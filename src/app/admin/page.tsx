@@ -2,7 +2,7 @@ import { createServerSupabaseClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { notFound } from 'next/navigation';
 import { format } from 'date-fns';
-import { AlertTriangle, Users, DollarSign, MessageSquare, Monitor } from 'lucide-react';
+import { AlertTriangle, Users, DollarSign, MessageSquare, Monitor, UserPlus } from 'lucide-react';
 import AdminClient from './AdminClient';
 
 function pct(num: number, den: number): string {
@@ -31,12 +31,13 @@ export default async function AdminPage() {
   // Parallel data fetch
   const [subRes, projectRes, formRes, testimonialRes, widgetRes, widgetViewsRes, authRes] =
     await Promise.all([
-      admin.from('subscriptions').select('user_id, plan, status, current_period_end, stripe_subscription_id'),
+      admin.from('subscriptions').select('user_id, plan, status, current_period_end, stripe_subscription_id, is_banned'),
       admin.from('projects').select('user_id, google_review_url, linkedin_url, slug'),
       admin.from('collection_forms').select('user_id, is_active'),
       admin.from('testimonials').select('user_id, created_at, status'),
-      admin.from('widgets').select('user_id'),
-      admin.from('widget_views').select('id', { count: 'exact', head: true }).gte('created_at', monthAgo),
+      admin.from('widgets').select('id, user_id'),
+      // Fetch widget_ids (not just count) so we can compute per-user views
+      admin.from('widget_views').select('widget_id').gte('created_at', monthAgo),
       admin.auth.admin.listUsers({ perPage: 1000 }),
     ]);
 
@@ -45,7 +46,7 @@ export default async function AdminPage() {
   const forms = formRes.data ?? [];
   const testimonials = testimonialRes.data ?? [];
   const widgets = widgetRes.data ?? [];
-  const widgetViewsMonth = widgetViewsRes.count ?? 0;
+  const widgetViewRows = widgetViewsRes.data ?? [];
   const authUsers = authRes.data?.users ?? [];
 
   // User lookup map: id => { email, created_at, last_sign_in_at }
@@ -53,6 +54,17 @@ export default async function AdminPage() {
   authUsers.forEach((u) => {
     userMap[u.id] = { email: u.email ?? '', created_at: u.created_at, last_sign_in_at: u.last_sign_in_at ?? null };
   });
+
+  // Widget id -> user_id map, and per-user widget view count (last 30 days)
+  const widgetUserMap: Record<string, string> = {};
+  widgets.forEach((w) => { widgetUserMap[w.id] = w.user_id; });
+
+  const widgetViewsByUser: Record<string, number> = {};
+  widgetViewRows.forEach((v) => {
+    const uid = widgetUserMap[v.widget_id];
+    if (uid) widgetViewsByUser[uid] = (widgetViewsByUser[uid] ?? 0) + 1;
+  });
+  const widgetViewsMonth = widgetViewRows.length;
 
   // Core metrics
   const totalUsers = subs.length;
@@ -63,11 +75,26 @@ export default async function AdminPage() {
   const pastDue = subs.filter((s) => s.status === 'past_due');
   const testimonialsThisWeek = testimonials.filter((t) => t.created_at > weekAgo).length;
 
-  // Activation funnel
-  const usersWithProject = new Set(projects.map((p) => p.user_id)).size;
-  const usersWithActiveForm = new Set(forms.filter((f) => f.is_active).map((f) => f.user_id)).size;
-  const usersWithTestimonial = new Set(testimonials.map((t) => t.user_id)).size;
-  const usersWithWidget = new Set(widgets.map((w) => w.user_id)).size;
+  // New signups in last 30 days
+  const newSignups30d = authUsers.filter((u) => u.created_at >= monthAgo).length;
+
+  // Activation funnel — last 30-day cohort
+  const recentUserIds = new Set(
+    authUsers.filter((u) => u.created_at >= monthAgo).map((u) => u.id)
+  );
+  const recentTotal = recentUserIds.size;
+  const recentWithProject = new Set(
+    projects.filter((p) => recentUserIds.has(p.user_id)).map((p) => p.user_id)
+  ).size;
+  const recentWithActiveForm = new Set(
+    forms.filter((f) => f.is_active && recentUserIds.has(f.user_id)).map((f) => f.user_id)
+  ).size;
+  const recentWithTestimonial = new Set(
+    testimonials.filter((t) => recentUserIds.has(t.user_id)).map((t) => t.user_id)
+  ).size;
+  const recentWithWidget = new Set(
+    widgets.filter((w) => recentUserIds.has(w.user_id)).map((w) => w.user_id)
+  ).size;
 
   // Testimonial count per user
   const tCountByUser: Record<string, number> = {};
@@ -99,12 +126,17 @@ export default async function AdminPage() {
       };
     });
 
-  // High-intent free users: free plan with 5+ testimonials
+  // High-intent free users: 5+ testimonials OR >5000 widget views in last 30 days
   const freeUserIds = new Set(subs.filter((s) => s.plan === 'free').map((s) => s.user_id));
   const highIntent = Array.from(freeUserIds)
-    .filter((id) => (tCountByUser[id] ?? 0) >= 5)
-    .map((id) => ({ id, email: userMap[id]?.email ?? id, tCount: tCountByUser[id] ?? 0 }))
-    .sort((a, b) => b.tCount - a.tCount)
+    .filter((id) => (tCountByUser[id] ?? 0) >= 5 || (widgetViewsByUser[id] ?? 0) >= 5000)
+    .map((id) => ({
+      id,
+      email: userMap[id]?.email ?? id,
+      tCount: tCountByUser[id] ?? 0,
+      widgetViews30d: widgetViewsByUser[id] ?? 0,
+    }))
+    .sort((a, b) => b.widgetViews30d - a.widgetViews30d || b.tCount - a.tCount)
     .slice(0, 10);
 
   // Pro subscribers list
@@ -152,7 +184,7 @@ export default async function AdminPage() {
         )}
 
         {/* Key metrics */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
           {[
             {
               icon: <Users className="size-5 text-indigo-500" />,
@@ -178,6 +210,12 @@ export default async function AdminPage() {
               value: widgetViewsMonth,
               sub: 'across all embeds',
             },
+            {
+              icon: <UserPlus className="size-5 text-violet-500" />,
+              label: 'New signups (30d)',
+              value: newSignups30d,
+              sub: 'viral loop proxy',
+            },
           ].map((card) => (
             <div key={card.label} className="bg-white rounded-2xl border border-gray-200 p-5">
               <div className="flex items-center gap-2 mb-3">{card.icon}<span className="text-xs text-gray-500 font-medium">{card.label}</span></div>
@@ -187,17 +225,20 @@ export default async function AdminPage() {
           ))}
         </div>
 
-        {/* Activation funnel */}
+        {/* Activation funnel — last 30 days cohort */}
         <div className="bg-white rounded-2xl border border-gray-200 p-6">
-          <h2 className="text-sm font-semibold text-gray-900 mb-1">Activation Funnel</h2>
-          <p className="text-xs text-gray-400 mb-5">Where users drop off between signup and getting value.</p>
+          <div className="flex items-center justify-between mb-1">
+            <h2 className="text-sm font-semibold text-gray-900">Activation Funnel</h2>
+            <span className="text-xs text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full">Last 30 days</span>
+          </div>
+          <p className="text-xs text-gray-400 mb-5">Where users from the last 30 days drop off between signup and getting value.</p>
           <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
             {[
-              { label: 'Signed up', count: totalUsers, pct: '100%' },
-              { label: 'Created project', count: usersWithProject, pct: pct(usersWithProject, totalUsers) },
-              { label: 'Active form', count: usersWithActiveForm, pct: pct(usersWithActiveForm, totalUsers) },
-              { label: 'Got testimonial', count: usersWithTestimonial, pct: pct(usersWithTestimonial, totalUsers) },
-              { label: 'Widget set up', count: usersWithWidget, pct: pct(usersWithWidget, totalUsers) },
+              { label: 'Signed up', count: recentTotal, pct: '100%' },
+              { label: 'Created project', count: recentWithProject, pct: pct(recentWithProject, recentTotal) },
+              { label: 'Active form', count: recentWithActiveForm, pct: pct(recentWithActiveForm, recentTotal) },
+              { label: 'Got testimonial', count: recentWithTestimonial, pct: pct(recentWithTestimonial, recentTotal) },
+              { label: 'Widget set up', count: recentWithWidget, pct: pct(recentWithWidget, recentTotal) },
             ].map((step, i) => (
               <div key={step.label} className="relative">
                 {i > 0 && (
@@ -284,7 +325,7 @@ export default async function AdminPage() {
           <div className="bg-white rounded-2xl border border-gray-200 p-6">
             <h2 className="text-sm font-semibold text-gray-900 mb-1">High-Intent Free Users</h2>
             <p className="text-xs text-gray-400 mb-4">
-              Free users with 5+ testimonials. These people are active and are the most likely to convert with a nudge or personalised outreach.
+              Free users with 5+ testimonials or 5000+ widget views in the last 30 days. Most likely to convert with a nudge or personalised outreach.
             </p>
             {highIntent.length === 0 ? (
               <p className="text-sm text-gray-400 py-6 text-center">None yet. Check back once you have active users.</p>
@@ -294,15 +335,21 @@ export default async function AdminPage() {
                   <thead>
                     <tr className="border-b border-gray-100 text-gray-400">
                       <th className="text-left py-2 pr-3 font-medium">Email</th>
-                      <th className="text-center py-2 font-medium">Testimonials</th>
+                      <th className="text-center py-2 px-2 font-medium">Tests</th>
+                      <th className="text-center py-2 font-medium">Views (30d)</th>
                     </tr>
                   </thead>
                   <tbody>
                     {highIntent.map((u) => (
                       <tr key={u.id} className="border-b border-gray-50 hover:bg-gray-50">
-                        <td className="py-2 pr-3 font-mono text-[11px] text-gray-700 max-w-[220px] truncate">{u.email}</td>
+                        <td className="py-2 pr-3 font-mono text-[11px] text-gray-700 max-w-[180px] truncate">{u.email}</td>
+                        <td className="py-2 px-2 text-center font-semibold text-gray-700">{u.tCount}</td>
                         <td className="py-2 text-center">
-                          <span className="text-sm font-bold text-indigo-600">{u.tCount}</span>
+                          {u.widgetViews30d >= 5000 ? (
+                            <span className="text-sm font-bold text-sky-600">{u.widgetViews30d.toLocaleString()}</span>
+                          ) : (
+                            <span className="text-sm text-gray-400">{u.widgetViews30d.toLocaleString()}</span>
+                          )}
                         </td>
                       </tr>
                     ))}

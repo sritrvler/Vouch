@@ -17,9 +17,13 @@ create table public.subscriptions (
   plan text not null default 'free' check (plan in ('free', 'pro', 'agency')),
   status text not null default 'active' check (status in ('active', 'inactive', 'past_due', 'cancelled')),
   current_period_end timestamptz,
+  is_banned boolean not null default false,
   created_at timestamptz default now() not null,
   updated_at timestamptz default now() not null
 );
+
+-- To add is_banned to an existing database run:
+-- ALTER TABLE public.subscriptions ADD COLUMN IF NOT EXISTS is_banned boolean not null default false;
 
 -- ============================================================
 -- PROJECTS (a user can have multiple projects/businesses)

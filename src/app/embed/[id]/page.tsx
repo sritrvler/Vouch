@@ -1,4 +1,5 @@
 import { createServerSupabaseClient } from '@/lib/supabase/server';
+import { createAdminClient } from '@/lib/supabase/admin';
 import { formatDistanceToNow } from 'date-fns';
 
 export const revalidate = 60;
@@ -573,13 +574,23 @@ export default async function EmbedPage({ params }: PageProps) {
     );
   }
 
-  // Check Pro status for display limit
-  const { data: sub } = await supabase
+  // Check subscription via admin client (bypasses RLS for anonymous iframe visitors)
+  const adminClient = createAdminClient();
+  const { data: sub } = await adminClient
     .from('subscriptions')
-    .select('plan')
+    .select('plan, is_banned')
     .eq('user_id', widget.user_id)
     .single();
-  const isPro = sub?.plan === 'pro';
+
+  if (sub?.is_banned) {
+    return (
+      <html>
+        <body style={{ margin: 0, padding: 0 }} />
+      </html>
+    );
+  }
+
+  const isPro = sub?.plan === 'pro' || sub?.plan === 'agency';
   const hardLimit = isPro ? (widget.max_items ?? 12) : Math.min(widget.max_items ?? 12, 5);
 
   const typedWidget = widget as Widget;

@@ -1,4 +1,5 @@
 import { createServerSupabaseClient } from '@/lib/supabase/server';
+import { createAdminClient } from '@/lib/supabase/admin';
 import type { Metadata } from 'next';
 import { Star, ExternalLink } from 'lucide-react';
 import Link from 'next/link';
@@ -49,7 +50,7 @@ export default async function PublicTestimonialsPage({ params }: PageProps) {
   // Fetch project by slug
   const { data: project } = await supabase
     .from('projects')
-    .select('id, name, logo_url, accent_color, website')
+    .select('id, name, logo_url, accent_color, website, user_id')
     .eq('slug', slug)
     .single();
 
@@ -64,6 +65,30 @@ export default async function PublicTestimonialsPage({ params }: PageProps) {
           </div>
           <h1 className="text-xl font-bold text-gray-900 mb-2">Page not found</h1>
           <p className="text-sm text-gray-500">This testimonial page does not exist or has been removed.</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Ban check via admin client
+  const adminClient = createAdminClient();
+  const { data: ownerSub } = await adminClient
+    .from('subscriptions')
+    .select('is_banned')
+    .eq('user_id', project.user_id)
+    .single();
+
+  if (ownerSub?.is_banned) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
+        <div className="text-center max-w-sm">
+          <div className="w-16 h-16 rounded-2xl bg-gray-100 flex items-center justify-center mx-auto mb-4">
+            <svg className="w-8 h-8 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
+            </svg>
+          </div>
+          <h1 className="text-xl font-bold text-gray-900 mb-2">Page unavailable</h1>
+          <p className="text-sm text-gray-500">This testimonial page is no longer available.</p>
         </div>
       </div>
     );
