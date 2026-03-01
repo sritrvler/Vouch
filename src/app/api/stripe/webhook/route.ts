@@ -1,110 +1,69 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { stripe } from '@/lib/stripe';
-import { createServerSupabaseClient } from '@/lib/supabase/server';
-import Stripe from 'stripe';
+import crypto from 'crypto';
+import { createClient } from '@supabase/supabase-js';
 
-// Disable body parsing — Stripe needs the raw body for signature verification
 export const runtime = 'nodejs';
 
 export async function POST(request: NextRequest) {
-  const body = await request.text();
-  const signature = request.headers.get('stripe-signature');
+  const rawBody = await request.text();
+  const signature = request.headers.get('X-Signature') ?? '';
 
-  if (!signature) {
-    return NextResponse.json({ error: 'Missing Stripe signature' }, { status: 400 });
+  // Verify Lemon Squeezy webhook signature
+  const secret = process.env.LEMONSQUEEZY_WEBHOOK_SECRET!;
+  const digest = crypto.createHmac('sha256', secret).update(rawBody).digest('hex');
+
+  if (!crypto.timingSafeEqual(Buffer.from(digest), Buffer.from(signature))) {
+    return NextResponse.json({ error: 'Invalid signature' }, { status: 401 });
   }
 
-  let event: Stripe.Event;
+  const payload = JSON.parse(rawBody);
+  const eventName: string = payload.meta?.event_name ?? '';
+  const userId: string = payload.meta?.custom_data?.user_id ?? '';
+  const attributes = payload.data?.attributes ?? {};
+  const subscriptionId: string = String(payload.data?.id ?? '');
 
-  try {
-    event = stripe.webhooks.constructEvent(
-      body,
-      signature,
-      process.env.STRIPE_WEBHOOK_SECRET!
-    );
-  } catch (err) {
-    console.error('Webhook signature verification failed:', err);
-    return NextResponse.json({ error: 'Invalid signature' }, { status: 400 });
+  if (!userId) {
+    return NextResponse.json({ received: true });
   }
 
-  const supabase = await createServerSupabaseClient();
+  const supabase = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  );
 
   try {
-    switch (event.type) {
-      case 'checkout.session.completed': {
-        const session = event.data.object as Stripe.Checkout.Session;
-        const userId = session.metadata?.user_id;
-        if (!userId) break;
+    if (eventName === 'subscription_created' || eventName === 'subscription_updated') {
+      const lsStatus: string = attributes.status ?? '';
+      let dbStatus: 'active' | 'inactive' | 'past_due' | 'cancelled' = 'inactive';
+      if (lsStatus === 'active') dbStatus = 'active';
+      else if (lsStatus === 'past_due') dbStatus = 'past_due';
+      else if (lsStatus === 'cancelled' || attributes.cancelled) dbStatus = 'cancelled';
 
-        // Fetch the subscription from Stripe for full details
-        if (typeof session.subscription === 'string') {
-          const stripeSub = await stripe.subscriptions.retrieve(session.subscription);
-          const subData = stripeSub as unknown as { current_period_end: number };
+      const isPro = dbStatus === 'active' || dbStatus === 'past_due';
 
-          await supabase
-            .from('subscriptions')
-            .update({
-              plan: 'pro',
-              status: 'active',
-              stripe_subscription_id: stripeSub.id,
-              stripe_customer_id: typeof session.customer === 'string' ? session.customer : undefined,
-              current_period_end: new Date(subData.current_period_end * 1000).toISOString(),
-            })
-            .eq('user_id', userId);
-        }
-        break;
-      }
+      await supabase
+        .from('subscriptions')
+        .update({
+          stripe_subscription_id: subscriptionId,
+          stripe_customer_id: String(attributes.customer_id ?? ''),
+          plan: isPro ? 'pro' : 'free',
+          status: dbStatus,
+          current_period_end: attributes.renews_at ?? null,
+        })
+        .eq('user_id', userId);
+    }
 
-      case 'customer.subscription.updated': {
-        const sub = event.data.object as Stripe.Subscription;
-        const userId = sub.metadata?.user_id;
-        if (!userId) break;
-
-        const subData = sub as unknown as { current_period_end: number };
-
-        const isActive = sub.status === 'active' || sub.status === 'trialing';
-        const isPastDue = sub.status === 'past_due';
-
-        let dbStatus: 'active' | 'inactive' | 'past_due' | 'cancelled' = 'inactive';
-        if (isActive) dbStatus = 'active';
-        else if (isPastDue) dbStatus = 'past_due';
-        else if (sub.status === 'canceled') dbStatus = 'cancelled';
-
-        await supabase
-          .from('subscriptions')
-          .update({
-            plan: isActive ? 'pro' : 'free',
-            status: dbStatus,
-            stripe_subscription_id: sub.id,
-            current_period_end: new Date(subData.current_period_end * 1000).toISOString(),
-          })
-          .eq('user_id', userId);
-        break;
-      }
-
-      case 'customer.subscription.deleted': {
-        const sub = event.data.object as Stripe.Subscription;
-        const userId = sub.metadata?.user_id;
-        if (!userId) break;
-
-        await supabase
-          .from('subscriptions')
-          .update({
-            plan: 'free',
-            status: 'cancelled',
-            stripe_subscription_id: null,
-          })
-          .eq('user_id', userId);
-        break;
-      }
-
-      default:
-        // Ignore other event types
-        break;
+    if (eventName === 'subscription_expired' || eventName === 'subscription_cancelled') {
+      await supabase
+        .from('subscriptions')
+        .update({
+          plan: 'free',
+          status: eventName === 'subscription_expired' ? 'inactive' : 'cancelled',
+        })
+        .eq('user_id', userId);
     }
   } catch (err) {
-    console.error(`Error handling Stripe event ${event.type}:`, err);
-    // Return 200 to acknowledge receipt — Stripe will retry if we return error
+    console.error(`Error handling LS event ${eventName}:`, err);
     return NextResponse.json({ received: true, warning: 'Handler error' });
   }
 

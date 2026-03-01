@@ -1,6 +1,5 @@
 import { Resend } from 'resend';
 
-const resend = new Resend(process.env.RESEND_API_KEY);
 const FROM = process.env.RESEND_FROM_EMAIL ?? 'notifications@vouch.so';
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://vouch.so';
 
@@ -23,6 +22,8 @@ export async function sendNewTestimonialNotification({
     // Skip silently in dev/placeholder mode
     return;
   }
+
+  const resend = new Resend(process.env.RESEND_API_KEY);
 
   const snippet = content.length > 160 ? content.slice(0, 157) + '...' : content;
   const inboxUrl = `${SITE_URL}/dashboard/inbox`;
