@@ -3,7 +3,7 @@
 import React, { useRef, useState } from "react";
 import Link from "next/link";
 import { motion, useInView } from "framer-motion";
-import { Star, ArrowRight, Check, Zap, MessageSquare, Code2 } from "lucide-react";
+import { Star, ArrowRight, Check, Minus, Zap, MessageSquare, Code2, Mail } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Accordion,
@@ -832,34 +832,42 @@ function HowItWorksSection() {
    Pricing cards (exported, used in /pricing page too)
 ───────────────────────────────────────────────────────── */
 
-const FREE_FEATURES = [
-  "Unlimited testimonials",
-  "1 collection form",
-  "1 embed widget",
-  "Grid layout",
-  "Custom questions on your form",
-  "Public reviews page (vouch.so/p/you)",
-  "Custom widget colours",
-  "Vouch branding on widget",
+type FeatureItem = { text: string; limitation?: true };
+
+const FREE_FEATURES: FeatureItem[] = [
+  { text: "Unlimited testimonials" },
+  { text: "1 collection form" },
+  { text: "1 embed widget" },
+  { text: "Grid layout" },
+  { text: "Custom questions on your form" },
+  { text: "Public reviews page (vouch.so/p/you)" },
+  { text: "Custom widget colors" },
+  { text: "Contains Vouch branding", limitation: true },
 ];
 
-const PRO_FEATURES = [
+const PRO_FEATURES: string[] = [
   "Everything in Free",
-  "Unlimited collection forms and embed widgets",
-  "No per-domain fees. One flat price.",
-  "Google Review + LinkedIn nudge after 4-5 stars",
+  "Unlimited forms and embed widgets",
+  "Automated LinkedIn and Google Review nudges",
   "Shareable image cards for social media",
   "Carousel, wall of love, and list layouts",
   "Remove Vouch branding",
   "Custom public page address",
 ];
 
+const AGENCY_FEATURES: string[] = [
+  "Everything in Pro",
+  "Unlimited projects",
+  "Priority email support",
+  "Custom onboarding call",
+];
+
 export function PricingCards() {
   return (
-    <div className="grid md:grid-cols-2 gap-6 max-w-3xl mx-auto">
+    <div className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto">
       {/* Free */}
       <FadeUp delay={0.05}>
-        <div className="flex flex-col p-7 bg-white border border-gray-200 rounded-2xl h-full">
+        <div className="flex flex-col p-6 bg-white border border-gray-200 rounded-2xl h-full">
           <div className="mb-6">
             <p className="text-sm font-semibold text-gray-500 mb-1">Free</p>
             <div className="flex items-end gap-1.5 mb-1">
@@ -873,11 +881,17 @@ export function PricingCards() {
           <ul className="space-y-3 flex-1 mb-7">
             {FREE_FEATURES.map((f) => (
               <li
-                key={f}
-                className="flex items-start gap-2.5 text-sm text-gray-600"
+                key={f.text}
+                className="flex items-start gap-2.5 text-sm"
               >
-                <Check className="w-4 h-4 text-gray-400 mt-0.5 flex-shrink-0" />
-                {f}
+                {f.limitation ? (
+                  <Minus className="w-4 h-4 text-gray-300 mt-0.5 flex-shrink-0" />
+                ) : (
+                  <Check className="w-4 h-4 text-gray-400 mt-0.5 flex-shrink-0" />
+                )}
+                <span className={f.limitation ? "text-gray-400" : "text-gray-600"}>
+                  {f.text}
+                </span>
               </li>
             ))}
           </ul>
@@ -893,7 +907,7 @@ export function PricingCards() {
 
       {/* Pro */}
       <FadeUp delay={0.12}>
-        <div className="relative flex flex-col p-7 bg-white border-2 border-indigo-500 rounded-2xl shadow-xl shadow-indigo-100 h-full">
+        <div className="relative flex flex-col p-6 bg-white border-2 border-indigo-500 rounded-2xl shadow-xl shadow-indigo-100 h-full">
           <div className="absolute -top-3.5 left-1/2 -translate-x-1/2">
             <div className="px-4 py-1 bg-indigo-600 rounded-full text-white text-xs font-semibold shadow-md">
               Most Popular
@@ -930,7 +944,48 @@ export function PricingCards() {
             <Link href="/signup?plan=pro">Start Pro trial</Link>
           </Button>
           <p className="text-center text-xs text-gray-400 mt-3">
-            14-day free trial · Cancel anytime
+            14-day free trial. Cancel anytime.
+          </p>
+        </div>
+      </FadeUp>
+
+      {/* Agency */}
+      <FadeUp delay={0.19}>
+        <div className="flex flex-col p-6 bg-slate-950 border border-slate-800 rounded-2xl h-full">
+          <div className="mb-6">
+            <p className="text-sm font-semibold text-slate-400 mb-1">Agency</p>
+            <div className="flex items-end gap-1.5 mb-1">
+              <span className="text-4xl font-bold text-white">$49</span>
+              <span className="text-slate-400 mb-1">/month</span>
+            </div>
+            <p className="text-sm text-slate-500">
+              For teams managing multiple client accounts.
+            </p>
+          </div>
+          <ul className="space-y-3 flex-1 mb-7">
+            {AGENCY_FEATURES.map((f) => (
+              <li
+                key={f}
+                className="flex items-start gap-2.5 text-sm text-slate-300"
+              >
+                <Check className="w-4 h-4 text-indigo-400 mt-0.5 flex-shrink-0" />
+                {f}
+              </li>
+            ))}
+          </ul>
+          <Button
+            asChild
+            variant="outline"
+            className="w-full rounded-xl border-slate-700 text-slate-300 hover:bg-slate-800 hover:text-white bg-transparent"
+          >
+            {/* Update this mailto to your preferred contact address */}
+            <a href="mailto:hello@vouch.so?subject=Agency%20Plan">
+              <Mail className="w-4 h-4 mr-2" />
+              Get in touch
+            </a>
+          </Button>
+          <p className="text-center text-xs text-slate-600 mt-3">
+            Custom pricing available for larger teams.
           </p>
         </div>
       </FadeUp>

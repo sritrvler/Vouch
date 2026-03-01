@@ -12,35 +12,37 @@ import { PricingCards } from "../page";
 ───────────────────────────────────────────────── */
 type FeatureRow =
   | { type: "category"; label: string }
-  | { type: "feature"; label: string; free: string | boolean; pro: string | boolean };
+  | { type: "feature"; label: string; free: string | boolean; pro: string | boolean; agency: string | boolean };
 
 const TABLE_ROWS: FeatureRow[] = [
   { type: "category", label: "Collecting Testimonials" },
-  { type: "feature", label: "Testimonials collected", free: "Unlimited", pro: "Unlimited" },
-  { type: "feature", label: "Collection forms", free: "1", pro: "Unlimited" },
-  { type: "feature", label: "Projects", free: "1", pro: "5" },
-  { type: "feature", label: "Text testimonials", free: true, pro: true },
-  { type: "feature", label: "Star ratings", free: true, pro: true },
-  { type: "feature", label: "Custom questions on form", free: true, pro: true },
-  { type: "feature", label: "Approval / reject flow", free: true, pro: true },
+  { type: "feature", label: "Testimonials collected", free: "Unlimited", pro: "Unlimited", agency: "Unlimited" },
+  { type: "feature", label: "Collection forms", free: "1", pro: "Unlimited", agency: "Unlimited" },
+  { type: "feature", label: "Projects", free: "1", pro: "Unlimited", agency: "Unlimited" },
+  { type: "feature", label: "Star ratings and written reviews", free: true, pro: true, agency: true },
+  { type: "feature", label: "Custom questions on form", free: true, pro: true, agency: true },
+  { type: "feature", label: "Approval and reject flow", free: true, pro: true, agency: true },
 
-  { type: "category", label: "Google Reviews" },
-  { type: "feature", label: "Google Review nudge after 4-5 stars", free: false, pro: true },
-  { type: "feature", label: "Custom Google Review link", free: false, pro: true },
+  { type: "category", label: "Review Nudges" },
+  { type: "feature", label: "Google Review nudge after 4-5 stars", free: false, pro: true, agency: true },
+  { type: "feature", label: "LinkedIn nudge after 4-5 stars", free: false, pro: true, agency: true },
 
   { type: "category", label: "Public Page" },
-  { type: "feature", label: "Public testimonial page (vouch.so/p/you)", free: true, pro: true },
-  { type: "feature", label: "Custom slug", free: false, pro: true },
+  { type: "feature", label: "Public testimonial page (vouch.so/p/you)", free: true, pro: true, agency: true },
+  { type: "feature", label: "Custom public page address", free: false, pro: true, agency: true },
 
-  { type: "category", label: "Display & Embed" },
-  { type: "feature", label: "Embed widgets", free: "1", pro: "Unlimited" },
-  { type: "feature", label: "Grid layout", free: true, pro: true },
-  { type: "feature", label: "Carousel, Wall of Love layouts", free: false, pro: true },
-  { type: "feature", label: "Remove Vouch branding", free: false, pro: true },
-  { type: "feature", label: "Custom widget colours", free: true, pro: true },
+  { type: "category", label: "Display and Embed" },
+  { type: "feature", label: "Embed widgets", free: "1", pro: "Unlimited", agency: "Unlimited" },
+  { type: "feature", label: "Grid layout", free: true, pro: true, agency: true },
+  { type: "feature", label: "Carousel, Wall of Love, and List layouts", free: false, pro: true, agency: true },
+  { type: "feature", label: "Shareable image cards for social media", free: false, pro: true, agency: true },
+  { type: "feature", label: "Custom widget colors", free: true, pro: true, agency: true },
+  { type: "feature", label: "Remove Vouch branding", free: false, pro: true, agency: true },
 
   { type: "category", label: "Support" },
-  { type: "feature", label: "Email support", free: true, pro: true },
+  { type: "feature", label: "Email support", free: true, pro: true, agency: true },
+  { type: "feature", label: "Priority email support", free: false, pro: false, agency: true },
+  { type: "feature", label: "Custom onboarding call", free: false, pro: false, agency: true },
 ];
 
 function FeatureValue({ value }: { value: string | boolean }) {
@@ -69,14 +71,17 @@ function ComparisonTable() {
       <table className="w-full">
         <thead>
           <tr className="border-b border-gray-100">
-            <th className="text-left py-4 pr-4 text-sm font-semibold text-gray-500 w-1/2">
+            <th className="text-left py-4 pr-4 text-sm font-semibold text-gray-500 w-[45%]">
               Feature
             </th>
-            <th className="text-center py-4 px-4 text-sm font-semibold text-gray-500 w-1/4">
+            <th className="text-center py-4 px-3 text-sm font-semibold text-gray-500 w-[18%]">
               Free
             </th>
-            <th className="text-center py-4 px-4 text-sm font-semibold text-indigo-600 w-1/4">
+            <th className="text-center py-4 px-3 text-sm font-semibold text-indigo-600 w-[18%]">
               Pro
+            </th>
+            <th className="text-center py-4 px-3 text-sm font-semibold text-slate-700 w-[19%]">
+              Agency
             </th>
           </tr>
         </thead>
@@ -86,7 +91,7 @@ function ComparisonTable() {
               return (
                 <tr key={i} className="border-b border-gray-50">
                   <td
-                    colSpan={3}
+                    colSpan={4}
                     className="py-4 pr-4 text-xs font-semibold text-gray-400 uppercase tracking-widest bg-gray-50/50 pl-1"
                   >
                     {row.label}
@@ -100,11 +105,14 @@ function ComparisonTable() {
                 className="border-b border-gray-50 hover:bg-gray-50/40 transition-colors"
               >
                 <td className="py-3.5 pr-4 text-sm text-gray-700">{row.label}</td>
-                <td className="py-3.5 px-4 text-center">
+                <td className="py-3.5 px-3 text-center">
                   <FeatureValue value={row.free} />
                 </td>
-                <td className="py-3.5 px-4 text-center">
+                <td className="py-3.5 px-3 text-center">
                   <FeatureValue value={row.pro} />
+                </td>
+                <td className="py-3.5 px-3 text-center">
+                  <FeatureValue value={row.agency} />
                 </td>
               </tr>
             );
