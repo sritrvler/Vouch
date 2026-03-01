@@ -202,21 +202,6 @@ function HeroVisual() {
             </motion.div>
           </motion.div>
 
-          {/* Notification badge */}
-          <motion.div
-            initial={{ opacity: 0, scale: 0.92 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: 1.1, duration: 0.4 }}
-            className="bg-white rounded-2xl border border-gray-100/80 shadow-md p-3.5 flex items-center gap-2.5"
-          >
-            <div className="w-8 h-8 rounded-full bg-emerald-50 flex items-center justify-center flex-shrink-0">
-              <Check className="w-3.5 h-3.5 text-emerald-600" />
-            </div>
-            <div>
-              <p className="text-[11px] font-semibold text-gray-900">New testimonial</p>
-              <p className="text-[10px] text-gray-400">Marco T. just submitted</p>
-            </div>
-          </motion.div>
         </div>
 
       </div>
