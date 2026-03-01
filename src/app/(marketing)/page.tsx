@@ -257,7 +257,7 @@ function HeroSection() {
               className="inline-flex items-center gap-2 rounded-full bg-indigo-50 border border-indigo-100 px-3 py-1 text-xs font-semibold text-indigo-700 mb-5"
             >
               <span className="size-1.5 rounded-full bg-indigo-500 animate-pulse" />
-              Built for Cursor, v0, Framer, and Next.js
+              For freelancers, agencies, and indie founders
             </motion.div>
 
             <motion.h1
@@ -354,12 +354,16 @@ function HeroSection() {
 ───────────────────────────────────────────────────────── */
 
 const TRUST_LABELS = [
-  "Next.js",
   "Framer",
   "Webflow",
-  "Cursor",
-  "v0 by Vercel",
-  "Tailwind CSS",
+  "WordPress",
+  "Next.js",
+  "Squarespace",
+  "Wix",
+  "Shopify",
+  "Ghost",
+  "Notion Sites",
+  "Carrd",
 ];
 
 function TrustBar() {
@@ -394,7 +398,7 @@ const PAIN_POINTS = [
   {
     number: "01",
     title: "Your testimonial widget looks like it came from somewhere else",
-    body: "You spend hours getting your Framer or Next.js site pixel-perfect. Then you paste a testimonial embed and it immediately screams third-party tool. Wrong fonts, wrong colors, wrong vibe. Your work deserves better than that.",
+    body: "You spend hours getting your site pixel-perfect. Then you paste a testimonial embed and it immediately screams third-party tool. Wrong fonts, wrong colors, wrong vibe. Your work deserves better than that.",
   },
   {
     number: "02",
@@ -753,7 +757,7 @@ function FeaturesSection() {
                 <ul className="space-y-3">
                   {[
                     "Matches your accent color automatically",
-                    "Works on Webflow, Framer, Next.js, anywhere",
+                    "Works on any platform — Framer, Webflow, WordPress, anywhere",
                     "Script tag or React component — your choice",
                   ].map((b) => (
                     <li
