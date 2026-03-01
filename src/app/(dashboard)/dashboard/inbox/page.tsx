@@ -777,7 +777,7 @@ export default function InboxPage() {
 
       if (testimonialsRes.error) throw testimonialsRes.error;
       setTestimonials((testimonialsRes.data as Testimonial[]) ?? []);
-      setIsPro(subRes.data?.plan === 'pro');
+      setIsPro(subRes.data?.plan === 'pro' || subRes.data?.plan === 'agency');
     } catch (err) {
       toast.error('Failed to load testimonials');
       console.error(err);
@@ -895,6 +895,34 @@ export default function InboxPage() {
     setTestimonials((prev) => [t, ...prev]);
   }, []);
 
+  const handleExportCSV = useCallback(() => {
+    const approved = testimonials.filter((t) => t.status === 'approved');
+    if (approved.length === 0) {
+      toast.error('No approved testimonials to export');
+      return;
+    }
+    const headers = ['Name', 'Role', 'Company', 'Email', 'Rating', 'Content', 'Date'];
+    const rows = approved.map((t) => [
+      t.author_name,
+      t.author_role ?? '',
+      t.author_company ?? '',
+      t.author_email ?? '',
+      String(t.rating),
+      t.content.replace(/"/g, '""'),
+      format(new Date(t.created_at), 'yyyy-MM-dd'),
+    ]);
+    const csvContent = [headers, ...rows]
+      .map((row) => row.map((cell) => `"${cell}"`).join(','))
+      .join('\n');
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'vouch-testimonials.csv';
+    a.click();
+    URL.revokeObjectURL(url);
+  }, [testimonials]);
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 12 }}
@@ -913,6 +941,17 @@ export default function InboxPage() {
           )}
         </div>
         <div className="flex items-center gap-2">
+          {isPro && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleExportCSV}
+              className="gap-1.5 rounded-xl"
+            >
+              <Download className="size-3.5" />
+              Export CSV
+            </Button>
+          )}
           <Button
             variant="outline"
             size="sm"

@@ -14,7 +14,7 @@ create table public.subscriptions (
   user_id uuid references auth.users(id) on delete cascade not null unique,
   stripe_customer_id text,
   stripe_subscription_id text,
-  plan text not null default 'free' check (plan in ('free', 'pro')),
+  plan text not null default 'free' check (plan in ('free', 'pro', 'agency')),
   status text not null default 'active' check (status in ('active', 'inactive', 'past_due', 'cancelled')),
   current_period_end timestamptz,
   created_at timestamptz default now() not null,
@@ -34,6 +34,7 @@ create table public.projects (
   accent_color text default '#6366F1',
   google_review_url text,
   linkedin_url text,
+  report_token text unique,
   created_at timestamptz default now() not null,
   updated_at timestamptz default now() not null
 );

@@ -65,7 +65,10 @@ interface FormCardProps {
   onToggle: (id: string, active: boolean) => Promise<void>;
   onDelete: (id: string) => Promise<void>;
   onQR: (id: string, title: string) => void;
+  onDuplicate: (id: string) => Promise<void>;
   isDeleting: boolean;
+  isDuplicating: boolean;
+  isPro: boolean;
 }
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000';
@@ -229,7 +232,7 @@ function FormCardSkeleton() {
 }
 
 // ─── Form Card ─────────────────────────────────────────────────────────────────
-function FormCard({ form, onToggle, onDelete, onQR, isDeleting }: FormCardProps) {
+function FormCard({ form, onToggle, onDelete, onQR, onDuplicate, isDeleting, isDuplicating, isPro }: FormCardProps) {
   const [toggling, setToggling] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
   const shareLink = `${SITE_URL}/c/${form.id}`;
@@ -317,34 +320,46 @@ function FormCard({ form, onToggle, onDelete, onQR, isDeleting }: FormCardProps)
         </a>
       </div>
 
-      {/* Delete */}
-      <div className="mt-3 flex justify-end">
-        {!confirmDelete ? (
+      {/* Bottom actions */}
+      <div className="mt-3 flex items-center justify-between">
+        {isPro && (
           <button
-            onClick={() => setConfirmDelete(true)}
-            className="text-xs text-muted-foreground hover:text-red-500 transition-colors flex items-center gap-1"
+            onClick={() => onDuplicate(form.id)}
+            disabled={isDuplicating}
+            className="text-xs text-muted-foreground hover:text-indigo-500 transition-colors flex items-center gap-1"
           >
-            <Trash2 className="size-3" />
-            Delete
+            {isDuplicating ? <Loader2 className="size-3 animate-spin" /> : <Copy className="size-3" />}
+            Duplicate
           </button>
-        ) : (
-          <div className="flex items-center gap-2">
-            <span className="text-xs text-muted-foreground">Confirm delete?</span>
-            <button
-              onClick={() => onDelete(form.id)}
-              disabled={isDeleting}
-              className="text-xs font-medium text-red-600 hover:text-red-700"
-            >
-              {isDeleting ? 'Deleting…' : 'Yes, delete'}
-            </button>
-            <button
-              onClick={() => setConfirmDelete(false)}
-              className="text-xs text-muted-foreground hover:text-foreground"
-            >
-              Cancel
-            </button>
-          </div>
         )}
+        <div className={cn('flex justify-end', !isPro && 'w-full')}>
+          {!confirmDelete ? (
+            <button
+              onClick={() => setConfirmDelete(true)}
+              className="text-xs text-muted-foreground hover:text-red-500 transition-colors flex items-center gap-1"
+            >
+              <Trash2 className="size-3" />
+              Delete
+            </button>
+          ) : (
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-muted-foreground">Confirm delete?</span>
+              <button
+                onClick={() => onDelete(form.id)}
+                disabled={isDeleting}
+                className="text-xs font-medium text-red-600 hover:text-red-700"
+              >
+                {isDeleting ? 'Deleting…' : 'Yes, delete'}
+              </button>
+              <button
+                onClick={() => setConfirmDelete(false)}
+                className="text-xs text-muted-foreground hover:text-foreground"
+              >
+                Cancel
+              </button>
+            </div>
+          )}
+        </div>
       </div>
     </motion.div>
   );
@@ -383,7 +398,8 @@ export default function FormsPage() {
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
   const [deletingId, setDeletingId] = useState<string | null>(null);
-  const [userPlan, setUserPlan] = useState<'free' | 'pro'>('free');
+  const [duplicatingId, setDuplicatingId] = useState<string | null>(null);
+  const [userPlan, setUserPlan] = useState<'free' | 'pro' | 'agency'>('free');
 
   // QR dialog state
   const [qrFormId, setQrFormId] = useState<string | null>(null);
@@ -557,6 +573,43 @@ export default function FormsPage() {
     [supabase]
   );
 
+  // ── Duplicate form ─────────────────────────────────────────────────────────
+  const handleDuplicate = useCallback(
+    async (id: string) => {
+      setDuplicatingId(id);
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) throw new Error('Not authenticated');
+
+        const original = forms.find((f) => f.id === id);
+        if (!original) throw new Error('Form not found');
+
+        const { data, error } = await supabase
+          .from('collection_forms')
+          .insert({
+            user_id: user.id,
+            project_id: original.project_id,
+            title: `${original.title} (Copy)`,
+            description: original.description,
+            custom_questions: original.custom_questions,
+            is_active: false,
+          })
+          .select('*, project:projects(name)')
+          .single();
+
+        if (error) throw error;
+        setForms((prev) => [{ ...data, submission_count: 0 }, ...prev]);
+        toast.success('Form duplicated');
+      } catch (err) {
+        toast.error('Failed to duplicate form');
+        console.error(err);
+      } finally {
+        setDuplicatingId(null);
+      }
+    },
+    [supabase, forms]
+  );
+
   // ── Custom Questions ──────────────────────────────────────────────────────
   const addQuestion = useCallback(() => {
     const q = newQuestion.trim();
@@ -616,7 +669,10 @@ export default function FormsPage() {
                 onToggle={handleToggle}
                 onDelete={handleDelete}
                 onQR={(id, title) => { setQrFormId(id); setQrFormTitle(title); }}
+                onDuplicate={handleDuplicate}
                 isDeleting={deletingId === form.id}
+                isDuplicating={duplicatingId === form.id}
+                isPro={userPlan !== 'free'}
               />
             ))}
           </div>
@@ -653,7 +709,7 @@ export default function FormsPage() {
                 'Google Review nudge after 4-5 stars',
                 'Carousel, Wall of Love, and List layouts',
                 'Remove Vouch branding',
-                'Custom public page slug',
+                'Custom public page address',
               ].map((f) => (
                 <li key={f} className="flex items-center gap-2">
                   <Check className="size-3.5 text-amber-600 shrink-0" />

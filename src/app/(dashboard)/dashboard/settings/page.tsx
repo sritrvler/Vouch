@@ -23,6 +23,8 @@ import {
   X,
   Linkedin,
   Copy,
+  RefreshCw,
+  Link2,
 } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { Button } from '@/components/ui/button';
@@ -43,10 +45,11 @@ interface Project {
   linkedin_url: string | null;
   logo_url: string | null;
   accent_color: string;
+  report_token: string | null;
 }
 
 interface Subscription {
-  plan: 'free' | 'pro';
+  plan: 'free' | 'pro' | 'agency';
   status: string;
   current_period_end: string | null;
   stripe_customer_id: string | null;
@@ -131,6 +134,9 @@ export default function SettingsPage() {
   const [savingProject, setSavingProject] = useState(false);
   const [uploadingLogo, setUploadingLogo] = useState(false);
   const [slugCopied, setSlugCopied] = useState(false);
+  const [reportToken, setReportToken] = useState<string | null>(null);
+  const [reportCopied, setReportCopied] = useState(false);
+  const [generatingReport, setGeneratingReport] = useState(false);
 
   // ── Billing state ──────────────────────────────────────────────────────────
   const [subscription, setSubscription] = useState<Subscription | null>(null);
@@ -172,6 +178,7 @@ export default function SettingsPage() {
         setLinkedinUrl(p.linkedin_url ?? '');
         setAccentColor(p.accent_color ?? '#6366F1');
         setLogoPreview(p.logo_url);
+        setReportToken(p.report_token ?? null);
       }
 
       if (subRes.data) {
@@ -329,6 +336,27 @@ export default function SettingsPage() {
       setSavingProject(false);
     }
   }, [supabase, project, projectName, projectSlug, projectWebsite, googleReviewUrl, linkedinUrl, accentColor, logoPreview, subscription]);
+
+  // ── Generate report token ─────────────────────────────────────────────────
+  const handleGenerateReportToken = useCallback(async () => {
+    if (!project) return;
+    setGeneratingReport(true);
+    try {
+      const token = Math.random().toString(36).slice(2, 9) + Math.random().toString(36).slice(2, 9);
+      const { error } = await supabase
+        .from('projects')
+        .update({ report_token: token })
+        .eq('id', project.id);
+      if (error) throw error;
+      setReportToken(token);
+      toast.success('Report link generated');
+    } catch (err) {
+      toast.error('Failed to generate report link');
+      console.error(err);
+    } finally {
+      setGeneratingReport(false);
+    }
+  }, [supabase, project]);
 
   // ── Stripe Checkout / Portal ───────────────────────────────────────────────
   const handleUpgrade = useCallback(async () => {
@@ -494,7 +522,7 @@ export default function SettingsPage() {
                 <div className="space-y-1.5">
                   <div className="flex items-center gap-2">
                     <Label htmlFor="project-slug">Public Page Address</Label>
-                    {subscription?.plan !== 'pro' && (
+                    {subscription?.plan === 'free' && (
                       <span className="inline-flex items-center gap-1 text-xs text-amber-600 bg-amber-50 border border-amber-200 rounded-full px-2 py-0.5">
                         <Lock className="size-3" /> Pro
                       </span>
@@ -510,7 +538,7 @@ export default function SettingsPage() {
                       onChange={(e) => setProjectSlug(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, '-'))}
                       placeholder="your-name"
                       className="pl-[88px] pr-10 rounded-xl"
-                      disabled={subscription?.plan !== 'pro'}
+                      disabled={subscription?.plan === 'free'}
                     />
                     {projectSlug && (
                       <button
@@ -528,7 +556,7 @@ export default function SettingsPage() {
                     )}
                   </div>
                   <p className="text-xs text-muted-foreground">
-                    {subscription?.plan === 'pro'
+                    {subscription?.plan !== 'free'
                       ? 'This is the link to your public testimonials page. You can customise the address above.'
                       : 'This is the link where people can view your testimonials. Upgrade to Pro to set a custom address.'}
                   </p>
@@ -551,7 +579,7 @@ export default function SettingsPage() {
                 <div className="space-y-1.5">
                   <div className="flex items-center gap-2">
                     <Label htmlFor="google-review-url">Google Review URL</Label>
-                    {subscription?.plan !== 'pro' && (
+                    {subscription?.plan === 'free' && (
                       <span className="inline-flex items-center gap-1 text-xs text-amber-600 bg-amber-50 border border-amber-200 rounded-full px-2 py-0.5">
                         <Lock className="size-3" /> Pro
                       </span>
@@ -568,7 +596,7 @@ export default function SettingsPage() {
                     />
                   </div>
                   <p className="text-xs text-muted-foreground leading-relaxed">
-                    {subscription?.plan === 'pro'
+                    {subscription?.plan !== 'free'
                       ? "Paste your Google Business review link. After customers give a 4 or 5 star rating, we'll nudge them to also leave a Google review."
                       : 'Upgrade to Pro to automatically nudge 4 and 5 star customers to leave a Google review.'}
                   </p>
@@ -576,7 +604,7 @@ export default function SettingsPage() {
                 <div className="space-y-1.5">
                   <div className="flex items-center gap-2">
                     <Label htmlFor="linkedin-url">LinkedIn Profile URL</Label>
-                    {subscription?.plan !== 'pro' && (
+                    {subscription?.plan === 'free' && (
                       <span className="inline-flex items-center gap-1 text-xs text-amber-600 bg-amber-50 border border-amber-200 rounded-full px-2 py-0.5">
                         <Lock className="size-3" /> Pro
                       </span>
@@ -593,13 +621,72 @@ export default function SettingsPage() {
                     />
                   </div>
                   <p className="text-xs text-muted-foreground leading-relaxed">
-                    {subscription?.plan === 'pro'
+                    {subscription?.plan !== 'free'
                       ? "After a 4 or 5 star rating, we'll copy their review text to the clipboard and open your LinkedIn page so they can post it."
                       : 'Upgrade to Pro to nudge happy customers to share their experience on LinkedIn.'}
                   </p>
                 </div>
               </div>
             </Section>
+
+            {/* Client Report Link (Agency only) */}
+            {subscription?.plan === 'agency' && project && (
+              <Section
+                title="Client Report Link"
+                description="Share a read-only link with your client so they can view all approved testimonials."
+              >
+                {reportToken ? (
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-2">
+                      <div className="flex-1 min-w-0 rounded-xl bg-muted/40 border border-border px-3 py-2">
+                        <span className="text-xs font-mono text-muted-foreground truncate block">
+                          {typeof window !== 'undefined' ? window.location.origin : 'https://vouch.so'}/report/{reportToken}
+                        </span>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          navigator.clipboard.writeText(`${window.location.origin}/report/${reportToken}`);
+                          setReportCopied(true);
+                          setTimeout(() => setReportCopied(false), 2000);
+                        }}
+                        className="inline-flex items-center gap-1 rounded-xl border border-border bg-muted/40 px-3 py-2 text-xs font-medium text-muted-foreground hover:bg-muted hover:text-foreground transition-all shrink-0"
+                      >
+                        {reportCopied ? <Check className="size-3.5 text-emerald-500" /> : <Copy className="size-3.5" />}
+                        {reportCopied ? 'Copied' : 'Copy'}
+                      </button>
+                    </div>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={handleGenerateReportToken}
+                      disabled={generatingReport}
+                      className="gap-2 rounded-xl text-xs"
+                    >
+                      {generatingReport ? <Loader2 className="size-3.5 animate-spin" /> : <RefreshCw className="size-3.5" />}
+                      Regenerate link
+                    </Button>
+                    <p className="text-xs text-muted-foreground">
+                      Anyone with this link can view approved testimonials. Regenerating it invalidates the old one.
+                    </p>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    <p className="text-sm text-muted-foreground">
+                      No report link yet. Generate one to share with your client.
+                    </p>
+                    <Button
+                      onClick={handleGenerateReportToken}
+                      disabled={generatingReport}
+                      className="gap-2 rounded-xl bg-indigo-600 hover:bg-indigo-700"
+                    >
+                      {generatingReport ? <Loader2 className="size-4 animate-spin" /> : <Link2 className="size-4" />}
+                      Generate report link
+                    </Button>
+                  </div>
+                )}
+              </Section>
+            )}
 
             {/* Logo */}
             <Section title="Logo" description="Used in collection forms and emails. Recommended: square PNG or SVG, at least 200×200px.">
@@ -695,7 +782,7 @@ export default function SettingsPage() {
             <div
               className={cn(
                 'rounded-2xl border p-6',
-                subscription?.plan === 'pro'
+                subscription?.plan !== 'free'
                   ? 'bg-gradient-to-br from-indigo-50 to-violet-50 border-indigo-200'
                   : 'bg-white border-border'
               )}
@@ -706,19 +793,19 @@ export default function SettingsPage() {
                     <ShieldCheck
                       className={cn(
                         'size-5',
-                        subscription?.plan === 'pro' ? 'text-indigo-600' : 'text-muted-foreground'
+                        subscription?.plan !== 'free' ? 'text-indigo-600' : 'text-muted-foreground'
                       )}
                     />
                     <h3 className="text-base font-semibold text-foreground">
-                      {subscription?.plan === 'pro' ? 'Pro Plan' : 'Free Plan'}
+                      {subscription?.plan === 'agency' ? 'Agency Plan' : subscription?.plan === 'pro' ? 'Pro Plan' : 'Free Plan'}
                     </h3>
-                    {subscription?.plan === 'pro' && (
+                    {subscription?.plan !== 'free' && (
                       <span className="text-xs bg-indigo-600 text-white rounded-full px-2 py-0.5 font-medium">
                         Active
                       </span>
                     )}
                   </div>
-                  {subscription?.plan === 'pro' && subscription.current_period_end && (
+                  {subscription?.plan !== 'free' && subscription?.current_period_end && (
                     <div className="flex items-center gap-1.5 text-xs text-muted-foreground mt-1">
                       <Calendar className="size-3.5" />
                       Renews{' '}
@@ -731,7 +818,7 @@ export default function SettingsPage() {
                     </p>
                   )}
                 </div>
-                {subscription?.plan === 'pro' && (
+                {subscription?.plan !== 'free' && (
                   <Button
                     variant="outline"
                     onClick={handleManageBilling}
@@ -800,10 +887,10 @@ export default function SettingsPage() {
               </div>
             )}
 
-            {/* Pro Plan → Manage */}
-            {subscription?.plan === 'pro' && (
+            {/* Paid Plan → Features + Manage */}
+            {subscription?.plan !== 'free' && (
               <>
-                <Section title="Plan Features" description="What's included in your Pro plan.">
+                <Section title="Plan Features" description={`What's included in your ${subscription?.plan === 'agency' ? 'Agency' : 'Pro'} plan.`}>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                     {PRO_FEATURES.map((feature) => (
                       <div key={feature} className="flex items-center gap-2">
