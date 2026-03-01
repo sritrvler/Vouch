@@ -83,10 +83,10 @@ const HERO_CARDS = [
     avatar: "JK",
     bg: "bg-violet-500",
     name: "Jana K.",
-    role: "Framer Designer",
+    role: "Designer and SaaS Founder",
     rating: 5,
     time: "2 weeks ago",
-    text: "Other tools clashed with my Framer design. Vouch matched my accent color out of the box. Clients asked if I built the testimonial section myself.",
+    text: "Other tools clashed with my product's design. Vouch matched my accent color out of the box. Users say the testimonial section feels like part of the product.",
   },
   {
     avatar: "SC",
@@ -95,7 +95,7 @@ const HERO_CARDS = [
     role: "Webflow Agency, 30+ client sites",
     rating: 5,
     time: "1 month ago",
-    text: "One account for every client site. Each form is branded to the client. My clients think I built the whole thing myself.",
+    text: "One account for every client site. Each form is branded to that client. They just see their own logo and colors — they fill it in without thinking twice.",
   },
 ];
 
@@ -278,8 +278,8 @@ function HeroSection() {
               transition={{ duration: 0.6, delay: 0.22 }}
               className="text-lg sm:text-xl text-gray-500 leading-relaxed mb-9 max-w-lg"
             >
-              Collect testimonials from every client, on every site you build. One account
-              covers them all. The widget inherits your client&apos;s colors and design automatically.
+              Collect written testimonials and display them anywhere. Works for your own
+              portfolio, a client&apos;s site, or your SaaS product — one account, one setup.
             </motion.p>
 
             <motion.div
@@ -372,7 +372,7 @@ function TrustBar() {
       <div className="border-y border-gray-100 bg-gray-50/60 py-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <p className="text-center text-[10px] font-semibold text-gray-400 uppercase tracking-widest mb-6">
-            One account. Every platform your clients use.
+            Works on every platform. Looks native to every design.
           </p>
           <div className="flex flex-wrap justify-center gap-3 sm:gap-6">
             {TRUST_LABELS.map((label) => (
@@ -407,8 +407,8 @@ const PAIN_POINTS = [
   },
   {
     number: "03",
-    title: "Every new project should not require a new testimonial setup",
-    body: "You onboard a new client, rebuild their site, then spend an hour configuring yet another testimonial tool and paying per domain. One Vouch account handles every project and every client. Set it up once, reuse it forever.",
+    title: "The moment to ask passes fast — and most tools are not ready when it does",
+    body: "Right after a great delivery, a launch, or a five-star user interaction is when your clients and users are most willing to say something. Most tools make you set up a form, configure the embed, and fight the CMS before you can send a single link. Vouch is ready in 15 minutes and stays ready forever.",
   },
 ];
 
@@ -710,9 +710,9 @@ function FeaturesSection() {
                 </p>
                 <ul className="space-y-3">
                   {[
-                    "Your accent color and logo on the form",
-                    "Create separate forms for each project or client",
-                    "Add custom questions to get specific results",
+                    "Your accent color and logo on every form",
+                    "Separate forms per project, client, or product",
+                    "Custom questions to get specific, useful answers",
                   ].map((b) => (
                     <li
                       key={b}
@@ -751,14 +751,14 @@ function FeaturesSection() {
                 </h3>
                 <p className="text-base text-gray-500 leading-relaxed mb-7">
                   Testimonials arrive in your dashboard. Approve what works. Embed with a script tag
-                  inside an iframe that fits any CMS without CSS conflicts, or grab the React component
-                  for Next.js projects. Each widget is scoped to the project it belongs to.
+                  on any platform, or drop the React component into your Next.js app or SaaS product.
+                  The widget reads your accent color and looks native on day one.
                 </p>
                 <ul className="space-y-3">
                   {[
-                    "Iframe embed works on Framer, Webflow, WordPress — no CSS conflicts",
-                    "React component for Next.js — uses your existing Tailwind theme",
-                    "One widget per project, each branded to that project",
+                    "Script tag drops into Framer, Webflow, WordPress — any platform",
+                    "React component for Next.js apps and SaaS landing pages",
+                    "Each widget is scoped to one project — portfolio, client site, or product",
                   ].map((b) => (
                     <li
                       key={b}
@@ -860,8 +860,8 @@ const FREE_FEATURES = [
 
 const PRO_FEATURES = [
   "Everything in Free",
-  "Unlimited forms and widgets — one per project",
-  "No per-domain fees — one price covers every client site",
+  "Unlimited collection forms and embed widgets",
+  "No per-domain fees — one flat price",
   "Google Review + LinkedIn nudge after 4-5 stars",
   "Shareable image cards for social media",
   "Carousel, wall of love, and list layouts",
@@ -963,7 +963,7 @@ function PricingSection() {
               One account. Every project you build.
             </h2>
             <p className="mt-4 text-lg text-gray-500">
-              Free for your first project. Upgrade once and it covers every site you and your clients need.
+              Start free. Upgrade when your work grows — one account, no per-project fees.
             </p>
           </div>
         </FadeUp>
@@ -979,8 +979,12 @@ function PricingSection() {
 
 const FAQS = [
   {
-    q: "I build websites for clients. Can one account cover all of them?",
-    a: "Yes, that is exactly what Vouch is designed for. One account gives you unlimited projects. Create a separate form and widget for each client site, branded to that client's colors. There are no per-domain fees. Your clients never see your dashboard.",
+    q: "Can one account cover multiple projects or clients?",
+    a: "Yes. One account gives you unlimited projects — create a separate form and widget for each client site, each product, or each service you offer. Each one can have its own branding, questions, and embed. There are no per-domain or per-project fees on Pro.",
+  },
+  {
+    q: "Does this work for SaaS products and apps?",
+    a: "Yes. SaaS founders use Vouch to collect testimonials from users and display them on their landing page to improve conversion. The React component drops directly into any Next.js app. The script tag works on any marketing page. Your widget reads your accent color and looks native to your product from day one.",
   },
   {
     q: "How is this different from Testimonial.to or EmbedSocial?",
@@ -988,7 +992,7 @@ const FAQS = [
   },
   {
     q: "Can I remove the 'Powered by Vouch' branding?",
-    a: "Yes. Pro removes the branding entirely from both the widget and the collection form. Your clients and their customers see only your work.",
+    a: "Yes. Pro removes the branding entirely from both the widget and the collection form. Your clients and their users see only your work.",
   },
   {
     q: "Will the widget match my site's design?",
@@ -1090,8 +1094,8 @@ function BottomCTA() {
                 <br className="hidden sm:block" /> It will look like you built it.
               </h2>
               <p className="text-indigo-200 text-lg mb-9 max-w-lg mx-auto">
-                Free for your first project. Upgrade once and it covers every site you build.
-                Set up in 15 minutes.
+                Free to start. Set up in 15 minutes. Upgrade when your work grows
+                and it covers everything you build.
               </p>
 
               <div className="flex flex-col sm:flex-row gap-3 justify-center">
