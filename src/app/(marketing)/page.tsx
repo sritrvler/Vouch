@@ -89,13 +89,13 @@ const HERO_CARDS = [
     text: "Other tools clashed with my Framer design. Vouch matched my accent color out of the box. Clients asked if I built the testimonial section myself.",
   },
   {
-    avatar: "MT",
+    avatar: "SC",
     bg: "bg-sky-500",
-    name: "Marco T.",
-    role: "Indie Hacker, 6 projects",
+    name: "Sarah C.",
+    role: "Webflow Agency, 30+ client sites",
     rating: 5,
     time: "1 month ago",
-    text: "Spinning up landing pages constantly. The free tier just works. I drop Vouch into every project now without thinking twice.",
+    text: "One account for every client site. Each form is branded to the client. My clients think I built the whole thing myself.",
   },
 ];
 
@@ -278,8 +278,8 @@ function HeroSection() {
               transition={{ duration: 0.6, delay: 0.22 }}
               className="text-lg sm:text-xl text-gray-500 leading-relaxed mb-9 max-w-lg"
             >
-              Collect written testimonials from clients. Embed a widget that inherits your
-              colors, fonts, and design system. One link to collect. One line to embed.
+              Collect testimonials from every client, on every site you build. One account
+              covers them all. The widget inherits your client&apos;s colors and design automatically.
             </motion.p>
 
             <motion.div
@@ -327,7 +327,7 @@ function HeroSection() {
                 ))}
               </div>
               <p className="text-sm text-gray-500">
-                Developers, designers, and indie hackers
+                Freelancers, agencies, and founders
                 <br className="hidden sm:block" />
                 shipping proof that matches their work
               </p>
@@ -372,7 +372,7 @@ function TrustBar() {
       <div className="border-y border-gray-100 bg-gray-50/60 py-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <p className="text-center text-[10px] font-semibold text-gray-400 uppercase tracking-widest mb-6">
-            Works natively with your stack
+            One account. Every platform your clients use.
           </p>
           <div className="flex flex-wrap justify-center gap-3 sm:gap-6">
             {TRUST_LABELS.map((label) => (
@@ -398,7 +398,7 @@ const PAIN_POINTS = [
   {
     number: "01",
     title: "Your testimonial widget looks like it came from somewhere else",
-    body: "You spend hours getting your site pixel-perfect. Then you paste a testimonial embed and it immediately screams third-party tool. Wrong fonts, wrong colors, wrong vibe. Your work deserves better than that.",
+    body: "You spend hours getting a site pixel-perfect — whether it is your own portfolio or a client's site. Then you paste a testimonial embed and it immediately screams third-party tool. Wrong fonts, wrong colors, wrong vibe. Your work deserves better than that.",
   },
   {
     number: "02",
@@ -407,8 +407,8 @@ const PAIN_POINTS = [
   },
   {
     number: "03",
-    title: "You are shipping multiple projects, not just one",
-    body: "This year you will build a portfolio refresh, two landing pages, a micro-SaaS, and a few client sites. Paying a monthly subscription for each one adds up before any of them have found their footing. Our free tier was designed for this workflow.",
+    title: "Every new project should not require a new testimonial setup",
+    body: "You onboard a new client, rebuild their site, then spend an hour configuring yet another testimonial tool and paying per domain. One Vouch account handles every project and every client. Set it up once, reuse it forever.",
   },
 ];
 
@@ -711,7 +711,7 @@ function FeaturesSection() {
                 <ul className="space-y-3">
                   {[
                     "Your accent color and logo on the form",
-                    "Works on any device, no app to download",
+                    "Create separate forms for each project or client",
                     "Add custom questions to get specific results",
                   ].map((b) => (
                     <li
@@ -750,15 +750,15 @@ function FeaturesSection() {
                   Embed or paste a React component.
                 </h3>
                 <p className="text-base text-gray-500 leading-relaxed mb-7">
-                  Testimonials arrive in your dashboard. Approve what works. Then embed with a script
-                  tag for any site, or grab the React component for Next.js projects. It uses your
-                  Tailwind theme out of the box. No stylesheet imports, no visual mismatch.
+                  Testimonials arrive in your dashboard. Approve what works. Embed with a script tag
+                  inside an iframe that fits any CMS without CSS conflicts, or grab the React component
+                  for Next.js projects. Each widget is scoped to the project it belongs to.
                 </p>
                 <ul className="space-y-3">
                   {[
-                    "Matches your accent color automatically",
-                    "Works on any platform — Framer, Webflow, WordPress, anywhere",
-                    "Script tag or React component — your choice",
+                    "Iframe embed works on Framer, Webflow, WordPress — no CSS conflicts",
+                    "React component for Next.js — uses your existing Tailwind theme",
+                    "One widget per project, each branded to that project",
                   ].map((b) => (
                     <li
                       key={b}
@@ -797,7 +797,7 @@ function HowItWorksSection() {
     {
       number: "02",
       title: "Share with clients",
-      body: "Paste the link in an email, a DM, or your project wrap-up message. They click, fill in two minutes, done. No login, no friction.",
+      body: "Paste the link in an email, a DM, or your client onboarding template. They click, fill in two minutes, done. No login, no friction.",
     },
     {
       number: "03",
@@ -860,12 +860,13 @@ const FREE_FEATURES = [
 
 const PRO_FEATURES = [
   "Everything in Free",
+  "Unlimited forms and widgets — one per project",
+  "No per-domain fees — one price covers every client site",
   "Google Review + LinkedIn nudge after 4-5 stars",
   "Shareable image cards for social media",
-  "Unlimited forms and widgets",
   "Carousel, wall of love, and list layouts",
   "Remove Vouch branding",
-  "Custom public page slug",
+  "Custom public page address",
 ];
 
 export function PricingCards() {
@@ -959,10 +960,10 @@ function PricingSection() {
         <FadeUp>
           <div className="text-center mb-12">
             <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 tracking-tight">
-              Simple, honest pricing
+              One account. Every project you build.
             </h2>
             <p className="mt-4 text-lg text-gray-500">
-              Start free. Upgrade when you are ready for more.
+              Free for your first project. Upgrade once and it covers every site you and your clients need.
             </p>
           </div>
         </FadeUp>
@@ -977,6 +978,18 @@ function PricingSection() {
 ───────────────────────────────────────────────────────── */
 
 const FAQS = [
+  {
+    q: "I build websites for clients. Can one account cover all of them?",
+    a: "Yes, that is exactly what Vouch is designed for. One account gives you unlimited projects. Create a separate form and widget for each client site, branded to that client's colors. There are no per-domain fees. Your clients never see your dashboard.",
+  },
+  {
+    q: "How is this different from Testimonial.to or EmbedSocial?",
+    a: "Those tools charge per domain or per seat and lock testimonials inside their own hosted page. Vouch lets you embed directly on any site you control, the widget matches your design instead of theirs, and one account covers every project you run. No per-domain pricing, no vendor-branded iframes.",
+  },
+  {
+    q: "Can I remove the 'Powered by Vouch' branding?",
+    a: "Yes. Pro removes the branding entirely from both the widget and the collection form. Your clients and their customers see only your work.",
+  },
   {
     q: "Will the widget match my site's design?",
     a: "Yes. You pick an accent color in your dashboard and the widget uses it everywhere — cards, stars, avatars. The component renders using your page's existing font stack, so there are no visual mismatches with a site you have spent careful effort designing.",
@@ -1073,12 +1086,12 @@ function BottomCTA() {
               </div>
 
               <h2 className="text-3xl sm:text-4xl font-bold text-white tracking-tight mb-4">
-                Ship a testimonial wall today.
+                Ship a testimonial section today.
                 <br className="hidden sm:block" /> It will look like you built it.
               </h2>
               <p className="text-indigo-200 text-lg mb-9 max-w-lg mx-auto">
-                Free forever for your first project. Set up in 15 minutes. Looks
-                native from day one.
+                Free for your first project. Upgrade once and it covers every site you build.
+                Set up in 15 minutes.
               </p>
 
               <div className="flex flex-col sm:flex-row gap-3 justify-center">
