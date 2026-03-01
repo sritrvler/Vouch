@@ -257,7 +257,7 @@ function HeroSection() {
               className="inline-flex items-center gap-2 rounded-full bg-indigo-50 border border-indigo-100 px-3 py-1 text-xs font-semibold text-indigo-700 mb-5"
             >
               <span className="size-1.5 rounded-full bg-indigo-500 animate-pulse" />
-              For Freelancers, Agencies, and Indie Founders
+              For Freelancers, Agencies, and SaaS Founders
             </motion.div>
 
             <motion.h1
