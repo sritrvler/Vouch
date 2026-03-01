@@ -345,7 +345,6 @@ export default function CollectFormClient({
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
   const [agreed, setAgreed] = useState(false);
-  const [showOptional, setShowOptional] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -645,18 +644,54 @@ export default function CollectFormClient({
                 transition={transition}
                 className="p-7 sm:p-9"
               >
-                <div className="mb-6">
+                <div className="mb-5">
                   <h2 className="text-2xl font-bold text-foreground">Almost done!</h2>
                   <p className="mt-1.5 text-sm text-muted-foreground">
-                    Just your name, and you are done.
+                    A face and title make your review feel real and help others trust it.
                   </p>
                 </div>
 
                 <div className="space-y-4">
-                  {/* Name: the only required field, prominent */}
+                  {/* Avatar upload: prominent circular zone at the top */}
+                  <div className="flex flex-col items-center gap-1.5 pb-1">
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={handleAvatarChange}
+                    />
+                    {avatarPreview ? (
+                      <div className="relative">
+                        <div className="w-20 h-20 rounded-full overflow-hidden border-2 shadow-sm" style={{ borderColor: accentColor }}>
+                          <Image src={avatarPreview} alt="Preview" fill className="object-cover" />
+                        </div>
+                        <button
+                          type="button"
+                          onClick={removeAvatar}
+                          className="absolute -top-1 -right-1 w-6 h-6 rounded-full bg-white border border-border flex items-center justify-center shadow-sm hover:bg-red-50 transition-colors"
+                        >
+                          <X className="size-3 text-muted-foreground" />
+                        </button>
+                      </div>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => fileInputRef.current?.click()}
+                        className="w-20 h-20 rounded-full border-2 border-dashed flex flex-col items-center justify-center gap-1 transition-colors hover:bg-accent/40"
+                        style={{ borderColor: `${accentColor}70` }}
+                      >
+                        <Upload className="size-5" style={{ color: accentColor }} />
+                        <span className="text-[10px] font-semibold" style={{ color: accentColor }}>Add photo</span>
+                      </button>
+                    )}
+                    <span className="text-xs text-muted-foreground">Optional</span>
+                  </div>
+
+                  {/* Name (required) */}
                   <div>
                     <Label htmlFor="author-name" className="text-sm font-medium mb-1.5 block">
-                      Your name
+                      Your name <span className="text-destructive text-xs">required</span>
                     </Label>
                     <Input
                       id="author-name"
@@ -669,110 +704,48 @@ export default function CollectFormClient({
                     />
                   </div>
 
-                  {/* Optional details disclosure */}
-                  <button
-                    type="button"
-                    onClick={() => setShowOptional((v) => !v)}
-                    className="flex items-center gap-1.5 text-sm transition-colors"
-                    style={{ color: showOptional ? '#64748b' : accentColor }}
-                  >
-                    <span
-                      className="inline-block transition-transform duration-200"
-                      style={{ transform: showOptional ? 'rotate(90deg)' : 'rotate(0deg)' }}
-                    >
-                      ›
-                    </span>
-                    {showOptional ? 'Hide optional details' : 'Add photo, role, and company (optional)'}
-                  </button>
+                  {/* Role + Company */}
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <Label htmlFor="author-role" className="text-sm font-medium mb-1.5 block">
+                        Role <span className="text-xs font-normal text-muted-foreground">optional</span>
+                      </Label>
+                      <Input
+                        id="author-role"
+                        value={authorRole}
+                        onChange={(e) => setAuthorRole(e.target.value)}
+                        placeholder="Marketing Manager"
+                        className="h-10 text-sm"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="author-company" className="text-sm font-medium mb-1.5 block">
+                        Company <span className="text-xs font-normal text-muted-foreground">optional</span>
+                      </Label>
+                      <Input
+                        id="author-company"
+                        value={authorCompany}
+                        onChange={(e) => setAuthorCompany(e.target.value)}
+                        placeholder="Acme Inc."
+                        className="h-10 text-sm"
+                      />
+                    </div>
+                  </div>
 
-                  <AnimatePresence initial={false}>
-                    {showOptional && (
-                      <motion.div
-                        initial={{ opacity: 0, height: 0 }}
-                        animate={{ opacity: 1, height: 'auto' }}
-                        exit={{ opacity: 0, height: 0 }}
-                        transition={{ duration: 0.22, ease: 'easeInOut' }}
-                        className="overflow-hidden"
-                      >
-                        <div className="space-y-4 pt-1">
-                          {/* Avatar upload */}
-                          <div>
-                            <Label className="text-sm font-medium mb-1.5 block text-muted-foreground">
-                              Profile photo
-                            </Label>
-                            {avatarPreview ? (
-                              <div className="flex items-center gap-3">
-                                <div className="relative w-12 h-12 rounded-full overflow-hidden border-2 border-border">
-                                  <Image src={avatarPreview} alt="Preview" fill className="object-cover" />
-                                </div>
-                                <button
-                                  type="button"
-                                  onClick={removeAvatar}
-                                  className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-destructive transition-colors"
-                                >
-                                  <X className="size-3.5" />
-                                  Remove
-                                </button>
-                              </div>
-                            ) : (
-                              <button
-                                type="button"
-                                onClick={() => fileInputRef.current?.click()}
-                                className="flex items-center gap-2 h-10 px-4 rounded-xl border border-dashed border-border hover:border-primary/50 hover:bg-accent/50 transition-colors text-sm text-muted-foreground w-full"
-                              >
-                                <Upload className="size-4" />
-                                Upload a photo
-                              </button>
-                            )}
-                            <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleAvatarChange} />
-                          </div>
-
-                          {/* Role + Company row */}
-                          <div className="grid grid-cols-2 gap-3">
-                            <div>
-                              <Label htmlFor="author-role" className="text-sm font-medium mb-1.5 block text-muted-foreground">
-                                Role
-                              </Label>
-                              <Input
-                                id="author-role"
-                                value={authorRole}
-                                onChange={(e) => setAuthorRole(e.target.value)}
-                                placeholder="Marketing Manager"
-                                className="h-10 text-sm"
-                              />
-                            </div>
-                            <div>
-                              <Label htmlFor="author-company" className="text-sm font-medium mb-1.5 block text-muted-foreground">
-                                Company
-                              </Label>
-                              <Input
-                                id="author-company"
-                                value={authorCompany}
-                                onChange={(e) => setAuthorCompany(e.target.value)}
-                                placeholder="Acme Inc."
-                                className="h-10 text-sm"
-                              />
-                            </div>
-                          </div>
-
-                          {/* Email */}
-                          <div>
-                            <Label htmlFor="author-email" className="text-sm font-medium mb-1.5 block text-muted-foreground">
-                              Email <span className="font-normal">(not shown publicly)</span>
-                            </Label>
-                            <Input
-                              id="author-email"
-                              type="email"
-                              value={authorEmail}
-                              onChange={(e) => setAuthorEmail(e.target.value)}
-                              placeholder="jane@example.com"
-                              className="h-10 text-sm"
-                            />
-                          </div>
-                        </div>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
+                  {/* Email */}
+                  <div>
+                    <Label htmlFor="author-email" className="text-sm font-medium mb-1.5 block">
+                      Email <span className="text-xs font-normal text-muted-foreground">optional, not shown publicly</span>
+                    </Label>
+                    <Input
+                      id="author-email"
+                      type="email"
+                      value={authorEmail}
+                      onChange={(e) => setAuthorEmail(e.target.value)}
+                      placeholder="jane@example.com"
+                      className="h-10 text-sm"
+                    />
+                  </div>
 
                   {/* Agreement */}
                   <label className="flex items-start gap-3 cursor-pointer pt-1">
