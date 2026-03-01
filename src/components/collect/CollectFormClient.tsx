@@ -898,7 +898,7 @@ export default function CollectFormClient({
             <span className="text-xs text-muted-foreground/60">
               Powered by{' '}
               <a
-                href="https://vouch.so"
+                href="/"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="hover:text-muted-foreground transition-colors"

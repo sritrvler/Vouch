@@ -1,5 +1,5 @@
 (function() {
-  var base = (window.VOUCH_BASE_URL || (document.currentScript && document.currentScript.src.replace('/widget.js', '')) || 'https://vouch.so');
+  var base = (window.VOUCH_BASE_URL || (document.currentScript && document.currentScript.src.replace('/widget.js', '')) || '');
   var widgets = document.querySelectorAll('[data-widget-id]');
   widgets.forEach(function(el) {
     var id = el.getAttribute('data-widget-id');

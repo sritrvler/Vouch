@@ -183,7 +183,7 @@ export async function GET(_request: Request, { params }: PageProps) {
             color: '#d1d5db',
           }}
         >
-          vouch.so
+          {(process.env.NEXT_PUBLIC_SITE_URL ?? '').replace(/^https?:\/\//, '').replace(/\/$/, '')}
         </div>
       </div>
     ),

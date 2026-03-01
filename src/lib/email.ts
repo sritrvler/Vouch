@@ -1,7 +1,7 @@
 import { Resend } from 'resend';
 
-const FROM = process.env.RESEND_FROM_EMAIL ?? 'notifications@vouch.so';
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://vouch.so';
+const FROM = process.env.RESEND_FROM_EMAIL ?? process.env.NEXT_PUBLIC_SUPPORT_EMAIL ?? 'notifications@example.com';
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000';
 
 function stars(rating: number): string {
   return '★'.repeat(rating) + '☆'.repeat(5 - rating);

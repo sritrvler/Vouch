@@ -530,21 +530,21 @@ export default function SettingsPage() {
                   </div>
                   <div className="relative">
                     <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground select-none">
-                      vouch.so/p/
+                      /p/
                     </span>
                     <Input
                       id="project-slug"
                       value={projectSlug}
                       onChange={(e) => setProjectSlug(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, '-'))}
                       placeholder="your-name"
-                      className="pl-[88px] pr-10 rounded-xl"
+                      className="pl-9 pr-10 rounded-xl"
                       disabled={subscription?.plan === 'free'}
                     />
                     {projectSlug && (
                       <button
                         type="button"
                         onClick={() => {
-                          navigator.clipboard.writeText(`https://vouch.so/p/${projectSlug}`);
+                          navigator.clipboard.writeText(`${window.location.origin}/p/${projectSlug}`);
                           setSlugCopied(true);
                           setTimeout(() => setSlugCopied(false), 2000);
                         }}
@@ -640,7 +640,7 @@ export default function SettingsPage() {
                     <div className="flex items-center gap-2">
                       <div className="flex-1 min-w-0 rounded-xl bg-muted/40 border border-border px-3 py-2">
                         <span className="text-xs font-mono text-muted-foreground truncate block">
-                          {typeof window !== 'undefined' ? window.location.origin : 'https://vouch.so'}/report/{reportToken}
+                          {typeof window !== 'undefined' ? window.location.origin : process.env.NEXT_PUBLIC_SITE_URL ?? ''}/report/{reportToken}
                         </span>
                       </div>
                       <button

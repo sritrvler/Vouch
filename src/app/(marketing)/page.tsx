@@ -527,7 +527,8 @@ function CollectVisual() {
 function EmbedVisual() {
   const [activeTab, setActiveTab] = useState<"script" | "react">("script");
 
-  const scriptCode = `<div id="vouch-widget"\n  data-widget-id="abc123">\n</div>\n<script src="vouch.so/widget.js"\n  async>\n</script>`;
+  const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL ?? '').replace(/\/$/, '');
+  const scriptCode = `<div id="vouch-widget"\n  data-widget-id="abc123">\n</div>\n<script src="${siteUrl}/widget.js"\n  async>\n</script>`;
 
   const reactCode = `// No install. Paste into your project.\n'use client';\nimport { useEffect, useState } from 'react';\n\nexport function Testimonials() {\n  const [items, setItems] = useState([]);\n  useEffect(() => {\n    fetch('/api/testimonials/widget/abc123')\n      .then(r => r.json())\n      .then(d => setItems(d.testimonials));\n  }, []);\n\n  return (\n    <div className="grid grid-cols-3 gap-4">\n      {items.map(t => (\n        <blockquote key={t.id}\n          className="rounded-xl border p-4">\n          {t.content}\n        </blockquote>\n      ))}\n    </div>\n  );\n}`;
 
@@ -840,7 +841,7 @@ const FREE_FEATURES: FeatureItem[] = [
   { text: "1 embed widget" },
   { text: "Grid layout" },
   { text: "Custom questions on your form" },
-  { text: "Public reviews page (vouch.so/p/you)" },
+  { text: "Public reviews page (/p/you)" },
   { text: "Custom widget colors" },
   { text: "Contains Vouch branding", limitation: true },
 ];
@@ -979,7 +980,7 @@ export function PricingCards() {
             className="w-full rounded-xl border-slate-700 text-slate-300 hover:bg-slate-800 hover:text-white bg-transparent"
           >
             {/* Update this mailto to your preferred contact address */}
-            <a href="mailto:hello@vouch.so?subject=Agency%20Plan">
+            <a href={`mailto:${process.env.NEXT_PUBLIC_SUPPORT_EMAIL ?? 'hello@example.com'}?subject=Agency%20Plan`}>
               <Mail className="w-4 h-4 mr-2" />
               Get in touch
             </a>
@@ -1052,7 +1053,7 @@ const FAQS = [
   },
   {
     q: "Do I need a website to use Vouch?",
-    a: "No. Every account gets a public page at vouch.so/p/your-name that you can share directly with prospects via email or a DM. Your testimonials live there even without a website.",
+    a: "No. Every account gets a public page at /p/your-name that you can share directly with prospects via email or a DM. Your testimonials live there even without a website.",
   },
   {
     q: "Can I cancel anytime?",

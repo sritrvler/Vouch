@@ -28,7 +28,7 @@ const TABLE_ROWS: FeatureRow[] = [
   { type: "feature", label: "LinkedIn nudge after 4-5 stars", free: false, pro: true, agency: true },
 
   { type: "category", label: "Public Page" },
-  { type: "feature", label: "Public testimonial page (vouch.so/p/you)", free: true, pro: true, agency: true },
+  { type: "feature", label: "Public testimonial page (/p/you)", free: true, pro: true, agency: true },
   { type: "feature", label: "Custom public page address", free: false, pro: true, agency: true },
 
   { type: "category", label: "Display and Embed" },

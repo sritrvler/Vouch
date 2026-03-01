@@ -95,8 +95,8 @@ export default function PrivacyPage() {
           <p>
             You have the right to access, correct, or delete your personal data at any time. To
             exercise these rights, email us at{' '}
-            <a href="mailto:hello@vouch.so" className="text-primary underline underline-offset-4">
-              hello@vouch.so
+            <a href={`mailto:${process.env.NEXT_PUBLIC_SUPPORT_EMAIL ?? 'hello@example.com'}`} className="text-primary underline underline-offset-4">
+              {process.env.NEXT_PUBLIC_SUPPORT_EMAIL ?? 'hello@example.com'}
             </a>
             .
           </p>
@@ -124,8 +124,8 @@ export default function PrivacyPage() {
           <h2 className="text-base font-semibold text-foreground mb-2">10. Contact</h2>
           <p>
             Questions about this Privacy Policy? Email us at{' '}
-            <a href="mailto:hello@vouch.so" className="text-primary underline underline-offset-4">
-              hello@vouch.so
+            <a href={`mailto:${process.env.NEXT_PUBLIC_SUPPORT_EMAIL ?? 'hello@example.com'}`} className="text-primary underline underline-offset-4">
+              {process.env.NEXT_PUBLIC_SUPPORT_EMAIL ?? 'hello@example.com'}
             </a>
             .
           </p>

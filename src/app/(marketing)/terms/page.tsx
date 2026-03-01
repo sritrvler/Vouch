@@ -107,8 +107,8 @@ export default function TermsPage() {
           <h2 className="text-base font-semibold text-foreground mb-2">11. Contact</h2>
           <p>
             Questions about these Terms? Email us at{' '}
-            <a href="mailto:hello@vouch.so" className="text-primary underline underline-offset-4">
-              hello@vouch.so
+            <a href={`mailto:${process.env.NEXT_PUBLIC_SUPPORT_EMAIL ?? 'hello@example.com'}`} className="text-primary underline underline-offset-4">
+              {process.env.NEXT_PUBLIC_SUPPORT_EMAIL ?? 'hello@example.com'}
             </a>
             .
           </p>
