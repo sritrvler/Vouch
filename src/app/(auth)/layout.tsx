@@ -66,7 +66,7 @@ function PanelTestimonialCard({
 export default function AuthLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-screen w-full flex">
-      {/* Left — brand panel (desktop only) */}
+      {/* Left: brand panel (desktop only) */}
       <div
         className="hidden lg:flex flex-col justify-between w-[480px] shrink-0 px-12 py-14"
         style={{
@@ -104,7 +104,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
         </p>
       </div>
 
-      {/* Right — form */}
+      {/* Right: form */}
       <div className="flex flex-1 items-center justify-center bg-background px-4 py-12">
         {children}
       </div>

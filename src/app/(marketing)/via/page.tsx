@@ -3,7 +3,7 @@ import type { Metadata } from 'next';
 import { Zap, Globe, Lock } from 'lucide-react';
 
 export const metadata: Metadata = {
-  title: 'Collect testimonials for free — Vouch',
+  title: 'Collect testimonials for free | Vouch',
   description: 'You just saw Vouch in action. Build your own testimonial wall in minutes, free.',
 };
 

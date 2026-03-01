@@ -237,7 +237,7 @@ function ShareElsewhere({
   const [linkedinCopied, setLinkedinCopied] = useState(false);
 
   function handleLinkedinClick() {
-    const shareText = `${content.trim()}\n\n— ${authorName}`;
+    const shareText = `${content.trim()}\n\n${authorName}`;
     navigator.clipboard.writeText(shareText).then(() => {
       setLinkedinCopied(true);
       setTimeout(() => setLinkedinCopied(false), 2000);
@@ -256,7 +256,7 @@ function ShareElsewhere({
     >
       <div className="w-full h-px bg-border mb-6" />
       <p className="text-sm font-semibold text-foreground mb-1">
-        One more thing — it would mean the world to us!
+        One more thing. It would mean the world to us!
       </p>
       <p className="text-sm text-muted-foreground mb-4">
         Share your experience on another platform too? It takes 30 seconds.
@@ -394,7 +394,7 @@ export default function CollectFormClient({
     try {
       let avatarUrl: string | null = null;
 
-      // Upload avatar if provided — send as base64 in the body
+      // Upload avatar if provided, send as base64 in the body
       if (avatarFile) {
         const reader = new FileReader();
         avatarUrl = await new Promise<string>((resolve, reject) => {
@@ -653,7 +653,7 @@ export default function CollectFormClient({
                 </div>
 
                 <div className="space-y-4">
-                  {/* Name — the only required field, prominent */}
+                  {/* Name: the only required field, prominent */}
                   <div>
                     <Label htmlFor="author-name" className="text-sm font-medium mb-1.5 block">
                       Your name
@@ -889,7 +889,7 @@ export default function CollectFormClient({
                   </p>
                 </motion.div>
 
-                {/* Multi-channel share nudge — only for happy customers */}
+                {/* Multi-channel share nudge, only for happy customers */}
                 {rating >= 4 && (project.google_review_url || project.linkedin_url) && (
                   <ShareElsewhere
                     accentColor={accentColor}

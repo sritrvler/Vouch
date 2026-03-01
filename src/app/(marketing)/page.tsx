@@ -66,7 +66,7 @@ function FadeIn({
 }
 
 /* ─────────────────────────────────────────────────────────
-   Hero — staggered testimonial cards
+   Hero: staggered testimonial cards
 ───────────────────────────────────────────────────────── */
 
 const HERO_CARDS = [
@@ -95,7 +95,7 @@ const HERO_CARDS = [
     role: "Webflow Agency, 30+ client sites",
     rating: 5,
     time: "1 month ago",
-    text: "One account for every client site. Each form is branded to that client. They just see their own logo and colors — they fill it in without thinking twice.",
+    text: "One account for every client site. Each form is branded to that client. They just see their own logo and colors. They fill it in without thinking twice.",
   },
 ];
 
@@ -187,7 +187,7 @@ function HeroVisual() {
           ))}
         </div>
 
-        {/* Right column — shifted down to create stagger */}
+        {/* Right column, shifted down to create stagger */}
         <div className="flex flex-col gap-4 mt-16">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -264,7 +264,7 @@ function HeroSection() {
               className="text-lg sm:text-xl text-gray-500 leading-relaxed mb-9 max-w-lg"
             >
               Collect written testimonials and display them anywhere. Works for your own
-              portfolio, a client&apos;s site, or your SaaS product — one account, one setup.
+              portfolio, a client&apos;s site, or your SaaS product. One account, one setup.
             </motion.p>
 
             <motion.div
@@ -383,7 +383,7 @@ const PAIN_POINTS = [
   {
     number: "01",
     title: "Your testimonial widget looks like it came from somewhere else",
-    body: "You spend hours getting a site pixel-perfect — whether it is your own portfolio or a client's site. Then you paste a testimonial embed and it immediately screams third-party tool. Wrong fonts, wrong colors, wrong vibe. Your work deserves better than that.",
+    body: "You spend hours getting a site pixel-perfect, whether it is your own portfolio or a client's site. Then you paste a testimonial embed and it immediately screams third-party tool. Wrong fonts, wrong colors, wrong vibe. Your work deserves better than that.",
   },
   {
     number: "02",
@@ -392,7 +392,7 @@ const PAIN_POINTS = [
   },
   {
     number: "03",
-    title: "The moment to ask passes fast — and most tools are not ready when it does",
+    title: "The moment to ask passes fast. Most tools are not ready when it does.",
     body: "Right after a great delivery, a launch, or a five-star user interaction is when your clients and users are most willing to say something. Most tools make you set up a form, configure the embed, and fight the CMS before you can send a single link. Vouch is ready in 15 minutes and stays ready forever.",
   },
 ];
@@ -671,7 +671,7 @@ function FeaturesSection() {
         </FadeUp>
 
         <div className="space-y-24 lg:space-y-32">
-          {/* Feature 1 — Collect */}
+          {/* Feature 1: Collect */}
           <FadeUp>
             <div className="grid lg:grid-cols-2 gap-12 lg:gap-20 items-center">
               <div>
@@ -717,7 +717,7 @@ function FeaturesSection() {
             </div>
           </FadeUp>
 
-          {/* Feature 2 — Embed */}
+          {/* Feature 2: Embed */}
           <FadeUp>
             <div className="grid lg:grid-cols-2 gap-12 lg:gap-20 items-center lg:[&>*:first-child]:order-2">
               <div>
@@ -741,9 +741,9 @@ function FeaturesSection() {
                 </p>
                 <ul className="space-y-3">
                   {[
-                    "Script tag drops into Framer, Webflow, WordPress — any platform",
+                    "Script tag works on Framer, Webflow, WordPress, or any other platform",
                     "React component for Next.js apps and SaaS landing pages",
-                    "Each widget is scoped to one project — portfolio, client site, or product",
+                    "Each widget scoped to one project (portfolio, client site, or product)",
                   ].map((b) => (
                     <li
                       key={b}
@@ -769,7 +769,7 @@ function FeaturesSection() {
 }
 
 /* ─────────────────────────────────────────────────────────
-   How it works — dark section
+   How it works (dark section)
 ───────────────────────────────────────────────────────── */
 
 function HowItWorksSection() {
@@ -829,7 +829,7 @@ function HowItWorksSection() {
 }
 
 /* ─────────────────────────────────────────────────────────
-   Pricing cards (exported — used in /pricing page too)
+   Pricing cards (exported, used in /pricing page too)
 ───────────────────────────────────────────────────────── */
 
 const FREE_FEATURES = [
@@ -846,7 +846,7 @@ const FREE_FEATURES = [
 const PRO_FEATURES = [
   "Everything in Free",
   "Unlimited collection forms and embed widgets",
-  "No per-domain fees — one flat price",
+  "No per-domain fees. One flat price.",
   "Google Review + LinkedIn nudge after 4-5 stars",
   "Shareable image cards for social media",
   "Carousel, wall of love, and list layouts",
@@ -948,7 +948,7 @@ function PricingSection() {
               One account. Every project you build.
             </h2>
             <p className="mt-4 text-lg text-gray-500">
-              Start free. Upgrade when your work grows — one account, no per-project fees.
+              Start free. Upgrade when your work grows. One account, no per-project fees.
             </p>
           </div>
         </FadeUp>
@@ -965,7 +965,7 @@ function PricingSection() {
 const FAQS = [
   {
     q: "Can one account cover multiple projects or clients?",
-    a: "Yes. One account gives you unlimited projects — create a separate form and widget for each client site, each product, or each service you offer. Each one can have its own branding, questions, and embed. There are no per-domain or per-project fees on Pro.",
+    a: "Yes. One account gives you unlimited projects. Create a separate form and widget for each client site, each product, or each service you offer. Each one can have its own branding, questions, and embed. There are no per-domain or per-project fees on Pro.",
   },
   {
     q: "Does this work for SaaS products and apps?",
@@ -981,7 +981,7 @@ const FAQS = [
   },
   {
     q: "Will the widget match my site's design?",
-    a: "Yes. You pick an accent color in your dashboard and the widget uses it everywhere — cards, stars, avatars. The component renders using your page's existing font stack, so there are no visual mismatches with a site you have spent careful effort designing.",
+    a: "Yes. You pick an accent color in your dashboard and the widget uses it everywhere: cards, stars, and avatars. The component renders using your page's existing font stack, so there are no visual mismatches with a site you have spent careful effort designing.",
   },
   {
     q: "Do my clients need to create an account to leave a testimonial?",

@@ -37,7 +37,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   }
 
   return {
-    title: `${project.name} — Customer Reviews`,
+    title: `${project.name} | Customer Reviews`,
     description: `See what customers are saying about ${project.name}.`,
   };
 }
@@ -98,7 +98,7 @@ export default async function PublicTestimonialsPage({ params }: PageProps) {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header — accent-tinted gradient with decorative quotation mark */}
+      {/* Header: accent-tinted gradient with decorative quotation mark */}
       <div
         className="border-b border-black/5"
         style={{
@@ -167,7 +167,7 @@ export default async function PublicTestimonialsPage({ params }: PageProps) {
         </div>
       </div>
 
-      {/* Testimonials — CSS columns masonry */}
+      {/* Testimonials: CSS columns masonry */}
       <div className="max-w-4xl mx-auto px-4 py-10">
         {displayTestimonials.length === 0 ? (
           <div className="text-center py-20">
@@ -249,7 +249,7 @@ export default async function PublicTestimonialsPage({ params }: PageProps) {
                         </div>
                       </div>
 
-                      {/* Verification badge — top right */}
+                      {/* Verification badge: top right */}
                       {(isX || isLinkedIn) ? (
                         <a
                           href={sourceUrl!}

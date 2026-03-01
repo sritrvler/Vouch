@@ -130,7 +130,7 @@ export default function SignupPage() {
     >
       {/* Card */}
       <div className="bg-white rounded-2xl shadow-lg border border-border/50 p-8">
-        {/* Logo — shown only on mobile where the brand panel is hidden */}
+        {/* Logo, shown only on mobile where the brand panel is hidden */}
         <div className="mb-8 text-center lg:hidden">
           <span className="text-3xl font-bold tracking-tight text-primary">Vouch</span>
         </div>

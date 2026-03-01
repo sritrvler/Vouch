@@ -56,7 +56,7 @@ export default async function CollectPage({ params }: PageProps) {
     .eq('id', formId)
     .single();
 
-  // 404 — form not found or inactive
+  // 404: form not found or inactive
   if (error || !form || !form.is_active) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-50 to-indigo-50/40 flex items-center justify-center px-4">

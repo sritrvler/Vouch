@@ -64,7 +64,7 @@ function NavHeader() {
             {/* Center spacer */}
             <div />
 
-            {/* Right actions — desktop */}
+            {/* Right actions: desktop */}
             <div className="hidden md:flex items-center gap-3">
               <Link
                 href="/pricing"
@@ -87,7 +87,7 @@ function NavHeader() {
               </Button>
             </div>
 
-            {/* Hamburger — mobile */}
+            {/* Hamburger: mobile */}
             <button
               className="md:hidden p-2 rounded-md text-gray-600 hover:text-gray-900 hover:bg-gray-100 transition-colors"
               onClick={() => setMobileOpen((v) => !v)}

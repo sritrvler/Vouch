@@ -323,7 +323,7 @@ export default function DashboardPage() {
           supabase.from('collection_forms').select('id', { count: 'exact', head: true }).eq('user_id', user.id),
         ]);
 
-        // Widget views — get all widget ids for this user, then count views
+        // Widget views: get all widget ids for this user, then count views
         let widgetViews = 0;
         if (widgetsRes.data && widgetsRes.data.length > 0) {
           const widgetIds = widgetsRes.data.map((w) => w.id);
@@ -373,7 +373,7 @@ export default function DashboardPage() {
         </p>
       </motion.div>
 
-      {/* Pending banner — only shown when there are testimonials to review */}
+      {/* Pending banner, only shown when there are testimonials to review */}
       <PendingBanner count={stats.pending} />
 
       {/* Key metrics */}
@@ -396,7 +396,7 @@ export default function DashboardPage() {
         />
       </div>
 
-      {/* Getting started checklist — show until all steps are complete */}
+      {/* Getting started checklist, show until all steps are complete */}
       {(!stats.hasProject || !stats.hasForm || stats.total === 0 || stats.approved === 0 || !stats.hasWidget) && (
         <GettingStarted stats={stats} />
       )}

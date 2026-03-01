@@ -272,7 +272,7 @@ function TestimonialCard({
           </div>
         )}
 
-        {/* Verification badge — top right */}
+        {/* Verification badge: top right */}
         {(isX || isLinkedIn) ? (
           <a
             href={src!}
@@ -740,7 +740,7 @@ export default async function EmbedPage({ params }: PageProps) {
               setTimeout(sendHeight, 500);
               setTimeout(sendHeight, 1500);
 
-              // Read more expander — only show button when quote is actually clamped
+              // Read more expander, only show button when quote is actually clamped
               window.addEventListener('load', function() {
                 document.querySelectorAll('[data-vouch-quote]').forEach(function(p) {
                   if (p.scrollHeight > p.clientHeight + 2) {
