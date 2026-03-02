@@ -32,7 +32,7 @@ export async function GET(request: NextRequest, { params }: PageProps) {
     // ── Fetch widget config ───────────────────────────────────────────────────
     const { data: widget, error: widgetError } = await supabase
       .from('widgets')
-      .select('id, project_id, user_id, name, layout, theme, filter_mode, min_rating, max_items, hide_branding')
+      .select('id, project_id, user_id, name, layout, theme, filter_mode, min_rating, max_items, hide_branding, pinned_ids')
       .eq('id', id)
       .single();
 
@@ -52,14 +52,18 @@ export async function GET(request: NextRequest, { params }: PageProps) {
     const isPro = sub?.plan === 'pro';
     const hardLimit = isPro ? (widget.max_items ?? 12) : Math.min(widget.max_items ?? 12, 5);
 
-    // ── Build testimonials query (single round-trip for both data and total count) ──
+    const pinnedIds: string[] = Array.isArray(widget.pinned_ids) ? (widget.pinned_ids as string[]) : [];
+
+    // ── Build testimonials query ───────────────────────────────────────────────
+    // Fetch up to 200 when custom order is set (sort in JS), otherwise use DB ordering + limit
+    const fetchLimit = pinnedIds.length > 0 ? 200 : hardLimit;
     let query = supabase
       .from('testimonials')
       .select('id, author_name, author_role, author_company, author_avatar_url, rating, content, enhanced_content, featured, source_url, golden_sentence, metric_label, created_at', { count: 'exact' })
       .eq('project_id', widget.project_id)
       .eq('status', 'approved')
       .order('created_at', { ascending: false })
-      .limit(hardLimit);
+      .limit(fetchLimit);
 
     if (widget.filter_mode === 'featured') {
       query = query.eq('featured', true);
@@ -67,9 +71,19 @@ export async function GET(request: NextRequest, { params }: PageProps) {
       query = query.gte('rating', widget.min_rating ?? 4);
     }
 
-    const { data: testimonials, count: totalCount, error: testimonialError } = await query;
+    const { data: rawTestimonials, count: totalCount, error: testimonialError } = await query;
 
-    if (testimonialError) {
+    // Apply custom ordering if set, then enforce hardLimit
+    let testimonials = rawTestimonials ?? [];
+    if (pinnedIds.length > 0 && testimonials.length > 0) {
+      const orderMap = new Map(pinnedIds.map((id, idx) => [id, idx]));
+      testimonials = [...testimonials].sort((a, b) =>
+        (orderMap.get(a.id) ?? Infinity) - (orderMap.get(b.id) ?? Infinity)
+      );
+    }
+    testimonials = testimonials.slice(0, hardLimit);
+
+    if (testimonialError ?? false) {
       console.error('Error fetching testimonials for widget:', testimonialError);
       return NextResponse.json(
         { error: 'Failed to fetch testimonials' },
@@ -80,7 +94,7 @@ export async function GET(request: NextRequest, { params }: PageProps) {
     // ── Record widget view (non-blocking) ─────────────────────────────────────
     void supabase.from('widget_views').insert({ widget_id: widget.id });
 
-    const totalApproved = totalCount ?? (testimonials ?? []).length;
+    const totalApproved = totalCount ?? testimonials.length;
 
     return NextResponse.json(
       {
@@ -91,7 +105,7 @@ export async function GET(request: NextRequest, { params }: PageProps) {
           theme: widget.theme,
           hideBranding: widget.hide_branding,
         },
-        testimonials: testimonials ?? [],
+        testimonials,
         isPro,
         totalApproved,
       },

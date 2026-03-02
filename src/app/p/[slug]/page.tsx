@@ -106,7 +106,7 @@ export default async function PublicTestimonialsPage({ params }: PageProps) {
   // Fetch approved testimonials
   const { data: testimonials } = await supabase
     .from('testimonials')
-    .select('id, author_name, author_role, author_company, author_avatar_url, content, rating, golden_sentence, metric_label, source_url, video_url, email_domain, created_at')
+    .select('id, author_name, author_role, author_company, author_avatar_url, content, rating, golden_sentence, metric_label, source_url, video_url, video_thumbnail_url, email_domain, created_at')
     .eq('project_id', project.id)
     .eq('status', 'approved')
     .order('featured', { ascending: false })
@@ -252,6 +252,7 @@ export default async function PublicTestimonialsPage({ params }: PageProps) {
               const metricLabel = (t as { metric_label?: string | null }).metric_label ?? null;
               const sourceUrl = (t as { source_url?: string | null }).source_url ?? null;
               const videoUrl = (t as { video_url?: string | null }).video_url ?? null;
+              const videoThumbnailUrl = (t as { video_thumbnail_url?: string | null }).video_thumbnail_url ?? null;
               const emailDomain = (t as { email_domain?: string | null }).email_domain ?? null;
               const isX = !!(sourceUrl && (sourceUrl.includes('twitter.com') || sourceUrl.includes('x.com')));
               const isLinkedIn = !!(sourceUrl && sourceUrl.includes('linkedin.com'));
@@ -413,6 +414,7 @@ export default async function PublicTestimonialsPage({ params }: PageProps) {
                         <div
                           data-vouch-play=""
                           data-video-url={videoUrl}
+                          data-video-poster={videoThumbnailUrl || ''}
                           className="relative rounded-xl overflow-hidden cursor-pointer group"
                           role="button"
                           aria-label="Play video testimonial"
@@ -420,6 +422,7 @@ export default async function PublicTestimonialsPage({ params }: PageProps) {
                           {/* eslint-disable-next-line jsx-a11y/media-has-caption */}
                           <video
                             src={videoUrl}
+                            poster={videoThumbnailUrl || undefined}
                             preload="metadata"
                             muted
                             className="w-full block"
@@ -508,10 +511,12 @@ export default async function PublicTestimonialsPage({ params }: PageProps) {
               document.querySelectorAll('[data-vouch-play]').forEach(function(btn) {
                 btn.addEventListener('click', function() {
                   var url = btn.getAttribute('data-video-url');
+                  var poster = btn.getAttribute('data-video-poster');
                   var modal = document.getElementById('vouch-video-modal');
                   var video = document.getElementById('vouch-video-player');
                   if (modal && video && url) {
                     video.src = url;
+                    video.poster = poster || '';
                     modal.style.display = 'flex';
                     video.play();
                   }

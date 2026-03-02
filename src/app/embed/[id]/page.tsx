@@ -42,6 +42,7 @@ interface Testimonial {
   golden_sentence: string | null;
   metric_label: string | null;
   video_url: string | null;
+  video_thumbnail_url: string | null;
   email_domain: string | null;
   created_at: string;
 }
@@ -357,6 +358,7 @@ function TestimonialCard({
         // eslint-disable-next-line jsx-a11y/media-has-caption
         <video
           src={testimonial.video_url}
+          poster={testimonial.video_thumbnail_url || undefined}
           controls
           preload="metadata"
           style={{ width: '100%', borderRadius: 8, marginTop: 8, display: 'block', background: '#000' }}
@@ -581,7 +583,7 @@ export default async function EmbedPage({ params }: PageProps) {
 
   const { data: widget, error: widgetError } = await supabase
     .from('widgets')
-    .select('id, project_id, user_id, name, layout, theme, filter_mode, min_rating, max_items, hide_branding')
+    .select('id, project_id, user_id, name, layout, theme, filter_mode, min_rating, max_items, hide_branding, pinned_ids')
     .eq('id', id)
     .single();
 
@@ -617,15 +619,18 @@ export default async function EmbedPage({ params }: PageProps) {
   const typedWidget = widget as Widget;
   const theme = (typedWidget.theme || {}) as WidgetTheme;
 
+  const pinnedIds: string[] = Array.isArray(widget.pinned_ids) ? (widget.pinned_ids as string[]) : [];
+  const fetchLimit = pinnedIds.length > 0 ? 200 : hardLimit;
+
   let query = supabase
     .from('testimonials')
     .select(
-      'id, author_name, author_role, author_company, author_avatar_url, rating, content, featured, source_url, golden_sentence, metric_label, video_url, email_domain, created_at'
+      'id, author_name, author_role, author_company, author_avatar_url, rating, content, featured, source_url, golden_sentence, metric_label, video_url, video_thumbnail_url, email_domain, created_at'
     )
     .eq('project_id', widget.project_id)
     .eq('status', 'approved')
     .order('created_at', { ascending: false })
-    .limit(hardLimit);
+    .limit(fetchLimit);
 
   if (widget.filter_mode === 'featured') {
     query = query.eq('featured', true);
@@ -633,8 +638,15 @@ export default async function EmbedPage({ params }: PageProps) {
     query = query.gte('rating', widget.min_rating ?? 4);
   }
 
-  const { data: testimonials } = await query;
-  const typedTestimonials = (testimonials ?? []) as Testimonial[];
+  const { data: rawTestimonials } = await query;
+  let sortedTestimonials = (rawTestimonials ?? []) as Testimonial[];
+  if (pinnedIds.length > 0 && sortedTestimonials.length > 0) {
+    const orderMap = new Map(pinnedIds.map((id, idx) => [id, idx]));
+    sortedTestimonials = [...sortedTestimonials].sort((a, b) =>
+      (orderMap.get(a.id) ?? Infinity) - (orderMap.get(b.id) ?? Infinity)
+    );
+  }
+  const typedTestimonials = sortedTestimonials.slice(0, hardLimit);
 
   // Free-tier: count total approved for truncation note
   let totalApproved = 0;

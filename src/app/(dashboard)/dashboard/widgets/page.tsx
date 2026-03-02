@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, Reorder } from 'framer-motion';
 import { toast } from 'sonner';
 import {
   LayoutGrid,
@@ -19,6 +19,7 @@ import {
   Globe,
   ExternalLink,
   Link2,
+  GripVertical,
 } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { Button } from '@/components/ui/button';
@@ -50,6 +51,7 @@ interface WidgetSettings {
   minRating: number;
   maxItems: number;
   hideBranding: boolean;
+  pinnedIds: string[];
 }
 
 interface Testimonial {
@@ -74,6 +76,7 @@ interface Widget {
   max_items: number;
   hide_branding: boolean;
   project_id: string;
+  pinned_ids: string[] | null;
 }
 
 // ─── Sample fallback testimonials ─────────────────────────────────────────────
@@ -227,6 +230,7 @@ function CopyCodeButton({ code }: { code: string }) {
 export default function WidgetsPage() {
   const supabase = createClient();
   const [testimonials, setTestimonials] = useState<Testimonial[]>([]);
+  const [orderedTestimonials, setOrderedTestimonials] = useState<Testimonial[]>([]);
   const [loadingTestimonials, setLoadingTestimonials] = useState(true);
   const [saving, setSaving] = useState(false);
   const [savedWidgetId, setSavedWidgetId] = useState<string | null>(null);
@@ -249,6 +253,7 @@ export default function WidgetsPage() {
     minRating: 4,
     maxItems: 12,
     hideBranding: false,
+    pinnedIds: [],
   });
 
   // ── Fetch approved testimonials ────────────────────────────────────────────
@@ -270,7 +275,8 @@ export default function WidgetsPage() {
         supabase.from('projects').select('id, slug').eq('user_id', user.id).limit(1).single(),
       ]);
 
-      setTestimonials((testimonialsRes.data as Testimonial[]) ?? []);
+      const fetchedTestimonials = (testimonialsRes.data as Testimonial[]) ?? [];
+      setTestimonials(fetchedTestimonials);
       if (subRes.data) setUserPlan(subRes.data.plan);
       if (projectsRes.data) {
         setProjectId(projectsRes.data.id);
@@ -285,6 +291,19 @@ export default function WidgetsPage() {
         .limit(1)
         .single();
 
+      const loadedPinnedIds: string[] = Array.isArray(widgetData?.pinned_ids)
+        ? (widgetData.pinned_ids as string[])
+        : [];
+
+      if (loadedPinnedIds.length > 0) {
+        const orderMap = new Map(loadedPinnedIds.map((id, idx) => [id, idx]));
+        setOrderedTestimonials([...fetchedTestimonials].sort((a, b) =>
+          (orderMap.get(a.id) ?? Infinity) - (orderMap.get(b.id) ?? Infinity)
+        ));
+      } else {
+        setOrderedTestimonials(fetchedTestimonials);
+      }
+
       if (widgetData) {
         setSavedWidgetId(widgetData.id);
         setSettings({
@@ -295,6 +314,7 @@ export default function WidgetsPage() {
           minRating: widgetData.min_rating,
           maxItems: widgetData.max_items,
           hideBranding: widgetData.hide_branding,
+          pinnedIds: loadedPinnedIds,
         });
       }
     } catch (err) {
@@ -310,7 +330,8 @@ export default function WidgetsPage() {
 
   // ── Filtered preview testimonials ──────────────────────────────────────────
   const previewTestimonials = useMemo(() => {
-    const source = testimonials.length > 0 ? testimonials : SAMPLE_TESTIMONIALS;
+    const hasReal = orderedTestimonials.length > 0 || testimonials.length > 0;
+    const source = hasReal ? orderedTestimonials : SAMPLE_TESTIMONIALS;
     let filtered = source;
     if (settings.filterMode === 'featured') {
       filtered = filtered.filter((t) => t.featured);
@@ -318,7 +339,7 @@ export default function WidgetsPage() {
       filtered = filtered.filter((t) => t.rating >= settings.minRating);
     }
     return filtered.slice(0, settings.maxItems);
-  }, [testimonials, settings.filterMode, settings.minRating, settings.maxItems]);
+  }, [orderedTestimonials, testimonials.length, settings.filterMode, settings.minRating, settings.maxItems]);
 
   const usingSampleData = testimonials.length === 0;
 
@@ -333,6 +354,13 @@ export default function WidgetsPage() {
   const update = useCallback(<K extends keyof WidgetSettings>(key: K, value: WidgetSettings[K]) => {
     setSettings((prev) => ({ ...prev, [key]: value }));
   }, []);
+
+  const handleReorder = useCallback((newOrder: Testimonial[]) => {
+    setOrderedTestimonials(newOrder);
+    if (testimonials.length > 0) {
+      setSettings((prev) => ({ ...prev, pinnedIds: newOrder.map((t) => t.id) }));
+    }
+  }, [testimonials.length]);
 
   // ── Save widget ───────────────────────────────────────────────────────────
   const handleSave = useCallback(async () => {
@@ -370,6 +398,7 @@ export default function WidgetsPage() {
         min_rating: settings.minRating,
         max_items: settings.maxItems,
         hide_branding: settings.hideBranding,
+        pinned_ids: settings.pinnedIds,
       };
 
       if (savedWidgetId) {
@@ -677,6 +706,55 @@ export function Testimonials() {
               </div>
             </div>
           </div>
+
+          {/* Display Order */}
+          {testimonials.length > 0 && (
+            <div className="bg-white rounded-2xl border border-border p-5 space-y-3">
+              <div>
+                <h3 className="text-sm font-semibold text-foreground">Display Order</h3>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  Drag to set the order. Filter and max items still apply.
+                </p>
+              </div>
+              <Reorder.Group
+                axis="y"
+                values={orderedTestimonials}
+                onReorder={handleReorder}
+                className="space-y-1.5"
+              >
+                {orderedTestimonials.map((t, idx) => (
+                  <Reorder.Item
+                    key={t.id}
+                    value={t}
+                    className="flex items-center gap-2.5 bg-muted/40 rounded-xl border border-border px-3 py-2 cursor-grab active:cursor-grabbing select-none"
+                  >
+                    <GripVertical className="size-3.5 text-muted-foreground/50 shrink-0" />
+                    <span className="text-[10px] font-mono text-muted-foreground/40 w-4 shrink-0 text-right">
+                      {idx + 1}
+                    </span>
+                    <div className="w-6 h-6 rounded-full bg-indigo-100 flex items-center justify-center shrink-0 overflow-hidden">
+                      {t.author_avatar_url ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img src={t.author_avatar_url} alt={t.author_name} className="w-full h-full object-cover" />
+                      ) : (
+                        <span className="text-[8px] font-semibold text-indigo-600">
+                          {t.author_name.slice(0, 2).toUpperCase()}
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-xs font-medium text-foreground truncate flex-1 min-w-0">
+                      {t.author_name}
+                    </p>
+                    <div className="flex items-center gap-0.5 shrink-0">
+                      {Array.from({ length: t.rating }).map((_, i) => (
+                        <Star key={i} className="size-2.5 fill-amber-400 text-amber-400" />
+                      ))}
+                    </div>
+                  </Reorder.Item>
+                ))}
+              </Reorder.Group>
+            </div>
+          )}
 
           {/* Branding */}
           <div className="bg-white rounded-2xl border border-border p-5">

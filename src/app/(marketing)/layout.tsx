@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Menu, X, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { createClient } from "@/lib/supabase/client";
 
 const NAV_LINKS: { label: string; href: string }[] = [];
 
@@ -30,6 +31,18 @@ function VouchLogo() {
 function NavHeader() {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  useEffect(() => {
+    const supabase = createClient();
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setIsLoggedIn(!!session);
+    });
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setIsLoggedIn(!!session);
+    });
+    return () => subscription.unsubscribe();
+  }, []);
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 10);
@@ -72,19 +85,31 @@ function NavHeader() {
               >
                 Pricing
               </Link>
-              <Link
-                href="/login"
-                className="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors px-3 py-1.5"
-              >
-                Log in
-              </Link>
-              <Button
-                asChild
-                size="sm"
-                className="bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg px-4 shadow-sm"
-              >
-                <Link href="/signup">Start free</Link>
-              </Button>
+              {isLoggedIn ? (
+                <Button
+                  asChild
+                  size="sm"
+                  className="bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg px-4 shadow-sm"
+                >
+                  <Link href="/dashboard">Go to dashboard</Link>
+                </Button>
+              ) : (
+                <>
+                  <Link
+                    href="/login"
+                    className="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors px-3 py-1.5"
+                  >
+                    Log in
+                  </Link>
+                  <Button
+                    asChild
+                    size="sm"
+                    className="bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg px-4 shadow-sm"
+                  >
+                    <Link href="/signup">Start free</Link>
+                  </Button>
+                </>
+              )}
             </div>
 
             {/* Hamburger: mobile */}
@@ -117,21 +142,34 @@ function NavHeader() {
               >
                 Pricing
               </Link>
-              <Link
-                href="/login"
-                onClick={() => setMobileOpen(false)}
-                className="px-4 py-3 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-md transition-colors"
-              >
-                Log in
-              </Link>
-              <Button
-                asChild
-                className="mt-1 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg"
-              >
-                <Link href="/signup" onClick={() => setMobileOpen(false)}>
-                  Start for free
-                </Link>
-              </Button>
+              {isLoggedIn ? (
+                <Button
+                  asChild
+                  className="mt-1 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg"
+                >
+                  <Link href="/dashboard" onClick={() => setMobileOpen(false)}>
+                    Go to dashboard
+                  </Link>
+                </Button>
+              ) : (
+                <>
+                  <Link
+                    href="/login"
+                    onClick={() => setMobileOpen(false)}
+                    className="px-4 py-3 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-md transition-colors"
+                  >
+                    Log in
+                  </Link>
+                  <Button
+                    asChild
+                    className="mt-1 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg"
+                  >
+                    <Link href="/signup" onClick={() => setMobileOpen(false)}>
+                      Start for free
+                    </Link>
+                  </Button>
+                </>
+              )}
             </div>
           </motion.div>
         )}

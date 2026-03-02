@@ -81,6 +81,7 @@ create table public.testimonials (
   featured boolean default false,
   custom_answers jsonb default '{}',
   video_url text,
+  video_thumbnail_url text,
   email_domain text,
   created_at timestamptz default now() not null,
   updated_at timestamptz default now() not null
@@ -88,6 +89,8 @@ create table public.testimonials (
 
 -- To add video_url to an existing database run:
 -- ALTER TABLE public.testimonials ADD COLUMN IF NOT EXISTS video_url text;
+-- To add video_thumbnail_url to an existing database run:
+-- ALTER TABLE public.testimonials ADD COLUMN IF NOT EXISTS video_thumbnail_url text;
 -- To add email_domain to an existing database run:
 -- ALTER TABLE public.testimonials ADD COLUMN IF NOT EXISTS email_domain text;
 
@@ -114,9 +117,12 @@ create table public.widgets (
   min_rating integer default 4,
   max_items integer default 12,
   hide_branding boolean default false,
+  pinned_ids jsonb default '[]',
   created_at timestamptz default now() not null,
   updated_at timestamptz default now() not null
 );
+-- To add pinned_ids to an existing database run:
+-- ALTER TABLE public.widgets ADD COLUMN IF NOT EXISTS pinned_ids jsonb default '[]';
 
 -- ============================================================
 -- ANALYTICS — Form views

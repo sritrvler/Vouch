@@ -3,7 +3,7 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
-import { Loader2, Star, ChevronRight, Check, ExternalLink, Upload, X, Linkedin, Camera, Video, Square } from 'lucide-react';
+import { Loader2, Star, ChevronRight, Check, ExternalLink, Upload, X, Linkedin, Camera, Video, Square, Pause, Play } from 'lucide-react';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -320,6 +320,55 @@ function ShareElsewhere({
   );
 }
 
+// ─── Video utilities ──────────────────────────────────────────────────────────
+
+function extractVideoFrames(videoUrl: string, count: number): Promise<string[]> {
+  return new Promise((resolve) => {
+    const video = document.createElement('video');
+    video.src = videoUrl;
+    video.muted = true;
+    video.preload = 'metadata';
+    video.onloadedmetadata = () => {
+      const duration = video.duration;
+      if (!duration || !isFinite(duration)) { resolve([]); return; }
+      const canvas = document.createElement('canvas');
+      canvas.width = 320;
+      canvas.height = 180;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) { resolve([]); return; }
+      const frames: string[] = [];
+      const timestamps = Array.from({ length: count }, (_, i) =>
+        duration * (0.1 + (0.8 * i) / Math.max(count - 1, 1))
+      );
+      let i = 0;
+      video.onseeked = () => {
+        try {
+          ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+          frames.push(canvas.toDataURL('image/jpeg', 0.8));
+        } catch { frames.push(''); }
+        i++;
+        if (i < timestamps.length) {
+          video.currentTime = timestamps[i];
+        } else {
+          resolve(frames.filter(Boolean));
+        }
+      };
+      video.onerror = () => resolve(frames);
+      video.currentTime = timestamps[0];
+    };
+    video.onerror = () => resolve([]);
+  });
+}
+
+function dataURLToBlob(dataUrl: string): Blob {
+  const [header, data] = dataUrl.split(',');
+  const mime = header.match(/:(.*?);/)![1];
+  const binary = atob(data);
+  const bytes = new Uint8Array(binary.length);
+  for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+  return new Blob([bytes], { type: mime });
+}
+
 // ─── Main component ───────────────────────────────────────────────────────────
 
 export default function CollectFormClient({
@@ -359,7 +408,15 @@ export default function CollectFormClient({
   const [mediaStream, setMediaStream] = useState<MediaStream | null>(null);
   const [isUploadingVideo, setIsUploadingVideo] = useState(false);
   const [videoUrl, setVideoUrl] = useState<string | null>(null);
+  const [videoThumbnailUrl, setVideoThumbnailUrl] = useState<string | null>(null);
   const [cameraError, setCameraError] = useState(false);
+  const [isCameraInitializing, setIsCameraInitializing] = useState(false);
+  const [isCameraActive, setIsCameraActive] = useState(false);
+  const [isPaused, setIsPaused] = useState(false);
+  const [thumbnailFrames, setThumbnailFrames] = useState<string[]>([]);
+  const [selectedThumbnailIdx, setSelectedThumbnailIdx] = useState<number>(0);
+  const cameraInitRef = useRef(false);
+  const currentStreamRef = useRef<MediaStream | null>(null);
 
   const contentLength = content.trim().length;
   const contentValid = contentLength >= 20;
@@ -397,55 +454,121 @@ export default function CollectFormClient({
     if (fileInputRef.current) fileInputRef.current.value = '';
   }
 
-  async function startRecording() {
-    setCameraError(false);
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
-      setMediaStream(stream);
-      const chunks: Blob[] = [];
-      const mimeType = MediaRecorder.isTypeSupported('video/webm;codecs=vp8,opus')
-        ? 'video/webm;codecs=vp8,opus'
-        : 'video/mp4';
-      const mr = new MediaRecorder(stream, { videoBitsPerSecond: 1_000_000, mimeType });
-      mr.ondataavailable = (e) => { if (e.data.size > 0) chunks.push(e.data); };
-      mr.onstop = () => {
-        const blob = new Blob(chunks, { type: mimeType });
-        setVideoBlob(blob);
-        setVideoObjectUrl(URL.createObjectURL(blob));
-        stream.getTracks().forEach((t) => t.stop());
-        setMediaStream(null);
-      };
-      mediaRecorderRef.current = mr;
-      mr.start();
-      setIsRecording(true);
-      setRecordingTime(0);
-    } catch {
-      setCameraError(true);
+  function leaveVideoStep() {
+    const stream = currentStreamRef.current;
+    if (stream) {
+      stream.getTracks().forEach((t) => t.stop());
+      currentStreamRef.current = null;
     }
+    setMediaStream(null);
+    setIsCameraActive(false);
+    setIsRecording(false);
+    setIsPaused(false);
+    if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
+      mediaRecorderRef.current.stop();
+    }
+  }
+
+  function startRecording() {
+    const stream = currentStreamRef.current;
+    if (!stream) return;
+    const chunks: Blob[] = [];
+    const mimeType = MediaRecorder.isTypeSupported('video/webm;codecs=vp8,opus')
+      ? 'video/webm;codecs=vp8,opus'
+      : 'video/mp4';
+    const mr = new MediaRecorder(stream, { videoBitsPerSecond: 1_000_000, mimeType });
+    mr.ondataavailable = (e) => { if (e.data.size > 0) chunks.push(e.data); };
+    mr.onstop = () => {
+      const blob = new Blob(chunks, { type: mimeType });
+      const objUrl = URL.createObjectURL(blob);
+      setVideoBlob(blob);
+      setVideoObjectUrl(objUrl);
+      stream.getTracks().forEach((t) => t.stop());
+      currentStreamRef.current = null;
+      setMediaStream(null);
+      setIsCameraActive(false);
+      setIsRecording(false);
+      setIsPaused(false);
+      extractVideoFrames(objUrl, 4).then((frames) => {
+        setThumbnailFrames(frames);
+        setSelectedThumbnailIdx(0);
+      });
+    };
+    mediaRecorderRef.current = mr;
+    mr.start();
+    setIsRecording(true);
+    setIsPaused(false);
+    setRecordingTime(0);
   }
 
   function stopRecording() {
     mediaRecorderRef.current?.stop();
-    setIsRecording(false);
   }
 
-  // Recording timer: increment every second, auto-stop at 2 minutes
+  function pauseRecording() {
+    mediaRecorderRef.current?.pause();
+    setIsPaused(true);
+  }
+
+  function resumeRecording() {
+    mediaRecorderRef.current?.resume();
+    setIsPaused(false);
+  }
+
+  function handleReRecord() {
+    if (videoObjectUrl) URL.revokeObjectURL(videoObjectUrl);
+    setVideoBlob(null);
+    setVideoObjectUrl(null);
+    setThumbnailFrames([]);
+    setSelectedThumbnailIdx(0);
+    setIsRecording(false);
+    setIsPaused(false);
+    setRecordingTime(0);
+    cameraInitRef.current = false;
+  }
+
+  // Auto-init camera when entering step 3
   useEffect(() => {
-    if (!isRecording) return;
+    if (step !== 3 || videoBlob || cameraInitRef.current) return;
+    cameraInitRef.current = true;
+    setIsCameraInitializing(true);
+    setCameraError(false);
+    navigator.mediaDevices.getUserMedia({ video: true, audio: true })
+      .then((stream) => {
+        currentStreamRef.current = stream;
+        setMediaStream(stream);
+        setIsCameraActive(true);
+      })
+      .catch(() => {
+        setCameraError(true);
+        cameraInitRef.current = false;
+      })
+      .finally(() => setIsCameraInitializing(false));
+  }, [step, videoBlob]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Component unmount: stop any active stream
+  useEffect(() => {
+    return () => {
+      currentStreamRef.current?.getTracks().forEach((t) => t.stop());
+    };
+  }, []);
+
+  // Recording timer: increment every second while recording and not paused
+  useEffect(() => {
+    if (!isRecording || isPaused) return;
     const intervalId = setInterval(() => {
       setRecordingTime((prev) => prev + 1);
     }, 1000);
     return () => clearInterval(intervalId);
-  }, [isRecording]);
+  }, [isRecording, isPaused]);
 
   useEffect(() => {
     if (isRecording && recordingTime >= 120) {
       mediaRecorderRef.current?.stop();
-      setIsRecording(false);
     }
   }, [isRecording, recordingTime]);
 
-  // Attach stream to live preview element
+  // Attach stream to live preview element (also re-runs when isCameraActive changes so the video element is mounted)
   useEffect(() => {
     if (mediaStream && videoPreviewRef.current) {
       videoPreviewRef.current.srcObject = mediaStream;
@@ -456,7 +579,7 @@ export default function CollectFormClient({
         videoPreviewRef.current.srcObject = null;
       }
     };
-  }, [mediaStream]);
+  }, [mediaStream, isCameraActive, isRecording]);
 
   async function handleVideoNext() {
     if (!videoBlob) {
@@ -468,6 +591,9 @@ export default function CollectFormClient({
       const fd = new FormData();
       fd.append('video', videoBlob, 'testimonial.webm');
       fd.append('formId', form.id);
+      if (thumbnailFrames.length > 0 && thumbnailFrames[selectedThumbnailIdx]) {
+        fd.append('thumbnail', dataURLToBlob(thumbnailFrames[selectedThumbnailIdx]), 'thumbnail.jpg');
+      }
       const res = await fetch('/api/testimonials/upload-video', { method: 'POST', body: fd });
       if (res.status === 403) {
         const data = (await res.json()) as { limitReached?: boolean };
@@ -475,8 +601,9 @@ export default function CollectFormClient({
           toast.error('Free plan includes 3 video testimonials. Upgrade to Pro for unlimited.');
         }
       } else if (res.ok) {
-        const { url } = (await res.json()) as { url: string };
+        const { url, thumbnailUrl } = (await res.json()) as { url: string; thumbnailUrl: string | null };
         setVideoUrl(url);
+        if (thumbnailUrl) setVideoThumbnailUrl(thumbnailUrl);
       } else {
         toast.error('Video upload failed. Continuing without video.');
       }
@@ -520,6 +647,7 @@ export default function CollectFormClient({
           avatarDataUrl: avatarUrl,
           customAnswers,
           videoUrl: videoUrl || null,
+          videoThumbnailUrl: videoThumbnailUrl || null,
         }),
       });
 
@@ -544,7 +672,7 @@ export default function CollectFormClient({
     }
   }, [
     nameValid, contentValid, agreed, avatarFile, form.id, rating, content,
-    authorName, authorEmail, authorRole, authorCompany, customAnswers, videoUrl,
+    authorName, authorEmail, authorRole, authorCompany, customAnswers, videoUrl, videoThumbnailUrl,
   ]);
 
   function resetForm() {
@@ -770,41 +898,59 @@ export default function CollectFormClient({
                     <Loader2 className="size-7 animate-spin" style={{ color: accentColor }} />
                     <p className="text-sm text-muted-foreground">Uploading video...</p>
                   </div>
-                ) : cameraError ? (
-                  <div className="text-center py-6 space-y-4">
-                    <p className="text-sm text-muted-foreground">
-                      Camera access denied. Skip to continue.
-                    </p>
-                    <Button
-                      onClick={() => goTo(4, 'forward')}
-                      className="w-full h-12 text-base font-semibold rounded-xl gap-2"
-                      style={{ backgroundColor: accentColor }}
-                    >
-                      Skip
-                      <ChevronRight className="size-4" />
-                    </Button>
-                  </div>
                 ) : videoBlob ? (
+                  /* Review state: video player + thumbnail picker */
                   <div className="space-y-4">
                     {/* eslint-disable-next-line jsx-a11y/media-has-caption */}
                     <video
                       src={videoObjectUrl!}
                       controls
-                      className="w-full rounded-2xl border border-border"
+                      poster={thumbnailFrames[selectedThumbnailIdx] || undefined}
+                      className="w-full rounded-2xl border border-border bg-black"
                       style={{ maxHeight: 280 }}
                     />
+
+                    {thumbnailFrames.length > 0 && (
+                      <div>
+                        <p className="text-xs font-medium text-muted-foreground mb-2">Choose a thumbnail</p>
+                        <div className="grid grid-cols-4 gap-2">
+                          {thumbnailFrames.map((frame, idx) => (
+                            <button
+                              key={idx}
+                              type="button"
+                              onClick={() => setSelectedThumbnailIdx(idx)}
+                              className="relative rounded-lg overflow-hidden border-2 transition-all"
+                              style={
+                                selectedThumbnailIdx === idx
+                                  ? { borderColor: accentColor }
+                                  : { borderColor: 'transparent' }
+                              }
+                            >
+                              {/* eslint-disable-next-line @next/next/no-img-element */}
+                              <img
+                                src={frame}
+                                alt={`Frame ${idx + 1}`}
+                                className="w-full block aspect-video object-cover"
+                              />
+                              {selectedThumbnailIdx === idx && (
+                                <div className="absolute inset-0 flex items-center justify-center bg-black/25">
+                                  <Check className="size-3.5 text-white drop-shadow" />
+                                </div>
+                              )}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
                     <div className="flex gap-3">
                       <Button
                         type="button"
                         variant="outline"
-                        onClick={() => {
-                          setVideoBlob(null);
-                          if (videoObjectUrl) URL.revokeObjectURL(videoObjectUrl);
-                          setVideoObjectUrl(null);
-                        }}
+                        onClick={handleReRecord}
                         className="flex-1 h-11 rounded-xl gap-2"
                       >
-                        <Square className="size-3.5" />
+                        <Video className="size-3.5" />
                         Re-record
                       </Button>
                       <Button
@@ -817,7 +963,27 @@ export default function CollectFormClient({
                       </Button>
                     </div>
                   </div>
-                ) : isRecording ? (
+                ) : cameraError ? (
+                  <div className="text-center py-6 space-y-4">
+                    <p className="text-sm text-muted-foreground">
+                      Camera access denied. You can skip and continue without a video.
+                    </p>
+                    <Button
+                      onClick={() => { leaveVideoStep(); goTo(4, 'forward'); }}
+                      className="w-full h-12 text-base font-semibold rounded-xl gap-2"
+                      style={{ backgroundColor: accentColor }}
+                    >
+                      Skip
+                      <ChevronRight className="size-4" />
+                    </Button>
+                  </div>
+                ) : isCameraInitializing ? (
+                  <div className="flex flex-col items-center justify-center py-12 gap-3">
+                    <Loader2 className="size-6 animate-spin text-muted-foreground" />
+                    <p className="text-sm text-muted-foreground">Opening camera...</p>
+                  </div>
+                ) : (
+                  /* Camera active: preview + controls */
                   <div className="space-y-4">
                     <div className="relative rounded-2xl overflow-hidden border border-border bg-black">
                       {/* eslint-disable-next-line jsx-a11y/media-has-caption */}
@@ -829,54 +995,64 @@ export default function CollectFormClient({
                         className="w-full block"
                         style={{ maxHeight: 260, objectFit: 'cover' }}
                       />
-                      <div className="absolute top-3 left-3 flex items-center gap-2 bg-black/60 rounded-full px-3 py-1">
-                        <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
-                        <span className="text-white text-xs font-mono">
-                          {`${Math.floor(recordingTime / 60)}:${String(recordingTime % 60).padStart(2, '0')} / 2:00`}
-                        </span>
+                      {isRecording && (
+                        <div className="absolute top-3 left-3 flex items-center gap-2 bg-black/60 rounded-full px-3 py-1">
+                          <span
+                            className={`w-2 h-2 rounded-full bg-red-500 ${isPaused ? 'opacity-50' : 'animate-pulse'}`}
+                          />
+                          <span className="text-white text-xs font-mono">
+                            {`${Math.floor(recordingTime / 60)}:${String(recordingTime % 60).padStart(2, '0')} / 2:00`}
+                          </span>
+                          {isPaused && (
+                            <span className="text-white/70 text-xs ml-0.5">Paused</span>
+                          )}
+                        </div>
+                      )}
+                    </div>
+
+                    {isRecording ? (
+                      <div className="flex gap-3">
+                        <Button
+                          type="button"
+                          variant="outline"
+                          onClick={isPaused ? resumeRecording : pauseRecording}
+                          className="flex-1 h-11 rounded-xl gap-2"
+                        >
+                          {isPaused
+                            ? <><Play className="size-3.5 fill-current" /> Resume</>
+                            : <><Pause className="size-3.5 fill-current" /> Pause</>
+                          }
+                        </Button>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          onClick={stopRecording}
+                          className="flex-1 h-11 rounded-xl gap-2 border-red-200 text-red-600 hover:bg-red-50"
+                        >
+                          <Square className="size-3.5 fill-red-500 text-red-500" />
+                          Stop
+                        </Button>
                       </div>
-                    </div>
-                    <Button
-                      onClick={stopRecording}
-                      variant="outline"
-                      className="w-full h-12 rounded-xl gap-2 border-red-200 text-red-600 hover:bg-red-50"
-                    >
-                      <Square className="size-3.5 fill-red-500 text-red-500" />
-                      Stop recording
-                    </Button>
-                  </div>
-                ) : (
-                  <div className="flex flex-col items-center gap-5 py-4">
-                    <div
-                      className="w-20 h-20 rounded-full flex items-center justify-center"
-                      style={{ backgroundColor: `${accentColor}15` }}
-                    >
-                      <Video className="size-8" style={{ color: accentColor }} />
-                    </div>
-                    <div className="text-center space-y-1">
-                      <p className="text-sm font-medium text-foreground">
-                        Record a short video (up to 2 min)
-                      </p>
-                      <p className="text-xs text-muted-foreground">
-                        Your webcam and microphone will be used
-                      </p>
-                    </div>
-                    <Button
-                      onClick={startRecording}
-                      className="w-full h-12 text-base font-semibold rounded-xl gap-2"
-                      style={{ backgroundColor: accentColor }}
-                    >
-                      <Camera className="size-4" />
-                      Start Recording
-                    </Button>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      onClick={() => goTo(4, 'forward')}
-                      className="w-full h-11 rounded-xl gap-2"
-                    >
-                      Skip, continue without video
-                    </Button>
+                    ) : (
+                      <div className="space-y-3">
+                        <Button
+                          onClick={startRecording}
+                          className="w-full h-12 text-base font-semibold rounded-xl gap-2"
+                          style={{ backgroundColor: accentColor }}
+                        >
+                          <Camera className="size-4" />
+                          Start Recording
+                        </Button>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          onClick={() => { leaveVideoStep(); goTo(4, 'forward'); }}
+                          className="w-full h-11 rounded-xl gap-2"
+                        >
+                          Skip, continue without video
+                        </Button>
+                      </div>
+                    )}
                   </div>
                 )}
 
@@ -884,7 +1060,7 @@ export default function CollectFormClient({
                   <div className="mt-4 text-center">
                     <button
                       type="button"
-                      onClick={() => goTo(2, 'back')}
+                      onClick={() => { leaveVideoStep(); goTo(2, 'back'); }}
                       className="text-sm text-muted-foreground hover:text-foreground transition-colors underline-offset-4 hover:underline"
                     >
                       Back

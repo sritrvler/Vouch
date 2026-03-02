@@ -29,6 +29,7 @@ import {
   PlusCircle,
   Video,
   ShieldCheck,
+  Play,
 } from 'lucide-react';
 
 const PERSONAL_DOMAINS = new Set([
@@ -77,6 +78,7 @@ interface Testimonial {
   golden_sentence: string | null;
   metric_label: string | null;
   video_url: string | null;
+  video_thumbnail_url: string | null;
   created_at: string;
   project_id: string;
   project?: { name: string };
@@ -579,7 +581,7 @@ function CardDialog({ id, onClose }: { id: string; onClose: () => void }) {
 }
 
 // ─── Video Dialog ─────────────────────────────────────────────────────────────
-function VideoDialog({ url, onClose }: { url: string; onClose: () => void }) {
+function VideoDialog({ url, poster, onClose }: { url: string; poster?: string | null; onClose: () => void }) {
   return (
     <Dialog open onOpenChange={(open) => { if (!open) onClose(); }}>
       <DialogContent className="max-w-2xl">
@@ -587,7 +589,7 @@ function VideoDialog({ url, onClose }: { url: string; onClose: () => void }) {
           <DialogTitle>Video testimonial</DialogTitle>
         </DialogHeader>
         {/* eslint-disable-next-line jsx-a11y/media-has-caption */}
-        <video src={url} controls autoPlay className="w-full rounded-xl" />
+        <video src={url} poster={poster || undefined} controls autoPlay className="w-full rounded-xl" />
       </DialogContent>
     </Dialog>
   );
@@ -732,6 +734,33 @@ function TestimonialCard({ testimonial, onApprove, onReject, onToggleFeatured, o
         </div>
       )}
 
+      {/* Video thumbnail */}
+      {testimonial.video_url && (
+        <div className="mt-3 max-w-[280px]">
+          <button
+            type="button"
+            onClick={() => onPlayVideo(testimonial.id)}
+            className="relative w-full rounded-xl overflow-hidden group block"
+            aria-label="Play video testimonial"
+          >
+            {/* eslint-disable-next-line jsx-a11y/media-has-caption */}
+            <video
+              src={testimonial.video_url}
+              poster={testimonial.video_thumbnail_url || undefined}
+              preload="metadata"
+              muted
+              className="w-full block"
+              style={{ maxHeight: 160, objectFit: 'cover', pointerEvents: 'none', background: '#000', borderRadius: 12 }}
+            />
+            <div className="absolute inset-0 bg-black/30 group-hover:bg-black/40 transition-colors rounded-xl flex items-center justify-center">
+              <div className="w-11 h-11 rounded-full bg-white/90 flex items-center justify-center shadow-xl group-hover:scale-110 transition-transform duration-200">
+                <Play className="size-4 ml-0.5 fill-gray-900 text-gray-900" />
+              </div>
+            </div>
+          </button>
+        </div>
+      )}
+
       {/* Pro: golden sentence + metric editing */}
       {isPro && (
         <div className="mt-3 pt-3 border-t border-dashed border-border/50 space-y-2">
@@ -766,16 +795,6 @@ function TestimonialCard({ testimonial, onApprove, onReject, onToggleFeatured, o
 
       {/* Actions */}
       <div className="mt-4 flex items-center gap-2 flex-wrap">
-        {testimonial.video_url && (
-          <button
-            onClick={() => onPlayVideo(testimonial.id)}
-            title="Play video testimonial"
-            className="inline-flex items-center gap-1.5 rounded-xl border px-2.5 py-1.5 text-xs font-medium transition-all border-border text-muted-foreground hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-600"
-          >
-            <Video className="size-3" />
-            Play Video
-          </button>
-        )}
         <button
           onClick={() => onToggleFeatured(testimonial.id, !testimonial.featured)}
           disabled={isUpdating}
@@ -866,7 +885,7 @@ export default function InboxPage() {
   const [updatingIds, setUpdatingIds] = useState<Set<string>>(new Set());
   const [isPro, setIsPro] = useState(false);
   const [cardDialogId, setCardDialogId] = useState<string | null>(null);
-  const [videoDialogUrl, setVideoDialogUrl] = useState<string | null>(null);
+  const [videoDialog, setVideoDialog] = useState<{ url: string; poster: string | null } | null>(null);
   const [showUpgradeDialog, setShowUpgradeDialog] = useState(false);
   const [showImportDialog, setShowImportDialog] = useState(false);
   const [hasMore, setHasMore] = useState(false);
@@ -1042,7 +1061,7 @@ export default function InboxPage() {
 
   const handlePlayVideo = useCallback((id: string) => {
     const t = testimonials.find((item) => item.id === id);
-    if (t?.video_url) setVideoDialogUrl(t.video_url);
+    if (t?.video_url) setVideoDialog({ url: t.video_url, poster: t.video_thumbnail_url });
   }, [testimonials]);
 
   const handleExportCSV = useCallback(() => {
@@ -1216,8 +1235,8 @@ export default function InboxPage() {
       )}
 
       {/* Video playback dialog */}
-      {videoDialogUrl && (
-        <VideoDialog url={videoDialogUrl} onClose={() => setVideoDialogUrl(null)} />
+      {videoDialog && (
+        <VideoDialog url={videoDialog.url} poster={videoDialog.poster} onClose={() => setVideoDialog(null)} />
       )}
 
       {/* Card preview dialog */}

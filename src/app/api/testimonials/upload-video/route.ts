@@ -93,7 +93,24 @@ export async function POST(request: NextRequest) {
       .from('testimonial-videos')
       .getPublicUrl(path);
 
-    return NextResponse.json({ url: urlData.publicUrl });
+    // Upload thumbnail if provided
+    let thumbnailUrl: string | null = null;
+    const thumbnail = formData.get('thumbnail') as File | null;
+    if (thumbnail && thumbnail.type.startsWith('image/')) {
+      const thumbBuffer = await thumbnail.arrayBuffer();
+      const thumbPath = `${formId}/${crypto.randomUUID()}-thumb.jpg`;
+      const { error: thumbError } = await adminClient.storage
+        .from('testimonial-videos')
+        .upload(thumbPath, thumbBuffer, { contentType: 'image/jpeg', upsert: false });
+      if (!thumbError) {
+        const { data: thumbData } = adminClient.storage
+          .from('testimonial-videos')
+          .getPublicUrl(thumbPath);
+        thumbnailUrl = thumbData.publicUrl;
+      }
+    }
+
+    return NextResponse.json({ url: urlData.publicUrl, thumbnailUrl });
   } catch (err) {
     console.error('Unhandled error in upload-video route:', err);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
