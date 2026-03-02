@@ -106,7 +106,7 @@ export default async function PublicTestimonialsPage({ params }: PageProps) {
   // Fetch approved testimonials
   const { data: testimonials } = await supabase
     .from('testimonials')
-    .select('id, author_name, author_role, author_company, author_avatar_url, content, rating, golden_sentence, metric_label, source_url, video_url, created_at')
+    .select('id, author_name, author_role, author_company, author_avatar_url, content, rating, golden_sentence, metric_label, source_url, video_url, email_domain, created_at')
     .eq('project_id', project.id)
     .eq('status', 'approved')
     .order('featured', { ascending: false })
@@ -121,7 +121,41 @@ export default async function PublicTestimonialsPage({ params }: PageProps) {
 
   const accentColor = project.accent_color ?? '#4f46e5';
 
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'Organization',
+    name: project.name,
+    ...(project.website ? { url: project.website } : {}),
+    ...(displayTestimonials.length > 0
+      ? {
+          aggregateRating: {
+            '@type': 'AggregateRating',
+            ratingValue: avgRating.toFixed(1),
+            bestRating: '5',
+            worstRating: '1',
+            ratingCount: displayTestimonials.length,
+          },
+        }
+      : {}),
+    review: displayTestimonials.slice(0, 10).map((t) => ({
+      '@type': 'Review',
+      reviewRating: {
+        '@type': 'Rating',
+        ratingValue: String(t.rating ?? 5),
+        bestRating: '5',
+      },
+      author: { '@type': 'Person', name: t.author_name },
+      reviewBody: t.content,
+      datePublished: new Date(t.created_at).toISOString().split('T')[0],
+    })),
+  };
+
   return (
+    <>
+    <script
+      type="application/ld+json"
+      dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+    />
     <div className="min-h-screen bg-gray-50">
       {/* Header: accent-tinted gradient with decorative quotation mark */}
       <div
@@ -218,6 +252,7 @@ export default async function PublicTestimonialsPage({ params }: PageProps) {
               const metricLabel = (t as { metric_label?: string | null }).metric_label ?? null;
               const sourceUrl = (t as { source_url?: string | null }).source_url ?? null;
               const videoUrl = (t as { video_url?: string | null }).video_url ?? null;
+              const emailDomain = (t as { email_domain?: string | null }).email_domain ?? null;
               const isX = !!(sourceUrl && (sourceUrl.includes('twitter.com') || sourceUrl.includes('x.com')));
               const isLinkedIn = !!(sourceUrl && sourceUrl.includes('linkedin.com'));
 
@@ -271,6 +306,14 @@ export default async function PublicTestimonialsPage({ params }: PageProps) {
                             <p className="text-xs text-gray-500 truncate">
                               {[t.author_role, t.author_company].filter(Boolean).join(', ')}
                             </p>
+                          )}
+                          {emailDomain && (
+                            <span className="inline-flex items-center gap-0.5 text-[10px] font-medium text-emerald-600 mt-0.5">
+                              <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /><polyline points="9 12 11 14 15 10" />
+                              </svg>
+                              {emailDomain}
+                            </span>
                           )}
                         </div>
                       </div>
@@ -505,5 +548,6 @@ export default async function PublicTestimonialsPage({ params }: PageProps) {
         </Link>
       </div>
     </div>
+    </>
   );
 }

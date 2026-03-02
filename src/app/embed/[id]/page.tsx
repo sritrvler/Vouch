@@ -42,6 +42,7 @@ interface Testimonial {
   golden_sentence: string | null;
   metric_label: string | null;
   video_url: string | null;
+  email_domain: string | null;
   created_at: string;
 }
 
@@ -268,6 +269,14 @@ function TestimonialCard({
                   }}
                 >
                   {authorLine}
+                </div>
+              )}
+              {testimonial.email_domain && (
+                <div style={{ display: 'flex', alignItems: 'center', gap: 3, marginTop: 2, fontSize: 10, fontWeight: 600, color: '#059669' }}>
+                  <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /><polyline points="9 12 11 14 15 10" />
+                  </svg>
+                  {testimonial.email_domain}
                 </div>
               )}
             </div>
@@ -611,7 +620,7 @@ export default async function EmbedPage({ params }: PageProps) {
   let query = supabase
     .from('testimonials')
     .select(
-      'id, author_name, author_role, author_company, author_avatar_url, rating, content, featured, source_url, golden_sentence, metric_label, video_url, created_at'
+      'id, author_name, author_role, author_company, author_avatar_url, rating, content, featured, source_url, golden_sentence, metric_label, video_url, email_domain, created_at'
     )
     .eq('project_id', widget.project_id)
     .eq('status', 'approved')

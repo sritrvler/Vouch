@@ -81,12 +81,15 @@ create table public.testimonials (
   featured boolean default false,
   custom_answers jsonb default '{}',
   video_url text,
+  email_domain text,
   created_at timestamptz default now() not null,
   updated_at timestamptz default now() not null
 );
 
 -- To add video_url to an existing database run:
 -- ALTER TABLE public.testimonials ADD COLUMN IF NOT EXISTS video_url text;
+-- To add email_domain to an existing database run:
+-- ALTER TABLE public.testimonials ADD COLUMN IF NOT EXISTS email_domain text;
 
 -- ============================================================
 -- WIDGETS

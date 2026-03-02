@@ -28,7 +28,23 @@ import {
   ExternalLink,
   PlusCircle,
   Video,
+  ShieldCheck,
 } from 'lucide-react';
+
+const PERSONAL_DOMAINS = new Set([
+  'gmail.com', 'googlemail.com', 'yahoo.com', 'yahoo.co.uk', 'yahoo.co.in',
+  'hotmail.com', 'hotmail.co.uk', 'outlook.com', 'live.com', 'msn.com',
+  'icloud.com', 'me.com', 'mac.com', 'protonmail.com', 'proton.me',
+  'aol.com', 'mail.com', 'yandex.com', 'yandex.ru', 'qq.com',
+]);
+
+function getEmailDomain(email: string | null | undefined): string | null {
+  if (!email) return null;
+  const at = email.lastIndexOf('@');
+  if (at === -1) return null;
+  const domain = email.slice(at + 1).toLowerCase().trim();
+  return domain && !PERSONAL_DOMAINS.has(domain) ? domain : null;
+}
 import { createClient } from '@/lib/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -193,6 +209,7 @@ function ImportDialog({
   const supabase = createClient();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [saving, setSaving] = useState(false);
+  const [fetching, setFetching] = useState(false);
   const [projects, setProjects] = useState<{ id: string; name: string }[]>([]);
   const [projectId, setProjectId] = useState('');
   const [userId, setUserId] = useState('');
@@ -204,6 +221,36 @@ function ImportDialog({
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
   const [avatarDataUrl, setAvatarDataUrl] = useState<string | null>(null);
   const [sourceUrl, setSourceUrl] = useState('');
+
+  function isTwitterUrl(url: string) {
+    try {
+      const h = new URL(url).hostname.replace(/^www\./, '');
+      return h === 'twitter.com' || h === 'x.com';
+    } catch {
+      return false;
+    }
+  }
+
+  async function handleFetchTweet() {
+    if (!sourceUrl.trim() || !isTwitterUrl(sourceUrl)) return;
+    setFetching(true);
+    try {
+      const res = await fetch(`/api/testimonials/fetch-oembed?url=${encodeURIComponent(sourceUrl.trim())}`);
+      if (!res.ok) {
+        const { error } = await res.json() as { error?: string };
+        toast.error(error ?? 'Could not fetch tweet');
+        return;
+      }
+      const data = await res.json() as { author_name: string; text: string; source_url: string };
+      if (data.text) setContent(data.text);
+      if (data.author_name && !authorName) setAuthorName(data.author_name);
+      toast.success('Tweet fetched');
+    } catch {
+      toast.error('Failed to fetch tweet');
+    } finally {
+      setFetching(false);
+    }
+  }
 
   useEffect(() => {
     async function load() {
@@ -416,14 +463,33 @@ function ImportDialog({
           {/* Source URL */}
           <div className="space-y-1.5">
             <label className="text-xs font-medium text-foreground">Source link (optional)</label>
-            <Input
-              value={sourceUrl}
-              onChange={(e) => setSourceUrl(e.target.value)}
-              placeholder="https://x.com/username/status/..."
-              className="rounded-xl"
-            />
+            <div className="flex gap-2">
+              <Input
+                value={sourceUrl}
+                onChange={(e) => setSourceUrl(e.target.value)}
+                placeholder="https://x.com/username/status/..."
+                className="rounded-xl flex-1"
+              />
+              {isTwitterUrl(sourceUrl) && (
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className="rounded-xl shrink-0 gap-1.5"
+                  onClick={handleFetchTweet}
+                  disabled={fetching}
+                >
+                  {fetching ? <Loader2 className="size-3.5 animate-spin" /> : (
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                      <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.748l7.73-8.835L1.254 2.25H8.08l4.259 5.629 5.905-5.629zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+                    </svg>
+                  )}
+                  {fetching ? 'Fetching...' : 'Fetch'}
+                </Button>
+              )}
+            </div>
             <p className="text-xs text-muted-foreground">
-              Adds a &ldquo;Verified on X&rdquo; or &ldquo;Verified on LinkedIn&rdquo; badge on your widget.
+              Adds a &ldquo;Verified on X&rdquo; or &ldquo;Verified on LinkedIn&rdquo; badge on your widget. Paste an X URL and click Fetch to auto-fill the tweet text.
             </p>
           </div>
         </div>
@@ -552,6 +618,7 @@ function TestimonialCard({ testimonial, onApprove, onReject, onToggleFeatured, o
     .slice(0, 2);
 
   const roleCompany = [testimonial.author_role, testimonial.author_company].filter(Boolean).join(' · ');
+  const emailDomain = getEmailDomain(testimonial.author_email);
 
   async function saveGoldenSentence() {
     setFieldSaving('golden');
@@ -604,6 +671,12 @@ function TestimonialCard({ testimonial, onApprove, onReject, onToggleFeatured, o
             <p className="text-sm font-semibold text-foreground truncate">{testimonial.author_name}</p>
             {roleCompany && (
               <p className="text-xs text-muted-foreground truncate">{roleCompany}</p>
+            )}
+            {emailDomain && (
+              <span className="inline-flex items-center gap-0.5 text-[10px] font-medium text-emerald-600 mt-0.5">
+                <ShieldCheck className="size-2.5" />
+                {emailDomain}
+              </span>
             )}
           </div>
         </div>

@@ -2,6 +2,23 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createServerSupabaseClient } from '@/lib/supabase/server';
 import { sendNewTestimonialNotification } from '@/lib/email';
 
+const PERSONAL_EMAIL_DOMAINS = new Set([
+  'gmail.com', 'googlemail.com', 'yahoo.com', 'yahoo.co.uk', 'yahoo.co.in',
+  'hotmail.com', 'hotmail.co.uk', 'outlook.com', 'live.com', 'msn.com',
+  'icloud.com', 'me.com', 'mac.com', 'protonmail.com', 'proton.me',
+  'aol.com', 'mail.com', 'yandex.com', 'yandex.ru', 'qq.com', '163.com',
+  '126.com', 'zoho.com', 'gmx.com', 'gmx.net', 'web.de',
+]);
+
+function extractProfessionalDomain(email: string | null | undefined): string | null {
+  if (!email) return null;
+  const at = email.lastIndexOf('@');
+  if (at === -1) return null;
+  const domain = email.slice(at + 1).toLowerCase().trim();
+  if (!domain || PERSONAL_EMAIL_DOMAINS.has(domain)) return null;
+  return domain;
+}
+
 interface SubmitBody {
   formId: string;
   rating: number;
@@ -101,6 +118,7 @@ export async function POST(request: NextRequest) {
         source: 'form',
         custom_answers: customAnswers ?? {},
         video_url: videoUrl || null,
+        email_domain: extractProfessionalDomain(authorEmail),
       })
       .select('id')
       .single();

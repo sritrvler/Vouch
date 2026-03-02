@@ -263,8 +263,8 @@ function HeroSection() {
               transition={{ duration: 0.6, delay: 0.22 }}
               className="text-lg sm:text-xl text-gray-500 leading-relaxed mb-9 max-w-lg"
             >
-              Collect written testimonials and display them anywhere. Works for your own
-              portfolio, a client&apos;s site, or your SaaS product. One account, one setup.
+              Collect written and video testimonials, then embed them anywhere without slowing your
+              site. Works for your portfolio, your clients&apos; sites, or your SaaS. One account, zero Lighthouse impact.
             </motion.p>
 
             <motion.div
@@ -387,8 +387,8 @@ const PAIN_POINTS = [
   },
   {
     number: "02",
-    title: "Video testimonials make your clients cringe",
-    body: "Asking clients to record a video adds a week of back-and-forth, awkward camera angles, and a 60% chance they never actually send it. Written feedback is faster, more authentic, and your clients are far more likely to follow through.",
+    title: "Your testimonial widget tanks your Lighthouse score",
+    body: "Third-party testimonial tools load heavy JavaScript, external fonts, and analytics trackers. Every point you lose on Lighthouse is lost conversion. Vouch renders testimonials as native HTML with no external requests and no cookie banners. Your Core Web Vitals stay clean.",
   },
   {
     number: "03",
@@ -843,12 +843,14 @@ const FREE_FEATURES: FeatureItem[] = [
   { text: "Custom questions on your form" },
   { text: "Public reviews page (/p/you)" },
   { text: "Custom widget colors" },
+  { text: "3 video testimonials per project" },
   { text: "Contains Vouch branding", limitation: true },
 ];
 
 const PRO_FEATURES: string[] = [
   "Everything in Free",
   "Unlimited forms and embed widgets",
+  "Unlimited video testimonials (in-browser recording)",
   "Automated LinkedIn and Google Review nudges",
   "Shareable image cards for social media",
   "Carousel, wall of love, and list layouts",
@@ -1029,7 +1031,15 @@ const FAQS = [
   },
   {
     q: "How is this different from Testimonial.to or EmbedSocial?",
-    a: "Those tools charge per domain or per seat and lock testimonials inside their own hosted page. Vouch lets you embed directly on any site you control, the widget matches your design instead of theirs, and one account covers every project you run. No per-domain pricing, no vendor-branded iframes.",
+    a: "Those tools charge per domain or per seat, inject third-party scripts that hurt your Lighthouse score, and lock testimonials inside their own hosted page. Vouch renders as native HTML with zero external requests. The widget matches your design instead of theirs, one account covers every project you run, and in-browser video recording is built in with no third-party SDK.",
+  },
+  {
+    q: "Does the testimonial widget slow down my site?",
+    a: "No. Vouch renders testimonials as static HTML inside an iframe. There are no external JavaScript libraries, no third-party trackers, and no cookie banners added to your page. Your Lighthouse score and Core Web Vitals stay exactly where you left them.",
+  },
+  {
+    q: "Can my clients record video testimonials?",
+    a: "Yes. The collection form has a built-in video recording step. Clients record directly in their browser with one click. No app to download, no third-party service. Free accounts include 3 video testimonials per project. Pro gets unlimited.",
   },
   {
     q: "Can I remove the 'Powered by Vouch' branding?",
