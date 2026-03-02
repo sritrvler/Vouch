@@ -869,6 +869,9 @@ export default function InboxPage() {
   const [videoDialogUrl, setVideoDialogUrl] = useState<string | null>(null);
   const [showUpgradeDialog, setShowUpgradeDialog] = useState(false);
   const [showImportDialog, setShowImportDialog] = useState(false);
+  const [hasMore, setHasMore] = useState(false);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const PAGE_SIZE = 100;
 
   // ── Fetch testimonials ─────────────────────────────────────────────────────
   const fetchTestimonials = useCallback(async () => {
@@ -882,7 +885,8 @@ export default function InboxPage() {
           .from('testimonials')
           .select('*, project:projects(name)')
           .eq('user_id', user.id)
-          .order('created_at', { ascending: false }),
+          .order('created_at', { ascending: false })
+          .limit(PAGE_SIZE),
         supabase
           .from('subscriptions')
           .select('plan')
@@ -891,7 +895,9 @@ export default function InboxPage() {
       ]);
 
       if (testimonialsRes.error) throw testimonialsRes.error;
-      setTestimonials((testimonialsRes.data as Testimonial[]) ?? []);
+      const rows = (testimonialsRes.data as Testimonial[]) ?? [];
+      setTestimonials(rows);
+      setHasMore(rows.length === PAGE_SIZE);
       setIsPro(subRes.data?.plan === 'pro' || subRes.data?.plan === 'agency');
     } catch (err) {
       toast.error('Failed to load testimonials');
@@ -900,6 +906,30 @@ export default function InboxPage() {
       setLoading(false);
     }
   }, [supabase]);
+
+  const loadMore = useCallback(async () => {
+    if (loadingMore || testimonials.length === 0) return;
+    setLoadingMore(true);
+    try {
+      const cursor = testimonials[testimonials.length - 1].created_at;
+      const { data, error } = await supabase
+        .from('testimonials')
+        .select('*, project:projects(name)')
+        .eq('user_id', (await supabase.auth.getUser()).data.user?.id ?? '')
+        .order('created_at', { ascending: false })
+        .lt('created_at', cursor)
+        .limit(PAGE_SIZE);
+      if (error) throw error;
+      const rows = (data as Testimonial[]) ?? [];
+      setTestimonials((prev) => [...prev, ...rows]);
+      setHasMore(rows.length === PAGE_SIZE);
+    } catch (err) {
+      toast.error('Failed to load more testimonials');
+      console.error(err);
+    } finally {
+      setLoadingMore(false);
+    }
+  }, [supabase, testimonials, loadingMore]);
 
   useEffect(() => {
     fetchTestimonials();
@@ -1140,23 +1170,38 @@ export default function InboxPage() {
             ) : filtered.length === 0 ? (
               <EmptyState tab={tab} />
             ) : (
-              <AnimatePresence mode="popLayout">
-                <div className="space-y-3">
-                  {filtered.map((t) => (
-                    <TestimonialCard
-                      key={t.id}
-                      testimonial={t}
-                      onApprove={handleApprove}
-                      onReject={handleReject}
-                      onToggleFeatured={handleToggleFeatured}
-                      onShareCard={handleShareCard}
-                      onPlayVideo={handlePlayVideo}
-                      isPro={isPro}
-                      isUpdating={updatingIds.has(t.id)}
-                    />
-                  ))}
-                </div>
-              </AnimatePresence>
+              <>
+                <AnimatePresence mode="popLayout">
+                  <div className="space-y-3">
+                    {filtered.map((t) => (
+                      <TestimonialCard
+                        key={t.id}
+                        testimonial={t}
+                        onApprove={handleApprove}
+                        onReject={handleReject}
+                        onToggleFeatured={handleToggleFeatured}
+                        onShareCard={handleShareCard}
+                        onPlayVideo={handlePlayVideo}
+                        isPro={isPro}
+                        isUpdating={updatingIds.has(t.id)}
+                      />
+                    ))}
+                  </div>
+                </AnimatePresence>
+                {hasMore && activeTab === tab && (
+                  <div className="mt-4 flex justify-center">
+                    <Button
+                      variant="outline"
+                      onClick={loadMore}
+                      disabled={loadingMore}
+                      className="gap-2 rounded-xl"
+                    >
+                      {loadingMore && <Loader2 className="size-4 animate-spin" />}
+                      {loadingMore ? 'Loading...' : 'Load more'}
+                    </Button>
+                  </div>
+                )}
+              </>
             )}
           </TabsContent>
         ))}

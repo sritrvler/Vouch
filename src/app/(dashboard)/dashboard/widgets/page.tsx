@@ -394,6 +394,7 @@ export default function WidgetsPage() {
     ? `<iframe\n  src="${SITE_URL}/embed/${savedWidgetId}"\n  width="100%"\n  height="600"\n  frameborder="0"\n  loading="lazy"\n></iframe>`
     : '';
 
+  // IMPORTANT: attribute name 'data-widget-id' must match public/widget.js exactly. Do not rename either.
   const scriptSnippet = savedWidgetId
     ? `<div id="vouch-widget" data-widget-id="${savedWidgetId}"></div>\n<script src="${SITE_URL}/widget.js" async></script>`
     : '';

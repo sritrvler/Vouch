@@ -533,7 +533,7 @@ export default async function PublicTestimonialsPage({ params }: PageProps) {
             style={{ borderColor: `${accentColor}50` }}
           >
             <Star className="w-4 h-4" style={{ color: accentColor }} />
-            Share your experience with {project.name}
+            Leave your own review
           </Link>
         </div>
       )}

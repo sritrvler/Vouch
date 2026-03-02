@@ -587,6 +587,9 @@ export default function CollectFormClient({
         {step !== 5 && (
           <div className="mb-6">
             <ProgressDots currentStep={step} accentColor={accentColor} />
+            {step === 1 && (
+              <p className="text-center text-xs text-muted-foreground mt-2">Takes about 2 minutes</p>
+            )}
           </div>
         )}
 
@@ -866,13 +869,14 @@ export default function CollectFormClient({
                       <Camera className="size-4" />
                       Start Recording
                     </Button>
-                    <button
+                    <Button
                       type="button"
+                      variant="outline"
                       onClick={() => goTo(4, 'forward')}
-                      className="text-sm text-muted-foreground hover:text-foreground transition-colors underline-offset-4 hover:underline"
+                      className="w-full h-11 rounded-xl gap-2"
                     >
-                      Skip this step
-                    </button>
+                      Skip, continue without video
+                    </Button>
                   </div>
                 )}
 
@@ -1115,7 +1119,7 @@ export default function CollectFormClient({
                     Thank you, {firstName}! 🎉
                   </h2>
                   <p className="mt-3 text-base text-muted-foreground">
-                    Your testimonial has been submitted and is under review.
+                    Your testimonial has been submitted. It will appear publicly once approved by the business.
                   </p>
                 </motion.div>
 
