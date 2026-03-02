@@ -12,6 +12,7 @@ interface SubmitBody {
   authorCompany?: string | null;
   avatarDataUrl?: string | null;
   customAnswers?: Record<string, string>;
+  videoUrl?: string | null;
 }
 
 function isSubmitBody(v: unknown): v is SubmitBody {
@@ -46,6 +47,7 @@ export async function POST(request: NextRequest) {
       authorCompany,
       avatarDataUrl,
       customAnswers,
+      videoUrl,
     } = rawBody;
 
     // ── Validate fields ──────────────────────────────────────────────────────
@@ -98,6 +100,7 @@ export async function POST(request: NextRequest) {
         status: 'pending',
         source: 'form',
         custom_answers: customAnswers ?? {},
+        video_url: videoUrl || null,
       })
       .select('id')
       .single();

@@ -27,6 +27,7 @@ import {
   Upload,
   ExternalLink,
   PlusCircle,
+  Video,
 } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { Button } from '@/components/ui/button';
@@ -58,6 +59,7 @@ interface Testimonial {
   source_url: string | null;
   golden_sentence: string | null;
   metric_label: string | null;
+  video_url: string | null;
   created_at: string;
   project_id: string;
   project?: { name: string };
@@ -504,6 +506,21 @@ function CardDialog({ id, onClose }: { id: string; onClose: () => void }) {
   );
 }
 
+// ─── Video Dialog ─────────────────────────────────────────────────────────────
+function VideoDialog({ url, onClose }: { url: string; onClose: () => void }) {
+  return (
+    <Dialog open onOpenChange={(open) => { if (!open) onClose(); }}>
+      <DialogContent className="max-w-2xl">
+        <DialogHeader>
+          <DialogTitle>Video testimonial</DialogTitle>
+        </DialogHeader>
+        {/* eslint-disable-next-line jsx-a11y/media-has-caption */}
+        <video src={url} controls autoPlay className="w-full rounded-xl" />
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 // ─── Testimonial Card ─────────────────────────────────────────────────────────
 interface TestimonialCardProps {
   testimonial: Testimonial;
@@ -511,11 +528,12 @@ interface TestimonialCardProps {
   onReject: (id: string) => Promise<void>;
   onToggleFeatured: (id: string, featured: boolean) => Promise<void>;
   onShareCard: (id: string) => void;
+  onPlayVideo: (id: string) => void;
   isPro: boolean;
   isUpdating: boolean;
 }
 
-function TestimonialCard({ testimonial, onApprove, onReject, onToggleFeatured, onShareCard, isPro, isUpdating }: TestimonialCardProps) {
+function TestimonialCard({ testimonial, onApprove, onReject, onToggleFeatured, onShareCard, onPlayVideo, isPro, isUpdating }: TestimonialCardProps) {
   const supabase = createClient();
   const [expanded, setExpanded] = useState(false);
   const [goldenSentence, setGoldenSentence] = useState(testimonial.golden_sentence ?? '');
@@ -569,12 +587,19 @@ function TestimonialCard({ testimonial, onApprove, onReject, onToggleFeatured, o
       {/* Header row */}
       <div className="flex items-start justify-between gap-3">
         <div className="flex items-center gap-3 min-w-0">
-          <Avatar size="default">
-            {testimonial.author_avatar_url && <AvatarImage src={testimonial.author_avatar_url} alt={testimonial.author_name} />}
-            <AvatarFallback className="bg-indigo-100 text-indigo-700 font-semibold text-xs">
-              {initials}
-            </AvatarFallback>
-          </Avatar>
+          <div className="relative">
+            <Avatar size="default">
+              {testimonial.author_avatar_url && <AvatarImage src={testimonial.author_avatar_url} alt={testimonial.author_name} />}
+              <AvatarFallback className="bg-indigo-100 text-indigo-700 font-semibold text-xs">
+                {initials}
+              </AvatarFallback>
+            </Avatar>
+            {testimonial.video_url && (
+              <div className="absolute -bottom-1 -right-1 w-4 h-4 rounded-full bg-indigo-600 flex items-center justify-center">
+                <Video className="size-2.5 text-white" />
+              </div>
+            )}
+          </div>
           <div className="min-w-0">
             <p className="text-sm font-semibold text-foreground truncate">{testimonial.author_name}</p>
             {roleCompany && (
@@ -662,6 +687,16 @@ function TestimonialCard({ testimonial, onApprove, onReject, onToggleFeatured, o
 
       {/* Actions */}
       <div className="mt-4 flex items-center gap-2 flex-wrap">
+        {testimonial.video_url && (
+          <button
+            onClick={() => onPlayVideo(testimonial.id)}
+            title="Play video testimonial"
+            className="inline-flex items-center gap-1.5 rounded-xl border px-2.5 py-1.5 text-xs font-medium transition-all border-border text-muted-foreground hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-600"
+          >
+            <Video className="size-3" />
+            Play Video
+          </button>
+        )}
         <button
           onClick={() => onToggleFeatured(testimonial.id, !testimonial.featured)}
           disabled={isUpdating}
@@ -752,6 +787,7 @@ export default function InboxPage() {
   const [updatingIds, setUpdatingIds] = useState<Set<string>>(new Set());
   const [isPro, setIsPro] = useState(false);
   const [cardDialogId, setCardDialogId] = useState<string | null>(null);
+  const [videoDialogUrl, setVideoDialogUrl] = useState<string | null>(null);
   const [showUpgradeDialog, setShowUpgradeDialog] = useState(false);
   const [showImportDialog, setShowImportDialog] = useState(false);
 
@@ -895,6 +931,11 @@ export default function InboxPage() {
     setTestimonials((prev) => [t, ...prev]);
   }, []);
 
+  const handlePlayVideo = useCallback((id: string) => {
+    const t = testimonials.find((item) => item.id === id);
+    if (t?.video_url) setVideoDialogUrl(t.video_url);
+  }, [testimonials]);
+
   const handleExportCSV = useCallback(() => {
     const approved = testimonials.filter((t) => t.status === 'approved');
     if (approved.length === 0) {
@@ -1030,6 +1071,7 @@ export default function InboxPage() {
                       onReject={handleReject}
                       onToggleFeatured={handleToggleFeatured}
                       onShareCard={handleShareCard}
+                      onPlayVideo={handlePlayVideo}
                       isPro={isPro}
                       isUpdating={updatingIds.has(t.id)}
                     />
@@ -1047,6 +1089,11 @@ export default function InboxPage() {
           onClose={() => setShowImportDialog(false)}
           onSuccess={handleImportSuccess}
         />
+      )}
+
+      {/* Video playback dialog */}
+      {videoDialogUrl && (
+        <VideoDialog url={videoDialogUrl} onClose={() => setVideoDialogUrl(null)} />
       )}
 
       {/* Card preview dialog */}

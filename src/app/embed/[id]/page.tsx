@@ -41,6 +41,7 @@ interface Testimonial {
   source_url: string | null;
   golden_sentence: string | null;
   metric_label: string | null;
+  video_url: string | null;
   created_at: string;
 }
 
@@ -341,6 +342,17 @@ function TestimonialCard({
           </span>
         )}
       </div>
+
+      {/* Inline video player */}
+      {testimonial.video_url && (
+        // eslint-disable-next-line jsx-a11y/media-has-caption
+        <video
+          src={testimonial.video_url}
+          controls
+          preload="none"
+          style={{ width: '100%', borderRadius: 8, marginTop: 8, display: 'block' }}
+        />
+      )}
     </article>
   );
 }
@@ -599,7 +611,7 @@ export default async function EmbedPage({ params }: PageProps) {
   let query = supabase
     .from('testimonials')
     .select(
-      'id, author_name, author_role, author_company, author_avatar_url, rating, content, featured, source_url, golden_sentence, metric_label, created_at'
+      'id, author_name, author_role, author_company, author_avatar_url, rating, content, featured, source_url, golden_sentence, metric_label, video_url, created_at'
     )
     .eq('project_id', widget.project_id)
     .eq('status', 'approved')

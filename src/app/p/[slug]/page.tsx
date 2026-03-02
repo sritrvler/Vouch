@@ -1,7 +1,7 @@
 import { createServerSupabaseClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import type { Metadata } from 'next';
-import { Star, ExternalLink } from 'lucide-react';
+import { Star, ExternalLink, Play } from 'lucide-react';
 import Link from 'next/link';
 
 // ─── Helpers ───────────────────────────────────────────────────────────────
@@ -106,7 +106,7 @@ export default async function PublicTestimonialsPage({ params }: PageProps) {
   // Fetch approved testimonials
   const { data: testimonials } = await supabase
     .from('testimonials')
-    .select('id, author_name, author_role, author_company, author_avatar_url, content, rating, golden_sentence, metric_label, source_url, created_at')
+    .select('id, author_name, author_role, author_company, author_avatar_url, content, rating, golden_sentence, metric_label, source_url, video_url, created_at')
     .eq('project_id', project.id)
     .eq('status', 'approved')
     .order('featured', { ascending: false })
@@ -217,6 +217,7 @@ export default async function PublicTestimonialsPage({ params }: PageProps) {
 
               const metricLabel = (t as { metric_label?: string | null }).metric_label ?? null;
               const sourceUrl = (t as { source_url?: string | null }).source_url ?? null;
+              const videoUrl = (t as { video_url?: string | null }).video_url ?? null;
               const isX = !!(sourceUrl && (sourceUrl.includes('twitter.com') || sourceUrl.includes('x.com')));
               const isLinkedIn = !!(sourceUrl && sourceUrl.includes('linkedin.com'));
 
@@ -362,6 +363,21 @@ export default async function PublicTestimonialsPage({ params }: PageProps) {
                         </span>
                       )}
                     </div>
+
+                    {/* Watch Video button */}
+                    {videoUrl && (
+                      <div className="pt-2 border-t border-gray-100">
+                        <button
+                          data-vouch-play=""
+                          data-video-url={videoUrl}
+                          className="flex items-center gap-2 text-xs font-semibold py-1 transition-opacity hover:opacity-70 w-full"
+                          style={{ color: accentColor, background: 'none', border: 'none', cursor: 'pointer', padding: '4px 0' }}
+                        >
+                          <Play className="w-3.5 h-3.5" fill={accentColor} />
+                          Watch video
+                        </button>
+                      </div>
+                    )}
                   </div>
                 </article>
               );
@@ -371,7 +387,48 @@ export default async function PublicTestimonialsPage({ params }: PageProps) {
       </div>
 
 
-      {/* Read more expander */}
+      {/* Video modal overlay */}
+      <div
+        id="vouch-video-modal"
+        style={{
+          display: 'none',
+          position: 'fixed',
+          inset: 0,
+          zIndex: 50,
+          background: 'rgba(0,0,0,0.85)',
+          alignItems: 'center',
+          justifyContent: 'center',
+          padding: '16px',
+        }}
+      >
+        <div style={{ position: 'relative', width: '100%', maxWidth: '800px' }}>
+          <button
+            id="vouch-video-modal-close"
+            style={{
+              position: 'absolute',
+              top: '-44px',
+              right: '0',
+              color: 'white',
+              fontSize: '28px',
+              background: 'none',
+              border: 'none',
+              cursor: 'pointer',
+              lineHeight: '1',
+              padding: '4px 8px',
+            }}
+          >
+            &times;
+          </button>
+          {/* eslint-disable-next-line jsx-a11y/media-has-caption */}
+          <video
+            id="vouch-video-player"
+            controls
+            style={{ width: '100%', borderRadius: '12px', background: 'black', display: 'block' }}
+          />
+        </div>
+      </div>
+
+      {/* Read more expander + video modal */}
       <script
         dangerouslySetInnerHTML={{
           __html: `
@@ -389,6 +446,36 @@ export default async function PublicTestimonialsPage({ params }: PageProps) {
                   }
                 }
               });
+
+              document.querySelectorAll('[data-vouch-play]').forEach(function(btn) {
+                btn.addEventListener('click', function() {
+                  var url = btn.getAttribute('data-video-url');
+                  var modal = document.getElementById('vouch-video-modal');
+                  var video = document.getElementById('vouch-video-player');
+                  if (modal && video && url) {
+                    video.src = url;
+                    modal.style.display = 'flex';
+                    video.play();
+                  }
+                });
+              });
+
+              var modalClose = document.getElementById('vouch-video-modal-close');
+              var modalEl = document.getElementById('vouch-video-modal');
+              if (modalClose && modalEl) {
+                modalClose.addEventListener('click', function() {
+                  var video = document.getElementById('vouch-video-player');
+                  if (video) { video.pause(); video.src = ''; }
+                  modalEl.style.display = 'none';
+                });
+                modalEl.addEventListener('click', function(e) {
+                  if (e.target === modalEl) {
+                    var video = document.getElementById('vouch-video-player');
+                    if (video) { video.pause(); video.src = ''; }
+                    modalEl.style.display = 'none';
+                  }
+                });
+              }
             });
           `,
         }}
