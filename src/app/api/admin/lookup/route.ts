@@ -2,16 +2,18 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createServerSupabaseClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 
-async function verifyAdmin() {
+async function verifyAdmin(req: NextRequest) {
   const supabase = await createServerSupabaseClient();
   const { data: { user } } = await supabase.auth.getUser();
   const adminEmail = process.env.ADMIN_EMAIL;
+  const adminSecret = process.env.ADMIN_SECRET;
   if (!adminEmail || !user || user.email !== adminEmail) return null;
+  if (adminSecret && req.headers.get('x-admin-secret') !== adminSecret) return null;
   return user;
 }
 
 export async function GET(req: NextRequest) {
-  const caller = await verifyAdmin();
+  const caller = await verifyAdmin(req);
   if (!caller) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
   const email = req.nextUrl.searchParams.get('email')?.trim().toLowerCase();

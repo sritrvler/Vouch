@@ -2,7 +2,7 @@ import { createServerSupabaseClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { formatDistanceToNow } from 'date-fns';
 
-export const revalidate = 60;
+export const revalidate = 10;
 
 interface PageProps {
   params: Promise<{ id: string }>;

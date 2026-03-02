@@ -64,7 +64,7 @@ export async function POST(request: NextRequest) {
     }
   } catch (err) {
     console.error(`Error handling LS event ${eventName}:`, err);
-    return NextResponse.json({ received: true, warning: 'Handler error' });
+    return NextResponse.json({ error: 'Handler error' }, { status: 500 });
   }
 
   return NextResponse.json({ received: true });

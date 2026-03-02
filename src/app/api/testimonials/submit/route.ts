@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServerSupabaseClient } from '@/lib/supabase/server';
 import { sendNewTestimonialNotification } from '@/lib/email';
+import { createRateLimiter, getClientIp } from '@/lib/ratelimit';
+
+const submitLimiter = createRateLimiter({ windowMs: 60_000, max: 10 });
 
 const PERSONAL_EMAIL_DOMAINS = new Set([
   'gmail.com', 'googlemail.com', 'yahoo.com', 'yahoo.co.uk', 'yahoo.co.in',
@@ -44,6 +47,11 @@ function isSubmitBody(v: unknown): v is SubmitBody {
 }
 
 export async function POST(request: NextRequest) {
+  const ip = getClientIp(request.headers);
+  if (!submitLimiter.check(ip)) {
+    return NextResponse.json({ error: 'Too many requests. Please wait a moment.' }, { status: 429 });
+  }
+
   try {
     const rawBody: unknown = await request.json();
 
@@ -68,7 +76,8 @@ export async function POST(request: NextRequest) {
     } = rawBody;
 
     // ── Validate fields ──────────────────────────────────────────────────────
-    if (!formId || typeof formId !== 'string' || formId.trim().length === 0) {
+    const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    if (!formId || typeof formId !== 'string' || !UUID_RE.test(formId)) {
       return NextResponse.json({ error: 'formId is required' }, { status: 400 });
     }
     if (!Number.isInteger(rating) || rating < 1 || rating > 5) {
@@ -80,8 +89,15 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       );
     }
+    if (typeof content === 'string' && content.length > 5000) {
+      return NextResponse.json({ error: 'content must be 5000 characters or fewer' }, { status: 400 });
+    }
     if (typeof authorName !== 'string' || authorName.trim().length === 0) {
       return NextResponse.json({ error: 'authorName is required' }, { status: 400 });
+    }
+    // Limit avatar to 500 KB (base64 adds ~37% overhead, so cap at 700 KB chars)
+    if (avatarDataUrl && avatarDataUrl.length > 700_000) {
+      return NextResponse.json({ error: 'Avatar image too large (max 500KB)' }, { status: 400 });
     }
 
     const supabase = await createServerSupabaseClient();

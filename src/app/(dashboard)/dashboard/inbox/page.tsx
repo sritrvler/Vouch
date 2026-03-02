@@ -45,6 +45,7 @@ function getEmailDomain(email: string | null | undefined): string | null {
   const domain = email.slice(at + 1).toLowerCase().trim();
   return domain && !PERSONAL_DOMAINS.has(domain) ? domain : null;
 }
+import Link from 'next/link';
 import { createClient } from '@/lib/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -145,7 +146,7 @@ function EmptyState({ tab }: { tab: string }) {
     all: {
       icon: <Inbox className="size-10 text-muted-foreground/50" />,
       title: 'No testimonials yet',
-      description: 'Share your collection form to start receiving testimonials from customers.',
+      description: 'Share your collection form link with customers to start receiving testimonials.',
     },
     pending: {
       icon: <Clock className="size-10 text-amber-400/60" />,
@@ -173,6 +174,11 @@ function EmptyState({ tab }: { tab: string }) {
       <div className="mb-4 rounded-full bg-muted/50 p-5">{icon}</div>
       <h3 className="text-base font-semibold text-foreground">{title}</h3>
       <p className="mt-1 max-w-xs text-sm text-muted-foreground">{description}</p>
+      {tab === 'all' && (
+        <Button asChild className="mt-5 gap-2 rounded-xl bg-indigo-600 hover:bg-indigo-700">
+          <Link href="/dashboard/forms">Go to my forms</Link>
+        </Button>
+      )}
     </motion.div>
   );
 }

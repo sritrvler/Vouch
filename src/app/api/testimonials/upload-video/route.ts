@@ -1,15 +1,24 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServerSupabaseClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
+import { createRateLimiter, getClientIp } from '@/lib/ratelimit';
+
+const videoLimiter = createRateLimiter({ windowMs: 60 * 60_000, max: 5 });
 
 export async function POST(request: NextRequest) {
+  const ip = getClientIp(request.headers);
+  if (!videoLimiter.check(ip)) {
+    return NextResponse.json({ error: 'Too many video uploads. Please try again later.' }, { status: 429 });
+  }
+
   try {
     const formData = await request.formData();
     const video = formData.get('video') as File | null;
     const formId = formData.get('formId') as string | null;
 
-    if (!video || !formId) {
-      return NextResponse.json({ error: 'Missing video or formId' }, { status: 400 });
+    const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    if (!video || !formId || !UUID_RE.test(formId)) {
+      return NextResponse.json({ error: 'Missing or invalid video/formId' }, { status: 400 });
     }
 
     if (!video.type.startsWith('video/')) {
