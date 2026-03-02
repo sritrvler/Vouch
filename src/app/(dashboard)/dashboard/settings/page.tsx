@@ -31,7 +31,6 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
-import { Separator } from '@/components/ui/separator';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 
@@ -838,52 +837,35 @@ export default function SettingsPage() {
 
             {/* Free Plan → Upgrade */}
             {subscription?.plan === 'free' && (
-              <div className="bg-white rounded-2xl border border-border overflow-hidden">
-                <div className="bg-gradient-to-r from-indigo-600 to-violet-600 px-6 py-5 text-white">
-                  <div className="flex items-start justify-between gap-4">
-                    <div>
-                      <h3 className="text-lg font-bold">Upgrade to Pro</h3>
-                      <p className="text-indigo-100 text-sm mt-0.5">
-                        Everything you need to turn testimonials into revenue.
-                      </p>
-                    </div>
-                    <div className="text-right shrink-0">
-                      <div className="text-3xl font-bold">$19</div>
-                      <div className="text-xs text-indigo-200">/month</div>
-                    </div>
+              <div className="bg-white rounded-2xl border border-indigo-100 p-6">
+                <div className="flex items-start justify-between gap-4 mb-5">
+                  <div>
+                    <h3 className="text-base font-semibold text-foreground">Pro Plan</h3>
+                    <p className="text-sm text-muted-foreground mt-0.5">
+                      Unlimited forms, video, Google Review nudges, and no Vouch branding.
+                    </p>
+                  </div>
+                  <div className="text-right shrink-0">
+                    <div className="text-2xl font-bold text-foreground leading-none">$19</div>
+                    <div className="text-xs text-muted-foreground mt-0.5">/month</div>
                   </div>
                 </div>
-                <div className="p-6">
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mb-6">
-                    {PRO_FEATURES.map((feature) => (
-                      <div key={feature} className="flex items-center gap-2">
-                        <div className="size-5 rounded-full bg-indigo-50 flex items-center justify-center shrink-0">
-                          <Check className="size-3 text-indigo-600" />
-                        </div>
-                        <span className="text-sm text-foreground/80">{feature}</span>
-                      </div>
-                    ))}
-                  </div>
-                  <Separator className="mb-5" />
-                  <div className="flex flex-col sm:flex-row gap-3">
-                    <Button
-                      onClick={handleUpgrade}
-                      disabled={loadingBilling}
-                      className="flex-1 gap-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 h-11"
-                      size="lg"
-                    >
-                      {loadingBilling ? (
-                        <Loader2 className="size-4 animate-spin" />
-                      ) : (
-                        <Zap className="size-4" />
-                      )}
-                      Upgrade to Pro, $19/mo
-                    </Button>
-                  </div>
-                  <p className="mt-2 text-center text-xs text-muted-foreground">
-                    No contracts. Cancel anytime. Billed monthly.
-                  </p>
-                </div>
+                <Button
+                  onClick={handleUpgrade}
+                  disabled={loadingBilling}
+                  className="w-full gap-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 h-11"
+                  size="lg"
+                >
+                  {loadingBilling ? (
+                    <Loader2 className="size-4 animate-spin" />
+                  ) : (
+                    <Zap className="size-4" />
+                  )}
+                  Upgrade to Pro — $19/mo
+                </Button>
+                <p className="mt-2 text-center text-xs text-muted-foreground">
+                  No contracts. Cancel anytime. Billed monthly.
+                </p>
               </div>
             )}
 
@@ -922,7 +904,7 @@ export default function SettingsPage() {
                       ) : (
                         <ExternalLink className="size-3.5" />
                       )}
-                      Manage in Stripe Portal
+                      Manage Subscription
                     </Button>
                   </div>
                 </div>

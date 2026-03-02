@@ -18,6 +18,7 @@ import {
 import { createClient } from '@/lib/supabase/client';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
+import { UpgradeModal } from '@/components/upgrade-modal';
 import type { User } from '@supabase/supabase-js';
 
 interface NavItem {
@@ -100,6 +101,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const [projectName, setProjectName] = useState<string>('My Project');
   const [pendingCount, setPendingCount] = useState(0);
   const [isSigningOut, setIsSigningOut] = useState(false);
+  const [upgradeModalOpen, setUpgradeModalOpen] = useState(false);
 
   useEffect(() => {
     const supabase = createClient();
@@ -203,13 +205,14 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         {/* Bottom: User + Upgrade + Sign out */}
         <div className="px-3 py-4 border-t border-border space-y-2">
           {plan === 'free' && (
-            <Link
-              href="/dashboard/settings?tab=billing"
-              className="flex items-center gap-2 px-3 py-2.5 rounded-xl bg-gradient-to-r from-primary/10 to-accent text-primary text-sm font-medium hover:from-primary/15 hover:to-accent transition-all"
+            <button
+              type="button"
+              onClick={() => setUpgradeModalOpen(true)}
+              className="flex items-center gap-2 px-3 py-2.5 rounded-xl bg-gradient-to-r from-primary/10 to-accent text-primary text-sm font-medium hover:from-primary/15 hover:to-accent transition-all w-full"
             >
               <Sparkles className="size-4 shrink-0" />
               Upgrade to Pro
-            </Link>
+            </button>
           )}
 
           {/* User info */}
@@ -251,6 +254,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           </motion.div>
         </div>
       </main>
+
+      <UpgradeModal open={upgradeModalOpen} onOpenChange={setUpgradeModalOpen} />
 
       {/* Mobile Bottom Nav */}
       <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-border z-50 safe-area-inset-bottom">

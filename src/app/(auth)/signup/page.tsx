@@ -1,11 +1,11 @@
 'use client';
 
-import { useState } from 'react';
+import { Suspense, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { toast } from 'sonner';
 import { Loader2, Mail, Lock, User, Eye, EyeOff } from 'lucide-react';
@@ -29,7 +29,17 @@ const signupSchema = z.object({
 type SignupFormValues = z.infer<typeof signupSchema>;
 
 export default function SignupPage() {
+  return (
+    <Suspense fallback={null}>
+      <SignupForm />
+    </Suspense>
+  );
+}
+
+function SignupForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const isPro = searchParams.get('plan') === 'pro';
   const [isLoading, setIsLoading] = useState(false);
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
   const [emailSent, setEmailSent] = useState(false);
@@ -65,6 +75,14 @@ export default function SignupPage() {
 
     // If user is immediately confirmed (e.g. email confirmations disabled in Supabase)
     if (data.session) {
+      if (isPro) {
+        toast.success('Account created! Taking you to checkout...');
+        const res = await fetch('/api/stripe/checkout', { method: 'POST' });
+        if (res.ok) {
+          const { url } = await res.json();
+          if (url) { window.location.href = url; return; }
+        }
+      }
       toast.success('Account created! Welcome to Vouch.');
       router.push('/dashboard');
       router.refresh();
@@ -139,7 +157,9 @@ export default function SignupPage() {
         <div className="mb-6">
           <h1 className="text-2xl font-semibold text-foreground">Create your account</h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            Start collecting testimonials for free
+            {isPro
+              ? 'One step away from Pro. Create your account to continue.'
+              : 'Start collecting testimonials for free'}
           </p>
         </div>
 
