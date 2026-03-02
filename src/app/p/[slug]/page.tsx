@@ -407,18 +407,33 @@ export default async function PublicTestimonialsPage({ params }: PageProps) {
                       )}
                     </div>
 
-                    {/* Watch Video button */}
+                    {/* Video thumbnail with play overlay */}
                     {videoUrl && (
                       <div className="pt-2 border-t border-gray-100">
-                        <button
+                        <div
                           data-vouch-play=""
                           data-video-url={videoUrl}
-                          className="flex items-center gap-2 text-xs font-semibold py-1 transition-opacity hover:opacity-70 w-full"
-                          style={{ color: accentColor, background: 'none', border: 'none', cursor: 'pointer', padding: '4px 0' }}
+                          className="relative rounded-xl overflow-hidden cursor-pointer group"
+                          role="button"
+                          aria-label="Play video testimonial"
                         >
-                          <Play className="w-3.5 h-3.5" fill={accentColor} />
-                          Watch video
-                        </button>
+                          {/* eslint-disable-next-line jsx-a11y/media-has-caption */}
+                          <video
+                            src={videoUrl}
+                            preload="metadata"
+                            muted
+                            className="w-full block"
+                            style={{ maxHeight: '160px', objectFit: 'cover', pointerEvents: 'none' }}
+                          />
+                          <div className="absolute inset-0 bg-black/30 group-hover:bg-black/40 transition-colors flex items-center justify-center">
+                            <div
+                              className="w-11 h-11 rounded-full flex items-center justify-center shadow-xl group-hover:scale-110 transition-transform duration-200"
+                              style={{ backgroundColor: 'rgba(255,255,255,0.92)' }}
+                            >
+                              <Play className="w-4 h-4 ml-0.5" style={{ fill: accentColor, color: accentColor }} />
+                            </div>
+                          </div>
+                        </div>
                       </div>
                     )}
                   </div>

@@ -352,14 +352,14 @@ function TestimonialCard({
         )}
       </div>
 
-      {/* Inline video player */}
+      {/* Inline video player with first-frame thumbnail */}
       {testimonial.video_url && (
         // eslint-disable-next-line jsx-a11y/media-has-caption
         <video
           src={testimonial.video_url}
           controls
-          preload="none"
-          style={{ width: '100%', borderRadius: 8, marginTop: 8, display: 'block' }}
+          preload="metadata"
+          style={{ width: '100%', borderRadius: 8, marginTop: 8, display: 'block', background: '#000' }}
         />
       )}
     </article>
