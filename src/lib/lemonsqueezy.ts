@@ -8,8 +8,15 @@ export function lsHeaders() {
   };
 }
 
-export async function createCheckoutUrl(userEmail: string, userId: string): Promise<string | null> {
+export async function createCheckoutUrl(
+  userEmail: string,
+  userId: string,
+  billing: 'monthly' | 'yearly' = 'monthly'
+): Promise<string | null> {
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
+  const variantId = billing === 'yearly'
+    ? String(process.env.LEMONSQUEEZY_YEARLY_VARIANT_ID)
+    : String(process.env.LEMONSQUEEZY_VARIANT_ID);
 
   const res = await fetch(`${LS_API_URL}/checkouts`, {
     method: 'POST',
@@ -31,7 +38,7 @@ export async function createCheckoutUrl(userEmail: string, userId: string): Prom
             data: { type: 'stores', id: String(process.env.LEMONSQUEEZY_STORE_ID) },
           },
           variant: {
-            data: { type: 'variants', id: String(process.env.LEMONSQUEEZY_VARIANT_ID) },
+            data: { type: 'variants', id: variantId },
           },
         },
       },

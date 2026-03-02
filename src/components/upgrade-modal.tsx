@@ -5,6 +5,7 @@ import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Check, Zap, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
+import { cn } from '@/lib/utils';
 
 const FEATURES = [
   'Unlimited forms and embed widgets',
@@ -21,12 +22,17 @@ interface UpgradeModalProps {
 }
 
 export function UpgradeModal({ open, onOpenChange }: UpgradeModalProps) {
+  const [billing, setBilling] = useState<'monthly' | 'yearly'>('monthly');
   const [loading, setLoading] = useState(false);
 
   async function handleUpgrade() {
     setLoading(true);
     try {
-      const res = await fetch('/api/stripe/checkout', { method: 'POST' });
+      const res = await fetch('/api/stripe/checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ billing }),
+      });
       if (!res.ok) throw new Error();
       const { url } = await res.json();
       if (url) window.location.href = url;
@@ -39,8 +45,37 @@ export function UpgradeModal({ open, onOpenChange }: UpgradeModalProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-sm p-0 overflow-hidden gap-0">
-        {/* Price block */}
-        <div className="px-6 pt-6 pb-5 border-b border-border">
+        {/* Billing toggle */}
+        <div className="px-6 pt-6 pb-4 border-b border-border">
+          <div className="flex items-center gap-1 bg-muted/60 rounded-full p-1 mb-4 w-fit">
+            <button
+              onClick={() => setBilling('monthly')}
+              className={cn(
+                'px-3.5 py-1.5 rounded-full text-sm font-medium transition-all',
+                billing === 'monthly'
+                  ? 'bg-white shadow-sm text-foreground'
+                  : 'text-muted-foreground hover:text-foreground'
+              )}
+            >
+              Monthly
+            </button>
+            <button
+              onClick={() => setBilling('yearly')}
+              className={cn(
+                'px-3.5 py-1.5 rounded-full text-sm font-medium transition-all flex items-center gap-2',
+                billing === 'yearly'
+                  ? 'bg-white shadow-sm text-foreground'
+                  : 'text-muted-foreground hover:text-foreground'
+              )}
+            >
+              Yearly
+              <span className="text-[11px] font-semibold text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded-full">
+                2 months free
+              </span>
+            </button>
+          </div>
+
+          {/* Price */}
           <div className="flex items-start justify-between gap-4">
             <div>
               <div className="flex items-center gap-2 mb-1">
@@ -48,12 +83,18 @@ export function UpgradeModal({ open, onOpenChange }: UpgradeModalProps) {
                 <h2 className="text-lg font-bold text-foreground">Upgrade to Pro</h2>
               </div>
               <p className="text-sm text-muted-foreground">
-                Unlock everything. Cancel anytime.
+                {billing === 'yearly'
+                  ? '$15.83/mo, billed as $190/year.'
+                  : 'Unlock everything. Cancel anytime.'}
               </p>
             </div>
             <div className="text-right shrink-0">
-              <div className="text-3xl font-bold text-foreground leading-none">$19</div>
-              <div className="text-xs text-muted-foreground mt-0.5">/month</div>
+              <div className="text-3xl font-bold text-foreground leading-none">
+                {billing === 'yearly' ? '$190' : '$19'}
+              </div>
+              <div className="text-xs text-muted-foreground mt-0.5">
+                {billing === 'yearly' ? '/year' : '/month'}
+              </div>
             </div>
           </div>
         </div>
@@ -86,12 +127,14 @@ export function UpgradeModal({ open, onOpenChange }: UpgradeModalProps) {
             ) : (
               <>
                 <Zap className="size-4" />
-                Upgrade to Pro — $19/mo
+                {billing === 'yearly'
+                  ? 'Upgrade to Pro — $190/yr'
+                  : 'Upgrade to Pro — $19/mo'}
               </>
             )}
           </Button>
           <p className="mt-2 text-center text-xs text-muted-foreground">
-            No contracts. Cancel anytime. Billed monthly.
+            No contracts. Cancel anytime.
           </p>
         </div>
       </DialogContent>

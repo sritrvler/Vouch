@@ -1,9 +1,12 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { createServerSupabaseClient } from '@/lib/supabase/server';
 import { createCheckoutUrl } from '@/lib/lemonsqueezy';
 
-export async function POST() {
+export async function POST(request: NextRequest) {
   try {
+    const body = await request.json().catch(() => ({}));
+    const billing: 'monthly' | 'yearly' = body.billing === 'yearly' ? 'yearly' : 'monthly';
+
     const supabase = await createServerSupabaseClient();
 
     const { data: { user }, error: authError } = await supabase.auth.getUser();
@@ -21,7 +24,7 @@ export async function POST() {
       return NextResponse.json({ error: 'Already on Pro plan' }, { status: 400 });
     }
 
-    const url = await createCheckoutUrl(user.email!, user.id);
+    const url = await createCheckoutUrl(user.email!, user.id, billing);
 
     if (!url) {
       return NextResponse.json({ error: 'Failed to create checkout' }, { status: 500 });

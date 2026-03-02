@@ -40,6 +40,7 @@ function SignupForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const isPro = searchParams.get('plan') === 'pro';
+  const billing = searchParams.get('billing') === 'yearly' ? 'yearly' : 'monthly';
   const [isLoading, setIsLoading] = useState(false);
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
   const [emailSent, setEmailSent] = useState(false);
@@ -77,7 +78,11 @@ function SignupForm() {
     if (data.session) {
       if (isPro) {
         toast.success('Account created! Taking you to checkout...');
-        const res = await fetch('/api/stripe/checkout', { method: 'POST' });
+        const res = await fetch('/api/stripe/checkout', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ billing }),
+        });
         if (res.ok) {
           const { url } = await res.json();
           if (url) { window.location.href = url; return; }

@@ -796,8 +796,42 @@ const AGENCY_FEATURES: string[] = [
 ];
 
 export function PricingCards() {
+  const [billing, setBilling] = useState<'monthly' | 'yearly'>('monthly');
+
   return (
-    <div className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto">
+    <div className="max-w-5xl mx-auto">
+      {/* Billing toggle */}
+      <div className="flex justify-center mb-8">
+        <div className="flex items-center gap-1 bg-gray-100 rounded-full p-1">
+          <button
+            onClick={() => setBilling('monthly')}
+            className={cn(
+              'px-4 py-1.5 rounded-full text-sm font-medium transition-all',
+              billing === 'monthly'
+                ? 'bg-white shadow-sm text-gray-900'
+                : 'text-gray-500 hover:text-gray-700'
+            )}
+          >
+            Monthly
+          </button>
+          <button
+            onClick={() => setBilling('yearly')}
+            className={cn(
+              'px-4 py-1.5 rounded-full text-sm font-medium transition-all flex items-center gap-2',
+              billing === 'yearly'
+                ? 'bg-white shadow-sm text-gray-900'
+                : 'text-gray-500 hover:text-gray-700'
+            )}
+          >
+            Yearly
+            <span className="text-xs font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full">
+              2 months free
+            </span>
+          </button>
+        </div>
+      </div>
+
+    <div className="grid md:grid-cols-3 gap-6">
       {/* Free */}
       <FadeUp delay={0.05}>
         <div className="flex flex-col p-6 bg-white border border-gray-200 rounded-2xl h-full">
@@ -848,16 +882,17 @@ export function PricingCards() {
           </div>
           <div className="mb-6 mt-2">
             <p className="text-sm font-semibold text-indigo-600 mb-1">Pro</p>
-            <div className="flex items-end gap-1.5 mb-2">
-              <span className="text-4xl font-bold text-gray-900">$19</span>
-              <span className="text-gray-400 mb-1">/month</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="text-sm text-gray-400">$190/year</span>
-              <span className="text-xs font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full">
-                2 months free
+            <div className="flex items-end gap-1.5 mb-1">
+              <span className="text-4xl font-bold text-gray-900">
+                {billing === 'yearly' ? '$190' : '$19'}
+              </span>
+              <span className="text-gray-400 mb-1">
+                {billing === 'yearly' ? '/year' : '/month'}
               </span>
             </div>
+            <p className="text-sm text-gray-400">
+              {billing === 'yearly' ? '$15.83/mo, billed annually.' : 'Billed monthly.'}
+            </p>
           </div>
           <ul className="space-y-3 flex-1 mb-7">
             {PRO_FEATURES.map((f) => (
@@ -874,7 +909,9 @@ export function PricingCards() {
             asChild
             className="w-full rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white shadow-md shadow-indigo-100"
           >
-            <Link href="/signup?plan=pro">Get started with Pro</Link>
+            <Link href={`/signup?plan=pro${billing === 'yearly' ? '&billing=yearly' : ''}`}>
+              Get started with Pro
+            </Link>
           </Button>
           <p className="text-xs text-gray-400 mt-3">
             Cancel anytime.
@@ -921,6 +958,7 @@ export function PricingCards() {
           </p>
         </div>
       </FadeUp>
+    </div>
     </div>
   );
 }
