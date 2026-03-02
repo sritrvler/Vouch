@@ -1,64 +1,38 @@
 import React from 'react';
-import { Star, Check } from 'lucide-react';
+import { Palette, Gauge, Zap } from 'lucide-react';
 
-const PANEL_TESTIMONIALS = [
+const BENEFITS = [
   {
-    initials: 'SL',
-    bg: 'bg-violet-400',
-    name: 'Sophie L.',
-    role: 'Marketing Lead',
-    rating: 5,
-    text: 'We were getting 1-2 testimonials a year. Now I have 14 in the last month.',
+    icon: Palette,
+    title: 'Looks native to any design',
+    desc: 'Matches your brand colors automatically. Works on Webflow, Framer, or custom HTML.',
   },
   {
-    initials: 'JT',
-    bg: 'bg-sky-400',
-    name: 'James T.',
-    role: 'Co-founder, Bloom Studio',
-    rating: 5,
-    text: 'Closed 3 clients last month who mentioned they saw reviews on my portfolio.',
+    icon: Gauge,
+    title: 'Zero Lighthouse impact',
+    desc: 'Async loading. Your page speed score stays untouched.',
   },
   {
-    initials: 'AR',
-    bg: 'bg-rose-400',
-    name: 'Ana R.',
-    role: 'Product Manager',
-    rating: 4,
-    text: 'Setup took 8 minutes. The embed looks great on our site.',
+    icon: Zap,
+    title: 'Clients submit in under 2 minutes',
+    desc: 'No account needed. They get a link, they fill it in. Done.',
   },
 ];
 
-function PanelTestimonialCard({
-  initials,
-  bg,
-  name,
-  role,
-  rating,
-  text,
-}: (typeof PANEL_TESTIMONIALS)[number]) {
+function BenefitRow({
+  icon: Icon,
+  title,
+  desc,
+}: (typeof BENEFITS)[number]) {
   return (
-    <div className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl p-4">
-      <div className="flex items-center gap-3 mb-3">
-        <div className={`w-9 h-9 rounded-full ${bg} flex items-center justify-center text-white text-xs font-bold shrink-0`}>
-          {initials}
-        </div>
-        <div className="min-w-0">
-          <p className="text-sm font-semibold text-white truncate">{name}</p>
-          <p className="text-xs text-indigo-200 truncate">{role}</p>
-        </div>
-        <span className="ml-auto flex items-center gap-1 bg-white/15 text-white text-[10px] font-semibold px-2 py-0.5 rounded-full shrink-0">
-          <Check className="w-2.5 h-2.5" /> Verified
-        </span>
+    <div className="flex items-start gap-3">
+      <div className="w-8 h-8 rounded-lg bg-white/15 flex items-center justify-center shrink-0 mt-0.5">
+        <Icon className="w-4 h-4 text-indigo-200" />
       </div>
-      <div className="flex gap-0.5 mb-2">
-        {[1, 2, 3, 4, 5].map((s) => (
-          <Star
-            key={s}
-            className={`w-3 h-3 ${s <= rating ? 'fill-amber-400 text-amber-400' : 'fill-white/20 text-white/20'}`}
-          />
-        ))}
+      <div>
+        <p className="text-sm font-semibold text-white">{title}</p>
+        <p className="text-xs text-indigo-300 mt-0.5 leading-relaxed">{desc}</p>
       </div>
-      <p className="text-sm text-indigo-100 leading-relaxed">&ldquo;{text}&rdquo;</p>
     </div>
   );
 }
@@ -87,13 +61,13 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
               <span className="text-indigo-300">Make sure everyone sees it.</span>
             </h2>
             <p className="mt-4 text-base text-indigo-200 leading-relaxed">
-              One link. Your client fills it in. A beautiful testimonial section appears on your site.
+              One link. Your client fills it in. A branded testimonial section appears on your site.
             </p>
           </div>
 
-          <div className="space-y-3">
-            {PANEL_TESTIMONIALS.map((t) => (
-              <PanelTestimonialCard key={t.name} {...t} />
+          <div className="space-y-5">
+            {BENEFITS.map((b) => (
+              <BenefitRow key={b.title} {...b} />
             ))}
           </div>
         </div>

@@ -66,145 +66,107 @@ function FadeIn({
 }
 
 /* ─────────────────────────────────────────────────────────
-   Hero: staggered testimonial cards
+   Hero: setup journey visual
 ───────────────────────────────────────────────────────── */
 
-const HERO_CARDS = [
-  {
-    avatar: "AL",
-    bg: "bg-indigo-500",
-    name: "Alex L.",
-    role: "Freelance Dev, Next.js",
-    rating: 5,
-    time: "3 days ago",
-    text: "Dropped it into my portfolio in 15 minutes. My clients actually fill it in because the form doesn't look like a random survey tool.",
-  },
-  {
-    avatar: "JK",
-    bg: "bg-violet-500",
-    name: "Jana K.",
-    role: "Designer and SaaS Founder",
-    rating: 5,
-    time: "2 weeks ago",
-    text: "Other tools clashed with my product's design. Vouch matched my accent color out of the box. Users say the testimonial section feels like part of the product.",
-  },
-  {
-    avatar: "SC",
-    bg: "bg-sky-500",
-    name: "Sarah C.",
-    role: "Webflow Agency, 30+ client sites",
-    rating: 5,
-    time: "1 month ago",
-    text: "One account for every client site. Each form is branded to that client. They just see their own logo and colors. They fill it in without thinking twice.",
-  },
-];
-
-function TestimonialCard({
-  avatar,
-  bg,
-  name,
-  role,
-  rating,
-  time,
-  text,
-}: (typeof HERO_CARDS)[number]) {
-  return (
-    <div className="bg-white rounded-2xl border border-gray-100/80 shadow-md p-4 w-full">
-      {/* Author row */}
-      <div className="flex items-start justify-between mb-3">
-        <div className="flex items-center gap-2.5">
-          <div
-            className={cn(
-              "w-10 h-10 rounded-full flex items-center justify-center text-white text-sm font-bold flex-shrink-0 ring-2 ring-white shadow-sm",
-              bg
-            )}
-          >
-            {avatar}
-          </div>
-          <div>
-            <p className="text-[12px] font-semibold text-gray-900">{name}</p>
-            <p className="text-[10px] text-gray-400">{role}</p>
-          </div>
-        </div>
-        <span className="flex items-center gap-1 bg-emerald-50 text-emerald-700 text-[9px] font-semibold px-2 py-0.5 rounded-full flex-shrink-0">
-          <Check className="w-2.5 h-2.5" /> Verified
-        </span>
-      </div>
-
-      {/* Stars + timestamp */}
-      <div className="flex items-center justify-between mb-2.5">
-        <div className="flex gap-0.5">
-          {[1, 2, 3, 4, 5].map((s) => (
-            <Star
-              key={s}
-              className={cn(
-                "w-3 h-3",
-                s <= rating
-                  ? "fill-amber-400 text-amber-400"
-                  : "fill-gray-100 text-gray-200"
-              )}
-            />
-          ))}
-        </div>
-        <span className="text-[10px] text-gray-400">{time}</span>
-      </div>
-
-      {/* Quote */}
-      <p className="text-[12px] text-gray-600 leading-relaxed">
-        &ldquo;{text}&rdquo;
-      </p>
-    </div>
-  );
-}
-
 function HeroVisual() {
+  const steps = [
+    { label: "Create your form", sub: "Brand colors applied automatically", time: "2 min" },
+    { label: "Share with clients", sub: "Email, DM, or project handoff", time: "30 sec" },
+    { label: "Approve and embed", sub: "One script tag, any platform", time: "2 min" },
+  ];
+
   return (
-    <div className="relative w-full max-w-[460px] hidden lg:block">
-      {/* Soft gradient background panel */}
-      <div className="absolute -inset-6 rounded-[36px] bg-gradient-to-br from-indigo-50/70 via-white to-violet-50/60" />
-      {/* Glow orb */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-80 h-80 bg-indigo-300/20 rounded-full blur-3xl pointer-events-none" />
+    <div className="relative w-full max-w-[420px] hidden lg:block">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6, delay: 0.2, ease: [0.22, 1, 0.36, 1] }}
+        className="bg-white rounded-2xl border border-gray-100 shadow-xl overflow-hidden"
+      >
+        {/* Header */}
+        <div className="px-6 pt-5 pb-4 border-b border-gray-50 flex items-center justify-between">
+          <div>
+            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-0.5">
+              Getting started
+            </p>
+            <p className="text-base font-bold text-gray-900">Live in 15 minutes</p>
+          </div>
+          <span className="text-xs font-semibold text-emerald-700 bg-emerald-50 border border-emerald-100 px-3 py-1.5 rounded-full">
+            Free to start
+          </span>
+        </div>
 
-      {/* 2-column staggered grid */}
-      <div className="relative grid grid-cols-2 gap-4 py-6 px-2">
-
-        {/* Left column */}
-        <div className="flex flex-col gap-4">
-          {HERO_CARDS.slice(0, 2).map((card, i) => (
+        {/* Steps */}
+        <div className="px-6 py-2">
+          {steps.map((step, i) => (
             <motion.div
-              key={card.name}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.25 + i * 0.18, duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+              key={step.label}
+              initial={{ opacity: 0, x: -10 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.4 + i * 0.18, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+              className="flex items-center gap-3.5 py-3.5 border-b border-gray-50 last:border-0"
             >
               <motion.div
-                animate={{ y: [0, -7, 0] }}
-                transition={{ duration: 4.2 + i * 0.7, repeat: Infinity, ease: "easeInOut", delay: i * 1.3 }}
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ delay: 0.55 + i * 0.18, type: "spring", stiffness: 350, damping: 20 }}
+                className="w-7 h-7 rounded-full bg-indigo-600 flex items-center justify-center shrink-0"
               >
-                <TestimonialCard {...card} />
+                <Check className="w-3.5 h-3.5 text-white" />
               </motion.div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-semibold text-gray-900">{step.label}</p>
+                <p className="text-[11px] text-gray-400 mt-0.5">{step.sub}</p>
+              </div>
+              <span className="text-[11px] text-gray-300 font-mono shrink-0">{step.time}</span>
             </motion.div>
           ))}
         </div>
 
-        {/* Right column, shifted down to create stagger */}
-        <div className="flex flex-col gap-4 mt-16">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.55, duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-          >
+        {/* Live bar */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 1.1, duration: 0.6 }}
+          className="mx-5 mb-5 rounded-xl bg-indigo-600 px-4 py-3 flex items-center justify-between"
+        >
+          <div>
+            <p className="text-sm font-semibold text-white">Widget live on your site</p>
+            <p className="text-[11px] text-indigo-300 mt-0.5">Embed anywhere in one line</p>
+          </div>
+          <div className="flex items-center gap-1.5 bg-white/10 rounded-full px-2.5 py-1">
             <motion.div
-              animate={{ y: [0, -7, 0] }}
-              transition={{ duration: 4.8, repeat: Infinity, ease: "easeInOut", delay: 0.6 }}
-            >
-              <TestimonialCard {...HERO_CARDS[2]} />
-            </motion.div>
-          </motion.div>
+              animate={{ opacity: [1, 0.3, 1] }}
+              transition={{ duration: 1.8, repeat: Infinity }}
+              className="w-1.5 h-1.5 rounded-full bg-emerald-400"
+            />
+            <span className="text-[11px] font-medium text-white">Live</span>
+          </div>
+        </motion.div>
+      </motion.div>
 
-        </div>
-
-      </div>
+      {/* Benefit pills — each maps to a specific fear */}
+      <motion.div
+        initial={{ opacity: 0, y: 8 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 1.3, duration: 0.5 }}
+        className="mt-3.5 flex flex-wrap gap-2"
+      >
+        {[
+          "Looks native to any design",
+          "Zero Lighthouse impact",
+          "No login needed to submit",
+        ].map((b) => (
+          <span
+            key={b}
+            className="inline-flex items-center gap-1.5 text-[11px] font-medium text-gray-600 bg-white border border-gray-100 rounded-full px-3 py-1.5 shadow-sm"
+          >
+            <Check className="w-3 h-3 text-indigo-500 shrink-0" />
+            {b}
+          </span>
+        ))}
+      </motion.div>
     </div>
   );
 }
@@ -214,15 +176,6 @@ function HeroVisual() {
 ───────────────────────────────────────────────────────── */
 
 function HeroSection() {
-  const avatarColors = [
-    "bg-indigo-500",
-    "bg-sky-500",
-    "bg-violet-500",
-    "bg-emerald-500",
-    "bg-amber-500",
-  ];
-  const avatarInitials = ["AL", "JK", "MT", "SR", "DM"];
-
   return (
     <section className="relative pt-28 pb-16 sm:pt-36 sm:pb-20 overflow-hidden">
       {/* Ambient background blobs */}
@@ -251,9 +204,9 @@ function HeroSection() {
               transition={{ duration: 0.7, delay: 0.1, ease: [0.22, 1, 0.36, 1] }}
               className="text-[2.6rem] sm:text-[3.2rem] lg:text-[3.6rem] font-black text-gray-900 leading-[1.07] tracking-tight mb-6"
             >
-              Social proof that{" "}
+              Social proof that matches your brand.{" "}
               <span className="text-indigo-600">
-                looks like you built it.
+                Live in 15 minutes.
               </span>
             </motion.h1>
 
@@ -263,8 +216,7 @@ function HeroSection() {
               transition={{ duration: 0.6, delay: 0.22 }}
               className="text-lg sm:text-xl text-gray-500 leading-relaxed mb-9 max-w-lg"
             >
-              Collect written and video testimonials, then embed them anywhere without slowing your
-              site. Works for your portfolio, your clients&apos; sites, or your SaaS. One account, zero Lighthouse impact.
+              Branded video and text testimonials that load fast and keep your SEO intact with zero Lighthouse impact.
             </motion.p>
 
             <motion.div
@@ -292,34 +244,9 @@ function HeroSection() {
               </Button>
             </motion.div>
 
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.5, delay: 0.45 }}
-              className="flex items-center gap-3"
-            >
-              <div className="flex -space-x-2.5">
-                {avatarColors.map((bg, i) => (
-                  <div
-                    key={i}
-                    className={cn(
-                      "w-9 h-9 rounded-full border-2 border-white flex items-center justify-center text-white text-xs font-bold",
-                      bg
-                    )}
-                  >
-                    {avatarInitials[i]}
-                  </div>
-                ))}
-              </div>
-              <p className="text-sm text-gray-500">
-                Freelancers, agencies, and founders
-                <br className="hidden sm:block" />
-                shipping proof that matches their work
-              </p>
-            </motion.div>
           </div>
 
-          {/* Staggered testimonial cards */}
+          {/* Setup journey visual */}
           <motion.div
             initial={{ opacity: 0, x: 24 }}
             animate={{ opacity: 1, x: 0 }}
@@ -404,8 +331,8 @@ function ProblemSection() {
         <FadeUp>
           <div className="text-center mb-16">
             <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 tracking-tight">
-              You ship polished sites.
-              <br className="hidden sm:block" /> Your social proof should match.
+              Your brand is consistent everywhere.
+              <br className="hidden sm:block" /> Your social proof should be too.
             </h2>
             <p className="mt-4 text-lg text-gray-500 max-w-xl mx-auto">
               Three friction points that are making great work look generic.
@@ -417,7 +344,7 @@ function ProblemSection() {
           {PAIN_POINTS.map((pt, i) => (
             <FadeUp key={pt.number} delay={i * 0.1}>
               <div className="relative pl-16">
-                <div className="absolute left-0 top-0 text-5xl font-black text-gray-100 leading-none select-none">
+                <div className="absolute left-0 top-0 text-5xl font-black text-indigo-100 leading-none select-none">
                   {pt.number}
                 </div>
                 <h3 className="text-base font-semibold text-gray-900 mb-2 mt-1">
@@ -799,7 +726,7 @@ function HowItWorksSection() {
           <div className="text-center mb-16">
             <h2 className="text-3xl sm:text-4xl font-bold text-white tracking-tight">
               Live on your site in 15 minutes.
-              <br className="hidden sm:block" /> Looks like you built it yourself.
+              <br className="hidden sm:block" /> Branded, fast, and yours.
             </h2>
             <p className="mt-4 text-lg text-slate-400 max-w-xl mx-auto">
               The whole product is share, approve, embed. No complex setup. No integrations to configure.
@@ -811,7 +738,7 @@ function HowItWorksSection() {
           {steps.map((step, i) => (
             <FadeUp key={step.number} delay={i * 0.12}>
               <div>
-                <div className="text-[64px] font-black text-slate-800 leading-none mb-5 select-none">
+                <div className="text-[64px] font-black text-indigo-800 leading-none mb-5 select-none">
                   {step.number}
                 </div>
                 <h3 className="text-lg font-bold text-white mb-2">
@@ -1144,7 +1071,7 @@ function BottomCTA() {
 
               <h2 className="text-3xl sm:text-4xl font-bold text-white tracking-tight mb-4">
                 Ship a testimonial section today.
-                <br className="hidden sm:block" /> It will look like you built it.
+                <br className="hidden sm:block" /> Branded, fast, and live in 15 minutes.
               </h2>
               <p className="text-indigo-200 text-lg mb-9 max-w-lg mx-auto">
                 Free to start. Set up in 15 minutes. Upgrade when your work grows
