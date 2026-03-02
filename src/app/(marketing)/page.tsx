@@ -850,17 +850,20 @@ const FREE_FEATURES: FeatureItem[] = [
 const PRO_FEATURES: string[] = [
   "Everything in Free",
   "Unlimited forms and embed widgets",
-  "Unlimited video testimonials (in-browser recording)",
-  "Automated LinkedIn and Google Review nudges",
+  "Unlimited video testimonials",
+  "Google Review and LinkedIn nudges",
   "Shareable image cards for social media",
   "Carousel, wall of love, and list layouts",
-  "Remove Vouch branding",
+  "React component embed",
+  "CSV export of testimonials",
+  "Form cloning",
   "Custom public page address",
+  "Remove Vouch branding",
 ];
 
 const AGENCY_FEATURES: string[] = [
   "Everything in Pro",
-  "Unlimited projects",
+  "Client report links for clients",
   "Priority email support",
   "Custom onboarding call",
 ];
@@ -944,10 +947,10 @@ export function PricingCards() {
             asChild
             className="w-full rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white shadow-md shadow-indigo-100"
           >
-            <Link href="/signup?plan=pro">Start Pro trial</Link>
+            <Link href="/signup?plan=pro">Get started with Pro</Link>
           </Button>
-          <p className="text-center text-xs text-gray-400 mt-3">
-            14-day free trial. Cancel anytime.
+          <p className="text-xs text-gray-400 mt-3">
+            Cancel anytime.
           </p>
         </div>
       </FadeUp>
@@ -987,7 +990,7 @@ export function PricingCards() {
               Get in touch
             </a>
           </Button>
-          <p className="text-center text-xs text-slate-600 mt-3">
+          <p className="text-xs text-slate-500 mt-3">
             Custom pricing available for larger teams.
           </p>
         </div>

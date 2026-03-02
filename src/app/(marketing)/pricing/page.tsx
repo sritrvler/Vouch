@@ -19,9 +19,12 @@ const TABLE_ROWS: FeatureRow[] = [
   { type: "feature", label: "Testimonials collected", free: "Unlimited", pro: "Unlimited", agency: "Unlimited" },
   { type: "feature", label: "Collection forms", free: "1", pro: "Unlimited", agency: "Unlimited" },
   { type: "feature", label: "Projects", free: "1", pro: "Unlimited", agency: "Unlimited" },
+  { type: "feature", label: "Video testimonials", free: "3 per project", pro: "Unlimited", agency: "Unlimited" },
   { type: "feature", label: "Star ratings and written reviews", free: true, pro: true, agency: true },
   { type: "feature", label: "Custom questions on form", free: true, pro: true, agency: true },
   { type: "feature", label: "Approval and reject flow", free: true, pro: true, agency: true },
+  { type: "feature", label: "Form cloning", free: false, pro: true, agency: true },
+  { type: "feature", label: "CSV export of testimonials", free: false, pro: true, agency: true },
 
   { type: "category", label: "Review Nudges" },
   { type: "feature", label: "Google Review nudge after 4-5 stars", free: false, pro: true, agency: true },
@@ -36,8 +39,12 @@ const TABLE_ROWS: FeatureRow[] = [
   { type: "feature", label: "Grid layout", free: true, pro: true, agency: true },
   { type: "feature", label: "Carousel, Wall of Love, and List layouts", free: false, pro: true, agency: true },
   { type: "feature", label: "Shareable image cards for social media", free: false, pro: true, agency: true },
+  { type: "feature", label: "React component embed", free: false, pro: true, agency: true },
   { type: "feature", label: "Custom widget colors", free: true, pro: true, agency: true },
   { type: "feature", label: "Remove Vouch branding", free: false, pro: true, agency: true },
+
+  { type: "category", label: "Agency Tools" },
+  { type: "feature", label: "Client report links", free: false, pro: false, agency: true },
 
   { type: "category", label: "Support" },
   { type: "feature", label: "Email support", free: true, pro: true, agency: true },
@@ -62,7 +69,11 @@ function FeatureValue({ value }: { value: string | boolean }) {
       </div>
     );
   }
-  return <span className="text-sm text-gray-600 font-medium">{value}</span>;
+  return (
+    <div className="flex justify-center">
+      <span className="text-sm text-gray-600 font-medium">{value}</span>
+    </div>
+  );
 }
 
 function ComparisonTable() {
@@ -273,7 +284,7 @@ export default function PricingPage() {
               className="bg-white text-indigo-600 hover:bg-indigo-50 rounded-xl px-7 font-semibold"
             >
               <Link href="/signup">
-                Create free account <ArrowRight className="ml-1 w-4 h-4" />
+                Start for free <ArrowRight className="ml-1 w-4 h-4" />
               </Link>
             </Button>
             <Button
@@ -282,11 +293,11 @@ export default function PricingPage() {
               size="lg"
               className="text-white border border-indigo-400 hover:bg-indigo-700 rounded-xl px-7"
             >
-              <Link href="/signup?plan=pro">Start Pro trial</Link>
+              <Link href="/signup?plan=pro">Upgrade to Pro</Link>
             </Button>
           </div>
           <p className="text-xs text-indigo-300 mt-5">
-            Pro trial is 14 days free · No credit card required to start
+            No credit card required to start
           </p>
         </motion.div>
       </section>
