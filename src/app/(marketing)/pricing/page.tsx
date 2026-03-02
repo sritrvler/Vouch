@@ -38,7 +38,7 @@ const TABLE_ROWS: FeatureRow[] = [
   { type: "feature", label: "Embed widgets", free: "1", pro: "Unlimited", agency: "Unlimited" },
   { type: "feature", label: "Grid layout", free: true, pro: true, agency: true },
   { type: "feature", label: "Carousel, Wall of Love, and List layouts", free: false, pro: true, agency: true },
-  { type: "feature", label: "Shareable image cards for social media", free: false, pro: true, agency: true },
+  { type: "feature", label: "Image cards for social sharing", free: false, pro: true, agency: true },
   { type: "feature", label: "React component embed", free: false, pro: true, agency: true },
   { type: "feature", label: "Custom widget colors", free: true, pro: true, agency: true },
   { type: "feature", label: "Remove Vouch branding", free: false, pro: true, agency: true },

@@ -852,7 +852,7 @@ const PRO_FEATURES: string[] = [
   "Unlimited forms and embed widgets",
   "Unlimited video testimonials",
   "Google Review and LinkedIn nudges",
-  "Shareable image cards for social media",
+  "Image cards for social sharing",
   "Carousel, wall of love, and list layouts",
   "React component embed",
   "CSV export of testimonials",
@@ -984,7 +984,6 @@ export function PricingCards() {
             variant="outline"
             className="w-full rounded-xl border-slate-700 text-slate-300 hover:bg-slate-800 hover:text-white bg-transparent"
           >
-            {/* Update this mailto to your preferred contact address */}
             <a href={`mailto:${process.env.NEXT_PUBLIC_SUPPORT_EMAIL ?? 'hello@example.com'}?subject=Agency%20Plan`}>
               <Mail className="w-4 h-4 mr-2" />
               Get in touch

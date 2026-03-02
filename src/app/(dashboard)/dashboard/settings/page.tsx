@@ -814,7 +814,7 @@ export default function SettingsPage() {
                   )}
                   {subscription?.plan === 'free' && (
                     <p className="text-sm text-muted-foreground mt-1">
-                      You&apos;re on the Free plan. Upgrade to unlock all features.
+                      You&apos;re on the Free plan. Upgrade for full access.
                     </p>
                   )}
                 </div>

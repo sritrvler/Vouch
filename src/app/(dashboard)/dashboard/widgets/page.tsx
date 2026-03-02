@@ -1042,7 +1042,7 @@ export function Testimonials() {
                 <div className="flex-1">
                   <p className="text-sm font-semibold text-indigo-900">Upgrade to Pro</p>
                   <p className="text-xs text-indigo-700/80 mt-0.5">
-                    Remove branding, create unlimited widgets, and unlock all layouts.
+                    Remove branding, get all layouts, and create unlimited widgets.
                   </p>
                   <Button
                     size="sm"
