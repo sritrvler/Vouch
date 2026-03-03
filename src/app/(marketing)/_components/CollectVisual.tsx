@@ -5,14 +5,14 @@ import { Star, Check, Zap } from "lucide-react";
 
 export default function CollectVisual() {
   return (
-    <div aria-hidden="true" className="relative max-w-sm mx-auto lg:mx-0">
+    <div className="relative max-w-sm mx-auto lg:mx-0">
       <div className="bg-white rounded-3xl shadow-2xl border border-gray-100 overflow-hidden">
         {/* Branded header */}
         <div className="bg-indigo-600 px-7 pt-7 pb-8">
           <div className="w-11 h-11 rounded-xl bg-white/20 flex items-center justify-center mb-3">
             <Zap className="w-5 h-5 text-white" />
           </div>
-          <p className="text-indigo-300 text-xs font-medium mb-0.5">Acme Studio</p>
+          <p className="text-indigo-100 text-xs font-medium mb-0.5">Acme Studio</p>
           <h3 className="text-lg font-bold text-white">
             How was your experience?
           </h3>
@@ -40,7 +40,7 @@ export default function CollectVisual() {
 
           {/* Text area mockup */}
           <div className="bg-gray-50 rounded-xl px-4 py-3 border border-gray-100 mb-4 min-h-[80px]">
-            <p className="text-sm text-gray-400 mb-1 text-[11px]">
+            <p className="text-sm text-gray-500 mb-1 text-[11px]">
               Your experience
             </p>
             <p className="text-sm text-gray-700">
@@ -65,10 +65,10 @@ export default function CollectVisual() {
           {/* Name/role fields */}
           <div className="flex gap-2 mb-5">
             <div className="flex-1 h-10 bg-gray-50 border border-gray-100 rounded-lg px-3 flex items-center">
-              <span className="text-[11px] text-gray-400">Your name</span>
+              <span className="text-[11px] text-gray-500">Your name</span>
             </div>
             <div className="flex-1 h-10 bg-gray-50 border border-gray-100 rounded-lg px-3 flex items-center">
-              <span className="text-[11px] text-gray-400">Role</span>
+              <span className="text-[11px] text-gray-500">Role</span>
             </div>
           </div>
 
@@ -80,7 +80,7 @@ export default function CollectVisual() {
 
       {/* Floating badge */}
       <motion.div
-        className="absolute -top-3 -right-3 bg-emerald-500 text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-lg shadow-emerald-200"
+        className="absolute -top-3 -right-3 bg-emerald-700 text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-lg shadow-emerald-200"
         animate={{ y: [0, -5, 0] }}
         transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
       >

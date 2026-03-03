@@ -13,7 +13,7 @@ export default function EmbedVisual() {
   const reactCode = `// No install. Paste into your project.\n'use client';\nimport { useEffect, useState } from 'react';\n\nexport function Testimonials() {\n  const [items, setItems] = useState([]);\n  useEffect(() => {\n    fetch('/api/testimonials/widget/abc123')\n      .then(r => r.json())\n      .then(d => setItems(d.testimonials));\n  }, []);\n\n  return (\n    <div className="grid grid-cols-3 gap-4">\n      {items.map(t => (\n        <blockquote key={t.id}\n          className="rounded-xl border p-4">\n          {t.content}\n        </blockquote>\n      ))}\n    </div>\n  );\n}`;
 
   return (
-    <div aria-hidden="true" className="relative max-w-sm mx-auto lg:mx-0 space-y-3">
+    <div className="relative max-w-sm mx-auto lg:mx-0 space-y-3">
       {/* Browser mockup */}
       <div className="bg-white rounded-2xl shadow-2xl border border-gray-100 overflow-hidden">
         {/* Browser chrome */}
@@ -23,7 +23,7 @@ export default function EmbedVisual() {
             <div className="w-2.5 h-2.5 rounded-full bg-amber-400" />
             <div className="w-2.5 h-2.5 rounded-full bg-emerald-400" />
           </div>
-          <div className="flex-1 bg-white rounded-md px-3 py-1 text-[11px] text-gray-400 border border-gray-100 truncate">
+          <div className="flex-1 bg-white rounded-md px-3 py-1 text-[11px] text-gray-500 border border-gray-100 truncate">
             alexchen.design/about
           </div>
         </div>
@@ -33,7 +33,7 @@ export default function EmbedVisual() {
           <div className="h-2 w-20 bg-gray-100 rounded-full mb-1.5" />
           <div className="h-2 w-32 bg-gray-100 rounded-full mb-5" />
 
-          <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-widest mb-3">
+          <p className="text-[10px] font-semibold text-gray-500 uppercase tracking-widest mb-3">
             What clients say
           </p>
 
@@ -41,14 +41,14 @@ export default function EmbedVisual() {
             {[
               {
                 avatar: "AL",
-                bg: "bg-indigo-500",
+                bg: "bg-indigo-600",
                 text: "The rebrand changed how prospects see us...",
                 name: "Alex L.",
                 role: "Freelance Dev",
               },
               {
                 avatar: "JK",
-                bg: "bg-violet-500",
+                bg: "bg-violet-600",
                 text: "Zero back-and-forth, delivered early...",
                 name: "Jana K.",
                 role: "Framer Designer",
@@ -82,7 +82,7 @@ export default function EmbedVisual() {
                     <p className="text-[9px] font-semibold text-gray-800">
                       {c.name}
                     </p>
-                    <p className="text-[9px] text-gray-400">{c.role}</p>
+                    <p className="text-[9px] text-gray-500">{c.role}</p>
                   </div>
                 </div>
               </div>
@@ -106,7 +106,7 @@ export default function EmbedVisual() {
                 "px-4 py-2 text-[11px] font-medium transition-colors",
                 activeTab === tab.id
                   ? "text-white border-b-2 border-indigo-400"
-                  : "text-slate-500 hover:text-slate-300"
+                  : "text-slate-400 hover:text-slate-200"
               )}
             >
               {tab.label}
@@ -116,7 +116,7 @@ export default function EmbedVisual() {
 
         <div className="px-4 py-3.5">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-[11px] text-slate-500 font-mono">
+            <span className="text-[11px] text-slate-300 font-mono">
               {activeTab === "script" ? "paste before </body>" : "paste anywhere in your app"}
             </span>
             <div className="flex items-center gap-1.5 text-[11px] text-emerald-400 font-medium">

@@ -85,9 +85,9 @@ export function PricingCards() {
             <p className="text-sm font-semibold text-gray-500 mb-1">Free</p>
             <div className="flex items-end gap-1.5 mb-1">
               <span className="text-4xl font-bold text-gray-900">$0</span>
-              <span className="text-gray-400 mb-1">/month</span>
+              <span className="text-gray-500 mb-1">/month</span>
             </div>
-            <p className="text-sm text-gray-400">
+            <p className="text-sm text-gray-500">
               Forever free. No credit card needed.
             </p>
           </div>
@@ -102,7 +102,7 @@ export function PricingCards() {
                 ) : (
                   <Check className="w-4 h-4 text-gray-400 mt-0.5 flex-shrink-0" />
                 )}
-                <span className={f.limitation ? "text-gray-400" : "text-gray-600"}>
+                <span className={f.limitation ? "text-gray-500" : "text-gray-600"}>
                   {f.text}
                 </span>
               </li>
@@ -132,11 +132,11 @@ export function PricingCards() {
               <span className="text-4xl font-bold text-gray-900">
                 {billing === 'yearly' ? '$190' : '$19'}
               </span>
-              <span className="text-gray-400 mb-1">
+              <span className="text-gray-500 mb-1">
                 {billing === 'yearly' ? '/year' : '/month'}
               </span>
             </div>
-            <p className="text-sm text-gray-400">
+            <p className="text-sm text-gray-500">
               {billing === 'yearly' ? '$15.83/mo, billed annually.' : 'Billed monthly.'}
             </p>
           </div>
@@ -159,7 +159,7 @@ export function PricingCards() {
               Get started with Pro
             </Link>
           </Button>
-          <p className="text-xs text-gray-400 mt-3">
+          <p className="text-xs text-gray-500 mt-3">
             Cancel anytime.
           </p>
         </div>
@@ -174,7 +174,7 @@ export function PricingCards() {
               <span className="text-4xl font-bold text-white">$49</span>
               <span className="text-slate-400 mb-1">/month</span>
             </div>
-            <p className="text-sm text-slate-500">
+            <p className="text-sm text-slate-400">
               For teams managing multiple client accounts.
             </p>
           </div>
@@ -199,7 +199,7 @@ export function PricingCards() {
               Get in touch
             </a>
           </Button>
-          <p className="text-xs text-slate-500 mt-3">
+          <p className="text-xs text-slate-400 mt-3">
             Custom pricing available for larger teams.
           </p>
         </div>
