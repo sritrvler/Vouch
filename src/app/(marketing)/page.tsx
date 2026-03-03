@@ -3,8 +3,9 @@ import Link from 'next/link';
 import { Star, ArrowRight, Check, Zap, MessageSquare, Code2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
-// Dynamic imports for client components with Framer Motion (code-split, above fold)
-const HeroVisual = dynamic(() => import('./_components/HeroVisual'));
+// Static import: HeroVisual hydrates synchronously with the main bundle (avoids Suspense boundary hydration mismatch)
+import HeroVisual from './_components/HeroVisual';
+// Dynamic import for below-fold component
 const CollectVisual = dynamic(() => import('./_components/CollectVisual'));
 
 // Regular imports for other client components (below fold, no urgency)
