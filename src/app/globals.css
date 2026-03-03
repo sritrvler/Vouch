@@ -151,6 +151,12 @@
   animation: marquee 50s linear infinite;
 }
 
+/* Below-fold content: skip rendering until scrolled into view */
+.below-fold {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 500px;
+}
+
 /* Dot-grid background — used in hero and dark sections */
 .bg-dot-grid {
   background-image: radial-gradient(circle, oklch(0.585 0.233 277.117 / 0.09) 1px, transparent 1px);

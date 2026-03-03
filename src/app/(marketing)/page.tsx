@@ -537,13 +537,27 @@ export default function HomePage() {
   return (
     <>
       <HeroSection />
-      <TrustBar />
-      <ProblemSection />
-      <FeaturesSection />
-      <HowItWorksSection />
-      <PricingSection />
-      <FAQSection />
-      <BottomCTA />
+      <div className="below-fold">
+        <TrustBar />
+      </div>
+      <div className="below-fold">
+        <ProblemSection />
+      </div>
+      <div className="below-fold">
+        <FeaturesSection />
+      </div>
+      <div className="below-fold">
+        <HowItWorksSection />
+      </div>
+      <div className="below-fold">
+        <PricingSection />
+      </div>
+      <div className="below-fold">
+        <FAQSection />
+      </div>
+      <div className="below-fold">
+        <BottomCTA />
+      </div>
     </>
   );
 }
