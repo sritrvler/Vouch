@@ -174,7 +174,7 @@ function TrustBar() {
   return (
     <div className="border-y border-gray-100 bg-gray-50/50 py-10">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <p className="text-center text-[10px] font-semibold text-gray-400 uppercase tracking-widest mb-7">
+        <p className="text-center text-[10px] font-semibold text-gray-500 uppercase tracking-widest mb-7">
           Works on every platform. Looks native to every design.
         </p>
         <div className="flex flex-wrap justify-center gap-2.5 sm:gap-3">

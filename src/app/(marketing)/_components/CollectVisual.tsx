@@ -5,7 +5,7 @@ import { Star, Check, Zap } from "lucide-react";
 
 export default function CollectVisual() {
   return (
-    <div className="relative max-w-sm mx-auto lg:mx-0">
+    <div aria-hidden="true" className="relative max-w-sm mx-auto lg:mx-0">
       <div className="bg-white rounded-3xl shadow-2xl border border-gray-100 overflow-hidden">
         {/* Branded header */}
         <div className="bg-indigo-600 px-7 pt-7 pb-8">

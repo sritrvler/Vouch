@@ -13,7 +13,7 @@ export default function EmbedVisual() {
   const reactCode = `// No install. Paste into your project.\n'use client';\nimport { useEffect, useState } from 'react';\n\nexport function Testimonials() {\n  const [items, setItems] = useState([]);\n  useEffect(() => {\n    fetch('/api/testimonials/widget/abc123')\n      .then(r => r.json())\n      .then(d => setItems(d.testimonials));\n  }, []);\n\n  return (\n    <div className="grid grid-cols-3 gap-4">\n      {items.map(t => (\n        <blockquote key={t.id}\n          className="rounded-xl border p-4">\n          {t.content}\n        </blockquote>\n      ))}\n    </div>\n  );\n}`;
 
   return (
-    <div className="relative max-w-sm mx-auto lg:mx-0 space-y-3">
+    <div aria-hidden="true" className="relative max-w-sm mx-auto lg:mx-0 space-y-3">
       {/* Browser mockup */}
       <div className="bg-white rounded-2xl shadow-2xl border border-gray-100 overflow-hidden">
         {/* Browser chrome */}
