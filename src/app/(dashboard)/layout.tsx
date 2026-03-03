@@ -14,6 +14,7 @@ import {
   LogOut,
   Sparkles,
   ChevronDown,
+  Zap,
 } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { cn } from '@/lib/utils';
@@ -175,8 +176,11 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       <aside className="hidden md:flex w-64 shrink-0 flex-col h-full bg-white border-r border-border">
         {/* Top: Logo + Project */}
         <div className="px-4 pt-5 pb-4 border-b border-border">
-          <Link href="/dashboard" className="flex items-center gap-2 mb-3">
-            <span className="text-xl font-bold tracking-tight text-primary">Vouch</span>
+          <Link href="/dashboard" className="flex items-center gap-2 mb-3 group">
+            <div className="w-7 h-7 rounded-md bg-primary flex items-center justify-center shadow-sm group-hover:bg-primary/90 transition-colors">
+              <Zap className="w-3.5 h-3.5 text-white fill-white" />
+            </div>
+            <span className="text-lg font-bold tracking-tight text-foreground">Vouch</span>
           </Link>
 
           {/* Project selector (display only) */}
@@ -208,9 +212,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             <button
               type="button"
               onClick={() => setUpgradeModalOpen(true)}
-              className="flex items-center gap-2 px-3 py-2.5 rounded-xl bg-gradient-to-r from-primary/10 to-accent text-primary text-sm font-medium hover:from-primary/15 hover:to-accent transition-all w-full"
+              className="flex items-center gap-2 px-3 py-2.5 rounded-xl bg-gradient-to-r from-indigo-50 to-violet-50 border border-indigo-100 text-primary text-sm font-semibold hover:from-indigo-100 hover:to-violet-100 transition-all w-full shadow-sm"
             >
-              <Sparkles className="size-4 shrink-0" />
+              <Sparkles className="size-4 shrink-0 text-violet-500" />
               Upgrade to Pro
             </button>
           )}

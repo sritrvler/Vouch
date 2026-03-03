@@ -168,7 +168,7 @@ function MetricCard({
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3, delay, ease: 'easeOut' }}
-      className="bg-white rounded-2xl border border-border/60 shadow-sm px-6 py-5 flex items-center gap-4"
+      className="bg-white rounded-2xl border border-border/60 shadow-sm px-6 py-5 flex items-center gap-4 hover:shadow-md transition-shadow"
     >
       <div className={cn('size-11 rounded-2xl flex items-center justify-center shrink-0', iconClass)}>
         <Icon className="size-5" />

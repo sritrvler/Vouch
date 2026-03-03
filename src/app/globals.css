@@ -118,6 +118,9 @@
 }
 
 @layer base {
+  html {
+    scroll-behavior: smooth;
+  }
   * {
     @apply border-border outline-ring/50;
   }
@@ -146,4 +149,15 @@
 
 .animate-marquee-slow {
   animation: marquee 50s linear infinite;
+}
+
+/* Dot-grid background — used in hero and dark sections */
+.bg-dot-grid {
+  background-image: radial-gradient(circle, oklch(0.585 0.233 277.117 / 0.09) 1px, transparent 1px);
+  background-size: 28px 28px;
+}
+
+.bg-dot-grid-white {
+  background-image: radial-gradient(circle, rgba(255, 255, 255, 0.12) 1px, transparent 1px);
+  background-size: 24px 24px;
 }

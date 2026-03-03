@@ -546,13 +546,13 @@ export default async function PublicTestimonialsPage({ params }: PageProps) {
 
       {/* Leave a review CTA */}
       {form && (
-        <div className="pb-8 text-center px-4">
+        <div className="pb-10 text-center px-4">
           <Link
             href={`/c/${form.id}`}
-            className="inline-flex items-center gap-2 rounded-xl bg-white border shadow-sm px-5 py-3 text-sm font-medium text-gray-700 hover:shadow-md transition-all"
-            style={{ borderColor: `${accentColor}50` }}
+            className="inline-flex items-center gap-2 rounded-full bg-white border shadow-md px-6 py-3 text-sm font-semibold text-gray-700 hover:shadow-lg transition-all hover:-translate-y-0.5"
+            style={{ borderColor: `${accentColor}40` }}
           >
-            <Star className="w-4 h-4" style={{ color: accentColor }} />
+            <Star className="w-4 h-4" style={{ fill: accentColor, color: accentColor }} />
             Leave your own review
           </Link>
         </div>
@@ -562,9 +562,10 @@ export default async function PublicTestimonialsPage({ params }: PageProps) {
       <div className="pb-10 text-center">
         <Link
           href="/"
-          className="inline-flex items-center gap-1.5 text-xs text-gray-300 hover:text-gray-500 transition-colors"
+          className="inline-flex items-center gap-1.5 text-xs text-gray-400 hover:text-gray-600 transition-colors"
         >
-          Powered by Vouch
+          Powered by{' '}
+          <span className="font-semibold">Vouch</span>
         </Link>
       </div>
     </div>

@@ -77,7 +77,7 @@ function HeroVisual() {
   ];
 
   return (
-    <div className="relative w-full max-w-[420px] hidden lg:block">
+    <div className="relative w-full max-w-[420px] mx-auto lg:mx-0">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -178,14 +178,17 @@ function HeroVisual() {
 function HeroSection() {
   return (
     <section className="relative pt-28 pb-16 sm:pt-36 sm:pb-20 overflow-hidden">
+      {/* Dot grid texture */}
+      <div className="absolute inset-0 bg-dot-grid pointer-events-none" />
       {/* Ambient background blobs */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
-        <div className="absolute -top-32 right-0 w-[700px] h-[600px] bg-indigo-100 rounded-full blur-3xl opacity-40 translate-x-1/4" />
-        <div className="absolute top-1/2 left-0 w-[400px] h-[400px] bg-amber-50 rounded-full blur-3xl opacity-60 -translate-x-1/2" />
+        <div className="absolute -top-32 right-0 w-[700px] h-[600px] bg-indigo-100 rounded-full blur-3xl opacity-35 translate-x-1/4" />
+        <div className="absolute top-1/2 left-0 w-[400px] h-[400px] bg-violet-50 rounded-full blur-3xl opacity-50 -translate-x-1/2" />
+        <div className="absolute bottom-0 right-1/3 w-[300px] h-[300px] bg-indigo-50 rounded-full blur-3xl opacity-40" />
       </div>
 
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid lg:grid-cols-2 gap-12 lg:gap-20 items-center">
+        <div className="grid lg:grid-cols-2 xl:grid-cols-[5fr_3fr] gap-12 lg:gap-20 items-center">
           {/* Copy */}
           <div>
             <motion.div
@@ -202,12 +205,13 @@ function HeroSection() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.7, delay: 0.1, ease: [0.22, 1, 0.36, 1] }}
-              className="text-[2.6rem] sm:text-[3.2rem] lg:text-[3.6rem] font-black text-gray-900 leading-[1.07] tracking-tight mb-6"
+              className="text-[2.1rem] sm:text-[2.5rem] md:text-[3.2rem] lg:text-[3.0rem] xl:text-[3.6rem] font-black text-gray-900 leading-[1.07] tracking-tight mb-6"
             >
-              Social proof that matches your brand.{" "}
-              <span className="text-indigo-600">
-                Live in 15 minutes.
-              </span>
+              Social proof that
+              <br />
+              matches your brand.
+              <br />
+              <span className="text-indigo-600">Live in 15 minutes.</span>
             </motion.h1>
 
             <motion.p
@@ -281,16 +285,16 @@ const TRUST_LABELS = [
 function TrustBar() {
   return (
     <FadeIn>
-      <div className="border-y border-gray-100 bg-gray-50/60 py-8">
+      <div className="border-y border-gray-100 bg-gray-50/50 py-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <p className="text-center text-[10px] font-semibold text-gray-400 uppercase tracking-widest mb-6">
+          <p className="text-center text-[10px] font-semibold text-gray-400 uppercase tracking-widest mb-7">
             Works on every platform. Looks native to every design.
           </p>
-          <div className="flex flex-wrap justify-center gap-3 sm:gap-6">
+          <div className="flex flex-wrap justify-center gap-2.5 sm:gap-3">
             {TRUST_LABELS.map((label) => (
               <div
                 key={label}
-                className="px-4 py-2 bg-white border border-gray-100 rounded-lg text-sm font-medium text-gray-400 shadow-xs"
+                className="px-4 py-2 bg-white border border-gray-200/80 rounded-full text-sm font-medium text-gray-500 shadow-sm hover:border-indigo-200 hover:text-indigo-600 transition-colors"
               >
                 {label}
               </div>
@@ -344,7 +348,7 @@ function ProblemSection() {
           {PAIN_POINTS.map((pt, i) => (
             <FadeUp key={pt.number} delay={i * 0.1}>
               <div className="relative pl-16">
-                <div className="absolute left-0 top-0 text-5xl font-black text-indigo-100 leading-none select-none">
+                <div className="absolute left-0 top-0 text-5xl font-black bg-gradient-to-br from-indigo-200 to-violet-200 bg-clip-text text-transparent leading-none select-none">
                   {pt.number}
                 </div>
                 <h3 className="text-base font-semibold text-gray-900 mb-2 mt-1">
@@ -720,8 +724,12 @@ function HowItWorksSection() {
   ];
 
   return (
-    <section className="bg-slate-950 py-20 sm:py-28">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <section className="relative bg-slate-950 py-20 sm:py-28 overflow-hidden">
+      {/* Subtle dot pattern on dark background */}
+      <div className="absolute inset-0 bg-dot-grid-white pointer-events-none" />
+      {/* Ambient glow */}
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[300px] bg-indigo-900/30 rounded-full blur-3xl pointer-events-none" />
+      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <FadeUp>
           <div className="text-center mb-16">
             <h2 className="text-3xl sm:text-4xl font-bold text-white tracking-tight">
@@ -738,7 +746,7 @@ function HowItWorksSection() {
           {steps.map((step, i) => (
             <FadeUp key={step.number} delay={i * 0.12}>
               <div>
-                <div className="text-[64px] font-black text-indigo-800 leading-none mb-5 select-none">
+                <div className="text-[64px] font-black leading-none mb-5 select-none bg-gradient-to-br from-indigo-400 to-violet-500 bg-clip-text text-transparent">
                   {step.number}
                 </div>
                 <h3 className="text-lg font-bold text-white mb-2">
@@ -1089,12 +1097,14 @@ function BottomCTA() {
             className="relative rounded-3xl px-8 py-16 overflow-hidden"
             style={{
               background:
-                "linear-gradient(135deg, #3730a3 0%, #4f46e5 45%, #6366f1 100%)",
+                "linear-gradient(135deg, #312e81 0%, #4338ca 40%, #6366f1 75%, #818cf8 100%)",
             }}
           >
+            {/* Dot pattern overlay */}
+            <div className="absolute inset-0 bg-dot-grid-white pointer-events-none" />
             {/* Orbs */}
-            <div className="absolute -top-16 -right-16 w-64 h-64 bg-white/10 rounded-full blur-2xl pointer-events-none" />
-            <div className="absolute -bottom-16 -left-16 w-64 h-64 bg-white/10 rounded-full blur-2xl pointer-events-none" />
+            <div className="absolute -top-16 -right-16 w-72 h-72 bg-violet-400/20 rounded-full blur-3xl pointer-events-none" />
+            <div className="absolute -bottom-16 -left-16 w-72 h-72 bg-indigo-300/15 rounded-full blur-3xl pointer-events-none" />
 
             <div className="relative">
               {/* Star row */}
