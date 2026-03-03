@@ -31,8 +31,8 @@ export default function HeroVisual() {
           {steps.map((step, i) => (
             <motion.div
               key={step.label}
-              initial={{ x: -10 }}
-              animate={{ x: 0 }}
+              initial={{ opacity: 0, x: -10 }}
+              animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.4 + i * 0.18, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
               className="flex items-center gap-3.5 py-3.5 border-b border-gray-50 last:border-0"
             >
@@ -55,8 +55,8 @@ export default function HeroVisual() {
 
         {/* Live bar */}
         <motion.div
-          initial={{ y: 6 }}
-          animate={{ y: 0 }}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
           transition={{ delay: 1.1, duration: 0.6 }}
           className="mx-5 mb-5 rounded-xl bg-indigo-600 px-4 py-3 flex items-center justify-between"
         >
@@ -77,8 +77,8 @@ export default function HeroVisual() {
 
       {/* Benefit pills */}
       <motion.div
-        initial={{ y: 8 }}
-        animate={{ y: 0 }}
+        initial={{ opacity: 0, y: 8 }}
+        animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 1.3, duration: 0.5 }}
         className="mt-3.5 flex flex-wrap gap-2"
       >
