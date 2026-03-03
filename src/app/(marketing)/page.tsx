@@ -119,7 +119,7 @@ function HeroVisual() {
                 <p className="text-sm font-semibold text-gray-900">{step.label}</p>
                 <p className="text-[11px] text-gray-400 mt-0.5">{step.sub}</p>
               </div>
-              <span className="text-[11px] text-gray-300 font-mono shrink-0">{step.time}</span>
+              <span className="text-[11px] text-gray-500 font-mono shrink-0">{step.time}</span>
             </motion.div>
           ))}
         </div>
@@ -201,18 +201,13 @@ function HeroSection() {
               For Freelancers, Agencies, and SaaS Founders
             </motion.div>
 
-            <motion.h1
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.7, delay: 0.1, ease: [0.22, 1, 0.36, 1] }}
-              className="text-[2.1rem] sm:text-[2.5rem] md:text-[3.2rem] lg:text-[3.0rem] xl:text-[3.6rem] font-black text-gray-900 leading-[1.07] tracking-tight mb-6"
-            >
+            <h1 className="text-[2.1rem] sm:text-[2.5rem] md:text-[3.2rem] lg:text-[3.0rem] xl:text-[3.6rem] font-black text-gray-900 leading-[1.07] tracking-tight mb-6">
               Social proof that
               <br />
               matches your brand.
               <br />
               <span className="text-indigo-600">Live in 15 minutes.</span>
-            </motion.h1>
+            </h1>
 
             <motion.p
               initial={{ opacity: 0, y: 16 }}
@@ -817,7 +812,7 @@ export function PricingCards() {
               'px-4 py-1.5 rounded-full text-sm font-medium transition-all',
               billing === 'monthly'
                 ? 'bg-white shadow-sm text-gray-900'
-                : 'text-gray-500 hover:text-gray-700'
+                : 'text-gray-700 hover:text-gray-900'
             )}
           >
             Monthly
@@ -828,7 +823,7 @@ export function PricingCards() {
               'px-4 py-1.5 rounded-full text-sm font-medium transition-all flex items-center gap-2',
               billing === 'yearly'
                 ? 'bg-white shadow-sm text-gray-900'
-                : 'text-gray-500 hover:text-gray-700'
+                : 'text-gray-700 hover:text-gray-900'
             )}
           >
             Yearly

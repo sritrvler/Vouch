@@ -190,14 +190,14 @@ function Footer() {
               <Link
                 key={link.label}
                 href={link.href}
-                className="text-sm text-gray-400 hover:text-gray-700 transition-colors"
+                className="text-sm text-gray-500 hover:text-gray-800 transition-colors"
               >
                 {link.label}
               </Link>
             ))}
           </nav>
 
-          <p className="text-sm text-gray-400">
+          <p className="text-sm text-gray-500">
             &copy; {new Date().getFullYear()} Vouch
           </p>
         </div>
