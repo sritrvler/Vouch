@@ -11,7 +11,9 @@ const FEATURES = [
   'Unlimited forms and embed widgets',
   'Unlimited video testimonials',
   'Google Review and LinkedIn nudges',
-  'Shareable image cards for social proof',
+  'Image cards for social sharing',
+  'Carousel, wall of love, and list layouts',
+  'React component embed',
   'Custom public page address',
   'Remove Vouch branding',
 ];

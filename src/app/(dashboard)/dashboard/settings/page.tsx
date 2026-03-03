@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef, Suspense } from 'react';
+import { useSearchParams, useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { toast } from 'sonner';
 import {
@@ -66,11 +67,15 @@ const ACCENT_PRESETS = [
 
 // ─── Pro Features List ────────────────────────────────────────────────────────
 const PRO_FEATURES = [
-  'Unlimited collection forms and widgets',
-  'Google Review nudge (4-5 star ratings)',
-  'Carousel, Wall of Love, and List layouts',
-  'Remove Vouch branding',
+  'Unlimited forms and embed widgets',
+  'Unlimited video testimonials',
+  'Google Review and LinkedIn nudges',
+  'Image cards for social sharing',
+  'Carousel, wall of love, and list layouts',
+  'React component embed',
+  'CSV export of testimonials',
   'Custom public page address',
+  'Remove Vouch branding',
   'Email support',
 ];
 
@@ -111,8 +116,18 @@ function SettingsSkeleton() {
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
 export default function SettingsPage() {
+  return (
+    <Suspense fallback={<SettingsSkeleton />}>
+      <SettingsInner />
+    </Suspense>
+  );
+}
+
+function SettingsInner() {
   const supabase = createClient();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const searchParams = useSearchParams();
+  const router = useRouter();
 
   // ── Auth state ─────────────────────────────────────────────────────────────
   const [userEmail, setUserEmail] = useState('');
@@ -140,6 +155,23 @@ export default function SettingsPage() {
   // ── Billing state ──────────────────────────────────────────────────────────
   const [subscription, setSubscription] = useState<Subscription | null>(null);
   const [loadingBilling, setLoadingBilling] = useState(false);
+
+  // ── Active tab (URL-driven) ────────────────────────────────────────────────
+  const initialTab = searchParams.get('tab') === 'billing' || searchParams.get('upgrade') === 'success'
+    ? 'billing'
+    : 'general';
+  const [activeTab, setActiveTab] = useState(initialTab);
+
+  // ── Upgrade success toast ──────────────────────────────────────────────────
+  useEffect(() => {
+    if (searchParams.get('upgrade') === 'success') {
+      toast.success("You're now on Pro. Welcome to the next level.");
+      // Clean the param from the URL without a full navigation
+      const url = new URL(window.location.href);
+      url.searchParams.delete('upgrade');
+      router.replace(url.pathname + (url.search || ''));
+    }
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // ── Initial load ──────────────────────────────────────────────────────────
   const [loading, setLoading] = useState(true);
@@ -406,7 +438,7 @@ export default function SettingsPage() {
       {loading ? (
         <SettingsSkeleton />
       ) : (
-        <Tabs defaultValue="general">
+        <Tabs value={activeTab} onValueChange={setActiveTab}>
           <TabsList className="mb-6 h-10 rounded-xl bg-muted/60 p-1 gap-1">
             <TabsTrigger value="general" className="gap-1.5 rounded-lg data-[state=active]:bg-white data-[state=active]:shadow-sm">
               <User className="size-3.5" />

@@ -20,7 +20,12 @@ export async function POST(request: NextRequest) {
   const eventName: string = payload.meta?.event_name ?? '';
   const userId: string = payload.meta?.custom_data?.user_id ?? '';
   const attributes = payload.data?.attributes ?? {};
-  const subscriptionId: string = String(payload.data?.id ?? '');
+
+  // LS sends the subscription ID as data.id (a string like "123456")
+  // and also mirrors it inside attributes as subscription_id on some events.
+  const subscriptionId: string =
+    String(payload.data?.id ?? attributes.subscription_id ?? attributes.id ?? '');
+
 
   if (!userId) {
     return NextResponse.json({ received: true });
