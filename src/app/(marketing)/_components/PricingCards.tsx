@@ -1,0 +1,212 @@
+"use client";
+
+import { useState } from "react";
+import Link from "next/link";
+import { Check, Minus, Mail } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
+
+export type FeatureItem = { text: string; limitation?: true };
+
+export const FREE_FEATURES: FeatureItem[] = [
+  { text: "Unlimited testimonials" },
+  { text: "1 collection form" },
+  { text: "1 embed widget" },
+  { text: "Grid layout" },
+  { text: "Custom questions on your form" },
+  { text: "Public reviews page (/p/you)" },
+  { text: "Custom widget colors" },
+  { text: "3 video testimonials per project" },
+  { text: "Contains Vouch branding", limitation: true },
+];
+
+export const PRO_FEATURES: string[] = [
+  "Everything in Free",
+  "Unlimited forms and embed widgets",
+  "Unlimited video testimonials",
+  "Google Review and LinkedIn nudges",
+  "Image cards for social sharing",
+  "Carousel, wall of love, and list layouts",
+  "React component embed",
+  "CSV export of testimonials",
+  "Form cloning",
+  "Custom public page address",
+  "Remove Vouch branding",
+];
+
+export const AGENCY_FEATURES: string[] = [
+  "Everything in Pro",
+  "Client report links for clients",
+  "Priority email support",
+  "Custom onboarding call",
+];
+
+export function PricingCards() {
+  const [billing, setBilling] = useState<'monthly' | 'yearly'>('monthly');
+
+  return (
+    <div className="max-w-5xl mx-auto">
+      {/* Billing toggle */}
+      <div className="flex justify-center mb-8">
+        <div className="flex items-center gap-1 bg-gray-100 rounded-full p-1">
+          <button
+            onClick={() => setBilling('monthly')}
+            className={cn(
+              'px-4 py-1.5 rounded-full text-sm font-medium transition-all',
+              billing === 'monthly'
+                ? 'bg-white shadow-sm text-gray-900'
+                : 'text-gray-700 hover:text-gray-900'
+            )}
+          >
+            Monthly
+          </button>
+          <button
+            onClick={() => setBilling('yearly')}
+            className={cn(
+              'px-4 py-1.5 rounded-full text-sm font-medium transition-all flex items-center gap-2',
+              billing === 'yearly'
+                ? 'bg-white shadow-sm text-gray-900'
+                : 'text-gray-700 hover:text-gray-900'
+            )}
+          >
+            Yearly
+            <span className="text-xs font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full">
+              2 months free
+            </span>
+          </button>
+        </div>
+      </div>
+
+    <div className="grid md:grid-cols-3 gap-6">
+      {/* Free */}
+      <div>
+        <div className="flex flex-col p-6 bg-white border border-gray-200 rounded-2xl h-full">
+          <div className="mb-6">
+            <p className="text-sm font-semibold text-gray-500 mb-1">Free</p>
+            <div className="flex items-end gap-1.5 mb-1">
+              <span className="text-4xl font-bold text-gray-900">$0</span>
+              <span className="text-gray-400 mb-1">/month</span>
+            </div>
+            <p className="text-sm text-gray-400">
+              Forever free. No credit card needed.
+            </p>
+          </div>
+          <ul className="space-y-3 flex-1 mb-7">
+            {FREE_FEATURES.map((f) => (
+              <li
+                key={f.text}
+                className="flex items-start gap-2.5 text-sm"
+              >
+                {f.limitation ? (
+                  <Minus className="w-4 h-4 text-gray-300 mt-0.5 flex-shrink-0" />
+                ) : (
+                  <Check className="w-4 h-4 text-gray-400 mt-0.5 flex-shrink-0" />
+                )}
+                <span className={f.limitation ? "text-gray-400" : "text-gray-600"}>
+                  {f.text}
+                </span>
+              </li>
+            ))}
+          </ul>
+          <Button
+            asChild
+            variant="outline"
+            className="w-full rounded-xl border-gray-200 text-gray-700 hover:border-gray-300"
+          >
+            <Link href="/signup">Start for free</Link>
+          </Button>
+        </div>
+      </div>
+
+      {/* Pro */}
+      <div>
+        <div className="relative flex flex-col p-6 bg-white border-2 border-indigo-500 rounded-2xl shadow-xl shadow-indigo-100 h-full">
+          <div className="absolute -top-3.5 left-1/2 -translate-x-1/2">
+            <div className="px-4 py-1 bg-indigo-600 rounded-full text-white text-xs font-semibold shadow-md">
+              Most Popular
+            </div>
+          </div>
+          <div className="mb-6 mt-2">
+            <p className="text-sm font-semibold text-indigo-600 mb-1">Pro</p>
+            <div className="flex items-end gap-1.5 mb-1">
+              <span className="text-4xl font-bold text-gray-900">
+                {billing === 'yearly' ? '$190' : '$19'}
+              </span>
+              <span className="text-gray-400 mb-1">
+                {billing === 'yearly' ? '/year' : '/month'}
+              </span>
+            </div>
+            <p className="text-sm text-gray-400">
+              {billing === 'yearly' ? '$15.83/mo, billed annually.' : 'Billed monthly.'}
+            </p>
+          </div>
+          <ul className="space-y-3 flex-1 mb-7">
+            {PRO_FEATURES.map((f) => (
+              <li
+                key={f}
+                className="flex items-start gap-2.5 text-sm text-gray-700"
+              >
+                <Check className="w-4 h-4 text-indigo-500 mt-0.5 flex-shrink-0" />
+                {f}
+              </li>
+            ))}
+          </ul>
+          <Button
+            asChild
+            className="w-full rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white shadow-md shadow-indigo-100"
+          >
+            <Link href={`/signup?plan=pro${billing === 'yearly' ? '&billing=yearly' : ''}`}>
+              Get started with Pro
+            </Link>
+          </Button>
+          <p className="text-xs text-gray-400 mt-3">
+            Cancel anytime.
+          </p>
+        </div>
+      </div>
+
+      {/* Agency */}
+      <div>
+        <div className="flex flex-col p-6 bg-slate-950 border border-slate-800 rounded-2xl h-full">
+          <div className="mb-6">
+            <p className="text-sm font-semibold text-slate-400 mb-1">Agency</p>
+            <div className="flex items-end gap-1.5 mb-1">
+              <span className="text-4xl font-bold text-white">$49</span>
+              <span className="text-slate-400 mb-1">/month</span>
+            </div>
+            <p className="text-sm text-slate-500">
+              For teams managing multiple client accounts.
+            </p>
+          </div>
+          <ul className="space-y-3 flex-1 mb-7">
+            {AGENCY_FEATURES.map((f) => (
+              <li
+                key={f}
+                className="flex items-start gap-2.5 text-sm text-slate-300"
+              >
+                <Check className="w-4 h-4 text-indigo-400 mt-0.5 flex-shrink-0" />
+                {f}
+              </li>
+            ))}
+          </ul>
+          <Button
+            asChild
+            variant="outline"
+            className="w-full rounded-xl border-slate-700 text-slate-300 hover:bg-slate-800 hover:text-white bg-transparent"
+          >
+            <a href={`mailto:${process.env.NEXT_PUBLIC_SUPPORT_EMAIL ?? 'hello@example.com'}?subject=Agency%20Plan`}>
+              <Mail className="w-4 h-4 mr-2" />
+              Get in touch
+            </a>
+          </Button>
+          <p className="text-xs text-slate-500 mt-3">
+            Custom pricing available for larger teams.
+          </p>
+        </div>
+      </div>
+    </div>
+    </div>
+  );
+}
+
+export default PricingCards;

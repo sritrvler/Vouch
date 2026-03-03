@@ -5,7 +5,7 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import { Check, X, Zap, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { PricingCards } from "../page";
+import { PricingCards } from "../_components/PricingCards";
 
 /* ─────────────────────────────────────────────────
    Feature comparison table data
