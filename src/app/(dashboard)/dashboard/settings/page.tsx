@@ -836,12 +836,11 @@ function SettingsInner() {
             </Section>
 
             {/* Colors */}
-            <Section title="Colors" description="Applied to your collection form, testimonial wall, and client report.">
+            <Section title="Colors" description="Brand color is used for accents everywhere. Background and text only affect your collection form.">
               <div className="space-y-5">
-                {/* Button Color */}
+                {/* Brand Color */}
                 <div className="space-y-2">
-                  <Label className="text-sm font-medium">Button Color</Label>
-                  <p className="text-xs text-muted-foreground">Buttons, stars, progress indicators on your collection form, testimonial wall, and report.</p>
+                  <Label className="text-sm font-medium">Brand Color</Label>
                   <div className="flex items-center gap-3 flex-wrap">
                     {ACCENT_PRESETS.map((c) => (
                       <button
@@ -889,7 +888,6 @@ function SettingsInner() {
                 {/* Form Background Color */}
                 <div className="space-y-2">
                   <Label className="text-sm font-medium">Form Background</Label>
-                  <p className="text-xs text-muted-foreground">Background color for your collection form page.</p>
                   <div className="flex items-center gap-3">
                     {[
                       { label: 'White', value: '#ffffff' },
@@ -941,10 +939,9 @@ function SettingsInner() {
                   </div>
                 </div>
 
-                {/* Text Color */}
+                {/* Form Text Color */}
                 <div className="space-y-2">
-                  <Label className="text-sm font-medium">Text Color</Label>
-                  <p className="text-xs text-muted-foreground">Headings, labels, and body text on your collection form and testimonial wall.</p>
+                  <Label className="text-sm font-medium">Form Text</Label>
                   <div className="flex items-center gap-3">
                     {[
                       { label: 'Near Black', value: '#1a1a1a' },
