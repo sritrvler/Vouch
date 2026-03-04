@@ -154,6 +154,8 @@ Suggest `/compact` only when mid-task continuation is needed and stopping would 
 
 **NEVER write code before completing all 5 steps.** If the user gives a task immediately, acknowledge it, complete the 5 steps first, then begin. This startup cost is small compared to the cost of re-discovering context or repeating mistakes.
 
+**After completing all 5 steps, say exactly:** `I FOLLOWED THE RULES` — this signals to the user that the session start gate was completed. Do not say this phrase unless all 5 steps were genuinely done.
+
 **Before suggesting /clear or session end (HARD GATE: do not suggest /clear until ALL 5 are done):**
 1. Update `tasks/todo.md`: check off completed items, add new findings, write a handoff note at the TOP titled "## Session Handoff [date]" with: what was done, what's next, what to watch out for. The handoff must be specific enough that a fresh session can execute without asking questions.
 2. Update `tasks/lessons.md`: add any new patterns, mistakes, or technical discoveries from this session. If nothing new was learned, explicitly write "No new lessons this session" so it's clear this step was not skipped.
@@ -162,6 +164,8 @@ Suggest `/compact` only when mid-task continuation is needed and stopping would 
 5. Self-check: re-read the handoff note you just wrote. Ask yourself: "If I lost all memory right now and only had tasks/todo.md, tasks/lessons.md, and MEMORY.md, could I continue?" If no, the handoff is incomplete. Fix it before suggesting /clear.
 
 **NEVER suggest /clear or /compact without completing all 5 steps above.** If you catch yourself about to suggest it without doing them, stop and do them first. This is the #1 process failure from past sessions.
+
+**After completing all 5 steps, say exactly:** `I FOLLOWED THE RULES` — this signals to the user that the session end gate was completed. Do not say this phrase unless all 5 steps were genuinely done. The user will not approve /clear without seeing this phrase.
 
 **Rule: never let knowledge die in a session.** If you learned it, write it down. If you fixed it, mark it done. If it is next, describe it in enough detail that a fresh session can execute without asking questions.
 
@@ -177,6 +181,8 @@ Before writing any code for a task, answer these questions explicitly. Do not sk
 
 If any answer is "no" or "skipped," pause and address it before writing code.
 
+**After answering all 5 questions, say exactly:** `I FOLLOWED THE RULES` — this signals to the user that pre-implementation validation was completed. Do not say this phrase unless all 5 questions were explicitly answered.
+
 ### Post-Implementation Checklist (Mandatory Before Marking Done)
 
 After completing code changes, before reporting completion:
@@ -186,6 +192,8 @@ After completing code changes, before reporting completion:
 3. **End-to-end flow?** For features touching the customer journey: test the full flow (form > submit > approve > embed > verify).
 4. **Security spot check?** For new routes/APIs: test auth bypass, verify RLS, check error messages don't leak internals.
 5. **Lessons captured?** Any new patterns, mistakes, or discoveries written to `tasks/lessons.md`.
+
+**After completing all 5 checks, say exactly:** `I FOLLOWED THE RULES` — this signals to the user that post-implementation validation was completed. Do not say this phrase unless all 5 checks were genuinely done.
 
 ### Response Style
 
