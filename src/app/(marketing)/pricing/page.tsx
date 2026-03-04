@@ -256,7 +256,7 @@ export default function PricingPage() {
           <h2 className="text-2xl sm:text-3xl font-bold mb-3">
             Start collecting testimonials today
           </h2>
-          <p className="text-indigo-200 mb-7">
+          <p className="text-indigo-100 mb-7">
             Free forever. Your first testimonial could arrive in the next hour.
           </p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
@@ -278,7 +278,7 @@ export default function PricingPage() {
               <Link href="/signup?plan=pro">Upgrade to Pro</Link>
             </Button>
           </div>
-          <p className="text-xs text-indigo-300 mt-5">
+          <p className="text-xs text-indigo-100 mt-5">
             No credit card required to start
           </p>
           </div>

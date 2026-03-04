@@ -494,7 +494,7 @@ function BottomCTA() {
               Ship a testimonial section today.
               <br className="hidden sm:block" /> Branded, fast, and live in 15 minutes.
             </h2>
-            <p className="text-indigo-200 text-lg mb-9 max-w-lg mx-auto">
+            <p className="text-indigo-100 text-lg mb-9 max-w-lg mx-auto">
               Free to start. Set up in 15 minutes. Upgrade when your work grows
               and it covers everything you build.
             </p>
@@ -519,7 +519,7 @@ function BottomCTA() {
               </Button>
             </div>
 
-            <p className="text-indigo-300/70 text-xs mt-6">
+            <p className="text-indigo-200 text-xs mt-6">
               Free forever · No credit card required to start
             </p>
           </div>
