@@ -134,7 +134,7 @@ function SettingsInner() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const searchParams = useSearchParams();
   const router = useRouter();
-  const { selectedProject, selectedProjectId, plan, refetchProjects, switchProject, loading: projectsLoading } = useProject();
+  const { projects, selectedProject, selectedProjectId, plan, refetchProjects, switchProject, loading: projectsLoading } = useProject();
 
   // ── Auth state ─────────────────────────────────────────────────────────────
   const [userEmail, setUserEmail] = useState('');
@@ -383,6 +383,12 @@ function SettingsInner() {
         if (error) throw error;
         await refetchProjects();
       } else {
+        // Free plan: max 1 project
+        if (plan === 'free' && projects.length >= 1) {
+          toast.error('Free plan allows 1 project. Upgrade to Pro for unlimited projects.');
+          setSavingProject(false);
+          return;
+        }
         const { data, error } = await supabase
           .from('projects')
           .insert({ ...payload, user_id: user.id })
@@ -408,7 +414,7 @@ function SettingsInner() {
     } finally {
       setSavingProject(false);
     }
-  }, [supabase, project, projectName, projectSlug, projectWebsite, googleReviewUrl, linkedinUrl, accentColor, fontFamily, fontUrl, logoPreview, subscription, refetchProjects, switchProject, isNewProject, router]);
+  }, [supabase, project, projects, plan, projectName, projectSlug, projectWebsite, googleReviewUrl, linkedinUrl, accentColor, fontFamily, fontUrl, logoPreview, subscription, refetchProjects, switchProject, isNewProject, router]);
 
   // ── Generate report token ─────────────────────────────────────────────────
   const handleGenerateReportToken = useCallback(async () => {
