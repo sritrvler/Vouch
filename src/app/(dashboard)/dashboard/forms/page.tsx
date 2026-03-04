@@ -153,7 +153,7 @@ function QRDialog({
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-w-sm rounded-2xl">
+      <DialogContent className="max-w-sm rounded-2xl overflow-hidden max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <QrCode className="size-5 text-indigo-500" />
@@ -169,7 +169,7 @@ function QRDialog({
             <QRCodeCanvas
               ref={canvasRef}
               value={formLink}
-              size={220}
+              size={180}
               level="M"
               includeMargin={false}
             />
