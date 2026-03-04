@@ -9,9 +9,18 @@
 
   // ── Helpers ──────────────────────────────────────────────────────────────────
 
+  function safeColor(val, fallback) {
+    if (!val) return fallback;
+    if (/^#[0-9a-fA-F]{3,8}$/.test(val)) return val;
+    if (/^(rgb|hsl)a?\([^)]+\)$/.test(val)) return val;
+    return fallback;
+  }
+
   function timeAgo(dateStr) {
-    var now = Date.now();
+    if (!dateStr) return '';
     var then = new Date(dateStr).getTime();
+    if (isNaN(then)) return '';
+    var now = Date.now();
     var diff = Math.max(0, now - then);
     var sec = Math.floor(diff / 1000);
     if (sec < 60) return 'just now';
@@ -66,8 +75,9 @@
   }
 
   function stars(rating, color) {
+    var r = typeof rating === 'number' ? rating : 0;
     var html = '<span style="display:flex;gap:2px">';
-    for (var i = 1; i <= 5; i++) html += starSvg(i <= rating, color);
+    for (var i = 1; i <= 5; i++) html += starSvg(i <= r, color);
     html += '</span>';
     return html;
   }
@@ -94,7 +104,7 @@
       return (
         '<span style="position:relative;width:36px;height:36px;flex-shrink:0;display:inline-block">' +
         '<img src="https://logo.clearbit.com/' + esc(domain) +
-        '" alt="" onerror="this.style.display=\'none\';this.nextElementSibling.style.display=\'flex\'" ' +
+        '" alt="" data-vouch-fallback ' +
         'style="width:36px;height:36px;border-radius:8px;object-fit:contain;background:#f8fafc;padding:4px;border:1px solid #f1f5f9;display:block">' +
         '<span style="display:none;position:absolute;inset:0;width:36px;height:36px;border-radius:50%;background:' +
         primaryColor + '20;color:' + primaryColor +
@@ -112,9 +122,9 @@
   // ── Card renderer ────────────────────────────────────────────────────────────
 
   function renderCard(t, theme, compact) {
-    var pc = theme.primaryColor || '#6366F1';
-    var tc = theme.textColor || '#0f172a';
-    var bg = theme.backgroundColor || '#ffffff';
+    var pc = safeColor(theme.primaryColor, '#6366F1');
+    var tc = safeColor(theme.textColor, '#0f172a');
+    var bg = safeColor(theme.backgroundColor, '#ffffff');
     var cs = theme.cardStyle || 'shadow';
     var border = cs === 'border' ? '1px solid #e2e8f0' : 'none';
     var shadow = cs === 'shadow' ? '0 1px 3px rgba(0,0,0,0.08),0 1px 2px rgba(0,0,0,0.04)' : 'none';
@@ -123,33 +133,43 @@
     var authorLine = [t.author_role, t.author_company].filter(Boolean).join(', ');
 
     // Golden sentence
+    var content = t.content || '';
     var golden = t.golden_sentence;
-    var hasGolden = !!(golden && t.content && t.content.indexOf(golden) !== -1);
+    var hasGolden = !!(golden && content && content.indexOf(golden) !== -1);
     var quoteHtml = '';
     if (hasGolden) {
-      var idx = t.content.indexOf(golden);
-      var before = t.content.slice(0, idx);
-      var after = t.content.slice(idx + golden.length);
+      var idx = content.indexOf(golden);
+      var before = content.slice(0, idx);
+      var after = content.slice(idx + golden.length);
       quoteHtml =
         (before ? '<span style="color:#9ca3af">' + esc(before) + '</span>' : '') +
         '<span style="color:' + tc + ';font-weight:600">' + esc(golden) + '</span>' +
         (after ? '<span style="color:#9ca3af">' + esc(after) + '</span>' : '');
     } else {
-      quoteHtml = '<span style="color:#374151">' + esc(t.content) + '</span>';
+      quoteHtml = '<span style="color:#374151">' + esc(content) + '</span>';
     }
+
+    // Skip card if no content at all
+    if (!content) return '';
 
     // Verification
     var src = t.source_url || '';
     var isX = src.indexOf('twitter.com') !== -1 || src.indexOf('x.com') !== -1;
     var isLI = src.indexOf('linkedin.com') !== -1;
-    var vDate = new Date(t.created_at).toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+    var vDate = '';
+    if (t.created_at) {
+      var d = new Date(t.created_at);
+      if (!isNaN(d.getTime())) {
+        vDate = d.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+      }
+    }
 
     var verifyHtml = '';
     if (isX || isLI) {
       verifyHtml =
         '<a href="' + esc(src) + '" target="_blank" rel="noopener noreferrer" style="flex-shrink:0;color:#9ca3af;text-decoration:none">' +
         (isX ? xIcon : linkedInIcon) + '</a>';
-    } else {
+    } else if (vDate) {
       verifyHtml =
         '<span style="font-size:10px;color:#9ca3af;flex-shrink:0;white-space:nowrap">&#10003; ' + esc(vDate) + '</span>';
     }
@@ -192,7 +212,10 @@
         esc(t.metric_label) + '</span>';
     }
     if (theme.showDate !== false) {
-      html += '<span style="font-size:10px;color:#9ca3af;margin-left:auto">' + timeAgo(t.created_at) + '</span>';
+      var ago = timeAgo(t.created_at);
+      if (ago) {
+        html += '<span style="font-size:10px;color:#9ca3af;margin-left:auto">' + ago + '</span>';
+      }
     }
     html += '</div>';
 
@@ -218,22 +241,23 @@
     if (!t) t = testimonials[0];
     if (!t) return '';
 
-    var pc = theme.primaryColor || '#6366F1';
-    var tc = theme.textColor || '#0f172a';
-    var bg = theme.backgroundColor || '#ffffff';
+    var pc = safeColor(theme.primaryColor, '#6366F1');
+    var tc = safeColor(theme.textColor, '#0f172a');
+    var bg = safeColor(theme.backgroundColor, '#ffffff');
     var authorLine = [t.author_role, t.author_company].filter(Boolean).join(', ');
 
+    var content = t.content || '';
     var golden = t.golden_sentence;
-    var hasGolden = !!(golden && t.content && t.content.indexOf(golden) !== -1);
+    var hasGolden = !!(golden && content && content.indexOf(golden) !== -1);
     var quoteHtml = '';
     if (hasGolden) {
-      var idx = t.content.indexOf(golden);
+      var idx = content.indexOf(golden);
       quoteHtml =
-        (t.content.slice(0, idx) ? '<span style="color:#9ca3af">' + esc(t.content.slice(0, idx)) + '</span>' : '') +
+        (content.slice(0, idx) ? '<span style="color:#9ca3af">' + esc(content.slice(0, idx)) + '</span>' : '') +
         '<span style="color:' + tc + ';font-weight:600">' + esc(golden) + '</span>' +
-        (t.content.slice(idx + golden.length) ? '<span style="color:#9ca3af">' + esc(t.content.slice(idx + golden.length)) + '</span>' : '');
+        (content.slice(idx + golden.length) ? '<span style="color:#9ca3af">' + esc(content.slice(idx + golden.length)) + '</span>' : '');
     } else {
-      quoteHtml = esc(t.content);
+      quoteHtml = esc(content);
     }
 
     var src = t.source_url || '';
@@ -282,6 +306,8 @@
   }
 
   function renderCarousel(testimonials, theme) {
+    // Fall back to single layout for 1 testimonial (carousel needs 2+)
+    if (testimonials.length < 2) return renderSingle(testimonials, theme);
     var doubled = testimonials.concat(testimonials);
     var html =
       '<style>' +
@@ -298,7 +324,7 @@
   }
 
   function renderWall(testimonials, theme) {
-    var html = '<div style="columns:3;column-gap:16px;padding:4px">';
+    var html = '<div style="columns:280px;column-gap:16px;padding:4px">';
     for (var i = 0; i < testimonials.length; i++) {
       html += '<div style="break-inside:avoid;margin-bottom:16px">' + renderCard(testimonials[i], theme, true) + '</div>';
     }
@@ -324,17 +350,17 @@
     var reviews = [];
     for (var i = 0; i < testimonials.length; i++) {
       var t = testimonials[i];
-      if (t.rating > 0) {
+      if (typeof t.rating === 'number' && t.rating > 0) {
         totalRating += t.rating;
         ratedCount++;
+        reviews.push({
+          '@type': 'Review',
+          author: { '@type': 'Person', name: t.author_name },
+          reviewRating: { '@type': 'Rating', ratingValue: t.rating, bestRating: 5 },
+          reviewBody: t.content || '',
+          datePublished: t.created_at ? t.created_at.split('T')[0] : undefined,
+        });
       }
-      reviews.push({
-        '@type': 'Review',
-        author: { '@type': 'Person', name: t.author_name },
-        reviewRating: { '@type': 'Rating', ratingValue: t.rating, bestRating: 5 },
-        reviewBody: t.content,
-        datePublished: t.created_at ? t.created_at.split('T')[0] : undefined,
-      });
     }
     if (!ratedCount) return;
 
@@ -362,14 +388,59 @@
     document.head.appendChild(tag);
   }
 
+  // ── Post-render fixups (CSP-safe, after layout) ────────────────────────────
+
+  function postRenderFixups(shadow, theme) {
+    requestAnimationFrame(function () {
+      // Clearbit logo fallback (CSP-safe, no inline onerror)
+      var fallbackImgs = shadow.querySelectorAll('img[data-vouch-fallback]');
+      for (var i = 0; i < fallbackImgs.length; i++) {
+        (function (img) {
+          img.addEventListener('error', function () {
+            img.style.display = 'none';
+            var sib = img.nextElementSibling;
+            if (sib) sib.style.display = 'flex';
+          });
+          // If already failed before listener attached
+          if (img.complete && img.naturalWidth === 0) {
+            img.style.display = 'none';
+            var sib = img.nextElementSibling;
+            if (sib) sib.style.display = 'flex';
+          }
+        })(fallbackImgs[i]);
+      }
+
+      // Read-more expander (needs layout to measure scrollHeight)
+      var pc = safeColor(theme.primaryColor, '#6366F1');
+      var quotes = shadow.querySelectorAll('blockquote p');
+      for (var j = 0; j < quotes.length; j++) {
+        (function (p) {
+          if (p.scrollHeight > p.clientHeight + 2) {
+            var btn = document.createElement('button');
+            btn.textContent = 'Read more';
+            btn.style.cssText =
+              'display:inline-block;font-size:11px;color:' + pc +
+              ';background:none;border:none;padding:4px 0 0;cursor:pointer;font-weight:600';
+            btn.addEventListener('click', function () {
+              p.style.overflow = 'visible';
+              p.style.display = 'block';
+              p.style.webkitLineClamp = 'unset';
+              btn.style.display = 'none';
+            });
+            p.parentNode.appendChild(btn);
+          }
+        })(quotes[j]);
+      }
+    });
+  }
+
   // ── Main render ──────────────────────────────────────────────────────────────
 
   function renderWidget(el, data) {
     var w = data.widget;
     var testimonials = data.testimonials || [];
     var theme = w.theme || {};
-    var bg = theme.backgroundColor || '#ffffff';
-    var tc = theme.textColor || '#0f172a';
+    var tc = safeColor(theme.textColor, '#0f172a');
 
     // Create shadow root
     var shadow = el.attachShadow({ mode: 'open' });
@@ -409,34 +480,20 @@
     if (!w.hideBranding) {
       var brand = document.createElement('div');
       brand.style.cssText = 'text-align:center;margin-top:16px;padding-top:12px;border-top:1px solid #f1f5f9';
-      brand.innerHTML =
-        '<a href="' + base + '/via" target="_blank" rel="noopener noreferrer" ' +
-        'style="font-size:11px;color:#94a3b8;text-decoration:none">Powered by Vouch</a>';
+      var brandLink = document.createElement('a');
+      brandLink.href = base + '/via';
+      brandLink.target = '_blank';
+      brandLink.rel = 'noopener noreferrer';
+      brandLink.style.cssText = 'font-size:11px;color:#94a3b8;text-decoration:none';
+      brandLink.textContent = 'Powered by Vouch';
+      brand.appendChild(brandLink);
       container.appendChild(brand);
     }
 
     shadow.appendChild(container);
 
-    // Read-more expander
-    var quotes = shadow.querySelectorAll('blockquote p');
-    for (var i = 0; i < quotes.length; i++) {
-      (function (p) {
-        if (p.scrollHeight > p.clientHeight + 2) {
-          var btn = document.createElement('button');
-          btn.textContent = 'Read more';
-          btn.style.cssText =
-            'display:inline-block;font-size:11px;color:' + (theme.primaryColor || '#6366F1') +
-            ';background:none;border:none;padding:4px 0 0;cursor:pointer;font-weight:600';
-          btn.addEventListener('click', function () {
-            p.style.overflow = 'visible';
-            p.style.display = 'block';
-            p.style.webkitLineClamp = 'unset';
-            btn.style.display = 'none';
-          });
-          p.parentNode.appendChild(btn);
-        }
-      })(quotes[i]);
-    }
+    // Post-render: avatar fallbacks and read-more buttons (after layout)
+    postRenderFixups(shadow, theme);
 
     // Inject JSON-LD schema into host page
     injectSchema(testimonials, w.name);
@@ -449,7 +506,7 @@
     if (!id || el._vouchLoaded) return;
     el._vouchLoaded = true;
 
-    fetch(base + '/api/testimonials/widget/' + id)
+    fetch(base + '/api/testimonials/widget/' + encodeURIComponent(id))
       .then(function (res) { return res.json(); })
       .then(function (data) {
         if (data.error) return;
