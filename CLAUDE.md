@@ -180,7 +180,7 @@ Before writing any code for a task, answer these questions explicitly. Do not sk
 4. **Security considered?** For any new route, API, or form: auth gates, input validation, RLS, rate limiting. Reference the test-and-ship security checklist.
 5. **Interface design applied?** For any UI change: persona intent stated, subtle layering principles followed, token architecture consistent.
 6. **Test scenarios enumerated?** Using the Test Scenario Checklist below, list every scenario that applies to this feature. Write them out explicitly. This becomes the verification list for post-implementation. Skip a category only if it genuinely does not apply, and say why.
-7. **Persona-driven UI selection?** For any UI component choice (layout, navigation, controls, information density), write a Persona UI Intent for EACH persona affected. Every UI decision must be justified per persona, not defaulted. See the Persona-Driven UI Selection section below.
+7. **Persona-driven UI selection + business impact?** For any UI component choice, write a Persona UI Intent for EACH persona AND a Business Impact Assessment (retention, conversion, time to value, churn risk, expansion, referral). Both are required. A UI that serves users but ignores business dies. A UI that serves business but ignores users churns. See the Persona-Driven UI Selection section below.
 
 If any answer is "no" or "skipped," pause and address it before writing code.
 
@@ -201,13 +201,38 @@ Feel: [how this interaction should feel to THEM]
 UI evaluation: [does this specific component/pattern serve THIS persona? why or why not?]
 ```
 
+**Then, for EVERY UI decision, write a Business Impact Assessment:**
+
+```
+BUSINESS IMPACT ASSESSMENT:
+1. Retention: Does this make the product stickier? Does it reduce friction for power users (who pay)?
+   [specific answer for this feature]
+2. Conversion: Does the free-to-paid boundary feel natural or punishing? Is the free tier generous
+   enough to demonstrate value before gating? Does the upgrade prompt appear at a moment of
+   motivation (wanting more) vs frustration (being blocked)?
+   [specific answer]
+3. Time to value: How many steps from signup to "aha moment"? Does this UI choice add or remove steps?
+   [specific answer]
+4. Churn risk: What in this UI could confuse, frustrate, or make a paying user feel they're not
+   getting their money's worth? What would make them cancel?
+   [specific answer]
+5. Expansion: Does this UI naturally expose higher-tier features? Does a Pro user see why Agency
+   would be valuable? Does usage of this feature create data/workflows that make leaving harder?
+   [specific answer]
+6. Referral: Is there anything in this flow that could prompt sharing, word-of-mouth, or "built with
+   Vouch" visibility? If not, is there a natural place to add it without being annoying?
+   [specific answer]
+```
+
+**User and business are not in conflict.** A delighted user retains and refers. A confused user churns. A user who hits a paywall at the right moment upgrades. A user who hits it too early leaves. Every UI decision is simultaneously a user decision and a business decision.
+
 **The rules:**
 1. NEVER pick a UI pattern because "it's common" or "it matches existing patterns." That is defaulting, not designing.
 2. If a pattern works for Persona A but fails for Persona B, you must find a solution that works for BOTH, or present the tradeoff to the user for a decision.
 3. Consider device constraints per persona: mobile (375px, one thumb, touch targets 44px+), tablet (768px), desktop (1920px). If any persona is primarily mobile, the mobile experience is not optional.
 4. Consider information density per persona: power users (agency managing 10 clients) need different density than occasional users (freelancer with 2 widgets).
 5. Consider cognitive load per persona: a busy founder between meetings needs different complexity than a developer customizing settings.
-6. **Business impact check:** Does this UI choice support retention, reduce churn, encourage upgrades? A confused user churns. A delighted user refers.
+6. **Business impact is not a checkbox at the end.** It is evaluated alongside persona intents, not after. If you wrote all persona intents and then added "Business: looks fine" as an afterthought, you skipped this step.
 
 **Red flags that mean you defaulted instead of designed:**
 1. "This matches the existing pattern" (consistency is good, but don't use it as an excuse to skip thinking)
@@ -215,6 +240,8 @@ UI evaluation: [does this specific component/pattern serve THIS persona? why or 
 3. "This is clean/simple" (clean for which persona on which device?)
 4. You can swap your choice for any common alternative and the experience feels the same
 5. You picked the UI before writing the persona intents
+6. Business impact says "supports retention" without explaining HOW specifically
+7. Upgrade prompt copy/placement was copied from another page without evaluating timing and motivation
 
 ### Test Scenario Checklist (referenced by pre-implementation step 6)
 
