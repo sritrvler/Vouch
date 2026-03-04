@@ -103,7 +103,7 @@ function ComparisonTable() {
                 <tr key={i} className="border-b border-gray-50">
                   <td
                     colSpan={4}
-                    className="py-4 pr-4 text-xs font-semibold text-gray-400 uppercase tracking-widest bg-gray-50/50 pl-1"
+                    className="py-4 pr-4 text-xs font-semibold text-gray-500 uppercase tracking-widest bg-gray-50/50 pl-1"
                   >
                     {row.label}
                   </td>

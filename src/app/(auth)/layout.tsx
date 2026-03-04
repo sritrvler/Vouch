@@ -85,9 +85,9 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
       </div>
 
       {/* Right: form */}
-      <div className="flex flex-1 items-center justify-center bg-background px-4 py-12">
+      <main className="flex flex-1 items-center justify-center bg-background px-4 py-12">
         {children}
-      </div>
+      </main>
       <Toaster richColors position="top-right" />
     </div>
   );

@@ -6,7 +6,6 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { motion } from 'framer-motion';
 import { toast } from 'sonner';
 import { Loader2, Mail, Lock, User, Eye, EyeOff } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
@@ -119,12 +118,7 @@ function SignupForm() {
 
   if (emailSent) {
     return (
-      <motion.div
-        initial={{ opacity: 0, y: 16 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.3, ease: 'easeOut' }}
-        className="w-full max-w-sm px-4"
-      >
+      <div className="w-full max-w-sm px-4">
         <div className="bg-white rounded-2xl shadow-lg border border-border/50 p-8 text-center">
           <div className="mb-4 flex justify-center">
             <div className="w-14 h-14 rounded-full bg-accent flex items-center justify-center">
@@ -140,17 +134,12 @@ function SignupForm() {
             <Link href="/login">Back to sign in</Link>
           </Button>
         </div>
-      </motion.div>
+      </div>
     );
   }
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 16 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.3, ease: 'easeOut' }}
-      className="w-full max-w-sm px-4"
-    >
+    <div className="w-full max-w-sm px-4">
       {/* Card */}
       <div className="bg-white rounded-2xl shadow-lg border border-border/50 p-8">
         {/* Logo, shown only on mobile where the brand panel is hidden */}
@@ -273,7 +262,7 @@ function SignupForm() {
               <button
                 type="button"
                 onClick={() => setShowPassword((v) => !v)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors p-1"
                 aria-label={showPassword ? 'Hide password' : 'Show password'}
               >
                 {showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
@@ -321,6 +310,6 @@ function SignupForm() {
           .
         </p>
       </div>
-    </motion.div>
+    </div>
   );
 }

@@ -5,7 +5,6 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import Link from 'next/link';
-import { motion } from 'framer-motion';
 import { toast } from 'sonner';
 import { Loader2, Mail, ArrowLeft, Check } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
@@ -54,12 +53,7 @@ export default function ForgotPasswordPage() {
 
   if (sent) {
     return (
-      <motion.div
-        initial={{ opacity: 0, y: 16 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.3, ease: 'easeOut' }}
-        className="w-full max-w-sm px-4"
-      >
+      <div className="w-full max-w-sm px-4">
         <div className="bg-white rounded-2xl shadow-lg border border-border/50 p-8 text-center">
           <div className="mb-4 flex justify-center">
             <div className="w-14 h-14 rounded-full bg-emerald-50 flex items-center justify-center">
@@ -75,17 +69,12 @@ export default function ForgotPasswordPage() {
             <Link href="/login">Back to sign in</Link>
           </Button>
         </div>
-      </motion.div>
+      </div>
     );
   }
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 16 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.3, ease: 'easeOut' }}
-      className="w-full max-w-sm px-4"
-    >
+    <div className="w-full max-w-sm px-4">
       <div className="bg-white rounded-2xl shadow-lg border border-border/50 p-8">
         <div className="mb-8 text-center lg:hidden">
           <span className="text-3xl font-bold tracking-tight text-primary">Vouch</span>
@@ -146,6 +135,6 @@ export default function ForgotPasswordPage() {
           </Link>
         </p>
       </div>
-    </motion.div>
+    </div>
   );
 }
