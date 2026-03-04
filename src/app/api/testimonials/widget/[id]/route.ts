@@ -59,7 +59,7 @@ export async function GET(request: NextRequest, { params }: PageProps) {
     const fetchLimit = pinnedIds.length > 0 ? 200 : hardLimit;
     let query = supabase
       .from('testimonials')
-      .select('id, author_name, author_role, author_company, author_avatar_url, rating, content, enhanced_content, featured, source_url, golden_sentence, metric_label, created_at', { count: 'exact' })
+      .select('id, author_name, author_role, author_company, author_avatar_url, rating, content, enhanced_content, featured, source_url, golden_sentence, metric_label, video_url, video_thumbnail_url, email_domain, created_at', { count: 'exact' })
       .eq('project_id', widget.project_id)
       .eq('status', 'approved')
       .order('created_at', { ascending: false })
