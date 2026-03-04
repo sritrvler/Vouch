@@ -4,6 +4,7 @@
 - [ ] **Enable "Confirm email" in Supabase**: Dashboard > Authentication > Providers > Email > toggle "Confirm email" ON.
 - [ ] **Test camera startup speed on another device**: Camera preview in the collection form (step 3) takes 5-10 seconds on dev laptop. Could be a hardware issue. Test on a different device before release. If still slow, investigate further optimizations.
 - [ ] **Test video upload speed on another device/network**: A 3-4 second video upload feels slow. Already optimized the API route (parallelized DB queries, removed redundant createBucket call). Could be dev network/Supabase Storage latency. Test on a different network before release.
+- [ ] **Video playback delay in review step**: After recording, clicking play on the review video takes 5-8 seconds to start. Likely the blob URL or video element buffering issue. Investigate and fix alongside other video issues.
 
 ---
 
