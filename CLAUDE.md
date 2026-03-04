@@ -148,8 +148,9 @@ Suggest `/compact` only when mid-task continuation is needed and stopping would 
 **At session START** (before writing any code):
 1. Read `tasks/todo.md` for the active work queue, context, and next task.
 2. Read `tasks/lessons.md` for patterns and mistakes to avoid.
-3. Understand the WHY (business context, who it hurts, what promise it fulfills) before writing code.
-4. Create a git checkpoint.
+3. Read ALL matching skill files (see Skills table at top of this file). This is not optional.
+4. Understand the WHY (business context, who it hurts, what promise it fulfills) before writing code.
+5. Create a git checkpoint.
 
 **Before suggesting /clear or session end:**
 1. Update `tasks/todo.md`: check off completed items, add new findings, write a handoff note at the top with exact next steps.
@@ -158,6 +159,28 @@ Suggest `/compact` only when mid-task continuation is needed and stopping would 
 4. The next session must be able to continue without re-discovering anything.
 
 **Rule: never let knowledge die in a session.** If you learned it, write it down. If you fixed it, mark it done. If it is next, describe it in enough detail that a fresh session can execute without asking questions.
+
+### Pre-Implementation Checklist (Mandatory for Every Task)
+
+Before writing any code for a task, answer these questions explicitly. Do not skip any.
+
+1. **Skills loaded?** Which skill files did you read? List them. If you did not read core-principles + the relevant task skills, stop and read them now.
+2. **Validation pass (core-principles)?** Does this task pass the "matters" test (would users complain if removed)? Does it pass the "80/50" test (80% value with 50% complexity)?
+3. **Persona defined?** Who is the specific human this change is for? Name them. What is their context, device, pain, motivation? (Not "users" or "customers.")
+4. **Security considered?** For any new route, API, or form: auth gates, input validation, RLS, rate limiting. Reference the test-and-ship security checklist.
+5. **Interface design applied?** For any UI change: persona intent stated, subtle layering principles followed, token architecture consistent.
+
+If any answer is "no" or "skipped," pause and address it before writing code.
+
+### Post-Implementation Checklist (Mandatory Before Marking Done)
+
+After completing code changes, before reporting completion:
+
+1. **Build passes?** `npx next build` exits 0.
+2. **Persona test?** Walk through the change as the named persona. Would Sarah Chen (freelance designer) find this intuitive? Would an agency owner managing 5 clients?
+3. **End-to-end flow?** For features touching the customer journey: test the full flow (form > submit > approve > embed > verify).
+4. **Security spot check?** For new routes/APIs: test auth bypass, verify RLS, check error messages don't leak internals.
+5. **Lessons captured?** Any new patterns, mistakes, or discoveries written to `tasks/lessons.md`.
 
 ### Response Style
 

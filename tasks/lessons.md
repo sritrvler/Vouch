@@ -33,3 +33,12 @@ Rules for myself. Read this at session start. Do not repeat these mistakes.
 18. **Test with real user flows, not just code review.** The usability testing in browser caught issues that code reading missed (e.g., form title not rendering despite code looking correct at a glance).
 19. **Parallel subagents for audits save massive time.** Launching 4 code review agents simultaneously was efficient. Use this pattern for any multi-file audit.
 20. **Don't trust subagent claims blindly.** One agent said the image card API route was missing when it actually existed. Always verify critical claims with a direct file check.
+
+## Process Failures (March 4, 2026 session): Prevented by CLAUDE.md Checklists
+
+21. **NEVER skip reading skill files.** I built 21 fixes without reading any of the 5 skill files. The code was fine but the process was wrong. Prevention: CLAUDE.md now has a mandatory pre-implementation checklist that requires listing which skills were read. If the answer is "none," stop.
+22. **NEVER skip persona-based testing.** I verified code worked but never tested as "Sarah Chen, freelance designer" or any named persona. A feature can work technically but fail for the human it's built for. Prevention: post-implementation checklist requires naming the persona you tested as.
+23. **NEVER skip the security spot check.** New routes and API changes went out without checking auth bypass, RLS, or error message leakage. Prevention: post-implementation checklist requires a security spot check for any new route or API.
+24. **NEVER skip validation before building.** I jumped straight to code without confirming each fix passes the "matters" test or "80/50" test. Some fixes might not have been worth the complexity. Prevention: pre-implementation checklist requires explicit validation answers.
+25. **NEVER skip end-to-end flow testing.** Changes to the collect form, widget builder, and embed.js were tested in isolation, not as a connected journey. Prevention: post-implementation checklist requires end-to-end flow testing for features touching the customer journey.
+26. **NEVER skip interface design skill for UI changes.** Widget builder text color picker and card style selector were built with reasonable defaults but without formal persona intent, subtle layering principles, or token consistency checks. Prevention: pre-implementation checklist requires confirming interface design skill was applied for any UI change.
