@@ -401,6 +401,7 @@ export default function FormsPage() {
   const { selectedProjectId: activeProjectId } = useProject();
   const router = useRouter();
   const [forms, setForms] = useState<CollectionForm[]>([]);
+  const [totalFormCount, setTotalFormCount] = useState(0);
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
   const [deletingId, setDeletingId] = useState<string | null>(null);
@@ -428,12 +429,18 @@ export default function FormsPage() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
-      const [formsRes, projectsRes, subRes] = await Promise.all([
-        supabase
-          .from('collection_forms')
-          .select('*, project:projects(name)')
-          .eq('user_id', user.id)
-          .order('created_at', { ascending: false }),
+      let formsQuery = supabase
+        .from('collection_forms')
+        .select('*, project:projects(name)')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false });
+
+      if (activeProjectId) {
+        formsQuery = formsQuery.eq('project_id', activeProjectId);
+      }
+
+      const [formsRes, projectsRes, subRes, totalFormsRes] = await Promise.all([
+        formsQuery,
         supabase
           .from('projects')
           .select('id, name')
@@ -444,10 +451,15 @@ export default function FormsPage() {
           .select('plan')
           .eq('user_id', user.id)
           .single(),
+        supabase
+          .from('collection_forms')
+          .select('id', { count: 'exact', head: true })
+          .eq('user_id', user.id),
       ]);
 
       if (formsRes.error) throw formsRes.error;
       if (projectsRes.error) throw projectsRes.error;
+      setTotalFormCount(totalFormsRes.count ?? 0);
 
       // Fetch submission counts for each form
       const formIds = (formsRes.data ?? []).map((f: CollectionForm) => f.id);
@@ -479,7 +491,7 @@ export default function FormsPage() {
     } finally {
       setLoading(false);
     }
-  }, [supabase]);
+  }, [supabase, activeProjectId]);
 
   useEffect(() => {
     fetchData();
@@ -494,7 +506,7 @@ export default function FormsPage() {
       });
       return;
     }
-    if (userPlan === 'free' && forms.length >= 1) {
+    if (userPlan === 'free' && totalFormCount >= 1) {
       setShowUpgradePrompt(true);
       return;
     }
@@ -504,7 +516,7 @@ export default function FormsPage() {
     setNewQuestion('');
     setSelectedProjectId(activeProjectId ?? projects[0]?.id ?? '');
     setCreateOpen(true);
-  }, [userPlan, forms.length, projects, activeProjectId, router]);
+  }, [userPlan, totalFormCount, projects, activeProjectId, router]);
 
   // ── Create Form ────────────────────────────────────────────────────────────
   const handleCreate = useCallback(async () => {
