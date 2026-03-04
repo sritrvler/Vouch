@@ -134,6 +134,39 @@ Inter, Roboto, Open Sans, Lato, Poppins, Montserrat, Nunito, Raleway, Source San
 
 ---
 
+## AFTER: Video Cost Optimization (Compress + Thumbnail + Fair Use)
+
+**The concern:**
+Pro ($19/mo) offers unlimited projects and videos. A power user with 20 projects full of videos could cost more in storage and bandwidth than the $19 revenue. Need to make "unlimited" sustainable.
+
+**Strategy:** Industry standard approach (Senja, Testimonial.to all do this).
+
+**Three parts:**
+
+### Part 1: Compress videos on upload
+File: `src/app/api/testimonials/upload-video/route.ts`
+1. After upload, transcode video to 720p using Cloudinary (free tier: 25 credits/mo) or FFmpeg
+2. Replace original with compressed version in Supabase storage
+3. Target: 80% size reduction (50MB upload becomes 5 to 10MB stored)
+4. Evaluate: Cloudinary free tier vs serverless FFmpeg vs Mux
+
+### Part 2: Thumbnail-first in widgets (play on click)
+Files: `public/embed.js`, `src/app/api/testimonials/widget/[id]/route.ts`
+1. Generate poster image (first frame) during upload or on first request
+2. Widget shows thumbnail by default, streams video only on click
+3. Cuts bandwidth 70 to 90% since most visitors never click play on every video
+4. Also improves widget load performance (lighter initial payload)
+
+### Part 3: Fair use policy in ToS
+File: `src/app/terms/page.tsx`
+1. Add fair use clause: "Unlimited means reasonable business use"
+2. Standard SaaS practice (Basecamp, Notion, etc.)
+3. Gives us a lever for the 1% edge case without changing marketing
+
+**Priority:** After multi-widget and custom fonts. This is an optimization, not a broken promise.
+
+---
+
 ## COMPLETED (for reference, do not redo)
 
 ### Usability Audit Fixes (21 items, March 4, 2026)
