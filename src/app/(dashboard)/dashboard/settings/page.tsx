@@ -835,59 +835,57 @@ function SettingsInner() {
               </div>
             </Section>
 
-            {/* Colors */}
-            <Section title="Colors" description="Brand color is used for accents everywhere. Background and text only affect your collection form.">
-              <div className="space-y-5">
-                {/* Brand Color */}
-                <div className="space-y-2">
-                  <Label className="text-sm font-medium">Brand Color</Label>
-                  <div className="flex items-center gap-3 flex-wrap">
-                    {ACCENT_PRESETS.map((c) => (
-                      <button
-                        key={c.value}
-                        onClick={() => setButtonColor(c.value)}
-                        title={c.label}
-                        className={cn(
-                          'size-8 rounded-full border-2 transition-all',
-                          (buttonColor || accentColor) === c.value
-                            ? 'border-foreground scale-110 shadow-md'
-                            : 'border-transparent hover:scale-105 hover:border-muted-foreground'
-                        )}
-                        style={{ backgroundColor: c.value }}
-                      />
-                    ))}
-                    <div className="flex items-center gap-2 ml-2">
-                      <div className="relative">
-                        <input
-                          type="color"
-                          value={buttonColor || accentColor}
-                          onChange={(e) => setButtonColor(e.target.value)}
-                          className="size-8 rounded-full cursor-pointer border-2 border-dashed border-muted-foreground/50 bg-[conic-gradient(red,yellow,lime,aqua,blue,magenta,red)]"
-                        />
-                        <span className="absolute -bottom-4 left-1/2 -translate-x-1/2 text-[10px] text-muted-foreground whitespace-nowrap">Custom</span>
-                      </div>
-                      <input
-                        type="text"
-                        value={buttonColor || accentColor}
-                        onChange={(e) => {
-                          let v = e.target.value;
-                          if (!v.startsWith('#')) v = '#' + v;
-                          if (/^#[0-9A-Fa-f]{0,6}$/.test(v)) setButtonColor(v);
-                        }}
-                        onBlur={() => {
-                          if (buttonColor && !/^#[0-9A-Fa-f]{6}$/.test(buttonColor)) setButtonColor('');
-                        }}
-                        maxLength={7}
-                        className="w-20 text-xs font-mono px-2 py-1 rounded border border-border bg-muted/50 focus:outline-none focus:ring-1 focus:ring-ring"
-                        placeholder="#6366F1"
-                      />
-                    </div>
+            {/* Brand Color */}
+            <Section title="Brand Color" description="Stars, buttons, and accents across all customer-facing pages.">
+              <div className="flex items-center gap-3 flex-wrap">
+                {ACCENT_PRESETS.map((c) => (
+                  <button
+                    key={c.value}
+                    onClick={() => setButtonColor(c.value)}
+                    title={c.label}
+                    className={cn(
+                      'size-8 rounded-full border-2 transition-all',
+                      (buttonColor || accentColor) === c.value
+                        ? 'border-foreground scale-110 shadow-md'
+                        : 'border-transparent hover:scale-105 hover:border-muted-foreground'
+                    )}
+                    style={{ backgroundColor: c.value }}
+                  />
+                ))}
+                <div className="flex items-center gap-2 ml-2">
+                  <div className="relative">
+                    <input
+                      type="color"
+                      value={buttonColor || accentColor}
+                      onChange={(e) => setButtonColor(e.target.value)}
+                      className="size-8 rounded-full cursor-pointer border-2 border-dashed border-muted-foreground/50 bg-[conic-gradient(red,yellow,lime,aqua,blue,magenta,red)]"
+                    />
+                    <span className="absolute -bottom-4 left-1/2 -translate-x-1/2 text-[10px] text-muted-foreground whitespace-nowrap">Custom</span>
                   </div>
+                  <input
+                    type="text"
+                    value={buttonColor || accentColor}
+                    onChange={(e) => {
+                      let v = e.target.value;
+                      if (!v.startsWith('#')) v = '#' + v;
+                      if (/^#[0-9A-Fa-f]{0,6}$/.test(v)) setButtonColor(v);
+                    }}
+                    onBlur={() => {
+                      if (buttonColor && !/^#[0-9A-Fa-f]{6}$/.test(buttonColor)) setButtonColor('');
+                    }}
+                    maxLength={7}
+                    className="w-20 text-xs font-mono px-2 py-1 rounded border border-border bg-muted/50 focus:outline-none focus:ring-1 focus:ring-ring"
+                    placeholder="#6366F1"
+                  />
                 </div>
+              </div>
+            </Section>
 
-                {/* Form Background Color */}
+            {/* Collection Form Appearance */}
+            <Section title="Collection Form" description="Background and text color for the form your customers fill out.">
+              <div className="space-y-5">
                 <div className="space-y-2">
-                  <Label className="text-sm font-medium">Form Background</Label>
+                  <Label className="text-sm font-medium">Background</Label>
                   <div className="flex items-center gap-3">
                     {[
                       { label: 'White', value: '#ffffff' },
@@ -939,9 +937,8 @@ function SettingsInner() {
                   </div>
                 </div>
 
-                {/* Form Text Color */}
                 <div className="space-y-2">
-                  <Label className="text-sm font-medium">Form Text</Label>
+                  <Label className="text-sm font-medium">Text</Label>
                   <div className="flex items-center gap-3">
                     {[
                       { label: 'Near Black', value: '#1a1a1a' },
