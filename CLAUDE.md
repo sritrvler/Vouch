@@ -143,6 +143,22 @@ You cannot run `/compact` or `/clear` yourself. These are user-only commands.
 Suggest `/clear` (preferred, free) when: completing a task before starting an unrelated one, after any major feature or refactor.
 Suggest `/compact` only when mid-task continuation is needed and stopping would lose important intermediate state. In that case, tell the user: "Run `/compact retain [specific thing]` to keep this session going efficiently."
 
+### Session Persistence (Non-Negotiable)
+
+**At session START** (before writing any code):
+1. Read `tasks/todo.md` for the active work queue, context, and next task.
+2. Read `tasks/lessons.md` for patterns and mistakes to avoid.
+3. Understand the WHY (business context, who it hurts, what promise it fulfills) before writing code.
+4. Create a git checkpoint.
+
+**Before suggesting /clear or session end:**
+1. Update `tasks/todo.md`: check off completed items, add new findings, write a handoff note at the top with exact next steps.
+2. Update `tasks/lessons.md`: add any new patterns, mistakes, or technical discoveries from this session.
+3. Commit all changes including task files.
+4. The next session must be able to continue without re-discovering anything.
+
+**Rule: never let knowledge die in a session.** If you learned it, write it down. If you fixed it, mark it done. If it is next, describe it in enough detail that a fresh session can execute without asking questions.
+
 ### Response Style
 
 No preamble ("Sure, I'll now...") and no postamble ("Let me know if you need anything else").

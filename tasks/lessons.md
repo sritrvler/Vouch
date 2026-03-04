@@ -1,0 +1,35 @@
+# Lessons Learned
+
+Rules for myself. Read this at session start. Do not repeat these mistakes.
+
+## Session Persistence (CRITICAL)
+
+1. **Always update `tasks/todo.md` and `tasks/lessons.md` before suggesting /clear.** The user lost context between sessions because I did not write handoff notes. This is the #1 process failure.
+2. **MEMORY.md is limited to 200 lines.** Put detailed specs in `tasks/` files and link from MEMORY.md.
+3. **Git commit messages are searchable context.** Write detailed commit messages that explain WHY, not just what. Future sessions can run `git log` to reconstruct history.
+
+## Code Patterns
+
+4. **Supabase joined tables return arrays.** Always check `Array.isArray()` before casting. This has bitten us multiple times.
+5. **Radix UI tabs cannot be clicked via browser automation.** The Chrome extension cannot trigger Radix tab switches via coordinate clicks, ref clicks, or JS dispatched events. Only React fiber props workaround works (unreliable).
+6. **React controlled inputs need `form_input` tool**, not the `type` action. Typing doesn't update React state.
+7. **`.limit(1).single()` is a common pattern** in our codebase for loading "the one project" or "the one widget." When adding multi-support, grep for ALL occurrences of this pattern.
+8. **Widget API `isPro` check must include 'agency'.** Was broken (only checked `=== 'pro'`). Fixed. Pattern: always check `plan === 'free'` (negation) rather than checking for specific paid plans.
+9. **Tailwind classes are static at build time.** Cannot use dynamic accent colors in Tailwind gradient classes. Use inline `style` with CSS `linear-gradient()` instead.
+10. **embed.js is vanilla JS, not React.** Changes to embed.js are manual DOM string building. Test changes carefully since there's no type checking.
+
+## Product Decisions
+
+11. **"Copy must match reality."** If the pricing page lists a feature, the code must support it. We discovered 6 broken promises during the usability audit. Never add features to marketing copy without implementing them first.
+12. **Customer-facing error messages must not leak internal details.** Video limit error was showing "Free plan includes 3 video testimonials. Upgrade to Pro" to the VISITOR who cannot upgrade. Always ask: "Who sees this message? Can they act on it?"
+13. **The "KFC test" for brand blending:** On every customer-facing surface, ask "Would this look like KFC built it?" If the answer is no, the brand blending promise is broken.
+14. **Optimistic UI reverts need the original state.** Don't blindly revert to 'pending'. Either capture the previous state before the optimistic update, or re-fetch from the DB.
+15. **URL params must be supported for all tabs, not just billing.** When adding tab-based navigation, ensure all tabs are URL-addressable (Settings ?tab=project was broken).
+
+## Process
+
+16. **Create git checkpoint before every task.** `git add -A && git commit -m "checkpoint: before [task]"`. This is in CLAUDE.md but I wasn't doing it consistently.
+17. **Read tasks/lessons.md at session start.** This file exists specifically to prevent repeated mistakes.
+18. **Test with real user flows, not just code review.** The usability testing in browser caught issues that code reading missed (e.g., form title not rendering despite code looking correct at a glance).
+19. **Parallel subagents for audits save massive time.** Launching 4 code review agents simultaneously was efficient. Use this pattern for any multi-file audit.
+20. **Don't trust subagent claims blindly.** One agent said the image card API route was missing when it actually existed. Always verify critical claims with a direct file check.
