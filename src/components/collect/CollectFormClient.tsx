@@ -418,6 +418,7 @@ export default function CollectFormClient({
   const [cameraError, setCameraError] = useState(false);
   const [isCameraInitializing, setIsCameraInitializing] = useState(false);
   const [isCameraActive, setIsCameraActive] = useState(false);
+  const [isCameraVisible, setIsCameraVisible] = useState(false);
   const [wantsVideo, setWantsVideo] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
   const [thumbnailFrames, setThumbnailFrames] = useState<string[]>([]);
@@ -469,6 +470,7 @@ export default function CollectFormClient({
     }
     setMediaStream(null);
     setIsCameraActive(false);
+    setIsCameraVisible(false);
     setIsRecording(false);
     setIsPaused(false);
     setWantsVideo(false);
@@ -550,12 +552,13 @@ export default function CollectFormClient({
         currentStreamRef.current = stream;
         setMediaStream(stream);
         setIsCameraActive(true);
+        // isCameraInitializing stays true until video element fires onPlaying
       })
       .catch(() => {
         setCameraError(true);
         cameraInitRef.current = false;
-      })
-      .finally(() => setIsCameraInitializing(false));
+        setIsCameraInitializing(false);
+      });
   }, [step, wantsVideo, videoBlob]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Component unmount: stop any active stream
@@ -1067,11 +1070,6 @@ export default function CollectFormClient({
                       <ChevronRight className="size-4" />
                     </Button>
                   </div>
-                ) : isCameraInitializing ? (
-                  <div className="flex flex-col items-center justify-center py-12 gap-3">
-                    <Loader2 className="size-6 animate-spin text-muted-foreground" />
-                    <p className="text-sm text-muted-foreground">Opening camera...</p>
-                  </div>
                 ) : (
                   /* Camera active: preview + controls */
                   <div className="space-y-4">
@@ -1082,9 +1080,16 @@ export default function CollectFormClient({
                         autoPlay
                         muted
                         playsInline
+                        onPlaying={() => { setIsCameraInitializing(false); setIsCameraVisible(true); }}
                         className="w-full block"
-                        style={{ maxHeight: 260, objectFit: 'cover' }}
+                        style={{ maxHeight: 260, objectFit: 'cover', opacity: isCameraVisible ? 1 : 0 }}
                       />
+                      {!isCameraVisible && (
+                        <div className="absolute inset-0 flex flex-col items-center justify-center gap-3">
+                          <Loader2 className="size-6 animate-spin text-white/70" />
+                          <p className="text-sm text-white/70">Opening camera...</p>
+                        </div>
+                      )}
                       {isRecording && (
                         <div className="absolute top-3 left-3 flex items-center gap-2 bg-black/60 rounded-full px-3 py-1">
                           <span
@@ -1123,7 +1128,7 @@ export default function CollectFormClient({
                           Stop
                         </Button>
                       </div>
-                    ) : (
+                    ) : isCameraVisible ? (
                       <div className="space-y-3">
                         <Button
                           onClick={startRecording}
@@ -1142,7 +1147,7 @@ export default function CollectFormClient({
                           Skip, continue without video
                         </Button>
                       </div>
-                    )}
+                    ) : null}
                   </div>
                 )}
 
