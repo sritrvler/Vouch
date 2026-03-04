@@ -9,6 +9,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { toast } from 'sonner';
 import { Loader2, Mail, Lock, User, Eye, EyeOff } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
+import { isDisposableEmail } from '@/lib/disposable-emails';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -54,6 +55,11 @@ function SignupForm() {
   });
 
   async function onSubmit(values: SignupFormValues) {
+    if (isDisposableEmail(values.email)) {
+      toast.error('Temporary email addresses are not allowed. Please use a real email.');
+      return;
+    }
+
     setIsLoading(true);
     const supabase = createClient();
     const origin = window.location.origin;
