@@ -145,18 +145,23 @@ Suggest `/compact` only when mid-task continuation is needed and stopping would 
 
 ### Session Persistence (Non-Negotiable)
 
-**At session START** (before writing any code):
-1. Read `tasks/todo.md` for the active work queue, context, and next task.
+**At session START (HARD GATE: do not write ANY code until all 5 are done):**
+1. Read `tasks/todo.md` for the active work queue, context, and handoff note from the previous session.
 2. Read `tasks/lessons.md` for patterns and mistakes to avoid.
-3. Read ALL matching skill files (see Skills table at top of this file). This is not optional.
-4. Understand the WHY (business context, who it hurts, what promise it fulfills) before writing code.
-5. Create a git checkpoint.
+3. Read ALL matching skill files (see Skills table at top of this file). This is not optional. List which files you read.
+4. Understand the WHY (business context, who it hurts, what promise it fulfills) before writing code. If the handoff note doesn't explain WHY, read the full task description in todo.md until you understand.
+5. Create a git checkpoint: `git add -A && git commit -m "checkpoint: before [task name]"`.
 
-**Before suggesting /clear or session end:**
-1. Update `tasks/todo.md`: check off completed items, add new findings, write a handoff note at the top with exact next steps.
-2. Update `tasks/lessons.md`: add any new patterns, mistakes, or technical discoveries from this session.
-3. Commit all changes including task files.
-4. The next session must be able to continue without re-discovering anything.
+**NEVER write code before completing all 5 steps.** If the user gives a task immediately, acknowledge it, complete the 5 steps first, then begin. This startup cost is small compared to the cost of re-discovering context or repeating mistakes.
+
+**Before suggesting /clear or session end (HARD GATE: do not suggest /clear until ALL 5 are done):**
+1. Update `tasks/todo.md`: check off completed items, add new findings, write a handoff note at the TOP titled "## Session Handoff [date]" with: what was done, what's next, what to watch out for. The handoff must be specific enough that a fresh session can execute without asking questions.
+2. Update `tasks/lessons.md`: add any new patterns, mistakes, or technical discoveries from this session. If nothing new was learned, explicitly write "No new lessons this session" so it's clear this step was not skipped.
+3. Commit all changes including task files: `git add -A && git commit -m "checkpoint: session end [description]"`.
+4. Output the Handoff Protocol block (see below). This is the ONLY way to signal session end.
+5. Self-check: re-read the handoff note you just wrote. Ask yourself: "If I lost all memory right now and only had tasks/todo.md, tasks/lessons.md, and MEMORY.md, could I continue?" If no, the handoff is incomplete. Fix it before suggesting /clear.
+
+**NEVER suggest /clear or /compact without completing all 5 steps above.** If you catch yourself about to suggest it without doing them, stop and do them first. This is the #1 process failure from past sessions.
 
 **Rule: never let knowledge die in a session.** If you learned it, write it down. If you fixed it, mark it done. If it is next, describe it in enough detail that a fresh session can execute without asking questions.
 
