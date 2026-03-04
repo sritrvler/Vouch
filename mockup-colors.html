@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Color Settings Mockup - First Time User POV</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f8f9fa; color: #111; }
+
+  .page { max-width: 720px; margin: 40px auto; padding: 0 24px; }
+  .page-title { font-size: 22px; font-weight: 700; margin-bottom: 8px; }
+  .page-desc { font-size: 14px; color: #666; margin-bottom: 32px; }
+
+  .section { background: #fff; border: 1px solid #e5e7eb; border-radius: 12px; padding: 28px; margin-bottom: 24px; }
+  .section-title { font-size: 15px; font-weight: 600; margin-bottom: 20px; color: #111; }
+
+  /* Preview + Picker side by side */
+  .color-row { display: flex; gap: 32px; align-items: flex-start; }
+  .color-row .preview-side { flex: 1; min-width: 0; }
+  .color-row .picker-side { width: 200px; flex-shrink: 0; }
+
+  /* Mini preview cards */
+  .mini-preview { border: 1px solid #e5e7eb; border-radius: 10px; overflow: hidden; }
+  .mini-preview-label { font-size: 11px; color: #999; margin-bottom: 6px; font-weight: 500; letter-spacing: 0.3px; text-transform: uppercase; }
+
+  /* Testimonial card preview */
+  .testimonial-card { padding: 16px; background: #fff; }
+  .tc-stars { display: flex; gap: 3px; margin-bottom: 8px; }
+  .tc-star { width: 16px; height: 16px; }
+  .tc-quote { font-size: 12px; color: #555; line-height: 1.5; margin-bottom: 12px; }
+  .tc-author { display: flex; align-items: center; gap: 8px; }
+  .tc-avatar { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 10px; font-weight: 700; flex-shrink: 0; }
+  .tc-name { font-size: 11px; font-weight: 600; color: #333; }
+  .tc-role { font-size: 10px; color: #999; }
+
+  /* Form preview */
+  .form-preview { padding: 20px; border-radius: 10px; transition: all 0.2s; }
+  .fp-logo { width: 32px; height: 32px; border-radius: 6px; background: #ddd; margin-bottom: 10px; display: flex; align-items: center; justify-content: center; font-size: 8px; color: #999; }
+  .fp-title { font-size: 14px; font-weight: 700; margin-bottom: 4px; transition: color 0.2s; }
+  .fp-subtitle { font-size: 11px; margin-bottom: 14px; transition: color 0.2s; }
+  .fp-input { width: 100%; height: 28px; border-radius: 6px; border: 1px solid #d1d5db; background: rgba(255,255,255,0.7); margin-bottom: 8px; }
+  .fp-textarea { width: 100%; height: 48px; border-radius: 6px; border: 1px solid #d1d5db; background: rgba(255,255,255,0.7); margin-bottom: 10px; }
+  .fp-button { padding: 6px 20px; border-radius: 6px; border: none; color: #fff; font-size: 11px; font-weight: 600; cursor: default; }
+
+  /* Color picker controls */
+  .picker-label { font-size: 12px; font-weight: 500; color: #555; margin-bottom: 8px; }
+  .preset-row { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 10px; }
+  .preset-dot { width: 28px; height: 28px; border-radius: 50%; border: 2px solid transparent; cursor: pointer; transition: all 0.15s; }
+  .preset-dot:hover { transform: scale(1.1); }
+  .preset-dot.active { border-color: #111; transform: scale(1.1); box-shadow: 0 2px 8px rgba(0,0,0,0.15); }
+  .hex-input { width: 80px; font-size: 11px; font-family: monospace; padding: 4px 8px; border: 1px solid #d1d5db; border-radius: 6px; background: #f9fafb; }
+
+  /* Separator */
+  .sep { height: 1px; background: #f0f0f0; margin: 20px 0; }
+
+  /* Annotation */
+  .annotation { font-size: 11px; color: #999; margin-top: 6px; line-height: 1.4; }
+
+  /* Arrow label on preview */
+  .preview-callout { font-size: 10px; color: #888; display: flex; align-items: center; gap: 4px; margin-top: 4px; }
+  .preview-callout::before { content: ''; display: inline-block; width: 16px; height: 1px; background: #ccc; }
+</style>
+</head>
+<body>
+
+<div class="page">
+  <div class="page-title">Project Settings</div>
+  <div class="page-desc">Customize how your project looks to customers.</div>
+
+  <!-- OPTION A: Preview-driven, single section -->
+  <div style="font-size:13px; font-weight:700; color:#6366f1; margin-bottom:12px; letter-spacing:0.5px; text-transform:uppercase;">Option A: Preview next to picker</div>
+
+  <div class="section">
+    <div class="section-title">Brand Color</div>
+    <div class="color-row">
+      <div class="preview-side">
+        <div class="mini-preview-label">Preview</div>
+        <div class="mini-preview">
+          <div class="testimonial-card">
+            <div class="tc-stars">
+              <svg class="tc-star" viewBox="0 0 24 24" fill="#6366F1" stroke="none"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+              <svg class="tc-star" viewBox="0 0 24 24" fill="#6366F1" stroke="none"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+              <svg class="tc-star" viewBox="0 0 24 24" fill="#6366F1" stroke="none"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+              <svg class="tc-star" viewBox="0 0 24 24" fill="#6366F1" stroke="none"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+              <svg class="tc-star" viewBox="0 0 24 24" fill="#6366F1" stroke="none"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            </div>
+            <div class="tc-quote">"Absolutely transformed our workflow. The team was incredible to work with."</div>
+            <div class="tc-author">
+              <div class="tc-avatar" id="avatar-a" style="background:#6366F1;">JD</div>
+              <div>
+                <div class="tc-name">Jane Doe</div>
+                <div class="tc-role">CEO, Acme Inc</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="preview-callout">This color appears on stars, buttons, and accents</div>
+      </div>
+      <div class="picker-side">
+        <div class="preset-row">
+          <div class="preset-dot active" style="background:#6366F1;" onclick="setBrand(this,'#6366F1')"></div>
+          <div class="preset-dot" style="background:#8B5CF6;" onclick="setBrand(this,'#8B5CF6')"></div>
+          <div class="preset-dot" style="background:#F43F5E;" onclick="setBrand(this,'#F43F5E')"></div>
+          <div class="preset-dot" style="background:#10B981;" onclick="setBrand(this,'#10B981')"></div>
+          <div class="preset-dot" style="background:#F59E0B;" onclick="setBrand(this,'#F59E0B')"></div>
+          <div class="preset-dot" style="background:#0EA5E9;" onclick="setBrand(this,'#0EA5E9')"></div>
+        </div>
+        <input type="text" class="hex-input" value="#6366F1" id="brand-hex">
+      </div>
+    </div>
+
+    <div class="sep"></div>
+
+    <div class="section-title">Collection Form</div>
+    <div class="color-row">
+      <div class="preview-side">
+        <div class="mini-preview-label">Preview</div>
+        <div class="mini-preview">
+          <div class="form-preview" id="form-preview-a" style="background: linear-gradient(135deg, #ffffff, #ffffff, #6366f108);">
+            <div class="fp-logo">Logo</div>
+            <div class="fp-title" id="fp-title-a" style="color:#1a1a1a;">Share your experience</div>
+            <div class="fp-subtitle" id="fp-sub-a" style="color:#1a1a1a99;">We'd love to hear from you</div>
+            <div class="fp-input"></div>
+            <div class="fp-textarea"></div>
+            <div class="fp-button" id="fp-btn-a" style="background:#6366F1;">Submit</div>
+          </div>
+        </div>
+      </div>
+      <div class="picker-side">
+        <div class="picker-label">Background</div>
+        <div class="preset-row" style="margin-bottom:16px;">
+          <div class="preset-dot active" style="background:#ffffff; border-color: #ddd;" onclick="setBg(this,'#ffffff')"></div>
+          <div class="preset-dot" style="background:#fafafa; border-color: #eee;" onclick="setBg(this,'#fafafa')"></div>
+          <div class="preset-dot" style="background:#fef9ef; border-color: #eee;" onclick="setBg(this,'#fef9ef')"></div>
+          <div class="preset-dot" style="background:#f1f5f9; border-color: #eee;" onclick="setBg(this,'#f1f5f9')"></div>
+          <div class="preset-dot" style="background:#0f172a;" onclick="setBg(this,'#0f172a')"></div>
+        </div>
+        <div class="picker-label">Text</div>
+        <div class="preset-row">
+          <div class="preset-dot active" style="background:#1a1a1a;" onclick="setText(this,'#1a1a1a')"></div>
+          <div class="preset-dot" style="background:#374151;" onclick="setText(this,'#374151')"></div>
+          <div class="preset-dot" style="background:#ffffff; border-color: #ddd;" onclick="setText(this,'#ffffff')"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- OPTION B: Even simpler, single brand color only -->
+  <div style="font-size:13px; font-weight:700; color:#10B981; margin-bottom:12px; letter-spacing:0.5px; text-transform:uppercase; margin-top: 40px;">Option B: Just brand color (simplest)</div>
+
+  <div class="section">
+    <div class="section-title">Brand Color</div>
+    <div class="color-row">
+      <div class="preview-side">
+        <div class="mini-preview-label">How it looks</div>
+        <div style="display:flex; gap: 12px;">
+          <!-- Mini testimonial card -->
+          <div class="mini-preview" style="flex:1;">
+            <div class="testimonial-card" style="padding:12px;">
+              <div class="tc-stars" style="margin-bottom:6px;">
+                <svg class="tc-star" style="width:12px;height:12px;" viewBox="0 0 24 24" fill="#6366F1" stroke="none"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                <svg class="tc-star" style="width:12px;height:12px;" viewBox="0 0 24 24" fill="#6366F1" stroke="none"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                <svg class="tc-star" style="width:12px;height:12px;" viewBox="0 0 24 24" fill="#6366F1" stroke="none"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                <svg class="tc-star" style="width:12px;height:12px;" viewBox="0 0 24 24" fill="#6366F1" stroke="none"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                <svg class="tc-star" style="width:12px;height:12px;" viewBox="0 0 24 24" fill="#6366F1" stroke="none"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+              </div>
+              <div style="font-size:10px;color:#555;line-height:1.4;margin-bottom:8px;">"Amazing experience..."</div>
+              <div style="display:flex;align-items:center;gap:6px;">
+                <div class="tc-avatar" style="width:20px;height:20px;font-size:8px;background:#6366F1;">J</div>
+                <div style="font-size:9px;font-weight:600;color:#333;">Jane D.</div>
+              </div>
+            </div>
+          </div>
+          <!-- Mini form -->
+          <div class="mini-preview" style="flex:1;">
+            <div style="padding:12px; background: linear-gradient(135deg, #fff, #fff, #6366f108);">
+              <div style="font-size:10px;font-weight:700;color:#1a1a1a;margin-bottom:6px;">Share feedback</div>
+              <div style="height:16px;border:1px solid #e5e7eb;border-radius:4px;margin-bottom:6px;background:rgba(255,255,255,0.7);"></div>
+              <div style="height:8px;width:48px;border-radius:4px;background:#6366F1;"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="picker-side">
+        <div class="preset-row">
+          <div class="preset-dot active" style="background:#6366F1;" ></div>
+          <div class="preset-dot" style="background:#8B5CF6;" ></div>
+          <div class="preset-dot" style="background:#F43F5E;" ></div>
+          <div class="preset-dot" style="background:#10B981;" ></div>
+          <div class="preset-dot" style="background:#F59E0B;" ></div>
+          <div class="preset-dot" style="background:#0EA5E9;" ></div>
+        </div>
+        <input type="text" class="hex-input" value="#6366F1">
+        <div class="annotation" style="margin-top:12px;">Form background and text colors can be customized when creating a form.</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+function setBrand(el, color) {
+  // Update active state
+  el.parentElement.querySelectorAll('.preset-dot').forEach(d => d.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('brand-hex').value = color;
+  // Update preview stars
+  document.querySelectorAll('.tc-star').forEach(s => s.setAttribute('fill', color));
+  // Update avatar
+  document.getElementById('avatar-a').style.background = color;
+  // Update form button
+  document.getElementById('fp-btn-a').style.background = color;
+}
+
+function setBg(el, color) {
+  el.parentElement.querySelectorAll('.preset-dot').forEach(d => d.classList.remove('active'));
+  el.classList.add('active');
+  const isDark = color === '#0f172a';
+  document.getElementById('form-preview-a').style.background = `linear-gradient(135deg, ${color}, ${color})`;
+  // Auto-switch text for dark bg
+  if (isDark) {
+    document.getElementById('fp-title-a').style.color = '#ffffff';
+    document.getElementById('fp-sub-a').style.color = '#ffffff99';
+  } else {
+    const textColor = document.getElementById('fp-title-a').dataset.textColor || '#1a1a1a';
+    document.getElementById('fp-title-a').style.color = textColor;
+    document.getElementById('fp-sub-a').style.color = textColor + '99';
+  }
+}
+
+function setText(el, color) {
+  el.parentElement.querySelectorAll('.preset-dot').forEach(d => d.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('fp-title-a').style.color = color;
+  document.getElementById('fp-title-a').dataset.textColor = color;
+  document.getElementById('fp-sub-a').style.color = color + '99';
+}
+</script>
+
+</body>
+</html>
