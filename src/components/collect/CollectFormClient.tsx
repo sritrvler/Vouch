@@ -418,6 +418,7 @@ export default function CollectFormClient({
   const [cameraError, setCameraError] = useState(false);
   const [isCameraInitializing, setIsCameraInitializing] = useState(false);
   const [isCameraActive, setIsCameraActive] = useState(false);
+  const [wantsVideo, setWantsVideo] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
   const [thumbnailFrames, setThumbnailFrames] = useState<string[]>([]);
   const [selectedThumbnailIdx, setSelectedThumbnailIdx] = useState<number>(0);
@@ -470,6 +471,8 @@ export default function CollectFormClient({
     setIsCameraActive(false);
     setIsRecording(false);
     setIsPaused(false);
+    setWantsVideo(false);
+    cameraInitRef.current = false;
     if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
       mediaRecorderRef.current.stop();
     }
@@ -533,13 +536,16 @@ export default function CollectFormClient({
     cameraInitRef.current = false;
   }
 
-  // Auto-init camera when entering step 3
+  // Init camera only after user opts in
   useEffect(() => {
-    if (step !== 3 || videoBlob || cameraInitRef.current) return;
+    if (step !== 3 || !wantsVideo || videoBlob || cameraInitRef.current) return;
     cameraInitRef.current = true;
     setIsCameraInitializing(true);
     setCameraError(false);
-    navigator.mediaDevices.getUserMedia({ video: true, audio: true })
+    navigator.mediaDevices.getUserMedia({
+      video: { facingMode: 'user', width: { ideal: 1280 }, height: { ideal: 720 } },
+      audio: true,
+    })
       .then((stream) => {
         currentStreamRef.current = stream;
         setMediaStream(stream);
@@ -550,7 +556,7 @@ export default function CollectFormClient({
         cameraInitRef.current = false;
       })
       .finally(() => setIsCameraInitializing(false));
-  }, [step, videoBlob]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [step, wantsVideo, videoBlob]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Component unmount: stop any active stream
   useEffect(() => {
@@ -919,7 +925,35 @@ export default function CollectFormClient({
                   </p>
                 </div>
 
-                {isUploadingVideo ? (
+                {!wantsVideo && !videoBlob ? (
+                  /* Opt-in screen: ask before turning on camera */
+                  <div className="flex flex-col items-center py-6 gap-5">
+                    <div className="w-16 h-16 rounded-full flex items-center justify-center" style={{ backgroundColor: `${buttonColor}15` }}>
+                      <Video className="size-7" style={{ color: buttonColor }} />
+                    </div>
+                    <p className="text-sm text-muted-foreground text-center max-w-[280px]">
+                      A 30-second video makes your testimonial feel personal and builds trust. Would you like to record one?
+                    </p>
+                    <div className="w-full space-y-3">
+                      <Button
+                        onClick={() => setWantsVideo(true)}
+                        className="w-full h-12 text-base font-semibold rounded-xl gap-2"
+                        style={{ backgroundColor: buttonColor }}
+                      >
+                        <Camera className="size-4" />
+                        Yes, record a video
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => { leaveVideoStep(); goTo(4, 'forward'); }}
+                        className="w-full h-11 rounded-xl gap-2"
+                      >
+                        Skip, continue without video
+                      </Button>
+                    </div>
+                  </div>
+                ) : isUploadingVideo ? (
                   <div className="flex flex-col items-center justify-center py-10 gap-3">
                     <Loader2 className="size-7 animate-spin" style={{ color: buttonColor }} />
                     <p className="text-sm text-muted-foreground">Uploading video...</p>
