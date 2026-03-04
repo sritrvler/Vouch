@@ -2,6 +2,7 @@
 
 - [ ] **Re-enable disposable email blocking**: Uncomment the `isDisposableEmail` check in `src/app/(auth)/signup/page.tsx` (line ~59). Currently disabled so we can test with temp emails like yopmail.
 - [ ] **Enable "Confirm email" in Supabase**: Dashboard > Authentication > Providers > Email > toggle "Confirm email" ON.
+- [ ] **Test camera startup speed on another device**: Camera preview in the collection form (step 3) takes 5-10 seconds on dev laptop. Could be a hardware issue. Test on a different device before release. If still slow, investigate further optimizations.
 
 ---
 
