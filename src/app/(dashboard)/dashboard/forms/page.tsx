@@ -68,6 +68,7 @@ interface FormCardProps {
   form: CollectionForm;
   onToggle: (id: string, active: boolean) => Promise<void>;
   onDelete: (id: string) => Promise<void>;
+  onEdit: (form: CollectionForm) => void;
   onQR: (id: string, title: string) => void;
   onDuplicate: (id: string) => Promise<void>;
   isDeleting: boolean;
@@ -236,7 +237,7 @@ function FormCardSkeleton() {
 }
 
 // ─── Form Card ─────────────────────────────────────────────────────────────────
-function FormCard({ form, onToggle, onDelete, onQR, onDuplicate, isDeleting, isDuplicating, isPro }: FormCardProps) {
+function FormCard({ form, onToggle, onDelete, onEdit, onQR, onDuplicate, isDeleting, isDuplicating, isPro }: FormCardProps) {
   const [toggling, setToggling] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
   const shareLink = `${SITE_URL}/c/${form.id}`;
@@ -326,17 +327,26 @@ function FormCard({ form, onToggle, onDelete, onQR, onDuplicate, isDeleting, isD
 
       {/* Bottom actions */}
       <div className="mt-3 flex items-center justify-between">
-        {isPro && (
+        <div className="flex items-center gap-3">
           <button
-            onClick={() => onDuplicate(form.id)}
-            disabled={isDuplicating}
+            onClick={() => onEdit(form)}
             className="text-xs text-muted-foreground hover:text-indigo-500 transition-colors flex items-center gap-1"
           >
-            {isDuplicating ? <Loader2 className="size-3 animate-spin" /> : <Copy className="size-3" />}
-            Duplicate
+            <Settings className="size-3" />
+            Edit
           </button>
-        )}
-        <div className={cn('flex justify-end', !isPro && 'w-full')}>
+          {isPro && (
+            <button
+              onClick={() => onDuplicate(form.id)}
+              disabled={isDuplicating}
+              className="text-xs text-muted-foreground hover:text-indigo-500 transition-colors flex items-center gap-1"
+            >
+              {isDuplicating ? <Loader2 className="size-3 animate-spin" /> : <Copy className="size-3" />}
+              Duplicate
+            </button>
+          )}
+        </div>
+        <div className="flex justify-end">
           {!confirmDelete ? (
             <button
               onClick={() => setConfirmDelete(true)}
@@ -412,7 +422,8 @@ export default function FormsPage() {
   const [qrFormId, setQrFormId] = useState<string | null>(null);
   const [qrFormTitle, setQrFormTitle] = useState('');
 
-  // Create form dialog state
+  // Create/Edit form dialog state
+  const [editingForm, setEditingForm] = useState<CollectionForm | null>(null);
   const [createOpen, setCreateOpen] = useState(false);
   const [creating, setCreating] = useState(false);
   const [formTitle, setFormTitle] = useState('Share your experience');
@@ -517,6 +528,50 @@ export default function FormsPage() {
     setSelectedProjectId(activeProjectId ?? projects[0]?.id ?? '');
     setCreateOpen(true);
   }, [userPlan, totalFormCount, projects, activeProjectId, router]);
+
+  // ── Open Edit Dialog ──────────────────────────────────────────────────────
+  const openEdit = useCallback((form: CollectionForm) => {
+    setEditingForm(form);
+    setFormTitle(form.title);
+    setFormDesc(form.description ?? '');
+    setCustomQuestions(form.custom_questions ?? []);
+    setNewQuestion('');
+    setSelectedProjectId(form.project_id);
+    setCreateOpen(true);
+  }, []);
+
+  // ── Save Edit ─────────────────────────────────────────────────────────────
+  const handleSaveEdit = useCallback(async () => {
+    if (!editingForm || !formTitle.trim()) return;
+    setCreating(true);
+    try {
+      const { error } = await supabase
+        .from('collection_forms')
+        .update({
+          title: formTitle.trim(),
+          description: formDesc.trim() || null,
+          custom_questions: customQuestions,
+        })
+        .eq('id', editingForm.id);
+
+      if (error) throw error;
+      setForms((prev) =>
+        prev.map((f) =>
+          f.id === editingForm.id
+            ? { ...f, title: formTitle.trim(), description: formDesc.trim() || null, custom_questions: customQuestions }
+            : f
+        )
+      );
+      setCreateOpen(false);
+      setEditingForm(null);
+      toast.success('Form updated');
+    } catch (err) {
+      toast.error('Failed to update form');
+      console.error(err);
+    } finally {
+      setCreating(false);
+    }
+  }, [supabase, editingForm, formTitle, formDesc, customQuestions]);
 
   // ── Create Form ────────────────────────────────────────────────────────────
   const handleCreate = useCallback(async () => {
@@ -720,6 +775,7 @@ export default function FormsPage() {
                 form={form}
                 onToggle={handleToggle}
                 onDelete={handleDelete}
+                onEdit={openEdit}
                 onQR={(id, title) => { setQrFormId(id); setQrFormTitle(title); }}
                 onDuplicate={handleDuplicate}
                 isDeleting={deletingId === form.id}
@@ -794,18 +850,18 @@ export default function FormsPage() {
       </Dialog>
 
       {/* ── Create Form Dialog ── */}
-      <Dialog open={createOpen} onOpenChange={setCreateOpen}>
+      <Dialog open={createOpen} onOpenChange={(open) => { setCreateOpen(open); if (!open) setEditingForm(null); }}>
         <DialogContent className="max-w-lg rounded-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Create Collection Form</DialogTitle>
+            <DialogTitle>{editingForm ? 'Edit Collection Form' : 'Create Collection Form'}</DialogTitle>
             <DialogDescription>
-              Customers will fill this form to submit their testimonials.
+              {editingForm ? 'Update your form title, description, and custom questions.' : 'Customers will fill this form to submit their testimonials.'}
             </DialogDescription>
           </DialogHeader>
 
           <div className="space-y-5">
-            {/* Project (only show selector when user has multiple projects) */}
-            {projects.length === 0 ? (
+            {/* Project (only show selector when creating and user has multiple projects) */}
+            {editingForm ? null : projects.length === 0 ? (
             <div className="space-y-1.5">
               <Label htmlFor="form-project">Project</Label>
                 <p className="text-xs text-muted-foreground bg-muted rounded-lg p-3">
@@ -908,16 +964,16 @@ export default function FormsPage() {
           </div>
 
           <DialogFooter>
-            <Button variant="outline" onClick={() => setCreateOpen(false)} className="rounded-xl">
+            <Button variant="outline" onClick={() => { setCreateOpen(false); setEditingForm(null); }} className="rounded-xl">
               Cancel
             </Button>
             <Button
-              onClick={handleCreate}
-              disabled={creating || !formTitle.trim() || !selectedProjectId}
+              onClick={editingForm ? handleSaveEdit : handleCreate}
+              disabled={creating || !formTitle.trim() || (!editingForm && !selectedProjectId)}
               className="gap-2 rounded-xl bg-indigo-600 hover:bg-indigo-700"
             >
               {creating && <Loader2 className="size-4 animate-spin" />}
-              Create Form
+              {editingForm ? 'Save Changes' : 'Create Form'}
             </Button>
           </DialogFooter>
         </DialogContent>
