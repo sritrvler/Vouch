@@ -548,6 +548,7 @@ export default function FormsPage() {
 
       if (error) throw error;
       setForms((prev) => [{ ...data, submission_count: 0 }, ...prev]);
+      setTotalFormCount((prev) => prev + 1);
       setCreateOpen(false);
       toast.success('Form created successfully');
     } catch (err) {
@@ -587,6 +588,7 @@ export default function FormsPage() {
         const { error } = await supabase.from('collection_forms').delete().eq('id', id);
         if (error) throw error;
         setForms((prev) => prev.filter((f) => f.id !== id));
+        setTotalFormCount((prev) => Math.max(0, prev - 1));
         toast.success('Form deleted');
       } catch (err) {
         toast.error('Failed to delete form');
@@ -624,6 +626,7 @@ export default function FormsPage() {
 
         if (error) throw error;
         setForms((prev) => [{ ...data, submission_count: 0 }, ...prev]);
+        setTotalFormCount((prev) => prev + 1);
         toast.success('Form duplicated');
       } catch (err) {
         toast.error('Failed to duplicate form');
