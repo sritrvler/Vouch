@@ -31,51 +31,47 @@ export async function POST(request: NextRequest) {
     }
 
     const supabase = await createServerSupabaseClient();
-
-    // Fetch form to get project_id and user_id
-    const { data: form, error: formError } = await supabase
-      .from('collection_forms')
-      .select('id, project_id, user_id')
-      .eq('id', formId)
-      .single();
-
-    if (formError || !form) {
-      return NextResponse.json({ error: 'Form not found' }, { status: 404 });
-    }
-
     const adminClient = createAdminClient();
 
-    // Check subscription plan
-    const { data: sub } = await adminClient
-      .from('subscriptions')
-      .select('plan')
-      .eq('user_id', form.user_id)
-      .single();
+    // Fetch form and start reading video buffer in parallel
+    const ext = video.type.includes('mp4') ? 'mp4' : 'webm';
+    const path = `${formId}/${crypto.randomUUID()}.${ext}`;
 
-    const isFree = !sub || sub.plan === 'free';
+    const [formRes, videoBuffer] = await Promise.all([
+      supabase
+        .from('collection_forms')
+        .select('id, project_id, user_id')
+        .eq('id', formId)
+        .single(),
+      video.arrayBuffer(),
+    ]);
 
-    if (isFree) {
-      // Count existing video testimonials for this project
-      const { count } = await adminClient
+    if (formRes.error || !formRes.data) {
+      return NextResponse.json({ error: 'Form not found' }, { status: 404 });
+    }
+    const form = formRes.data;
+
+    // Check subscription + video count in parallel
+    const [subRes, countRes] = await Promise.all([
+      adminClient
+        .from('subscriptions')
+        .select('plan')
+        .eq('user_id', form.user_id)
+        .single(),
+      adminClient
         .from('testimonials')
         .select('id', { count: 'exact', head: true })
         .eq('project_id', form.project_id)
-        .not('video_url', 'is', null);
+        .not('video_url', 'is', null),
+    ]);
 
-      if ((count ?? 0) >= 3) {
-        return NextResponse.json(
-          { error: 'Video limit reached', limitReached: true },
-          { status: 403 }
-        );
-      }
+    const isFree = !subRes.data || subRes.data.plan === 'free';
+    if (isFree && (countRes.count ?? 0) >= 3) {
+      return NextResponse.json(
+        { error: 'Video limit reached', limitReached: true },
+        { status: 403 }
+      );
     }
-
-    // Ensure bucket exists (lazy creation, ignore error if already exists)
-    await adminClient.storage.createBucket('testimonial-videos', { public: true });
-
-    const ext = video.type.includes('mp4') ? 'mp4' : 'webm';
-    const path = `${formId}/${crypto.randomUUID()}.${ext}`;
-    const videoBuffer = await video.arrayBuffer();
 
     const { error: uploadError } = await adminClient.storage
       .from('testimonial-videos')
