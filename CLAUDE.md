@@ -188,7 +188,7 @@ If any answer is "no" or "skipped," pause and address it before writing code.
 After completing code changes, before reporting completion:
 
 1. **Build passes?** `npx next build` exits 0.
-2. **Persona test?** Walk through the change as the named persona. Would Sarah Chen (freelance designer) find this intuitive? Would an agency owner managing 5 clients?
+2. **All personas tested?** List ALL personas affected by this change (not just the primary one). Test each separately. For each, name the persona, state their context, and trace their code path. A feature tested with one persona is not tested. Include edge cases: new user (0 data), free user hitting limits, downgraded user with legacy data.
 3. **End-to-end flow?** For features touching the customer journey: test the full flow (form > submit > approve > embed > verify).
 4. **Security spot check?** For new routes/APIs: test auth bypass, verify RLS, check error messages don't leak internals.
 5. **Lessons captured?** Any new patterns, mistakes, or discoveries written to `tasks/lessons.md`.
