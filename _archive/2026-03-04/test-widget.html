@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vouch Widget Test</title>
+  <style>
+    body { font-family: system-ui, sans-serif; max-width: 900px; margin: 40px auto; padding: 0 20px; background: #f8f9fa; }
+    h1 { color: #333; }
+    .test-section { background: white; border: 1px solid #ddd; border-radius: 8px; padding: 24px; margin: 24px 0; }
+    h2 { color: #555; font-size: 18px; margin-top: 0; }
+    .note { color: #888; font-size: 14px; }
+  </style>
+</head>
+<body>
+  <h1>Vouch Embed.js Widget Test</h1>
+
+  <div class="test-section">
+    <h2>Test 1: Widget with fake ID (should show error gracefully)</h2>
+    <div data-vouch="test-fake-id-12345"></div>
+  </div>
+
+  <div class="test-section">
+    <h2>Test 2: Check that embed.js loaded and initialized</h2>
+    <p class="note" id="status">Checking...</p>
+  </div>
+
+  <script src="/embed.js" defer></script>
+  <script>
+    window.addEventListener('DOMContentLoaded', () => {
+      setTimeout(() => {
+        const shadow = document.querySelector('[data-vouch]')?.shadowRoot;
+        const status = document.getElementById('status');
+        if (shadow) {
+          status.textContent = 'Shadow DOM attached. Script loaded and initialized.';
+          status.style.color = 'green';
+        } else {
+          status.textContent = 'No Shadow DOM found yet. Script may still be loading or waiting for IntersectionObserver.';
+          status.style.color = 'orange';
+        }
+
+        // Check for JSON-LD
+        const jsonLd = document.querySelector('script[type="application/ld+json"]');
+        if (jsonLd) {
+          status.textContent += ' JSON-LD schema found!';
+        }
+      }, 3000);
+    });
+  </script>
+</body>
+</html>
