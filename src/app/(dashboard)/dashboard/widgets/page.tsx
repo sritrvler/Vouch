@@ -274,7 +274,10 @@ export default function WidgetsPage() {
 
   // ── Fetch approved testimonials ────────────────────────────────────────────
   const fetchData = useCallback(async () => {
-    if (!selectedProjectId) return;
+    if (!selectedProjectId) {
+      setLoadingTestimonials(false);
+      return;
+    }
     setLoadingTestimonials(true);
     // Reset widget state when project changes
     setSavedWidgetId(null);
