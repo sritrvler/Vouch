@@ -18,6 +18,9 @@ interface Project {
   name: string;
   logo_url: string | null;
   accent_color: string | null;
+  form_bg_color: string | null;
+  button_color: string | null;
+  text_color: string | null;
   font_family: string | null;
   font_url: string | null;
   google_review_url: string | null;
@@ -73,7 +76,7 @@ function StarButton({
   index,
   filled,
   hovered,
-  accentColor,
+  buttonColor,
   onClick,
   onMouseEnter,
   onMouseLeave,
@@ -81,7 +84,7 @@ function StarButton({
   index: number;
   filled: boolean;
   hovered: boolean;
-  accentColor: string;
+  buttonColor: string;
   onClick: () => void;
   onMouseEnter: () => void;
   onMouseLeave: () => void;
@@ -100,7 +103,7 @@ function StarButton({
       className="focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 rounded-sm"
       style={
         {
-          '--ring-color': accentColor,
+          '--ring-color': buttonColor,
         } as React.CSSProperties
       }
     >
@@ -109,10 +112,10 @@ function StarButton({
         style={{
           width: 44,
           height: 44,
-          fill: active ? accentColor : 'transparent',
-          stroke: active ? accentColor : '#cbd5e1',
+          fill: active ? buttonColor : 'transparent',
+          stroke: active ? buttonColor : '#cbd5e1',
           filter: active
-            ? `drop-shadow(0 0 8px ${accentColor}60)`
+            ? `drop-shadow(0 0 8px ${buttonColor}60)`
             : 'none',
         }}
       />
@@ -124,10 +127,10 @@ function StarButton({
 
 function ProgressDots({
   currentStep,
-  accentColor,
+  buttonColor,
 }: {
   currentStep: number;
-  accentColor: string;
+  buttonColor: string;
 }) {
   const steps = [1, 2, 3, 4];
   return (
@@ -150,14 +153,14 @@ function ProgressDots({
                 width: 28,
                 height: 28,
                 backgroundColor: isActive
-                  ? accentColor
+                  ? buttonColor
                   : isComplete
-                    ? `${accentColor}30`
+                    ? `${buttonColor}30`
                     : '#e2e8f0',
                 color: isActive
                   ? '#ffffff'
                   : isComplete
-                    ? accentColor
+                    ? buttonColor
                     : '#94a3b8',
               }}
             >
@@ -171,7 +174,7 @@ function ProgressDots({
               <div
                 className="h-px w-6 transition-colors duration-300"
                 style={{
-                  backgroundColor: isComplete ? `${accentColor}60` : '#e2e8f0',
+                  backgroundColor: isComplete ? `${buttonColor}60` : '#e2e8f0',
                 }}
               />
             )}
@@ -186,10 +189,10 @@ function ProgressDots({
 
 function BusinessHeader({
   project,
-  accentColor,
+  buttonColor,
 }: {
   project: Project;
-  accentColor: string;
+  buttonColor: string;
 }) {
   const initials = project.name
     .split(' ')
@@ -212,7 +215,7 @@ function BusinessHeader({
       ) : (
         <div
           className="w-16 h-16 rounded-2xl flex items-center justify-center text-white text-xl font-bold shadow-md"
-          style={{ backgroundColor: accentColor }}
+          style={{ backgroundColor: buttonColor }}
         >
           {initials}
         </div>
@@ -225,13 +228,13 @@ function BusinessHeader({
 // ─── Share elsewhere nudge ────────────────────────────────────────────────────
 
 function ShareElsewhere({
-  accentColor,
+  buttonColor,
   content,
   authorName,
   googleReviewUrl,
   linkedinUrl,
 }: {
-  accentColor: string;
+  buttonColor: string;
   content: string;
   authorName: string;
   googleReviewUrl: string | null;
@@ -274,7 +277,7 @@ function ShareElsewhere({
           >
             <div
               className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
-              style={{ backgroundColor: `${accentColor}15` }}
+              style={{ backgroundColor: `${buttonColor}15` }}
             >
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
                 <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
@@ -379,7 +382,9 @@ export default function CollectFormClient({
   project,
   showBranding,
 }: CollectFormClientProps) {
-  const accentColor = project.accent_color || '#6366F1';
+  const buttonColor = project.button_color || project.accent_color || '#6366F1';
+  const formBgColor = project.form_bg_color || '#ffffff';
+  const textColor = project.text_color || '#1a1a1a';
   const fontFamily = sanitizeFontFamily(project.font_family);
   const fontStyleUrl = resolveFontUrl(project.font_family, project.font_url);
 
@@ -745,20 +750,23 @@ export default function CollectFormClient({
     <div
       className="min-h-screen flex flex-col items-center justify-start py-8 px-4"
       style={{
-        background: `linear-gradient(to bottom right, #f8fafc, #ffffff, ${accentColor}12)`,
+        background: `linear-gradient(to bottom right, ${formBgColor}, ${formBgColor}, ${buttonColor}12)`,
+        color: textColor,
+        '--form-text': textColor,
+        '--form-text-muted': `${textColor}99`,
         ...(fontFamily ? { fontFamily: `"${fontFamily}", sans-serif` } : {}),
-      }}
+      } as React.CSSProperties}
     >
       <div className="w-full max-w-md">
         {/* Business header */}
         <div className="mb-6 flex justify-center">
-          <BusinessHeader project={project} accentColor={accentColor} />
+          <BusinessHeader project={project} buttonColor={buttonColor} />
         </div>
 
         {/* Progress (steps 1–4 only) */}
         {step !== 5 && (
           <div className="mb-6">
-            <ProgressDots currentStep={step} accentColor={accentColor} />
+            <ProgressDots currentStep={step} buttonColor={buttonColor} />
             {step === 1 && (
               <p className="text-center text-xs text-muted-foreground mt-2">Takes about 2 minutes</p>
             )}
@@ -780,10 +788,10 @@ export default function CollectFormClient({
                 className="p-7 sm:p-9"
               >
                 <div className="text-center mb-8">
-                  <h1 className="text-2xl sm:text-3xl font-bold text-foreground leading-tight">
+                  <h1 className="text-2xl sm:text-3xl font-bold leading-tight" style={{ color: textColor }}>
                     {form.title || `${project.name} would love your feedback`}
                   </h1>
-                  <p className="mt-3 text-base text-muted-foreground">
+                  <p className="mt-3 text-base" style={{ color: `${textColor}99` }}>
                     {form.description || 'How would you rate your experience?'}
                   </p>
                 </div>
@@ -795,7 +803,7 @@ export default function CollectFormClient({
                       index={value - 1}
                       filled={value <= rating}
                       hovered={value <= hoverRating}
-                      accentColor={accentColor}
+                      buttonColor={buttonColor}
                       onClick={() => handleRatingClick(value)}
                       onMouseEnter={() => setHoverRating(value)}
                       onMouseLeave={() => setHoverRating(0)}
@@ -828,15 +836,15 @@ export default function CollectFormClient({
                       style={{
                         width: 20,
                         height: 20,
-                        fill: v <= rating ? accentColor : 'transparent',
-                        stroke: v <= rating ? accentColor : '#cbd5e1',
+                        fill: v <= rating ? buttonColor : 'transparent',
+                        stroke: v <= rating ? buttonColor : '#cbd5e1',
                       }}
                     />
                   ))}
                 </div>
 
                 <div className="mb-6">
-                  <h2 className="text-2xl font-bold text-foreground">Tell us more</h2>
+                  <h2 className="text-2xl font-bold" style={{ color: textColor }}>Tell us more</h2>
                   <p className="mt-1.5 text-sm text-muted-foreground">
                     What did you love? What could be better?
                   </p>
@@ -851,7 +859,7 @@ export default function CollectFormClient({
                       className="min-h-[120px] text-base resize-none focus:ring-2 transition-shadow"
                       style={
                         {
-                          '--tw-ring-color': accentColor,
+                          '--tw-ring-color': buttonColor,
                         } as React.CSSProperties
                       }
                       maxLength={500}
@@ -902,7 +910,7 @@ export default function CollectFormClient({
                     disabled={!contentValid}
                     className="w-full h-12 text-base font-semibold rounded-xl gap-2"
                     style={{
-                      backgroundColor: contentValid ? accentColor : undefined,
+                      backgroundColor: contentValid ? buttonColor : undefined,
                     }}
                   >
                     Next
@@ -931,7 +939,7 @@ export default function CollectFormClient({
                 className="p-7 sm:p-9"
               >
                 <div className="mb-5 text-center">
-                  <h2 className="text-2xl font-bold text-foreground">Add a video</h2>
+                  <h2 className="text-2xl font-bold" style={{ color: textColor }}>Add a video</h2>
                   <p className="mt-1.5 text-sm text-muted-foreground">
                     Optional. A short video makes your testimonial 3x more impactful.
                   </p>
@@ -939,7 +947,7 @@ export default function CollectFormClient({
 
                 {isUploadingVideo ? (
                   <div className="flex flex-col items-center justify-center py-10 gap-3">
-                    <Loader2 className="size-7 animate-spin" style={{ color: accentColor }} />
+                    <Loader2 className="size-7 animate-spin" style={{ color: buttonColor }} />
                     <p className="text-sm text-muted-foreground">Uploading video...</p>
                   </div>
                 ) : videoUploadFailed ? (
@@ -955,7 +963,7 @@ export default function CollectFormClient({
                       <button
                         onClick={() => { setVideoUploadFailed(false); handleVideoNext(); }}
                         className="px-4 py-2 rounded-xl text-sm font-medium text-white"
-                        style={{ backgroundColor: accentColor }}
+                        style={{ backgroundColor: buttonColor }}
                       >
                         Try again
                       </button>
@@ -991,7 +999,7 @@ export default function CollectFormClient({
                               className="relative rounded-lg overflow-hidden border-2 transition-all"
                               style={
                                 selectedThumbnailIdx === idx
-                                  ? { borderColor: accentColor }
+                                  ? { borderColor: buttonColor }
                                   : { borderColor: 'transparent' }
                               }
                             >
@@ -1025,7 +1033,7 @@ export default function CollectFormClient({
                       <Button
                         onClick={handleVideoNext}
                         className="flex-1 h-11 text-base font-semibold rounded-xl gap-2"
-                        style={{ backgroundColor: accentColor }}
+                        style={{ backgroundColor: buttonColor }}
                       >
                         Continue
                         <ChevronRight className="size-4" />
@@ -1040,7 +1048,7 @@ export default function CollectFormClient({
                     <Button
                       onClick={() => { leaveVideoStep(); goTo(4, 'forward'); }}
                       className="w-full h-12 text-base font-semibold rounded-xl gap-2"
-                      style={{ backgroundColor: accentColor }}
+                      style={{ backgroundColor: buttonColor }}
                     >
                       Skip
                       <ChevronRight className="size-4" />
@@ -1107,7 +1115,7 @@ export default function CollectFormClient({
                         <Button
                           onClick={startRecording}
                           className="w-full h-12 text-base font-semibold rounded-xl gap-2"
-                          style={{ backgroundColor: accentColor }}
+                          style={{ backgroundColor: buttonColor }}
                         >
                           <Camera className="size-4" />
                           Start Recording
@@ -1151,7 +1159,7 @@ export default function CollectFormClient({
                 className="p-7 sm:p-9"
               >
                 <div className="mb-5">
-                  <h2 className="text-2xl font-bold text-foreground">Almost done!</h2>
+                  <h2 className="text-2xl font-bold" style={{ color: textColor }}>Almost done!</h2>
                   <p className="mt-1.5 text-sm text-muted-foreground">
                     A face and title make your review feel real and help others trust it.
                   </p>
@@ -1169,7 +1177,7 @@ export default function CollectFormClient({
                     />
                     {avatarPreview ? (
                       <div className="relative">
-                        <div className="w-20 h-20 rounded-full overflow-hidden border-2 shadow-sm" style={{ borderColor: accentColor }}>
+                        <div className="w-20 h-20 rounded-full overflow-hidden border-2 shadow-sm" style={{ borderColor: buttonColor }}>
                           <Image src={avatarPreview} alt="Preview" fill className="object-cover" />
                         </div>
                         <button
@@ -1185,10 +1193,10 @@ export default function CollectFormClient({
                         type="button"
                         onClick={() => fileInputRef.current?.click()}
                         className="w-20 h-20 rounded-full border-2 border-dashed flex flex-col items-center justify-center gap-1 transition-colors hover:bg-accent/40"
-                        style={{ borderColor: `${accentColor}70` }}
+                        style={{ borderColor: `${buttonColor}70` }}
                       >
-                        <Upload className="size-5" style={{ color: accentColor }} />
-                        <span className="text-[10px] font-semibold" style={{ color: accentColor }}>Add photo</span>
+                        <Upload className="size-5" style={{ color: buttonColor }} />
+                        <span className="text-[10px] font-semibold" style={{ color: buttonColor }}>Add photo</span>
                       </button>
                     )}
                     <span className="text-xs text-muted-foreground">Optional</span>
@@ -1265,8 +1273,8 @@ export default function CollectFormClient({
                       <div
                         className="w-5 h-5 rounded-md border-2 flex items-center justify-center transition-all duration-150"
                         style={{
-                          borderColor: agreed ? accentColor : '#cbd5e1',
-                          backgroundColor: agreed ? accentColor : 'transparent',
+                          borderColor: agreed ? buttonColor : '#cbd5e1',
+                          backgroundColor: agreed ? buttonColor : 'transparent',
                         }}
                       >
                         {agreed && <Check className="size-3 text-white" />}
@@ -1288,7 +1296,7 @@ export default function CollectFormClient({
                     style={{
                       backgroundColor:
                         nameValid && contentValid && agreed && !isSubmitting
-                          ? accentColor
+                          ? buttonColor
                           : undefined,
                     }}
                   >
@@ -1336,7 +1344,7 @@ export default function CollectFormClient({
                       delay: 0.1,
                     }}
                     className="w-20 h-20 rounded-full flex items-center justify-center"
-                    style={{ backgroundColor: `${accentColor}15` }}
+                    style={{ backgroundColor: `${buttonColor}15` }}
                   >
                     <motion.div
                       initial={{ scale: 0 }}
@@ -1348,7 +1356,7 @@ export default function CollectFormClient({
                         delay: 0.25,
                       }}
                       className="w-14 h-14 rounded-full flex items-center justify-center"
-                      style={{ backgroundColor: accentColor }}
+                      style={{ backgroundColor: buttonColor }}
                     >
                       <Check className="size-7 text-white" strokeWidth={3} />
                     </motion.div>
@@ -1360,7 +1368,7 @@ export default function CollectFormClient({
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.35, duration: 0.3 }}
                 >
-                  <h2 className="text-2xl sm:text-3xl font-bold text-foreground">
+                  <h2 className="text-2xl sm:text-3xl font-bold" style={{ color: textColor }}>
                     Thank you, {firstName}! 🎉
                   </h2>
                   <p className="mt-3 text-base text-muted-foreground">
@@ -1371,7 +1379,7 @@ export default function CollectFormClient({
                 {/* Multi-channel share nudge, only for happy customers */}
                 {rating >= 4 && (project.google_review_url || project.linkedin_url) && (
                   <ShareElsewhere
-                    accentColor={accentColor}
+                    buttonColor={buttonColor}
                     content={content}
                     authorName={authorName}
                     googleReviewUrl={project.google_review_url}

@@ -51,7 +51,7 @@ export default async function PublicTestimonialsPage({ params }: PageProps) {
   // Fetch project by slug
   const { data: project } = await supabase
     .from('projects')
-    .select('id, name, logo_url, accent_color, font_family, font_url, website, user_id')
+    .select('id, name, logo_url, accent_color, form_bg_color, button_color, text_color, font_family, font_url, website, user_id')
     .eq('slug', slug)
     .single();
 
@@ -120,7 +120,8 @@ export default async function PublicTestimonialsPage({ params }: PageProps) {
       ? displayTestimonials.reduce((sum, t) => sum + (t.rating ?? 0), 0) / displayTestimonials.length
       : 0;
 
-  const accentColor = project.accent_color ?? '#4f46e5';
+  const accentColor = project.button_color || project.accent_color || '#4f46e5';
+  const textColor = project.text_color || '#1a1a1a';
   const fontFamily = sanitizeFontFamily(project.font_family);
   const fontStyleUrl = resolveFontUrl(project.font_family, project.font_url);
 

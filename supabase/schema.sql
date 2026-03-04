@@ -36,6 +36,9 @@ create table public.projects (
   website text,
   logo_url text,
   accent_color text default '#6366F1',
+  form_bg_color text default '#ffffff',
+  button_color text,
+  text_color text default '#1a1a1a',
   font_family text,
   font_url text,
   google_review_url text,
@@ -131,6 +134,11 @@ create table public.widgets (
 -- To add font columns to an existing database run:
 -- ALTER TABLE public.projects ADD COLUMN IF NOT EXISTS font_family text;
 -- ALTER TABLE public.projects ADD COLUMN IF NOT EXISTS font_url text;
+
+-- To add 3-color split columns to an existing database run:
+-- ALTER TABLE public.projects ADD COLUMN IF NOT EXISTS form_bg_color text DEFAULT '#ffffff';
+-- ALTER TABLE public.projects ADD COLUMN IF NOT EXISTS button_color text;
+-- ALTER TABLE public.projects ADD COLUMN IF NOT EXISTS text_color text DEFAULT '#1a1a1a';
 
 -- ============================================================
 -- ANALYTICS — Form views

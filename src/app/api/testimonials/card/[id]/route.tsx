@@ -51,11 +51,11 @@ export async function GET(_request: Request, { params }: PageProps) {
 
   const { data: project } = await supabase
     .from('projects')
-    .select('name, accent_color')
+    .select('name, accent_color, button_color')
     .eq('id', testimonial.project_id)
     .single();
 
-  const accentColor = project?.accent_color ?? '#6366F1';
+  const accentColor = project?.button_color || project?.accent_color || '#6366F1';
   const projectName = project?.name ?? '';
 
   const displayContent =

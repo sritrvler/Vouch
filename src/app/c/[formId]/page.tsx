@@ -49,6 +49,9 @@ export default async function CollectPage({ params }: PageProps) {
         name,
         logo_url,
         accent_color,
+        form_bg_color,
+        button_color,
+        text_color,
         font_family,
         font_url,
         google_review_url,
@@ -96,6 +99,9 @@ export default async function CollectPage({ params }: PageProps) {
     name: string;
     logo_url: string | null;
     accent_color: string | null;
+    form_bg_color: string | null;
+    button_color: string | null;
+    text_color: string | null;
     font_family: string | null;
     font_url: string | null;
     google_review_url: string | null;
@@ -155,6 +161,9 @@ export default async function CollectPage({ params }: PageProps) {
         name: project.name,
         logo_url: project.logo_url,
         accent_color: project.accent_color,
+        form_bg_color: project.form_bg_color,
+        button_color: project.button_color,
+        text_color: project.text_color,
         font_family: project.font_family,
         font_url: project.font_url,
         // Google Review + LinkedIn nudges are Pro features

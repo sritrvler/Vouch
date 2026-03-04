@@ -401,7 +401,7 @@ function EmptyState({ onCreateClick }: { onCreateClick: () => void }) {
 // ─── Page ─────────────────────────────────────────────────────────────────────
 export default function FormsPage() {
   const supabase = createClient();
-  const { selectedProjectId: activeProjectId } = useProject();
+  const { selectedProjectId: activeProjectId, selectedProject: ctxProject } = useProject();
   const router = useRouter();
   const [forms, setForms] = useState<CollectionForm[]>([]);
   const [totalFormCount, setTotalFormCount] = useState(0);
@@ -516,7 +516,7 @@ export default function FormsPage() {
     }
     setFormTitle('Share your experience');
     setFormDesc('');
-    setCustomQuestions([]);
+    setCustomQuestions(['What did you love about working with us?']);
     setNewQuestion('');
     setSelectedProjectId(activeProjectId ?? projects[0]?.id ?? '');
     setCreateOpen(true);
@@ -536,6 +536,11 @@ export default function FormsPage() {
   // ── Save Edit ─────────────────────────────────────────────────────────────
   const handleSaveEdit = useCallback(async () => {
     if (!editingForm || !formTitle.trim()) return;
+    const trimmedQuestions = customQuestions.map((q) => q.trim()).filter(Boolean);
+    if (trimmedQuestions.length === 0) {
+      toast.error('At least 1 question is required');
+      return;
+    }
     setCreating(true);
     try {
       const { error } = await supabase
@@ -543,7 +548,7 @@ export default function FormsPage() {
         .update({
           title: formTitle.trim(),
           description: formDesc.trim() || null,
-          custom_questions: customQuestions,
+          custom_questions: trimmedQuestions,
         })
         .eq('id', editingForm.id);
 
@@ -576,6 +581,11 @@ export default function FormsPage() {
       toast.error('Please select a project');
       return;
     }
+    const trimmedQuestions = customQuestions.map((q) => q.trim()).filter(Boolean);
+    if (trimmedQuestions.length === 0) {
+      toast.error('At least 1 question is required');
+      return;
+    }
     setCreating(true);
     try {
       const { data: { user } } = await supabase.auth.getUser();
@@ -588,7 +598,7 @@ export default function FormsPage() {
           project_id: selectedProjectId,
           title: formTitle.trim(),
           description: formDesc.trim() || null,
-          custom_questions: customQuestions,
+          custom_questions: trimmedQuestions,
           is_active: true,
         })
         .select('*, project:projects(name)')
@@ -690,6 +700,10 @@ export default function FormsPage() {
   const addQuestion = useCallback(() => {
     const q = newQuestion.trim();
     if (!q) return;
+    if (q.length > 200) {
+      toast.error('Question must be 200 characters or less');
+      return;
+    }
     if (customQuestions.length >= 5) {
       toast.error('Maximum 5 custom questions allowed');
       return;
@@ -699,7 +713,16 @@ export default function FormsPage() {
   }, [newQuestion, customQuestions]);
 
   const removeQuestion = useCallback((idx: number) => {
+    if (customQuestions.length <= 1) {
+      toast.error('At least 1 question is required');
+      return;
+    }
     setCustomQuestions((prev) => prev.filter((_, i) => i !== idx));
+  }, [customQuestions]);
+
+  const updateQuestion = useCallback((idx: number, value: string) => {
+    if (value.length > 200) return;
+    setCustomQuestions((prev) => prev.map((q, i) => (i === idx ? value : q)));
   }, []);
 
   return (
@@ -894,12 +917,13 @@ export default function FormsPage() {
               />
             </div>
 
-            {/* Custom Questions */}
+            {/* Questions */}
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <Label>Custom Questions</Label>
+                <Label>Questions</Label>
                 <span className="text-xs text-muted-foreground">{customQuestions.length}/5</span>
               </div>
+              <p className="text-xs text-muted-foreground">Visitors will answer these on your collection form. At least 1 required.</p>
 
               <AnimatePresence>
                 {customQuestions.map((q, i) => (
@@ -908,17 +932,24 @@ export default function FormsPage() {
                     initial={{ opacity: 0, height: 0 }}
                     animate={{ opacity: 1, height: 'auto' }}
                     exit={{ opacity: 0, height: 0 }}
-                    className="flex items-center gap-2"
+                    className="space-y-1"
                   >
-                    <div className="flex-1 rounded-xl bg-muted/40 border border-border px-3 py-2 text-sm">
-                      {q}
+                    <div className="flex items-center gap-2">
+                      <Input
+                        value={q}
+                        onChange={(e) => updateQuestion(i, e.target.value)}
+                        className="rounded-xl text-sm flex-1"
+                        maxLength={200}
+                      />
+                      <button
+                        onClick={() => removeQuestion(i)}
+                        className="rounded-lg p-1.5 text-muted-foreground hover:bg-red-50 hover:text-red-500 transition-colors shrink-0"
+                        title={customQuestions.length <= 1 ? 'At least 1 question required' : 'Remove question'}
+                      >
+                        <X className="size-3.5" />
+                      </button>
                     </div>
-                    <button
-                      onClick={() => removeQuestion(i)}
-                      className="rounded-lg p-1.5 text-muted-foreground hover:bg-red-50 hover:text-red-500 transition-colors"
-                    >
-                      <X className="size-3.5" />
-                    </button>
+                    <span className="text-[10px] text-muted-foreground pl-1">{q.length}/200</span>
                   </motion.div>
                 ))}
               </AnimatePresence>
@@ -927,10 +958,13 @@ export default function FormsPage() {
                 <div className="flex gap-2">
                   <Input
                     value={newQuestion}
-                    onChange={(e) => setNewQuestion(e.target.value)}
+                    onChange={(e) => {
+                      if (e.target.value.length <= 200) setNewQuestion(e.target.value);
+                    }}
                     onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), addQuestion())}
-                    placeholder="What problem did we solve for you?"
+                    placeholder="Add another question..."
                     className="rounded-xl text-sm"
+                    maxLength={200}
                   />
                   <Button
                     variant="outline"
@@ -945,6 +979,69 @@ export default function FormsPage() {
               )}
             </div>
           </div>
+
+          {/* Visual guide: where colors and logo appear */}
+          {ctxProject && (
+            <div className="space-y-2">
+              <Label className="text-xs text-muted-foreground">Preview: where your branding appears</Label>
+              <div
+                className="rounded-xl border border-border p-4 relative overflow-hidden"
+                style={{
+                  background: `linear-gradient(135deg, ${ctxProject.form_bg_color || '#ffffff'}, ${ctxProject.form_bg_color || '#ffffff'}, ${(ctxProject.button_color || ctxProject.accent_color || '#6366F1')}10)`,
+                }}
+              >
+                {/* Mini form mockup */}
+                <div className="flex flex-col items-center gap-2">
+                  {/* Logo zone */}
+                  <div
+                    className="w-8 h-8 rounded-lg flex items-center justify-center text-[10px] font-bold text-white"
+                    style={{ backgroundColor: ctxProject.button_color || ctxProject.accent_color || '#6366F1' }}
+                  >
+                    {ctxProject.logo_url ? '🖼' : (ctxProject.name?.charAt(0)?.toUpperCase() || 'L')}
+                  </div>
+                  <span className="text-[9px] text-muted-foreground">Logo</span>
+
+                  {/* Text zone */}
+                  <div className="text-center">
+                    <div
+                      className="text-xs font-semibold"
+                      style={{ color: ctxProject.text_color || '#1a1a1a' }}
+                    >
+                      Form Title
+                    </div>
+                    <div
+                      className="text-[10px] mt-0.5"
+                      style={{ color: `${ctxProject.text_color || '#1a1a1a'}80` }}
+                    >
+                      Description text
+                    </div>
+                    <span className="text-[8px] text-muted-foreground">(Text color)</span>
+                  </div>
+
+                  {/* Button zone */}
+                  <div
+                    className="px-4 py-1 rounded-lg text-[10px] font-medium text-white"
+                    style={{ backgroundColor: ctxProject.button_color || ctxProject.accent_color || '#6366F1' }}
+                  >
+                    Next Step
+                  </div>
+                  <span className="text-[8px] text-muted-foreground">(Button color)</span>
+                </div>
+
+                {/* Background label */}
+                <div className="absolute bottom-1 right-2">
+                  <span className="text-[8px] text-muted-foreground">(Background color)</span>
+                </div>
+              </div>
+              <a
+                href="/dashboard/settings?tab=project"
+                className="text-xs text-indigo-500 hover:text-indigo-600 transition-colors inline-flex items-center gap-1"
+              >
+                <Settings className="size-3" />
+                Change colors and logo in Project Settings
+              </a>
+            </div>
+          )}
 
           <DialogFooter>
             <Button variant="outline" onClick={() => { setCreateOpen(false); setEditingForm(null); }} className="rounded-xl">

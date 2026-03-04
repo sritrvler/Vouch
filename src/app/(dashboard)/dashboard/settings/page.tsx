@@ -49,6 +49,9 @@ interface Project {
   linkedin_url: string | null;
   logo_url: string | null;
   accent_color: string;
+  form_bg_color: string | null;
+  button_color: string | null;
+  text_color: string | null;
   font_family: string | null;
   font_url: string | null;
   report_token: string | null;
@@ -151,6 +154,9 @@ function SettingsInner() {
   const [googleReviewUrl, setGoogleReviewUrl] = useState('');
   const [linkedinUrl, setLinkedinUrl] = useState('');
   const [accentColor, setAccentColor] = useState('#6366F1');
+  const [formBgColor, setFormBgColor] = useState('#ffffff');
+  const [buttonColor, setButtonColor] = useState('');
+  const [textColor, setTextColor] = useState('#1a1a1a');
   const [fontFamily, setFontFamily] = useState<string | null>(null);
   const [fontUrl, setFontUrl] = useState<string | null>(null);
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
@@ -197,6 +203,9 @@ function SettingsInner() {
       setGoogleReviewUrl('');
       setLinkedinUrl('');
       setAccentColor('#6366F1');
+      setFormBgColor('#ffffff');
+      setButtonColor('');
+      setTextColor('#1a1a1a');
       setFontFamily(null);
       setFontUrl(null);
       setLogoPreview(null);
@@ -212,6 +221,9 @@ function SettingsInner() {
       setGoogleReviewUrl(p.google_review_url ?? '');
       setLinkedinUrl(p.linkedin_url ?? '');
       setAccentColor(p.accent_color ?? '#6366F1');
+      setFormBgColor(p.form_bg_color ?? '#ffffff');
+      setButtonColor(p.button_color ?? '');
+      setTextColor(p.text_color ?? '#1a1a1a');
       setFontFamily(p.font_family ?? null);
       setFontUrl(p.font_url ?? null);
       setLogoPreview(p.logo_url);
@@ -225,6 +237,9 @@ function SettingsInner() {
       setGoogleReviewUrl('');
       setLinkedinUrl('');
       setAccentColor('#6366F1');
+      setFormBgColor('#ffffff');
+      setButtonColor('');
+      setTextColor('#1a1a1a');
       setFontFamily(null);
       setFontUrl(null);
       setLogoPreview(null);
@@ -363,13 +378,19 @@ function SettingsInner() {
         resolvedSlug = project.slug; // Keep existing slug
       }
 
+      // Resolve button color: if user set one use it, otherwise keep null (falls back to accent_color)
+      const resolvedButtonColor = buttonColor.trim() || null;
+
       const payload = {
         name: projectName.trim(),
         slug: resolvedSlug,
         website: projectWebsite.trim() || null,
         google_review_url: googleReviewUrl.trim() || null,
         linkedin_url: linkedinUrl.trim() || null,
-        accent_color: accentColor,
+        accent_color: resolvedButtonColor || accentColor,
+        form_bg_color: formBgColor || '#ffffff',
+        button_color: resolvedButtonColor,
+        text_color: textColor || '#1a1a1a',
         font_family: sanitizeFontFamily(fontFamily),
         font_url: sanitizeFontUrl(fontUrl),
         logo_url: logoPreview,
@@ -414,7 +435,7 @@ function SettingsInner() {
     } finally {
       setSavingProject(false);
     }
-  }, [supabase, project, projects, plan, projectName, projectSlug, projectWebsite, googleReviewUrl, linkedinUrl, accentColor, fontFamily, fontUrl, logoPreview, subscription, refetchProjects, switchProject, isNewProject, router]);
+  }, [supabase, project, projects, plan, projectName, projectSlug, projectWebsite, googleReviewUrl, linkedinUrl, accentColor, formBgColor, buttonColor, textColor, fontFamily, fontUrl, logoPreview, subscription, refetchProjects, switchProject, isNewProject, router]);
 
   // ── Generate report token ─────────────────────────────────────────────────
   const handleGenerateReportToken = useCallback(async () => {
@@ -814,48 +835,154 @@ function SettingsInner() {
               </div>
             </Section>
 
-            {/* Accent Color */}
-            <Section title="Accent Color" description="Used on your collection form and widget buttons.">
-              <div className="flex items-center gap-3 flex-wrap">
-                {ACCENT_PRESETS.map((c) => (
-                  <button
-                    key={c.value}
-                    onClick={() => setAccentColor(c.value)}
-                    title={c.label}
-                    className={cn(
-                      'size-8 rounded-full border-2 transition-all',
-                      accentColor === c.value
-                        ? 'border-foreground scale-110 shadow-md'
-                        : 'border-transparent hover:scale-105 hover:border-muted-foreground'
-                    )}
-                    style={{ backgroundColor: c.value }}
-                  />
-                ))}
-                <div className="flex items-center gap-2 ml-2">
-                  <div className="relative">
-                    <input
-                      type="color"
-                      value={accentColor}
-                      onChange={(e) => setAccentColor(e.target.value)}
-                      className="size-8 rounded-full cursor-pointer border-2 border-border"
-                    />
-                    <span className="absolute -bottom-4 left-1/2 -translate-x-1/2 text-[10px] text-muted-foreground whitespace-nowrap">Custom</span>
+            {/* Colors */}
+            <Section title="Colors" description="Control the look of your collection form and public page.">
+              <div className="space-y-5">
+                {/* Button Color */}
+                <div className="space-y-2">
+                  <Label className="text-sm font-medium">Button Color</Label>
+                  <p className="text-xs text-muted-foreground">Buttons, stars, progress indicators, and interactive elements.</p>
+                  <div className="flex items-center gap-3 flex-wrap">
+                    {ACCENT_PRESETS.map((c) => (
+                      <button
+                        key={c.value}
+                        onClick={() => setButtonColor(c.value)}
+                        title={c.label}
+                        className={cn(
+                          'size-8 rounded-full border-2 transition-all',
+                          (buttonColor || accentColor) === c.value
+                            ? 'border-foreground scale-110 shadow-md'
+                            : 'border-transparent hover:scale-105 hover:border-muted-foreground'
+                        )}
+                        style={{ backgroundColor: c.value }}
+                      />
+                    ))}
+                    <div className="flex items-center gap-2 ml-2">
+                      <input
+                        type="color"
+                        value={buttonColor || accentColor}
+                        onChange={(e) => setButtonColor(e.target.value)}
+                        className="size-8 rounded-full cursor-pointer border-2 border-border"
+                      />
+                      <input
+                        type="text"
+                        value={buttonColor || accentColor}
+                        onChange={(e) => {
+                          let v = e.target.value;
+                          if (!v.startsWith('#')) v = '#' + v;
+                          if (/^#[0-9A-Fa-f]{0,6}$/.test(v)) setButtonColor(v);
+                        }}
+                        onBlur={() => {
+                          if (buttonColor && !/^#[0-9A-Fa-f]{6}$/.test(buttonColor)) setButtonColor('');
+                        }}
+                        maxLength={7}
+                        className="w-20 text-xs font-mono px-2 py-1 rounded border border-border bg-muted/50 focus:outline-none focus:ring-1 focus:ring-ring"
+                        placeholder="#6366F1"
+                      />
+                    </div>
                   </div>
-                  <input
-                    type="text"
-                    value={accentColor}
-                    onChange={(e) => {
-                      let v = e.target.value;
-                      if (!v.startsWith('#')) v = '#' + v;
-                      if (/^#[0-9A-Fa-f]{0,6}$/.test(v)) setAccentColor(v);
-                    }}
-                    onBlur={() => {
-                      if (!/^#[0-9A-Fa-f]{6}$/.test(accentColor)) setAccentColor('#6366F1');
-                    }}
-                    maxLength={7}
-                    className="w-20 text-xs font-mono px-2 py-1 rounded border border-border bg-muted/50 focus:outline-none focus:ring-1 focus:ring-ring"
-                    placeholder="#000000"
-                  />
+                </div>
+
+                {/* Form Background Color */}
+                <div className="space-y-2">
+                  <Label className="text-sm font-medium">Form Background</Label>
+                  <p className="text-xs text-muted-foreground">Background color for your collection form page.</p>
+                  <div className="flex items-center gap-3">
+                    {[
+                      { label: 'White', value: '#ffffff' },
+                      { label: 'Snow', value: '#fafafa' },
+                      { label: 'Cream', value: '#fef9ef' },
+                      { label: 'Slate', value: '#f1f5f9' },
+                      { label: 'Stone', value: '#f5f5f4' },
+                      { label: 'Dark', value: '#0f172a' },
+                    ].map((c) => (
+                      <button
+                        key={c.value}
+                        onClick={() => setFormBgColor(c.value)}
+                        title={c.label}
+                        className={cn(
+                          'size-8 rounded-full border-2 transition-all',
+                          formBgColor === c.value
+                            ? 'border-foreground scale-110 shadow-md'
+                            : 'border-muted-foreground/30 hover:scale-105 hover:border-muted-foreground'
+                        )}
+                        style={{ backgroundColor: c.value }}
+                      />
+                    ))}
+                    <div className="flex items-center gap-2 ml-2">
+                      <input
+                        type="color"
+                        value={formBgColor}
+                        onChange={(e) => setFormBgColor(e.target.value)}
+                        className="size-8 rounded-full cursor-pointer border-2 border-border"
+                      />
+                      <input
+                        type="text"
+                        value={formBgColor}
+                        onChange={(e) => {
+                          let v = e.target.value;
+                          if (!v.startsWith('#')) v = '#' + v;
+                          if (/^#[0-9A-Fa-f]{0,6}$/.test(v)) setFormBgColor(v);
+                        }}
+                        onBlur={() => {
+                          if (!/^#[0-9A-Fa-f]{6}$/.test(formBgColor)) setFormBgColor('#ffffff');
+                        }}
+                        maxLength={7}
+                        className="w-20 text-xs font-mono px-2 py-1 rounded border border-border bg-muted/50 focus:outline-none focus:ring-1 focus:ring-ring"
+                        placeholder="#ffffff"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Text Color */}
+                <div className="space-y-2">
+                  <Label className="text-sm font-medium">Text Color</Label>
+                  <p className="text-xs text-muted-foreground">Headings, labels, and body text on your form.</p>
+                  <div className="flex items-center gap-3">
+                    {[
+                      { label: 'Near Black', value: '#1a1a1a' },
+                      { label: 'Dark Gray', value: '#374151' },
+                      { label: 'Slate', value: '#334155' },
+                      { label: 'White', value: '#ffffff' },
+                    ].map((c) => (
+                      <button
+                        key={c.value}
+                        onClick={() => setTextColor(c.value)}
+                        title={c.label}
+                        className={cn(
+                          'size-8 rounded-full border-2 transition-all',
+                          textColor === c.value
+                            ? 'border-foreground scale-110 shadow-md'
+                            : 'border-muted-foreground/30 hover:scale-105 hover:border-muted-foreground'
+                        )}
+                        style={{ backgroundColor: c.value }}
+                      />
+                    ))}
+                    <div className="flex items-center gap-2 ml-2">
+                      <input
+                        type="color"
+                        value={textColor}
+                        onChange={(e) => setTextColor(e.target.value)}
+                        className="size-8 rounded-full cursor-pointer border-2 border-border"
+                      />
+                      <input
+                        type="text"
+                        value={textColor}
+                        onChange={(e) => {
+                          let v = e.target.value;
+                          if (!v.startsWith('#')) v = '#' + v;
+                          if (/^#[0-9A-Fa-f]{0,6}$/.test(v)) setTextColor(v);
+                        }}
+                        onBlur={() => {
+                          if (!/^#[0-9A-Fa-f]{6}$/.test(textColor)) setTextColor('#1a1a1a');
+                        }}
+                        maxLength={7}
+                        className="w-20 text-xs font-mono px-2 py-1 rounded border border-border bg-muted/50 focus:outline-none focus:ring-1 focus:ring-ring"
+                        placeholder="#1a1a1a"
+                      />
+                    </div>
+                  </div>
                 </div>
               </div>
             </Section>

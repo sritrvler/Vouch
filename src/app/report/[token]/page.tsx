@@ -28,7 +28,7 @@ export default async function ClientReportPage({ params }: PageProps) {
 
   const { data: project } = await supabase
     .from('projects')
-    .select('id, name, logo_url, accent_color')
+    .select('id, name, logo_url, accent_color, button_color')
     .eq('report_token', token)
     .single();
 
@@ -41,7 +41,7 @@ export default async function ClientReportPage({ params }: PageProps) {
     .eq('status', 'approved')
     .order('created_at', { ascending: false });
 
-  const accent = project.accent_color ?? '#6366F1';
+  const accent = project.button_color || project.accent_color || '#6366F1';
   const total = testimonials?.length ?? 0;
   const avgRating = total > 0
     ? (testimonials!.reduce((sum, t) => sum + t.rating, 0) / total).toFixed(1)
