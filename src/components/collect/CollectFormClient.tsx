@@ -918,22 +918,18 @@ export default function CollectFormClient({
                 transition={transition}
                 className="p-7 sm:p-9"
               >
-                <div className="mb-5 text-center">
-                  <h2 className="text-2xl font-bold" style={{ color: textColor }}>Add a video</h2>
-                  <p className="mt-1.5 text-sm text-muted-foreground">
-                    Optional. A short video makes your testimonial 3x more impactful.
-                  </p>
-                </div>
-
                 {!wantsVideo && !videoBlob ? (
                   /* Opt-in screen: ask before turning on camera */
                   <div className="flex flex-col items-center py-6 gap-5">
                     <div className="w-16 h-16 rounded-full flex items-center justify-center" style={{ backgroundColor: `${buttonColor}15` }}>
                       <Video className="size-7" style={{ color: buttonColor }} />
                     </div>
-                    <p className="text-sm text-muted-foreground text-center max-w-[280px]">
-                      A 30-second video makes your testimonial feel personal and builds trust. Would you like to record one?
-                    </p>
+                    <div className="text-center">
+                      <h2 className="text-2xl font-bold" style={{ color: textColor }}>Add a video?</h2>
+                      <p className="mt-1.5 text-sm text-muted-foreground max-w-[280px]">
+                        A short video makes your testimonial feel personal and builds trust.
+                      </p>
+                    </div>
                     <div className="w-full space-y-3">
                       <Button
                         onClick={() => setWantsVideo(true)}
@@ -953,7 +949,16 @@ export default function CollectFormClient({
                       </Button>
                     </div>
                   </div>
-                ) : isUploadingVideo ? (
+                ) : (
+                <>
+                <div className="mb-5 text-center">
+                  <h2 className="text-2xl font-bold" style={{ color: textColor }}>Record your video</h2>
+                  <p className="mt-1.5 text-sm text-muted-foreground">
+                    Keep it short, 30 seconds to 2 minutes is perfect.
+                  </p>
+                </div>
+
+                {isUploadingVideo ? (
                   <div className="flex flex-col items-center justify-center py-10 gap-3">
                     <Loader2 className="size-7 animate-spin" style={{ color: buttonColor }} />
                     <p className="text-sm text-muted-foreground">Uploading video...</p>
@@ -1139,6 +1144,9 @@ export default function CollectFormClient({
                       </div>
                     )}
                   </div>
+                )}
+
+                </>
                 )}
 
                 {!isRecording && !isUploadingVideo && (
