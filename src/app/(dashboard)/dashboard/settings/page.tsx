@@ -316,49 +316,26 @@ function SettingsInner() {
 
       setUploadingLogo(true);
       try {
-        const { data: { user } } = await supabase.auth.getUser();
-        if (!user) throw new Error('Not authenticated');
+        const body = new FormData();
+        body.append('file', file);
 
-        const ext = file.name.split('.').pop();
-        const path = `logos/${user.id}/logo.${ext}`;
+        const res = await fetch('/api/upload-logo', { method: 'POST', body });
+        const data = await res.json();
 
-        const { error: uploadError } = await supabase.storage
-          .from('vouch-assets')
-          .upload(path, file, { upsert: true });
+        if (!res.ok) throw new Error(data.error || 'Upload failed');
 
-        if (uploadError) throw uploadError;
-
-        const { data: urlData } = supabase.storage
-          .from('vouch-assets')
-          .getPublicUrl(path);
-
-        const logoUrl = `${urlData.publicUrl}?t=${Date.now()}`;
-        setLogoPreview(logoUrl);
-        setProject((prev) => prev ? { ...prev, logo_url: logoUrl } : prev);
+        setLogoPreview(data.url);
+        setProject((prev) => prev ? { ...prev, logo_url: data.url } : prev);
         toast.success('Logo uploaded');
       } catch (err: unknown) {
         const msg = err instanceof Error ? err.message : String(err);
-        const lower = msg.toLowerCase();
-
-        if (lower.includes('not authenticated') || lower.includes('auth')) {
-          toast.error('You need to be signed in to upload a logo. Try refreshing the page.');
-        } else if (lower.includes('bucket') && lower.includes('not found')) {
-          toast.error('Logo upload failed: storage is not configured yet. Contact support.');
-        } else if (lower.includes('permission') || lower.includes('policy') || lower.includes('rls')) {
-          toast.error('Logo upload failed: permission denied. Try signing out and back in.');
-        } else if (lower.includes('payload too large') || lower.includes('too large') || lower.includes('413')) {
-          toast.error('Logo file is too large. Please use an image under 2MB.');
-        } else if (lower.includes('network') || lower.includes('timeout') || lower.includes('fetch') || lower.includes('failed to fetch')) {
-          toast.error('Upload failed due to a network issue. Check your connection and try again.');
-        } else {
-          toast.error(`Logo upload failed: ${msg}. Try a different image or contact support.`);
-        }
+        toast.error(`Logo upload failed: ${msg}`);
         console.error(err);
       } finally {
         setUploadingLogo(false);
       }
     },
-    [supabase]
+    []
   );
 
   // ── Save project ───────────────────────────────────────────────────────────
@@ -849,13 +826,30 @@ function SettingsInner() {
                   />
                 ))}
                 <div className="flex items-center gap-2 ml-2">
+                  <div className="relative">
+                    <input
+                      type="color"
+                      value={accentColor}
+                      onChange={(e) => setAccentColor(e.target.value)}
+                      className="size-8 rounded-full cursor-pointer border-2 border-border"
+                    />
+                    <span className="absolute -bottom-4 left-1/2 -translate-x-1/2 text-[10px] text-muted-foreground whitespace-nowrap">Custom</span>
+                  </div>
                   <input
-                    type="color"
+                    type="text"
                     value={accentColor}
-                    onChange={(e) => setAccentColor(e.target.value)}
-                    className="size-8 rounded-full cursor-pointer border-2 border-border"
+                    onChange={(e) => {
+                      let v = e.target.value;
+                      if (!v.startsWith('#')) v = '#' + v;
+                      if (/^#[0-9A-Fa-f]{0,6}$/.test(v)) setAccentColor(v);
+                    }}
+                    onBlur={() => {
+                      if (!/^#[0-9A-Fa-f]{6}$/.test(accentColor)) setAccentColor('#6366F1');
+                    }}
+                    maxLength={7}
+                    className="w-20 text-xs font-mono px-2 py-1 rounded border border-border bg-muted/50 focus:outline-none focus:ring-1 focus:ring-ring"
+                    placeholder="#000000"
                   />
-                  <span className="text-xs text-muted-foreground font-mono">{accentColor}</span>
                 </div>
               </div>
             </Section>

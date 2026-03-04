@@ -1,4 +1,4 @@
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import { Inter, JetBrains_Mono } from 'next/font/google';
 import './globals.css';
 
@@ -14,6 +14,12 @@ const jetbrainsMono = JetBrains_Mono({
   display: 'swap',
   preload: false,
 });
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  viewportFit: 'cover',
+};
 
 export const metadata: Metadata = {
   title: { default: 'Vouch: Turn happy customers into your best salespeople', template: '%s | Vouch' },
