@@ -835,88 +835,144 @@ function SettingsInner() {
               </div>
             </Section>
 
-            {/* Brand Color */}
-            <Section title="Brand Color" description="Stars, buttons, and accents across all customer-facing pages.">
-              <div className="flex items-center gap-3 flex-wrap">
-                {ACCENT_PRESETS.map((c) => (
-                  <button
-                    key={c.value}
-                    onClick={() => setButtonColor(c.value)}
-                    title={c.label}
-                    className={cn(
-                      'size-8 rounded-full border-2 transition-all',
-                      (buttonColor || accentColor) === c.value
-                        ? 'border-foreground scale-110 shadow-md'
-                        : 'border-transparent hover:scale-105 hover:border-muted-foreground'
-                    )}
-                    style={{ backgroundColor: c.value }}
-                  />
-                ))}
-                <div className="flex items-center gap-2 ml-2">
-                  <div className="relative">
-                    <input
-                      type="color"
-                      value={buttonColor || accentColor}
-                      onChange={(e) => setButtonColor(e.target.value)}
-                      className="size-8 rounded-full cursor-pointer border-2 border-dashed border-muted-foreground/50 bg-[conic-gradient(red,yellow,lime,aqua,blue,magenta,red)]"
-                    />
-                    <span className="absolute -bottom-4 left-1/2 -translate-x-1/2 text-[10px] text-muted-foreground whitespace-nowrap">Custom</span>
+            {/* Brand Color with live preview */}
+            <Section title="Brand Color">
+              <div className="flex gap-8">
+                {/* Preview */}
+                <div className="flex-1 min-w-0">
+                  <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wide mb-2">Preview</p>
+                  <div className="rounded-xl border border-border overflow-hidden bg-white p-4">
+                    <div className="flex gap-1 mb-2">
+                      {[1,2,3,4,5].map((i) => (
+                        <svg key={i} width="16" height="16" viewBox="0 0 24 24" fill={buttonColor || accentColor} stroke="none">
+                          <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+                        </svg>
+                      ))}
+                    </div>
+                    <p className="text-xs text-muted-foreground leading-relaxed mb-3">&ldquo;Absolutely transformed our workflow. The team was incredible to work with.&rdquo;</p>
+                    <div className="flex items-center gap-2">
+                      <div
+                        className="size-7 rounded-full flex items-center justify-center text-white text-[10px] font-bold shrink-0"
+                        style={{ backgroundColor: buttonColor || accentColor }}
+                      >
+                        JD
+                      </div>
+                      <div>
+                        <p className="text-[11px] font-semibold text-foreground">Jane Doe</p>
+                        <p className="text-[10px] text-muted-foreground">CEO, Acme Inc</p>
+                      </div>
+                    </div>
                   </div>
-                  <input
-                    type="text"
-                    value={buttonColor || accentColor}
-                    onChange={(e) => {
-                      let v = e.target.value;
-                      if (!v.startsWith('#')) v = '#' + v;
-                      if (/^#[0-9A-Fa-f]{0,6}$/.test(v)) setButtonColor(v);
-                    }}
-                    onBlur={() => {
-                      if (buttonColor && !/^#[0-9A-Fa-f]{6}$/.test(buttonColor)) setButtonColor('');
-                    }}
-                    maxLength={7}
-                    className="w-20 text-xs font-mono px-2 py-1 rounded border border-border bg-muted/50 focus:outline-none focus:ring-1 focus:ring-ring"
-                    placeholder="#6366F1"
-                  />
+                  <p className="text-[11px] text-muted-foreground mt-2">Appears on stars, buttons, and accents everywhere</p>
                 </div>
-              </div>
-            </Section>
-
-            {/* Collection Form Appearance */}
-            <Section title="Collection Form" description="Background and text color for the form your customers fill out.">
-              <div className="space-y-5">
-                <div className="space-y-2">
-                  <Label className="text-sm font-medium">Background</Label>
-                  <div className="flex items-center gap-3">
-                    {[
-                      { label: 'White', value: '#ffffff' },
-                      { label: 'Snow', value: '#fafafa' },
-                      { label: 'Cream', value: '#fef9ef' },
-                      { label: 'Slate', value: '#f1f5f9' },
-                      { label: 'Stone', value: '#f5f5f4' },
-                      { label: 'Dark', value: '#0f172a' },
-                    ].map((c) => (
+                {/* Picker */}
+                <div className="w-[200px] shrink-0">
+                  <div className="flex gap-1.5 flex-wrap mb-3">
+                    {ACCENT_PRESETS.map((c) => (
                       <button
                         key={c.value}
-                        onClick={() => setFormBgColor(c.value)}
+                        onClick={() => setButtonColor(c.value)}
                         title={c.label}
                         className={cn(
-                          'size-8 rounded-full border-2 transition-all',
-                          formBgColor === c.value
+                          'size-7 rounded-full border-2 transition-all',
+                          (buttonColor || accentColor) === c.value
                             ? 'border-foreground scale-110 shadow-md'
-                            : 'border-muted-foreground/30 hover:scale-105 hover:border-muted-foreground'
+                            : 'border-transparent hover:scale-105 hover:border-muted-foreground'
                         )}
                         style={{ backgroundColor: c.value }}
                       />
                     ))}
-                    <div className="flex items-center gap-2 ml-2">
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="relative">
+                      <input
+                        type="color"
+                        value={buttonColor || accentColor}
+                        onChange={(e) => setButtonColor(e.target.value)}
+                        className="size-7 rounded-full cursor-pointer border-2 border-dashed border-muted-foreground/50 bg-[conic-gradient(red,yellow,lime,aqua,blue,magenta,red)]"
+                      />
+                    </div>
+                    <input
+                      type="text"
+                      value={buttonColor || accentColor}
+                      onChange={(e) => {
+                        let v = e.target.value;
+                        if (!v.startsWith('#')) v = '#' + v;
+                        if (/^#[0-9A-Fa-f]{0,6}$/.test(v)) setButtonColor(v);
+                      }}
+                      onBlur={() => {
+                        if (buttonColor && !/^#[0-9A-Fa-f]{6}$/.test(buttonColor)) setButtonColor('');
+                      }}
+                      maxLength={7}
+                      className="w-20 text-xs font-mono px-2 py-1 rounded border border-border bg-muted/50 focus:outline-none focus:ring-1 focus:ring-ring"
+                      placeholder="#6366F1"
+                    />
+                  </div>
+                </div>
+              </div>
+            </Section>
+
+            {/* Collection Form with live preview */}
+            <Section title="Collection Form">
+              <div className="flex gap-8">
+                {/* Preview */}
+                <div className="flex-1 min-w-0">
+                  <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wide mb-2">Preview</p>
+                  <div
+                    className="rounded-xl border border-border overflow-hidden p-5 transition-colors"
+                    style={{ background: `linear-gradient(135deg, ${formBgColor}, ${formBgColor})` }}
+                  >
+                    <div
+                      className="size-8 rounded-lg bg-muted/50 mb-2 flex items-center justify-center text-[8px] text-muted-foreground border border-border/50"
+                    >
+                      Logo
+                    </div>
+                    <p className="text-sm font-bold mb-1 transition-colors" style={{ color: textColor }}>Share your experience</p>
+                    <p className="text-[11px] mb-3 transition-colors" style={{ color: `${textColor}99` }}>We&apos;d love to hear from you</p>
+                    <div className="h-7 rounded-md border border-border/40 bg-white/70 mb-2" />
+                    <div className="h-12 rounded-md border border-border/40 bg-white/70 mb-3" />
+                    <div
+                      className="h-7 w-20 rounded-md flex items-center justify-center text-white text-[10px] font-semibold"
+                      style={{ backgroundColor: buttonColor || accentColor }}
+                    >
+                      Submit
+                    </div>
+                  </div>
+                </div>
+                {/* Pickers */}
+                <div className="w-[200px] shrink-0 space-y-5">
+                  <div>
+                    <Label className="text-xs font-medium mb-2 block">Background</Label>
+                    <div className="flex gap-1.5 flex-wrap mb-2">
+                      {[
+                        { label: 'White', value: '#ffffff' },
+                        { label: 'Snow', value: '#fafafa' },
+                        { label: 'Cream', value: '#fef9ef' },
+                        { label: 'Slate', value: '#f1f5f9' },
+                        { label: 'Dark', value: '#0f172a' },
+                      ].map((c) => (
+                        <button
+                          key={c.value}
+                          onClick={() => setFormBgColor(c.value)}
+                          title={c.label}
+                          className={cn(
+                            'size-7 rounded-full border-2 transition-all',
+                            formBgColor === c.value
+                              ? 'border-foreground scale-110 shadow-md'
+                              : 'border-muted-foreground/30 hover:scale-105 hover:border-muted-foreground'
+                          )}
+                          style={{ backgroundColor: c.value }}
+                        />
+                      ))}
+                    </div>
+                    <div className="flex items-center gap-2">
                       <div className="relative">
                         <input
                           type="color"
                           value={formBgColor}
                           onChange={(e) => setFormBgColor(e.target.value)}
-                          className="size-8 rounded-full cursor-pointer border-2 border-dashed border-muted-foreground/50 bg-[conic-gradient(red,yellow,lime,aqua,blue,magenta,red)]"
+                          className="size-7 rounded-full cursor-pointer border-2 border-dashed border-muted-foreground/50 bg-[conic-gradient(red,yellow,lime,aqua,blue,magenta,red)]"
                         />
-                        <span className="absolute -bottom-4 left-1/2 -translate-x-1/2 text-[10px] text-muted-foreground whitespace-nowrap">Custom</span>
                       </div>
                       <input
                         type="text"
@@ -935,39 +991,36 @@ function SettingsInner() {
                       />
                     </div>
                   </div>
-                </div>
-
-                <div className="space-y-2">
-                  <Label className="text-sm font-medium">Text</Label>
-                  <div className="flex items-center gap-3">
-                    {[
-                      { label: 'Near Black', value: '#1a1a1a' },
-                      { label: 'Dark Gray', value: '#374151' },
-                      { label: 'Slate', value: '#334155' },
-                      { label: 'White', value: '#ffffff' },
-                    ].map((c) => (
-                      <button
-                        key={c.value}
-                        onClick={() => setTextColor(c.value)}
-                        title={c.label}
-                        className={cn(
-                          'size-8 rounded-full border-2 transition-all',
-                          textColor === c.value
-                            ? 'border-foreground scale-110 shadow-md'
-                            : 'border-muted-foreground/30 hover:scale-105 hover:border-muted-foreground'
-                        )}
-                        style={{ backgroundColor: c.value }}
-                      />
-                    ))}
-                    <div className="flex items-center gap-2 ml-2">
+                  <div>
+                    <Label className="text-xs font-medium mb-2 block">Text</Label>
+                    <div className="flex gap-1.5 flex-wrap mb-2">
+                      {[
+                        { label: 'Near Black', value: '#1a1a1a' },
+                        { label: 'Dark Gray', value: '#374151' },
+                        { label: 'White', value: '#ffffff' },
+                      ].map((c) => (
+                        <button
+                          key={c.value}
+                          onClick={() => setTextColor(c.value)}
+                          title={c.label}
+                          className={cn(
+                            'size-7 rounded-full border-2 transition-all',
+                            textColor === c.value
+                              ? 'border-foreground scale-110 shadow-md'
+                              : 'border-muted-foreground/30 hover:scale-105 hover:border-muted-foreground'
+                          )}
+                          style={{ backgroundColor: c.value }}
+                        />
+                      ))}
+                    </div>
+                    <div className="flex items-center gap-2">
                       <div className="relative">
                         <input
                           type="color"
                           value={textColor}
                           onChange={(e) => setTextColor(e.target.value)}
-                          className="size-8 rounded-full cursor-pointer border-2 border-dashed border-muted-foreground/50 bg-[conic-gradient(red,yellow,lime,aqua,blue,magenta,red)]"
+                          className="size-7 rounded-full cursor-pointer border-2 border-dashed border-muted-foreground/50 bg-[conic-gradient(red,yellow,lime,aqua,blue,magenta,red)]"
                         />
-                        <span className="absolute -bottom-4 left-1/2 -translate-x-1/2 text-[10px] text-muted-foreground whitespace-nowrap">Custom</span>
                       </div>
                       <input
                         type="text"
