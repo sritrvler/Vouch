@@ -1,3 +1,10 @@
+# Go-Live Checklist (DO NOT SKIP BEFORE LAUNCH)
+
+- [ ] **Re-enable disposable email blocking**: Uncomment the `isDisposableEmail` check in `src/app/(auth)/signup/page.tsx` (line ~59). Currently disabled so we can test with temp emails like yopmail.
+- [ ] **Enable "Confirm email" in Supabase**: Dashboard > Authentication > Providers > Email > toggle "Confirm email" ON.
+
+---
+
 # Active Work Queue
 
 ## Session Handoff (March 4, 2026, session 5)
