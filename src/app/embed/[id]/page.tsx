@@ -21,8 +21,6 @@ interface WidgetTheme {
   showAvatar?: boolean;
   showDate?: boolean;
   showSource?: boolean;
-  showText?: boolean;
-  showVideo?: boolean;
 }
 
 interface Widget {
@@ -48,6 +46,8 @@ interface Testimonial {
   video_url: string | null;
   video_thumbnail_url: string | null;
   email_domain: string | null;
+  show_text: boolean;
+  show_video: boolean;
   created_at: string;
 }
 
@@ -305,8 +305,8 @@ function TestimonialCard({
         )}
       </div>
 
-      {/* Zone B: Quote (hidden when showText is false and testimonial has video) */}
-      {(theme.showText !== false || !testimonial.video_url) && (
+      {/* Zone B: Quote (hidden when show_text is false and testimonial has video) */}
+      {(testimonial.show_text !== false || !testimonial.video_url) && (
         <blockquote style={{ margin: 0, padding: 0 }}>
           <p data-vouch-quote="" style={{ fontSize: compact ? 13 : 14, lineHeight: 1.65, margin: 0, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 6, WebkitBoxOrient: 'vertical' as const }}>
             &ldquo;
@@ -360,7 +360,7 @@ function TestimonialCard({
       </div>
 
       {/* Inline video player with first-frame thumbnail */}
-      {testimonial.video_url && theme.showVideo !== false && (
+      {testimonial.video_url && testimonial.show_video !== false && (
         // eslint-disable-next-line jsx-a11y/media-has-caption
         <video
           src={testimonial.video_url}
@@ -510,7 +510,7 @@ function SingleLayout({
           <Stars rating={featured.rating} color={primaryColor} />
         </div>
       )}
-      {(theme.showText !== false || !featured.video_url) && (
+      {(featured.show_text !== false || !featured.video_url) && (
         <blockquote style={{ margin: '0 0 24px' }}>
           <p style={{ fontSize: 18, lineHeight: 1.7, fontStyle: 'italic', margin: 0, color: '#374151' }}>
             &ldquo;
@@ -633,7 +633,7 @@ export default async function EmbedPage({ params }: PageProps) {
   let query = supabase
     .from('testimonials')
     .select(
-      'id, author_name, author_role, author_company, author_avatar_url, rating, content, featured, source_url, golden_sentence, metric_label, video_url, video_thumbnail_url, email_domain, created_at'
+      'id, author_name, author_role, author_company, author_avatar_url, rating, content, featured, source_url, golden_sentence, metric_label, video_url, video_thumbnail_url, email_domain, show_text, show_video, created_at'
     )
     .eq('project_id', widget.project_id)
     .eq('status', 'approved')

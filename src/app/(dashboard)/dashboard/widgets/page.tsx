@@ -62,8 +62,6 @@ interface WidgetTheme {
   showRating: boolean;
   showAvatar: boolean;
   showDate: boolean;
-  showText: boolean;
-  showVideo: boolean;
 }
 
 interface WidgetSettings {
@@ -291,8 +289,6 @@ export default function WidgetsPage() {
       showRating: true,
       showAvatar: true,
       showDate: true,
-      showText: true,
-      showVideo: true,
     },
     filterMode: 'all',
     minRating: 4,
@@ -315,8 +311,6 @@ export default function WidgetsPage() {
       showRating: true,
       showAvatar: true,
       showDate: true,
-      showText: true,
-      showVideo: true,
     },
     filterMode: 'all' as FilterMode,
     minRating: 4,
@@ -354,8 +348,6 @@ export default function WidgetsPage() {
         showRating: loadedTheme.showRating ?? true,
         showAvatar: loadedTheme.showAvatar ?? true,
         showDate: loadedTheme.showDate ?? true,
-        showText: loadedTheme.showText ?? true,
-        showVideo: loadedTheme.showVideo ?? true,
       },
       filterMode: widget.filter_mode,
       minRating: widget.min_rating,
@@ -1033,36 +1025,8 @@ export function Testimonials() {
               )}
             </div>
 
-            {/* Content toggles */}
+            {/* Toggles */}
             <div className="space-y-2 pt-1">
-              <p className="text-xs font-medium text-muted-foreground">Content</p>
-              {(
-                [
-                  { key: 'showText' as const, label: 'Show written testimonial' },
-                  { key: 'showVideo' as const, label: 'Show video testimonial' },
-                ] as const
-              ).map(({ key, label }) => (
-                <div key={key} className="flex items-center justify-between">
-                  <span className="text-sm text-foreground/80">{label}</span>
-                  <Switch
-                    checked={settings.theme[key] as boolean}
-                    onCheckedChange={(v) => {
-                      const otherKey = key === 'showText' ? 'showVideo' : 'showText';
-                      if (!v && !settings.theme[otherKey]) {
-                        toast.error('At least one of text or video must be shown');
-                        return;
-                      }
-                      updateTheme(key, v);
-                    }}
-                    size="sm"
-                  />
-                </div>
-              ))}
-            </div>
-
-            {/* Display toggles */}
-            <div className="space-y-2 pt-1">
-              <p className="text-xs font-medium text-muted-foreground">Display</p>
               {(
                 [
                   { key: 'showRating' as const, label: 'Show star rating' },

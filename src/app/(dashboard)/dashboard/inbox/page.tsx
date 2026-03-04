@@ -58,6 +58,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import { Switch } from '@/components/ui/switch';
 import { cn } from '@/lib/utils';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -79,6 +80,8 @@ interface Testimonial {
   metric_label: string | null;
   video_url: string | null;
   video_thumbnail_url: string | null;
+  show_text: boolean;
+  show_video: boolean;
   created_at: string;
   project_id: string;
   project?: { name: string };
@@ -614,6 +617,8 @@ function TestimonialCard({ testimonial, onApprove, onReject, onToggleFeatured, o
   const [goldenSentence, setGoldenSentence] = useState(testimonial.golden_sentence ?? '');
   const [metricLabel, setMetricLabel] = useState(testimonial.metric_label ?? '');
   const [fieldSaving, setFieldSaving] = useState<'golden' | 'metric' | null>(null);
+  const [showText, setShowText] = useState(testimonial.show_text ?? true);
+  const [showVideo, setShowVideo] = useState(testimonial.show_video ?? true);
   const TRUNCATE_AT = 150;
   const shouldTruncate = testimonial.content.length > TRUNCATE_AT;
   const displayContent =
@@ -649,6 +654,26 @@ function TestimonialCard({ testimonial, onApprove, onReject, onToggleFeatured, o
     if (!error) toast.success('Metric saved');
     else toast.error('Failed to save');
     setFieldSaving(null);
+  }
+
+  async function toggleShowContent(field: 'show_text' | 'show_video', value: boolean) {
+    const otherField = field === 'show_text' ? 'show_video' : 'show_text';
+    const otherValue = field === 'show_text' ? showVideo : showText;
+    if (!value && !otherValue) {
+      toast.error('At least one of text or video must be shown');
+      return;
+    }
+    if (field === 'show_text') setShowText(value);
+    else setShowVideo(value);
+    const { error } = await supabase
+      .from('testimonials')
+      .update({ [field]: value })
+      .eq('id', testimonial.id);
+    if (error) {
+      toast.error('Failed to update');
+      if (field === 'show_text') setShowText(!value);
+      else setShowVideo(!value);
+    }
   }
 
   return (
@@ -759,6 +784,31 @@ function TestimonialCard({ testimonial, onApprove, onReject, onToggleFeatured, o
               </div>
             </div>
           </button>
+        </div>
+      )}
+
+      {/* Widget display toggles (only for testimonials with video) */}
+      {testimonial.video_url && (
+        <div className="mt-3 pt-3 border-t border-dashed border-border/50">
+          <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mb-2">Show in widget</p>
+          <div className="flex items-center gap-4">
+            <label className="flex items-center gap-1.5 cursor-pointer">
+              <Switch
+                checked={showText}
+                onCheckedChange={(v) => toggleShowContent('show_text', v)}
+                size="sm"
+              />
+              <span className="text-xs text-foreground/80">Text</span>
+            </label>
+            <label className="flex items-center gap-1.5 cursor-pointer">
+              <Switch
+                checked={showVideo}
+                onCheckedChange={(v) => toggleShowContent('show_video', v)}
+                size="sm"
+              />
+              <span className="text-xs text-foreground/80">Video</span>
+            </label>
+          </div>
         </div>
       )}
 

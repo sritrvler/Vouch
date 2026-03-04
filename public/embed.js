@@ -258,8 +258,8 @@
     html += verifyHtml;
     html += '</div>';
 
-    // Quote (hidden when showText is false and testimonial has video)
-    if (theme.showText !== false || !t.video_url) {
+    // Quote (hidden when show_text is false and testimonial has video)
+    if (t.show_text !== false || !t.video_url) {
       html +=
         '<blockquote style="margin:0;padding:0"><p style="font-size:' + (compact ? '13' : '14') +
         'px;line-height:1.65;margin:0;overflow:hidden;display:-webkit-box;-webkit-line-clamp:6;-webkit-box-orient:vertical">' +
@@ -283,8 +283,8 @@
     }
     html += '</div>';
 
-    // Video (hidden when showVideo is false)
-    if (t.video_url && theme.showVideo !== false) {
+    // Video (hidden when show_video is false)
+    if (t.video_url && t.show_video !== false) {
       html +=
         '<video src="' + esc(t.video_url) + '"' +
         (t.video_thumbnail_url ? ' poster="' + esc(t.video_thumbnail_url) + '"' : '') +
@@ -333,7 +333,7 @@
     if (theme.showRating !== false) {
       html += '<div style="display:flex;justify-content:center;margin-bottom:16px">' + stars(t.rating, pc) + '</div>';
     }
-    if (theme.showText !== false || !t.video_url) {
+    if (t.show_text !== false || !t.video_url) {
       html +=
         '<blockquote style="margin:0 0 24px"><p style="font-size:18px;line-height:1.7;font-style:italic;margin:0;color:#374151">&ldquo;' +
         quoteHtml + '&rdquo;</p></blockquote>';

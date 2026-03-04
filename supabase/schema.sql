@@ -90,6 +90,8 @@ create table public.testimonials (
   video_url text,
   video_thumbnail_url text,
   email_domain text,
+  show_text boolean not null default true,
+  show_video boolean not null default true,
   created_at timestamptz default now() not null,
   updated_at timestamptz default now() not null
 );
@@ -100,6 +102,8 @@ create table public.testimonials (
 -- ALTER TABLE public.testimonials ADD COLUMN IF NOT EXISTS video_thumbnail_url text;
 -- To add email_domain to an existing database run:
 -- ALTER TABLE public.testimonials ADD COLUMN IF NOT EXISTS email_domain text;
+-- ALTER TABLE public.testimonials ADD COLUMN IF NOT EXISTS show_text boolean NOT NULL DEFAULT true;
+-- ALTER TABLE public.testimonials ADD COLUMN IF NOT EXISTS show_video boolean NOT NULL DEFAULT true;
 
 -- ============================================================
 -- WIDGETS
