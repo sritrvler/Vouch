@@ -17,8 +17,11 @@ import {
   QrCode,
   Download,
   MessageCircle,
+  AlertTriangle,
+  Settings,
 } from 'lucide-react';
 import { QRCodeCanvas } from 'qrcode.react';
+import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -394,6 +397,7 @@ function EmptyState({ onCreateClick }: { onCreateClick: () => void }) {
 // ─── Page ─────────────────────────────────────────────────────────────────────
 export default function FormsPage() {
   const supabase = createClient();
+  const router = useRouter();
   const [forms, setForms] = useState<CollectionForm[]>([]);
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
@@ -481,6 +485,13 @@ export default function FormsPage() {
 
   // ── Open Create Dialog ──────────────────────────────────────────────────────
   const openCreate = useCallback(() => {
+    if (projects.length === 0) {
+      toast.error('Create a project first', {
+        description: 'Go to Settings > Project to set up your project before creating forms.',
+        action: { label: 'Go to Settings', onClick: () => router.push('/dashboard/settings') },
+      });
+      return;
+    }
     if (userPlan === 'free' && forms.length >= 1) {
       setShowUpgradePrompt(true);
       return;
@@ -491,7 +502,7 @@ export default function FormsPage() {
     setNewQuestion('');
     setSelectedProjectId(projects[0]?.id ?? '');
     setCreateOpen(true);
-  }, [userPlan, forms.length, projects]);
+  }, [userPlan, forms.length, projects, router]);
 
   // ── Create Form ────────────────────────────────────────────────────────────
   const handleCreate = useCallback(async () => {
@@ -649,6 +660,30 @@ export default function FormsPage() {
           Create Form
         </Button>
       </div>
+
+      {/* ── No project banner ── */}
+      {!loading && projects.length === 0 && (
+        <div className="mb-4 flex items-start gap-3 rounded-xl border border-amber-200 bg-amber-50 p-4">
+          <AlertTriangle className="size-5 text-amber-500 mt-0.5 shrink-0" />
+          <div className="flex-1">
+            <p className="text-sm font-medium text-amber-800">
+              You need a project before you can create forms.
+            </p>
+            <p className="text-xs text-amber-700 mt-0.5">
+              Set up your project in Settings to get started.
+            </p>
+          </div>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => router.push('/dashboard/settings')}
+            className="gap-1.5 rounded-xl border-amber-300 text-amber-700 hover:bg-amber-100 shrink-0"
+          >
+            <Settings className="size-3.5" />
+            Go to Settings
+          </Button>
+        </div>
+      )}
 
       {/* ── Form list ── */}
       {loading ? (

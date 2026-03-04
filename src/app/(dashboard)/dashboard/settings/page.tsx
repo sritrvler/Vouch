@@ -294,12 +294,27 @@ function SettingsInner() {
           .from('vouch-assets')
           .getPublicUrl(path);
 
-        const logoUrl = urlData.publicUrl;
+        const logoUrl = `${urlData.publicUrl}?t=${Date.now()}`;
         setLogoPreview(logoUrl);
         setProject((prev) => prev ? { ...prev, logo_url: logoUrl } : prev);
         toast.success('Logo uploaded');
-      } catch (err) {
-        toast.error('Failed to upload logo');
+      } catch (err: unknown) {
+        const msg = err instanceof Error ? err.message : String(err);
+        const lower = msg.toLowerCase();
+
+        if (lower.includes('not authenticated') || lower.includes('auth')) {
+          toast.error('You need to be signed in to upload a logo. Try refreshing the page.');
+        } else if (lower.includes('bucket') && lower.includes('not found')) {
+          toast.error('Logo upload failed: storage is not configured yet. Contact support.');
+        } else if (lower.includes('permission') || lower.includes('policy') || lower.includes('rls')) {
+          toast.error('Logo upload failed: permission denied. Try signing out and back in.');
+        } else if (lower.includes('payload too large') || lower.includes('too large') || lower.includes('413')) {
+          toast.error('Logo file is too large. Please use an image under 2MB.');
+        } else if (lower.includes('network') || lower.includes('timeout') || lower.includes('fetch') || lower.includes('failed to fetch')) {
+          toast.error('Upload failed due to a network issue. Check your connection and try again.');
+        } else {
+          toast.error(`Logo upload failed: ${msg}. Try a different image or contact support.`);
+        }
         console.error(err);
       } finally {
         setUploadingLogo(false);
