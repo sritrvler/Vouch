@@ -836,12 +836,12 @@ function SettingsInner() {
             </Section>
 
             {/* Colors */}
-            <Section title="Colors" description="Control the look of your collection form and public page.">
+            <Section title="Colors" description="Applied to your collection form, testimonial wall, and client report.">
               <div className="space-y-5">
                 {/* Button Color */}
                 <div className="space-y-2">
                   <Label className="text-sm font-medium">Button Color</Label>
-                  <p className="text-xs text-muted-foreground">Buttons, stars, progress indicators, and interactive elements.</p>
+                  <p className="text-xs text-muted-foreground">Buttons, stars, progress indicators on your collection form, testimonial wall, and report.</p>
                   <div className="flex items-center gap-3 flex-wrap">
                     {ACCENT_PRESETS.map((c) => (
                       <button
@@ -858,12 +858,15 @@ function SettingsInner() {
                       />
                     ))}
                     <div className="flex items-center gap-2 ml-2">
-                      <input
-                        type="color"
-                        value={buttonColor || accentColor}
-                        onChange={(e) => setButtonColor(e.target.value)}
-                        className="size-8 rounded-full cursor-pointer border-2 border-border"
-                      />
+                      <div className="relative">
+                        <input
+                          type="color"
+                          value={buttonColor || accentColor}
+                          onChange={(e) => setButtonColor(e.target.value)}
+                          className="size-8 rounded-full cursor-pointer border-2 border-dashed border-muted-foreground/50 bg-[conic-gradient(red,yellow,lime,aqua,blue,magenta,red)]"
+                        />
+                        <span className="absolute -bottom-4 left-1/2 -translate-x-1/2 text-[10px] text-muted-foreground whitespace-nowrap">Custom</span>
+                      </div>
                       <input
                         type="text"
                         value={buttonColor || accentColor}
@@ -910,12 +913,15 @@ function SettingsInner() {
                       />
                     ))}
                     <div className="flex items-center gap-2 ml-2">
-                      <input
-                        type="color"
-                        value={formBgColor}
-                        onChange={(e) => setFormBgColor(e.target.value)}
-                        className="size-8 rounded-full cursor-pointer border-2 border-border"
-                      />
+                      <div className="relative">
+                        <input
+                          type="color"
+                          value={formBgColor}
+                          onChange={(e) => setFormBgColor(e.target.value)}
+                          className="size-8 rounded-full cursor-pointer border-2 border-dashed border-muted-foreground/50 bg-[conic-gradient(red,yellow,lime,aqua,blue,magenta,red)]"
+                        />
+                        <span className="absolute -bottom-4 left-1/2 -translate-x-1/2 text-[10px] text-muted-foreground whitespace-nowrap">Custom</span>
+                      </div>
                       <input
                         type="text"
                         value={formBgColor}
@@ -938,7 +944,7 @@ function SettingsInner() {
                 {/* Text Color */}
                 <div className="space-y-2">
                   <Label className="text-sm font-medium">Text Color</Label>
-                  <p className="text-xs text-muted-foreground">Headings, labels, and body text on your form.</p>
+                  <p className="text-xs text-muted-foreground">Headings, labels, and body text on your collection form and testimonial wall.</p>
                   <div className="flex items-center gap-3">
                     {[
                       { label: 'Near Black', value: '#1a1a1a' },
@@ -960,12 +966,15 @@ function SettingsInner() {
                       />
                     ))}
                     <div className="flex items-center gap-2 ml-2">
-                      <input
-                        type="color"
-                        value={textColor}
-                        onChange={(e) => setTextColor(e.target.value)}
-                        className="size-8 rounded-full cursor-pointer border-2 border-border"
-                      />
+                      <div className="relative">
+                        <input
+                          type="color"
+                          value={textColor}
+                          onChange={(e) => setTextColor(e.target.value)}
+                          className="size-8 rounded-full cursor-pointer border-2 border-dashed border-muted-foreground/50 bg-[conic-gradient(red,yellow,lime,aqua,blue,magenta,red)]"
+                        />
+                        <span className="absolute -bottom-4 left-1/2 -translate-x-1/2 text-[10px] text-muted-foreground whitespace-nowrap">Custom</span>
+                      </div>
                       <input
                         type="text"
                         value={textColor}
