@@ -32,6 +32,7 @@ interface CollectionForm {
   id: string;
   title: string;
   description: string | null;
+  prompt: string;
   custom_questions: string[] | null;
 }
 
@@ -815,7 +816,7 @@ export default function CollectFormClient({
                 <div className="mb-6">
                   <h2 className="text-2xl font-bold" style={{ color: textColor }}>Tell us more</h2>
                   <p className="mt-1.5 text-sm text-muted-foreground">
-                    What did you love? What could be better?
+                    {form.prompt || 'What did you love? What could be better?'}
                   </p>
                 </div>
 

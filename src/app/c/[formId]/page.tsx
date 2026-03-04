@@ -42,6 +42,7 @@ export default async function CollectPage({ params }: PageProps) {
       id,
       title,
       description,
+      prompt,
       custom_questions,
       is_active,
       projects (
@@ -156,6 +157,7 @@ export default async function CollectPage({ params }: PageProps) {
         id: form.id,
         title: form.title,
         description: form.description,
+        prompt: form.prompt || 'What did you love? What could be better?',
         custom_questions: form.custom_questions,
       }}
       project={{

@@ -49,6 +49,7 @@ interface CollectionForm {
   id: string;
   title: string;
   description: string | null;
+  prompt: string;
   custom_questions: string[];
   is_active: boolean;
   created_at: string;
@@ -422,6 +423,7 @@ export default function FormsPage() {
   const [formTitle, setFormTitle] = useState('Share your experience');
   const [formDesc, setFormDesc] = useState('');
   const [selectedProjectId, setSelectedProjectId] = useState('');
+  const [formPrompt, setFormPrompt] = useState('What did you love? What could be better?');
   const [customQuestions, setCustomQuestions] = useState<string[]>([]);
   const [newQuestion, setNewQuestion] = useState('');
   const [showUpgradePrompt, setShowUpgradePrompt] = useState(false);
@@ -516,7 +518,8 @@ export default function FormsPage() {
     }
     setFormTitle('Share your experience');
     setFormDesc('');
-    setCustomQuestions(['What did you love about working with us?']);
+    setFormPrompt('What did you love? What could be better?');
+    setCustomQuestions([]);
     setNewQuestion('');
     setSelectedProjectId(activeProjectId ?? projects[0]?.id ?? '');
     setCreateOpen(true);
@@ -527,6 +530,7 @@ export default function FormsPage() {
     setEditingForm(form);
     setFormTitle(form.title);
     setFormDesc(form.description ?? '');
+    setFormPrompt(form.prompt || 'What did you love? What could be better?');
     setCustomQuestions(form.custom_questions ?? []);
     setNewQuestion('');
     setSelectedProjectId(form.project_id);
@@ -536,11 +540,11 @@ export default function FormsPage() {
   // ── Save Edit ─────────────────────────────────────────────────────────────
   const handleSaveEdit = useCallback(async () => {
     if (!editingForm || !formTitle.trim()) return;
-    const trimmedQuestions = customQuestions.map((q) => q.trim()).filter(Boolean);
-    if (trimmedQuestions.length === 0) {
-      toast.error('At least 1 question is required');
+    if (!formPrompt.trim()) {
+      toast.error('Testimonial prompt is required');
       return;
     }
+    const trimmedQuestions = customQuestions.map((q) => q.trim()).filter(Boolean);
     setCreating(true);
     try {
       const { error } = await supabase
@@ -548,6 +552,7 @@ export default function FormsPage() {
         .update({
           title: formTitle.trim(),
           description: formDesc.trim() || null,
+          prompt: formPrompt.trim(),
           custom_questions: trimmedQuestions,
         })
         .eq('id', editingForm.id);
@@ -556,7 +561,7 @@ export default function FormsPage() {
       setForms((prev) =>
         prev.map((f) =>
           f.id === editingForm.id
-            ? { ...f, title: formTitle.trim(), description: formDesc.trim() || null, custom_questions: customQuestions }
+            ? { ...f, title: formTitle.trim(), description: formDesc.trim() || null, prompt: formPrompt.trim(), custom_questions: trimmedQuestions }
             : f
         )
       );
@@ -569,7 +574,7 @@ export default function FormsPage() {
     } finally {
       setCreating(false);
     }
-  }, [supabase, editingForm, formTitle, formDesc, customQuestions]);
+  }, [supabase, editingForm, formTitle, formDesc, formPrompt, customQuestions]);
 
   // ── Create Form ────────────────────────────────────────────────────────────
   const handleCreate = useCallback(async () => {
@@ -581,11 +586,11 @@ export default function FormsPage() {
       toast.error('Please select a project');
       return;
     }
-    const trimmedQuestions = customQuestions.map((q) => q.trim()).filter(Boolean);
-    if (trimmedQuestions.length === 0) {
-      toast.error('At least 1 question is required');
+    if (!formPrompt.trim()) {
+      toast.error('Testimonial prompt is required');
       return;
     }
+    const trimmedQuestions = customQuestions.map((q) => q.trim()).filter(Boolean);
     setCreating(true);
     try {
       const { data: { user } } = await supabase.auth.getUser();
@@ -598,6 +603,7 @@ export default function FormsPage() {
           project_id: selectedProjectId,
           title: formTitle.trim(),
           description: formDesc.trim() || null,
+          prompt: formPrompt.trim(),
           custom_questions: trimmedQuestions,
           is_active: true,
         })
@@ -615,7 +621,7 @@ export default function FormsPage() {
     } finally {
       setCreating(false);
     }
-  }, [supabase, formTitle, formDesc, selectedProjectId, customQuestions]);
+  }, [supabase, formTitle, formDesc, formPrompt, selectedProjectId, customQuestions]);
 
   // ── Toggle active ──────────────────────────────────────────────────────────
   const handleToggle = useCallback(
@@ -676,6 +682,7 @@ export default function FormsPage() {
             project_id: original.project_id,
             title: `${original.title} (Copy)`,
             description: original.description,
+            prompt: original.prompt || 'What did you love? What could be better?',
             custom_questions: original.custom_questions,
             is_active: false,
           })
@@ -713,12 +720,8 @@ export default function FormsPage() {
   }, [newQuestion, customQuestions]);
 
   const removeQuestion = useCallback((idx: number) => {
-    if (customQuestions.length <= 1) {
-      toast.error('At least 1 question is required');
-      return;
-    }
     setCustomQuestions((prev) => prev.filter((_, i) => i !== idx));
-  }, [customQuestions]);
+  }, []);
 
   const updateQuestion = useCallback((idx: number, value: string) => {
     if (value.length > 200) return;
@@ -917,13 +920,28 @@ export default function FormsPage() {
               />
             </div>
 
-            {/* Questions */}
+            {/* Testimonial Prompt */}
+            <div className="space-y-1.5">
+              <Label htmlFor="form-prompt">Testimonial Prompt</Label>
+              <p className="text-xs text-muted-foreground">This appears above the main text box where visitors write their testimonial.</p>
+              <Input
+                id="form-prompt"
+                value={formPrompt}
+                onChange={(e) => setFormPrompt(e.target.value)}
+                placeholder="What did you love? What could be better?"
+                className="rounded-xl"
+                maxLength={200}
+              />
+              <span className="text-[10px] text-muted-foreground">{formPrompt.length}/200</span>
+            </div>
+
+            {/* Additional Questions (optional) */}
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <Label>Questions</Label>
-                <span className="text-xs text-muted-foreground">{customQuestions.length}/5</span>
+                <Label>Additional Questions <span className="text-muted-foreground font-normal">(optional)</span></Label>
+                <span className="text-xs text-muted-foreground">{customQuestions.length}/3</span>
               </div>
-              <p className="text-xs text-muted-foreground">Visitors will answer these on your collection form. At least 1 required.</p>
+              <p className="text-xs text-muted-foreground">Extra questions shown below the main testimonial box.</p>
 
               <AnimatePresence>
                 {customQuestions.map((q, i) => (
@@ -944,7 +962,7 @@ export default function FormsPage() {
                       <button
                         onClick={() => removeQuestion(i)}
                         className="rounded-lg p-1.5 text-muted-foreground hover:bg-red-50 hover:text-red-500 transition-colors shrink-0"
-                        title={customQuestions.length <= 1 ? 'At least 1 question required' : 'Remove question'}
+                        title="Remove question"
                       >
                         <X className="size-3.5" />
                       </button>

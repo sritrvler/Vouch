@@ -58,6 +58,7 @@ create table public.collection_forms (
   user_id uuid references auth.users(id) on delete cascade not null,
   title text not null default 'Share your experience',
   description text,
+  prompt text not null default 'What did you love? What could be better?',
   custom_questions text[] default '{}',
   is_active boolean default true,
   created_at timestamptz default now() not null
@@ -141,6 +142,8 @@ create table public.widgets (
 -- ALTER TABLE public.projects ADD COLUMN IF NOT EXISTS button_color text;
 -- ALTER TABLE public.projects ADD COLUMN IF NOT EXISTS text_color text DEFAULT '#1a1a1a';
 -- ALTER TABLE public.projects ADD COLUMN IF NOT EXISTS input_color text DEFAULT '#ffffff';
+
+-- ALTER TABLE public.collection_forms ADD COLUMN IF NOT EXISTS prompt text NOT NULL DEFAULT 'What did you love? What could be better?';
 
 -- ============================================================
 -- ANALYTICS — Form views
