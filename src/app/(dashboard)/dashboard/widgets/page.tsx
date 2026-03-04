@@ -41,6 +41,8 @@ type FilterMode = 'all' | 'featured' | 'rating';
 interface WidgetTheme {
   primaryColor: string;
   backgroundColor: string;
+  textColor: string;
+  cardStyle: 'shadow' | 'border' | 'flat';
   showRating: boolean;
   showAvatar: boolean;
   showDate: boolean;
@@ -174,13 +176,22 @@ function TestimonialPreviewCard({
     .toUpperCase()
     .slice(0, 2);
 
+  const cardStyles: React.CSSProperties = {
+    backgroundColor: theme.backgroundColor,
+    ...(theme.cardStyle === 'shadow'
+      ? { boxShadow: '0 1px 3px 0 rgb(0 0 0 / 0.1)' }
+      : theme.cardStyle === 'border'
+        ? { boxShadow: 'none' }
+        : { boxShadow: 'none', borderColor: 'transparent' }),
+  };
+
   return (
     <div
-      className="rounded-xl border border-border/60 p-4 shadow-sm"
-      style={{ backgroundColor: theme.backgroundColor }}
+      className={cn('rounded-xl p-4', theme.cardStyle !== 'flat' && 'border border-border/60')}
+      style={cardStyles}
     >
       {theme.showRating && <StarRating rating={testimonial.rating} color={theme.primaryColor} />}
-      <p className={cn('mt-2 text-sm text-foreground/85 leading-relaxed', compact && 'text-xs')}>{truncated}</p>
+      <p className={cn('mt-2 text-sm leading-relaxed', compact && 'text-xs')} style={{ color: theme.textColor + 'd9' }}>{truncated}</p>
       <div className="mt-3 flex items-center gap-2">
         {theme.showAvatar && (
           <Avatar size="sm">
@@ -196,11 +207,11 @@ function TestimonialPreviewCard({
           </Avatar>
         )}
         <div>
-          <p className="text-xs font-semibold text-foreground">{testimonial.author_name}</p>
-          {roleCompany && <p className="text-xs text-muted-foreground">{roleCompany}</p>}
+          <p className="text-xs font-semibold" style={{ color: theme.textColor }}>{testimonial.author_name}</p>
+          {roleCompany && <p className="text-xs" style={{ color: theme.textColor + '80' }}>{roleCompany}</p>}
         </div>
         {theme.showDate && (
-          <span className="ml-auto text-xs text-muted-foreground">
+          <span className="ml-auto text-xs" style={{ color: theme.textColor + '60' }}>
             {format(new Date(testimonial.created_at), 'MMM yyyy')}
           </span>
         )}
@@ -237,7 +248,7 @@ export default function WidgetsPage() {
   const [loadingTestimonials, setLoadingTestimonials] = useState(true);
   const [saving, setSaving] = useState(false);
   const [savedWidgetId, setSavedWidgetId] = useState<string | null>(null);
-  const [userPlan, setUserPlan] = useState<'free' | 'pro'>('free');
+  const [userPlan, setUserPlan] = useState<'free' | 'pro' | 'agency'>('free');
   const [projectId, setProjectId] = useState<string | null>(null);
   const [projectSlug, setProjectSlug] = useState<string | null>(null);
   const [embedTab, setEmbedTab] = useState<'link' | 'builder' | 'dev' | 'react'>('link');
@@ -248,6 +259,8 @@ export default function WidgetsPage() {
     theme: {
       primaryColor: '#6366F1',
       backgroundColor: '#ffffff',
+      textColor: '#0f172a',
+      cardStyle: 'shadow',
       showRating: true,
       showAvatar: true,
       showDate: true,
@@ -309,10 +322,19 @@ export default function WidgetsPage() {
 
       if (widgetData) {
         setSavedWidgetId(widgetData.id);
+        const loadedTheme = widgetData.theme as WidgetTheme;
         setSettings({
           name: widgetData.name,
           layout: widgetData.layout,
-          theme: widgetData.theme,
+          theme: {
+            primaryColor: loadedTheme.primaryColor ?? '#6366F1',
+            backgroundColor: loadedTheme.backgroundColor ?? '#ffffff',
+            textColor: loadedTheme.textColor ?? '#0f172a',
+            cardStyle: loadedTheme.cardStyle ?? 'shadow',
+            showRating: loadedTheme.showRating ?? true,
+            showAvatar: loadedTheme.showAvatar ?? true,
+            showDate: loadedTheme.showDate ?? true,
+          },
           filterMode: widgetData.filter_mode,
           minRating: widgetData.min_rating,
           maxItems: widgetData.max_items,
@@ -644,6 +666,61 @@ export function Testimonials() {
                     className="size-7 rounded-full cursor-pointer border-2 border-border"
                   />
                 </div>
+              </div>
+            </div>
+
+            {/* Text Color */}
+            <div>
+              <Label className="text-xs text-muted-foreground mb-2 block">Text Color</Label>
+              <div className="flex items-center gap-2">
+                {['#0f172a', '#1e293b', '#374151', '#4b5563', '#ffffff'].map((c) => (
+                  <button
+                    key={c}
+                    onClick={() => updateTheme('textColor', c)}
+                    title={c}
+                    className={cn(
+                      'size-7 rounded-full border-2 transition-all',
+                      settings.theme.textColor === c
+                        ? 'border-foreground scale-110 shadow-md'
+                        : 'border-border hover:scale-105'
+                    )}
+                    style={{ backgroundColor: c }}
+                  />
+                ))}
+                <div className="flex items-center gap-1.5">
+                  <input
+                    type="color"
+                    value={settings.theme.textColor}
+                    onChange={(e) => updateTheme('textColor', e.target.value)}
+                    className="size-7 rounded-full cursor-pointer border-2 border-border"
+                  />
+                  <span className="text-xs text-muted-foreground font-mono">{settings.theme.textColor}</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Card Style */}
+            <div>
+              <Label className="text-xs text-muted-foreground mb-2 block">Card Style</Label>
+              <div className="flex gap-2">
+                {([
+                  { value: 'shadow' as const, label: 'Shadow' },
+                  { value: 'border' as const, label: 'Border' },
+                  { value: 'flat' as const, label: 'Flat' },
+                ]).map(({ value, label }) => (
+                  <button
+                    key={value}
+                    onClick={() => updateTheme('cardStyle', value)}
+                    className={cn(
+                      'flex-1 px-3 py-2 rounded-xl text-xs font-medium transition-all border',
+                      settings.theme.cardStyle === value
+                        ? 'border-indigo-300 bg-indigo-50 text-indigo-700'
+                        : 'border-border text-muted-foreground hover:bg-muted/50'
+                    )}
+                  >
+                    {label}
+                  </button>
+                ))}
               </div>
             </div>
 
@@ -994,17 +1071,20 @@ export function Testimonials() {
                       <div>
                         <div className="flex items-center justify-between mb-1.5">
                           <span className="text-xs font-medium text-foreground/70">Paste this code:</span>
-                          <CopyCodeButton code={iframeSnippet} />
+                          <CopyCodeButton code={scriptSnippet} />
                         </div>
                         <pre className="rounded-xl bg-gray-950 p-3 text-xs text-emerald-400 overflow-x-auto font-mono leading-relaxed">
-                          {iframeSnippet}
+                          {scriptSnippet}
                         </pre>
                       </div>
+                      <p className="text-xs text-emerald-600 bg-emerald-50 border border-emerald-200 rounded-xl px-3 py-2">
+                        This embed is SEO-friendly. Google will index your testimonials as part of your page.
+                      </p>
                       <ol className="space-y-2">
                         {[
                           'Open your page in the website builder',
-                          'Add an "Embed" block (usually found under Add Elements or the </> icon)',
-                          'Paste the code above into the embed block',
+                          'Add an "Embed" or "Custom Code" block',
+                          'Paste the code above into the block',
                           'Publish your page',
                         ].map((step, i) => (
                           <li key={i} className="flex items-start gap-3 text-xs text-foreground/80">

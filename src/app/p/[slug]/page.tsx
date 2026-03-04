@@ -304,7 +304,7 @@ export default async function PublicTestimonialsPage({ params }: PageProps) {
                         <div className="min-w-0">
                           <p className="text-xs font-bold text-gray-900 truncate">{t.author_name}</p>
                           {(t.author_role || t.author_company) && (
-                            <p className="text-xs text-gray-500 truncate">
+                            <p className="text-xs text-gray-500 leading-snug">
                               {[t.author_role, t.author_company].filter(Boolean).join(', ')}
                             </p>
                           )}

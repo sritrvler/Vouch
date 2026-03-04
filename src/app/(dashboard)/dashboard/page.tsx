@@ -369,7 +369,7 @@ export default function DashboardPage() {
       >
         <h1 className="text-2xl font-bold text-foreground">Overview</h1>
         <p className="text-sm text-muted-foreground mt-0.5">
-          Here&apos;s what&apos;s happening with your testimonials.
+          {hasTestimonials ? "Here\u0027s what\u0027s happening with your testimonials." : "Let\u0027s get your first testimonial."}
         </p>
       </motion.div>
 

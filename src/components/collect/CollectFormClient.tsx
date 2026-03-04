@@ -407,6 +407,7 @@ export default function CollectFormClient({
   const [recordingTime, setRecordingTime] = useState(0);
   const [mediaStream, setMediaStream] = useState<MediaStream | null>(null);
   const [isUploadingVideo, setIsUploadingVideo] = useState(false);
+  const [videoUploadFailed, setVideoUploadFailed] = useState(false);
   const [videoUrl, setVideoUrl] = useState<string | null>(null);
   const [videoThumbnailUrl, setVideoThumbnailUrl] = useState<string | null>(null);
   const [cameraError, setCameraError] = useState(false);
@@ -587,6 +588,7 @@ export default function CollectFormClient({
       return;
     }
     setIsUploadingVideo(true);
+    setVideoUploadFailed(false);
     try {
       const fd = new FormData();
       fd.append('video', videoBlob, 'testimonial.webm');
@@ -599,19 +601,24 @@ export default function CollectFormClient({
         const data = (await res.json()) as { limitReached?: boolean };
         if (data.limitReached) {
           toast.error('Video testimonials are not available for this form right now. You can skip this step.');
+          setIsUploadingVideo(false);
+          goTo(4, 'forward');
+          return;
         }
       } else if (res.ok) {
         const { url, thumbnailUrl } = (await res.json()) as { url: string; thumbnailUrl: string | null };
         setVideoUrl(url);
         if (thumbnailUrl) setVideoThumbnailUrl(thumbnailUrl);
-      } else {
-        toast.error('Video upload failed. Continuing without video.');
+        setIsUploadingVideo(false);
+        goTo(4, 'forward');
+        return;
       }
-    } catch {
-      toast.error('Video upload failed. Continuing without video.');
-    } finally {
+      // Non-403, non-ok: upload failed
+      setVideoUploadFailed(true);
       setIsUploadingVideo(false);
-      goTo(4, 'forward');
+    } catch {
+      setVideoUploadFailed(true);
+      setIsUploadingVideo(false);
     }
   }
 
@@ -704,7 +711,10 @@ export default function CollectFormClient({
   const exitVariant = direction === 'forward' ? 'exitToLeft' : 'exitToRight';
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-indigo-50/40 flex flex-col items-center justify-start py-8 px-4">
+    <div
+      className="min-h-screen flex flex-col items-center justify-start py-8 px-4"
+      style={{ background: `linear-gradient(to bottom right, #f8fafc, #ffffff, ${accentColor}12)` }}
+    >
       <div className="w-full max-w-md">
         {/* Business header */}
         <div className="mb-6 flex justify-center">
@@ -897,6 +907,31 @@ export default function CollectFormClient({
                   <div className="flex flex-col items-center justify-center py-10 gap-3">
                     <Loader2 className="size-7 animate-spin" style={{ color: accentColor }} />
                     <p className="text-sm text-muted-foreground">Uploading video...</p>
+                  </div>
+                ) : videoUploadFailed ? (
+                  <div className="flex flex-col items-center justify-center py-10 gap-3">
+                    <div className="size-12 rounded-full bg-red-100 flex items-center justify-center">
+                      <svg className="size-6 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                    </div>
+                    <p className="text-sm font-medium text-foreground">Video upload failed</p>
+                    <p className="text-xs text-muted-foreground">Check your connection and try again, or skip this step.</p>
+                    <div className="flex gap-3 mt-2">
+                      <button
+                        onClick={() => { setVideoUploadFailed(false); handleVideoNext(); }}
+                        className="px-4 py-2 rounded-xl text-sm font-medium text-white"
+                        style={{ backgroundColor: accentColor }}
+                      >
+                        Try again
+                      </button>
+                      <button
+                        onClick={() => { setVideoUploadFailed(false); setVideoBlob(null); goTo(4, 'forward'); }}
+                        className="px-4 py-2 rounded-xl text-sm font-medium text-muted-foreground hover:text-foreground border border-border"
+                      >
+                        Skip video
+                      </button>
+                    </div>
                   </div>
                 ) : videoBlob ? (
                   /* Review state: video player + thumbnail picker */

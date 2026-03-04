@@ -186,7 +186,7 @@
       html += '<div style="min-width:0">';
       html += '<div style="font-weight:700;font-size:13px;color:' + tc + ';overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + esc(t.author_name) + '</div>';
       if (authorLine) {
-        html += '<div style="font-size:11px;color:#6b7280;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + esc(authorLine) + '</div>';
+        html += '<div style="font-size:11px;color:#6b7280;line-height:1.4">' + esc(authorLine) + '</div>';
       }
       if (t.email_domain) {
         html += '<div style="display:flex;align-items:center;gap:3px;margin-top:2px;font-size:10px;font-weight:600;color:#059669">' + shieldIcon + esc(t.email_domain) + '</div>';

@@ -610,6 +610,7 @@ interface TestimonialCardProps {
 function TestimonialCard({ testimonial, onApprove, onReject, onToggleFeatured, onShareCard, onPlayVideo, isPro, isUpdating }: TestimonialCardProps) {
   const supabase = createClient();
   const [expanded, setExpanded] = useState(false);
+  const [confirmingReject, setConfirmingReject] = useState(false);
   const [goldenSentence, setGoldenSentence] = useState(testimonial.golden_sentence ?? '');
   const [metricLabel, setMetricLabel] = useState(testimonial.metric_label ?? '');
   const [fieldSaving, setFieldSaving] = useState<'golden' | 'metric' | null>(null);
@@ -835,29 +836,75 @@ function TestimonialCard({ testimonial, onApprove, onReject, onToggleFeatured, o
               {isUpdating ? <Loader2 className="size-3.5 animate-spin" /> : <CheckCircle className="size-3.5" />}
               Approve
             </Button>
+            {confirmingReject ? (
+              <>
+                <span className="text-xs text-red-600 font-medium">Reject this?</span>
+                <Button
+                  size="sm"
+                  disabled={isUpdating}
+                  onClick={() => { onReject(testimonial.id); setConfirmingReject(false); }}
+                  className="h-8 gap-1.5 bg-red-600 hover:bg-red-700 text-white rounded-xl"
+                >
+                  {isUpdating ? <Loader2 className="size-3.5 animate-spin" /> : <XCircle className="size-3.5" />}
+                  Yes, reject
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => setConfirmingReject(false)}
+                  className="h-8 rounded-xl"
+                >
+                  Cancel
+                </Button>
+              </>
+            ) : (
+              <Button
+                size="sm"
+                variant="outline"
+                disabled={isUpdating}
+                onClick={() => setConfirmingReject(true)}
+                className="h-8 gap-1.5 border-red-200 text-red-600 hover:bg-red-50 hover:border-red-300 rounded-xl"
+              >
+                <XCircle className="size-3.5" />
+                Reject
+              </Button>
+            )}
+          </>
+        )}
+        {testimonial.status === 'approved' && (
+          confirmingReject ? (
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-red-600 font-medium">Revoke approval?</span>
+              <Button
+                size="sm"
+                disabled={isUpdating}
+                onClick={() => { onReject(testimonial.id); setConfirmingReject(false); }}
+                className="h-8 gap-1.5 bg-red-600 hover:bg-red-700 text-white rounded-xl"
+              >
+                {isUpdating ? <Loader2 className="size-3.5 animate-spin" /> : <XCircle className="size-3.5" />}
+                Yes, revoke
+              </Button>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => setConfirmingReject(false)}
+                className="h-8 rounded-xl"
+              >
+                Cancel
+              </Button>
+            </div>
+          ) : (
             <Button
               size="sm"
               variant="outline"
               disabled={isUpdating}
-              onClick={() => onReject(testimonial.id)}
-              className="h-8 gap-1.5 border-red-200 text-red-600 hover:bg-red-50 hover:border-red-300 rounded-xl"
+              onClick={() => setConfirmingReject(true)}
+              className="h-8 gap-1.5 border-red-200 text-red-600 hover:bg-red-50 rounded-xl"
             >
-              {isUpdating ? <Loader2 className="size-3.5 animate-spin" /> : <XCircle className="size-3.5" />}
-              Reject
+              <XCircle className="size-3.5" />
+              Revoke
             </Button>
-          </>
-        )}
-        {testimonial.status === 'approved' && (
-          <Button
-            size="sm"
-            variant="outline"
-            disabled={isUpdating}
-            onClick={() => onReject(testimonial.id)}
-            className="h-8 gap-1.5 border-red-200 text-red-600 hover:bg-red-50 rounded-xl"
-          >
-            <XCircle className="size-3.5" />
-            Revoke
-          </Button>
+          )
         )}
         {testimonial.status === 'rejected' && (
           <Button
@@ -931,13 +978,17 @@ export default function InboxPage() {
     setLoadingMore(true);
     try {
       const cursor = testimonials[testimonials.length - 1].created_at;
-      const { data, error } = await supabase
+      let query = supabase
         .from('testimonials')
         .select('*, project:projects(name)')
         .eq('user_id', (await supabase.auth.getUser()).data.user?.id ?? '')
         .order('created_at', { ascending: false })
         .lt('created_at', cursor)
         .limit(PAGE_SIZE);
+      if (activeTab !== 'all') {
+        query = query.eq('status', activeTab);
+      }
+      const { data, error } = await query;
       if (error) throw error;
       const rows = (data as Testimonial[]) ?? [];
       setTestimonials((prev) => [...prev, ...rows]);
@@ -948,7 +999,7 @@ export default function InboxPage() {
     } finally {
       setLoadingMore(false);
     }
-  }, [supabase, testimonials, loadingMore]);
+  }, [supabase, testimonials, loadingMore, activeTab]);
 
   useEffect(() => {
     fetchTestimonials();
