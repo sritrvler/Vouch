@@ -317,9 +317,9 @@ export default async function PublicTestimonialsPage({ params }: PageProps) {
                           </div>
                         )}
                         <div className="min-w-0">
-                          <p className="text-xs font-bold text-gray-900 truncate">{t.author_name}</p>
+                          <p className="text-xs font-bold truncate" style={{ color: textColor }}>{t.author_name}</p>
                           {(t.author_role || t.author_company) && (
-                            <p className="text-xs text-gray-500 leading-snug">
+                            <p className="text-xs leading-snug" style={{ color: `${textColor}99` }}>
                               {[t.author_role, t.author_company].filter(Boolean).join(', ')}
                             </p>
                           )}
@@ -376,12 +376,12 @@ export default async function PublicTestimonialsPage({ params }: PageProps) {
                         &ldquo;
                         {hasGolden ? (
                           <>
-                            {beforeGolden && <span className="text-gray-400">{beforeGolden}</span>}
-                            <span className="font-semibold text-gray-900">{golden}</span>
-                            {afterGolden && <span className="text-gray-400">{afterGolden}</span>}
+                            {beforeGolden && <span style={{ color: `${textColor}99` }}>{beforeGolden}</span>}
+                            <span className="font-semibold" style={{ color: textColor }}>{golden}</span>
+                            {afterGolden && <span style={{ color: `${textColor}99` }}>{afterGolden}</span>}
                           </>
                         ) : (
-                          <span className="text-gray-700">{t.content}</span>
+                          <span style={{ color: textColor }}>{t.content}</span>
                         )}
                         &rdquo;
                       </p>

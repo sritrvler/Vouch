@@ -39,6 +39,7 @@ create table public.projects (
   form_bg_color text default '#ffffff',
   button_color text,
   text_color text default '#1a1a1a',
+  input_color text default '#ffffff',
   font_family text,
   font_url text,
   google_review_url text,
@@ -139,6 +140,7 @@ create table public.widgets (
 -- ALTER TABLE public.projects ADD COLUMN IF NOT EXISTS form_bg_color text DEFAULT '#ffffff';
 -- ALTER TABLE public.projects ADD COLUMN IF NOT EXISTS button_color text;
 -- ALTER TABLE public.projects ADD COLUMN IF NOT EXISTS text_color text DEFAULT '#1a1a1a';
+-- ALTER TABLE public.projects ADD COLUMN IF NOT EXISTS input_color text DEFAULT '#ffffff';
 
 -- ============================================================
 -- ANALYTICS — Form views

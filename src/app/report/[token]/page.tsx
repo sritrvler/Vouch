@@ -28,7 +28,7 @@ export default async function ClientReportPage({ params }: PageProps) {
 
   const { data: project } = await supabase
     .from('projects')
-    .select('id, name, logo_url, accent_color, button_color')
+    .select('id, name, logo_url, accent_color, button_color, text_color')
     .eq('report_token', token)
     .single();
 
@@ -42,6 +42,7 @@ export default async function ClientReportPage({ params }: PageProps) {
     .order('created_at', { ascending: false });
 
   const accent = project.button_color || project.accent_color || '#6366F1';
+  const reportTextColor = project.text_color || '#1a1a1a';
   const total = testimonials?.length ?? 0;
   const avgRating = total > 0
     ? (testimonials!.reduce((sum, t) => sum + t.rating, 0) / total).toFixed(1)
@@ -113,7 +114,7 @@ export default async function ClientReportPage({ params }: PageProps) {
                   </div>
 
                   {/* Content */}
-                  <p className="text-sm text-gray-700 leading-relaxed mb-4">{t.content}</p>
+                  <p className="text-sm leading-relaxed mb-4" style={{ color: reportTextColor }}>{t.content}</p>
 
                   {/* Author */}
                   <div className="flex items-center gap-2.5">
@@ -133,9 +134,9 @@ export default async function ClientReportPage({ params }: PageProps) {
                       </div>
                     )}
                     <div className="min-w-0">
-                      <p className="text-xs font-semibold text-gray-900 truncate">{t.author_name}</p>
+                      <p className="text-xs font-semibold truncate" style={{ color: reportTextColor }}>{t.author_name}</p>
                       {roleCompany && (
-                        <p className="text-xs text-gray-400 truncate">{roleCompany}</p>
+                        <p className="text-xs truncate" style={{ color: `${reportTextColor}99` }}>{roleCompany}</p>
                       )}
                     </div>
                   </div>

@@ -21,6 +21,7 @@ interface Project {
   form_bg_color: string | null;
   button_color: string | null;
   text_color: string | null;
+  input_color: string | null;
   font_family: string | null;
   font_url: string | null;
   google_review_url: string | null;
@@ -385,6 +386,7 @@ export default function CollectFormClient({
   const buttonColor = project.button_color || project.accent_color || '#6366F1';
   const formBgColor = project.form_bg_color || '#ffffff';
   const textColor = project.text_color || '#1a1a1a';
+  const inputColor = project.input_color || '#ffffff';
   const fontFamily = sanitizeFontFamily(project.font_family);
   const fontStyleUrl = resolveFontUrl(project.font_family, project.font_url);
 
@@ -754,6 +756,7 @@ export default function CollectFormClient({
         color: textColor,
         '--form-text': textColor,
         '--form-text-muted': `${textColor}99`,
+        '--form-input-bg': inputColor,
         ...(fontFamily ? { fontFamily: `"${fontFamily}", sans-serif` } : {}),
       } as React.CSSProperties}
     >
@@ -860,6 +863,9 @@ export default function CollectFormClient({
                       style={
                         {
                           '--tw-ring-color': buttonColor,
+                          backgroundColor: inputColor,
+                          borderColor: `${textColor}20`,
+                          color: textColor,
                         } as React.CSSProperties
                       }
                       maxLength={500}
@@ -897,6 +903,7 @@ export default function CollectFormClient({
                             }
                             placeholder="Your answer..."
                             className="h-11 text-sm"
+                            style={{ backgroundColor: inputColor, borderColor: `${textColor}20`, color: textColor }}
                           />
                         </div>
                       ))}
@@ -1213,6 +1220,7 @@ export default function CollectFormClient({
                       onChange={(e) => setAuthorName(e.target.value)}
                       placeholder="Jane Smith"
                       className="h-12 text-base"
+                      style={{ backgroundColor: inputColor, borderColor: `${textColor}20`, color: textColor }}
                       required
                       autoFocus
                     />
@@ -1230,6 +1238,7 @@ export default function CollectFormClient({
                         onChange={(e) => setAuthorRole(e.target.value)}
                         placeholder="Marketing Manager"
                         className="h-10 text-sm"
+                        style={{ backgroundColor: inputColor, borderColor: `${textColor}20`, color: textColor }}
                       />
                     </div>
                     <div>
@@ -1242,6 +1251,7 @@ export default function CollectFormClient({
                         onChange={(e) => setAuthorCompany(e.target.value)}
                         placeholder="Acme Inc."
                         className="h-10 text-sm"
+                        style={{ backgroundColor: inputColor, borderColor: `${textColor}20`, color: textColor }}
                       />
                     </div>
                   </div>
@@ -1258,6 +1268,7 @@ export default function CollectFormClient({
                       onChange={(e) => setAuthorEmail(e.target.value)}
                       placeholder="jane@example.com"
                       className="h-10 text-sm"
+                      style={{ backgroundColor: inputColor, borderColor: `${textColor}20`, color: textColor }}
                     />
                   </div>
 

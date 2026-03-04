@@ -51,11 +51,12 @@ export async function GET(_request: Request, { params }: PageProps) {
 
   const { data: project } = await supabase
     .from('projects')
-    .select('name, accent_color, button_color')
+    .select('name, accent_color, button_color, text_color')
     .eq('id', testimonial.project_id)
     .single();
 
   const accentColor = project?.button_color || project?.accent_color || '#6366F1';
+  const cardTextColor = project?.text_color || '#374151';
   const projectName = project?.name ?? '';
 
   const displayContent =
@@ -126,7 +127,7 @@ export async function GET(_request: Request, { params }: PageProps) {
           style={{
             fontSize: 36,
             lineHeight: 1.5,
-            color: '#374151',
+            color: cardTextColor,
             flex: 1,
             display: 'flex',
             alignItems: 'flex-start',
@@ -157,7 +158,7 @@ export async function GET(_request: Request, { params }: PageProps) {
             {initials}
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-            <div style={{ fontSize: 22, fontWeight: 700, color: '#111827' }}>
+            <div style={{ fontSize: 22, fontWeight: 700, color: cardTextColor }}>
               {testimonial.author_name}
             </div>
             {authorLine && (
