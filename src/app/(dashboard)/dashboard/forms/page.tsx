@@ -704,8 +704,8 @@ export default function FormsPage() {
       toast.error('Question must be 200 characters or less');
       return;
     }
-    if (customQuestions.length >= 5) {
-      toast.error('Maximum 5 custom questions allowed');
+    if (customQuestions.length >= 3) {
+      toast.error('Maximum 3 custom questions allowed');
       return;
     }
     setCustomQuestions((prev) => [...prev, q]);
@@ -954,7 +954,7 @@ export default function FormsPage() {
                 ))}
               </AnimatePresence>
 
-              {customQuestions.length < 5 && (
+              {customQuestions.length < 3 && (
                 <div className="flex gap-2">
                   <Input
                     value={newQuestion}

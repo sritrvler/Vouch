@@ -126,62 +126,28 @@ function StarButton({
 
 // ─── Progress dots ───────────────────────────────────────────────────────────
 
-function ProgressDots({
+function ProgressBar({
   currentStep,
   buttonColor,
 }: {
   currentStep: number;
   buttonColor: string;
 }) {
-  const steps = [1, 2, 3, 4];
+  // Endowed progress: start at 20% so the user feels they've already begun
+  // Step 1 = 20%, Step 2 = 45%, Step 3 = 70%, Step 4 = 90%
+  const progressMap: Record<number, number> = { 1: 20, 2: 45, 3: 70, 4: 90 };
+  const percent = progressMap[currentStep] ?? 20;
   return (
-    <div className="flex items-center gap-2 justify-center">
-      {steps.map((step) => {
-        const isActive = step === currentStep;
-        const isComplete = step < currentStep;
-        return (
-          <div
-            key={step}
-            className="flex items-center gap-2"
-          >
-            <motion.div
-              animate={{
-                scale: isActive ? 1 : 0.85,
-              }}
-              transition={{ duration: 0.2 }}
-              className="flex items-center justify-center rounded-full text-xs font-semibold transition-colors duration-300"
-              style={{
-                width: 28,
-                height: 28,
-                backgroundColor: isActive
-                  ? buttonColor
-                  : isComplete
-                    ? `${buttonColor}30`
-                    : '#e2e8f0',
-                color: isActive
-                  ? '#ffffff'
-                  : isComplete
-                    ? buttonColor
-                    : '#94a3b8',
-              }}
-            >
-              {isComplete ? (
-                <Check style={{ width: 12, height: 12 }} />
-              ) : (
-                step
-              )}
-            </motion.div>
-            {step < 4 && (
-              <div
-                className="h-px w-6 transition-colors duration-300"
-                style={{
-                  backgroundColor: isComplete ? `${buttonColor}60` : '#e2e8f0',
-                }}
-              />
-            )}
-          </div>
-        );
-      })}
+    <div className="w-full max-w-xs mx-auto">
+      <div className="h-1.5 rounded-full bg-black/5 overflow-hidden">
+        <motion.div
+          className="h-full rounded-full"
+          style={{ backgroundColor: buttonColor }}
+          initial={{ width: '20%' }}
+          animate={{ width: `${percent}%` }}
+          transition={{ duration: 0.5, ease: 'easeOut' }}
+        />
+      </div>
     </div>
   );
 }
@@ -769,7 +735,7 @@ export default function CollectFormClient({
         {/* Progress (steps 1–4 only) */}
         {step !== 5 && (
           <div className="mb-6">
-            <ProgressDots currentStep={step} buttonColor={buttonColor} />
+            <ProgressBar currentStep={step} buttonColor={buttonColor} />
             {step === 1 && (
               <p className="text-center text-xs text-muted-foreground mt-2">Takes about 2 minutes</p>
             )}
@@ -1168,7 +1134,7 @@ export default function CollectFormClient({
                 <div className="mb-5">
                   <h2 className="text-2xl font-bold" style={{ color: textColor }}>Almost done!</h2>
                   <p className="mt-1.5 text-sm text-muted-foreground">
-                    A face and title make your review feel real and help others trust it.
+                    Just your name and a photo. It makes your testimonial feel real and helps others trust it.
                   </p>
                 </div>
 
