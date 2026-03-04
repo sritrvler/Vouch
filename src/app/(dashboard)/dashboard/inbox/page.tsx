@@ -992,14 +992,8 @@ export default function InboxPage() {
         if (error) throw error;
         toast.success(status === 'approved' ? 'Testimonial approved' : 'Testimonial rejected');
       } catch (err) {
-        // Revert on failure
-        setTestimonials((prev) =>
-          prev.map((t) =>
-            t.id === id
-              ? { ...t, status: t.status === status ? 'pending' : t.status }
-              : t
-          )
-        );
+        // Revert on failure: re-fetch for accurate state
+        fetchTestimonials();
         toast.error('Failed to update testimonial');
         console.error(err);
         // Re-fetch to ensure consistency
@@ -1187,7 +1181,19 @@ export default function InboxPage() {
                 ))}
               </div>
             ) : filtered.length === 0 ? (
-              <EmptyState tab={tab} />
+              searchQuery.trim() ? (
+                <motion.div
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="flex flex-col items-center justify-center py-20 text-center"
+                >
+                  <Search className="size-10 text-muted-foreground/50 mb-3" />
+                  <p className="text-sm font-medium text-muted-foreground">No results for &quot;{searchQuery}&quot;</p>
+                  <p className="text-xs text-muted-foreground/70 mt-1">Try a different search term</p>
+                </motion.div>
+              ) : (
+                <EmptyState tab={tab} />
+              )
             ) : (
               <>
                 <AnimatePresence mode="popLayout">

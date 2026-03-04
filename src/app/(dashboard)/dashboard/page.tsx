@@ -401,105 +401,102 @@ export default function DashboardPage() {
         <GettingStarted stats={stats} />
       )}
 
-      {hasTestimonials ? (
-        <>
-          {/* Recent testimonials */}
-          <motion.section
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3, delay: 0.1, ease: 'easeOut' }}
-          >
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-base font-semibold text-foreground">Recent testimonials</h2>
-              <Button variant="ghost" size="sm" asChild className="text-primary gap-1">
-                <Link href="/dashboard/inbox">
-                  View all
-                  <ArrowRight className="size-3.5" />
-                </Link>
-              </Button>
-            </div>
+      {hasTestimonials && (
+        <motion.section
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3, delay: 0.1, ease: 'easeOut' }}
+        >
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-base font-semibold text-foreground">Recent testimonials</h2>
+            <Button variant="ghost" size="sm" asChild className="text-primary gap-1">
+              <Link href="/dashboard/inbox">
+                View all
+                <ArrowRight className="size-3.5" />
+              </Link>
+            </Button>
+          </div>
 
-            <div className="space-y-3">
-              {recentTestimonials.map((testimonial) => (
-                <div
-                  key={testimonial.id}
-                  className="bg-white rounded-2xl border border-border/60 px-5 py-4 flex items-start gap-4 shadow-sm hover:shadow-md transition-shadow"
-                >
-                  {/* Avatar */}
-                  <div className="size-9 rounded-full bg-primary/10 flex items-center justify-center shrink-0 mt-0.5">
-                    <span className="text-sm font-semibold text-primary">
-                      {testimonial.author_name[0]?.toUpperCase() ?? '?'}
-                    </span>
-                  </div>
-
-                  {/* Content */}
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <span className="font-medium text-sm text-foreground">
-                        {testimonial.author_name}
-                      </span>
-                      <StarRating rating={testimonial.rating} />
-                      <StatusBadge status={testimonial.status} />
-                    </div>
-                    <p className="mt-1 text-sm text-muted-foreground line-clamp-2 leading-relaxed">
-                      {testimonial.content}
-                    </p>
-                  </div>
-
-                  {/* View link */}
-                  <Link
-                    href={`/dashboard/inbox?id=${testimonial.id}`}
-                    className="shrink-0 p-1.5 rounded-lg text-muted-foreground hover:text-primary hover:bg-accent transition-colors"
-                    aria-label="View testimonial"
-                  >
-                    <ExternalLink className="size-4" />
-                  </Link>
+          <div className="space-y-3">
+            {recentTestimonials.map((testimonial) => (
+              <div
+                key={testimonial.id}
+                className="bg-white rounded-2xl border border-border/60 px-5 py-4 flex items-start gap-4 shadow-sm hover:shadow-md transition-shadow"
+              >
+                {/* Avatar */}
+                <div className="size-9 rounded-full bg-primary/10 flex items-center justify-center shrink-0 mt-0.5">
+                  <span className="text-sm font-semibold text-primary">
+                    {testimonial.author_name[0]?.toUpperCase() ?? '?'}
+                  </span>
                 </div>
-              ))}
-            </div>
-          </motion.section>
 
-          {/* Quick actions */}
-          <motion.section
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3, delay: 0.15, ease: 'easeOut' }}
-          >
-            <h2 className="text-base font-semibold text-foreground mb-4">Quick actions</h2>
-            <div className="grid sm:grid-cols-2 gap-4">
-              <div className="rounded-2xl border border-border/60 bg-white shadow-sm hover:shadow-md transition-shadow overflow-hidden">
-                <Link href="/dashboard/forms" className="flex items-start gap-4 p-5 h-full">
-                  <div className="p-2.5 rounded-xl bg-primary/10 text-primary shrink-0 mt-0.5">
-                    <FileText className="size-5" />
+                {/* Content */}
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className="font-medium text-sm text-foreground">
+                      {testimonial.author_name}
+                    </span>
+                    <StarRating rating={testimonial.rating} />
+                    <StatusBadge status={testimonial.status} />
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="font-semibold text-sm text-foreground">Share collection form</p>
-                    <p className="text-xs text-muted-foreground mt-0.5">
-                      Send a unique link to collect testimonials from customers
-                    </p>
-                  </div>
-                  <ArrowRight className="size-4 text-muted-foreground shrink-0 self-center" />
+                  <p className="mt-1 text-sm text-muted-foreground line-clamp-2 leading-relaxed">
+                    {testimonial.content}
+                  </p>
+                </div>
+
+                {/* View link */}
+                <Link
+                  href={`/dashboard/inbox?id=${testimonial.id}`}
+                  className="shrink-0 p-1.5 rounded-lg text-muted-foreground hover:text-primary hover:bg-accent transition-colors"
+                  aria-label="View testimonial"
+                >
+                  <ExternalLink className="size-4" />
                 </Link>
               </div>
+            ))}
+          </div>
+        </motion.section>
+      )}
 
-              <div className="rounded-2xl border border-border/60 bg-white shadow-sm hover:shadow-md transition-shadow overflow-hidden">
-                <Link href="/dashboard/widgets" className="flex items-start gap-4 p-5 h-full">
-                  <div className="p-2.5 rounded-xl bg-violet-100 text-violet-600 shrink-0 mt-0.5">
-                    <Layout className="size-5" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="font-semibold text-sm text-foreground">Embed widget</p>
-                    <p className="text-xs text-muted-foreground mt-0.5">
-                      Add a beautiful testimonials widget to your website
-                    </p>
-                  </div>
-                  <ArrowRight className="size-4 text-muted-foreground shrink-0 self-center" />
-                </Link>
+      {/* Quick actions */}
+      <motion.section
+        initial={{ opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3, delay: hasTestimonials ? 0.15 : 0.1, ease: 'easeOut' }}
+      >
+        <h2 className="text-base font-semibold text-foreground mb-4">Quick actions</h2>
+        <div className="grid sm:grid-cols-2 gap-4">
+          <div className="rounded-2xl border border-border/60 bg-white shadow-sm hover:shadow-md transition-shadow overflow-hidden">
+            <Link href="/dashboard/forms" className="flex items-start gap-4 p-5 h-full">
+              <div className="p-2.5 rounded-xl bg-primary/10 text-primary shrink-0 mt-0.5">
+                <FileText className="size-5" />
               </div>
-            </div>
-          </motion.section>
-        </>
-      ) : null}
+              <div className="flex-1 min-w-0">
+                <p className="font-semibold text-sm text-foreground">Share collection form</p>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  Send a unique link to collect testimonials from customers
+                </p>
+              </div>
+              <ArrowRight className="size-4 text-muted-foreground shrink-0 self-center" />
+            </Link>
+          </div>
+
+          <div className="rounded-2xl border border-border/60 bg-white shadow-sm hover:shadow-md transition-shadow overflow-hidden">
+            <Link href="/dashboard/widgets" className="flex items-start gap-4 p-5 h-full">
+              <div className="p-2.5 rounded-xl bg-violet-100 text-violet-600 shrink-0 mt-0.5">
+                <Layout className="size-5" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="font-semibold text-sm text-foreground">Embed widget</p>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  Add a beautiful testimonials widget to your website
+                </p>
+              </div>
+              <ArrowRight className="size-4 text-muted-foreground shrink-0 self-center" />
+            </Link>
+          </div>
+        </div>
+      </motion.section>
     </div>
   );
 }

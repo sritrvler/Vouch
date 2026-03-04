@@ -157,9 +157,12 @@ function SettingsInner() {
   const [loadingBilling, setLoadingBilling] = useState(false);
 
   // ── Active tab (URL-driven) ────────────────────────────────────────────────
-  const initialTab = searchParams.get('tab') === 'billing' || searchParams.get('upgrade') === 'success'
+  const tabParam = searchParams.get('tab');
+  const initialTab = tabParam === 'billing' || searchParams.get('upgrade') === 'success'
     ? 'billing'
-    : 'general';
+    : tabParam === 'project'
+      ? 'project'
+      : 'general';
   const [activeTab, setActiveTab] = useState(initialTab);
 
   // ── Upgrade success toast ──────────────────────────────────────────────────

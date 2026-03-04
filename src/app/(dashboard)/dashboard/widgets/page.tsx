@@ -20,7 +20,10 @@ import {
   ExternalLink,
   Link2,
   GripVertical,
+  AlertTriangle,
+  Settings,
 } from 'lucide-react';
+import Link from 'next/link';
 import { createClient } from '@/lib/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -504,6 +507,23 @@ export function Testimonials() {
           {savedWidgetId ? 'Save Changes' : 'Save Widget'}
         </Button>
       </div>
+
+      {!projectId && !loadingTestimonials && (
+        <div className="mb-6 flex items-start gap-3 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3">
+          <AlertTriangle className="size-5 text-amber-600 shrink-0 mt-0.5" />
+          <div className="flex-1">
+            <p className="text-sm font-medium text-amber-800">
+              Create a project before saving your widget
+            </p>
+            <p className="text-xs text-amber-700 mt-0.5">
+              Go to Settings &gt; Project to set up your project first.
+            </p>
+          </div>
+          <Button asChild size="sm" variant="outline" className="shrink-0 border-amber-300 text-amber-700 hover:bg-amber-100">
+            <Link href="/dashboard/settings?tab=project">Go to Settings</Link>
+          </Button>
+        </div>
+      )}
 
       <div className="grid grid-cols-1 xl:grid-cols-[380px_1fr] gap-6">
         {/* ── Left Panel: Settings ── */}

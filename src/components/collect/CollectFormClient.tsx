@@ -598,7 +598,7 @@ export default function CollectFormClient({
       if (res.status === 403) {
         const data = (await res.json()) as { limitReached?: boolean };
         if (data.limitReached) {
-          toast.error('Free plan includes 3 video testimonials. Upgrade to Pro for unlimited.');
+          toast.error('Video testimonials are not available for this form right now. You can skip this step.');
         }
       } else if (res.ok) {
         const { url, thumbnailUrl } = (await res.json()) as { url: string; thumbnailUrl: string | null };
@@ -737,10 +737,10 @@ export default function CollectFormClient({
               >
                 <div className="text-center mb-8">
                   <h1 className="text-2xl sm:text-3xl font-bold text-foreground leading-tight">
-                    {project.name} would love your feedback
+                    {form.title || `${project.name} would love your feedback`}
                   </h1>
                   <p className="mt-3 text-base text-muted-foreground">
-                    How would you rate your experience?
+                    {form.description || 'How would you rate your experience?'}
                   </p>
                 </div>
 
@@ -1335,7 +1335,7 @@ export default function CollectFormClient({
             <span className="text-xs text-muted-foreground/60">
               Powered by{' '}
               <a
-                href="/"
+                href="/via"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="hover:text-muted-foreground transition-colors"
