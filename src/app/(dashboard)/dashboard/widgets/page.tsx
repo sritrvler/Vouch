@@ -22,6 +22,9 @@ import {
   GripVertical,
   AlertTriangle,
   Settings,
+  Plus,
+  Trash2,
+  X,
 } from 'lucide-react';
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/client';
@@ -31,6 +34,14 @@ import { Label } from '@/components/ui/label';
 import { Slider } from '@/components/ui/slider';
 import { Switch } from '@/components/ui/switch';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from '@/components/ui/dialog';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 import { useProject } from '@/context/ProjectContext';
@@ -250,8 +261,16 @@ export default function WidgetsPage() {
   const [orderedTestimonials, setOrderedTestimonials] = useState<Testimonial[]>([]);
   const [loadingTestimonials, setLoadingTestimonials] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [savedWidgetId, setSavedWidgetId] = useState<string | null>(null);
   const [embedTab, setEmbedTab] = useState<'link' | 'builder' | 'dev' | 'react'>('link');
+
+  // Multi-widget state
+  const [widgets, setWidgets] = useState<Widget[]>([]);
+  const [activeWidgetId, setActiveWidgetId] = useState<string | null>(null);
+  const [creatingWidget, setCreatingWidget] = useState(false);
+  const [deletingWidgetId, setDeletingWidgetId] = useState<string | null>(null);
+  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
+  const [totalWidgetCount, setTotalWidgetCount] = useState(0);
+  const [showUpgradePrompt, setShowUpgradePrompt] = useState(false);
 
   const [settings, setSettings] = useState<WidgetSettings>({
     name: 'My Widget',
@@ -272,7 +291,63 @@ export default function WidgetsPage() {
     pinnedIds: [],
   });
 
-  // ── Fetch approved testimonials ────────────────────────────────────────────
+  // ── Default settings ─────────────────────────────────────────────────────
+  const DEFAULT_SETTINGS: WidgetSettings = useMemo(() => ({
+    name: 'My Widget',
+    layout: 'grid' as WidgetLayout,
+    theme: {
+      primaryColor: '#6366F1',
+      backgroundColor: '#ffffff',
+      textColor: '#0f172a',
+      cardStyle: 'shadow' as const,
+      showRating: true,
+      showAvatar: true,
+      showDate: true,
+    },
+    filterMode: 'all' as FilterMode,
+    minRating: 4,
+    maxItems: 12,
+    hideBranding: false,
+    pinnedIds: [],
+  }), []);
+
+  // ── Load widget settings into the builder ──────────────────────────────────
+  const loadWidgetIntoSettings = useCallback((widget: Widget, fetchedTestimonials: Testimonial[]) => {
+    const loadedPinnedIds: string[] = Array.isArray(widget.pinned_ids)
+      ? (widget.pinned_ids as string[])
+      : [];
+
+    if (loadedPinnedIds.length > 0) {
+      const orderMap = new Map(loadedPinnedIds.map((id, idx) => [id, idx]));
+      setOrderedTestimonials([...fetchedTestimonials].sort((a, b) =>
+        (orderMap.get(a.id) ?? Infinity) - (orderMap.get(b.id) ?? Infinity)
+      ));
+    } else {
+      setOrderedTestimonials(fetchedTestimonials);
+    }
+
+    const loadedTheme = widget.theme as WidgetTheme;
+    setSettings({
+      name: widget.name,
+      layout: widget.layout,
+      theme: {
+        primaryColor: loadedTheme.primaryColor ?? '#6366F1',
+        backgroundColor: loadedTheme.backgroundColor ?? '#ffffff',
+        textColor: loadedTheme.textColor ?? '#0f172a',
+        cardStyle: loadedTheme.cardStyle ?? 'shadow',
+        showRating: loadedTheme.showRating ?? true,
+        showAvatar: loadedTheme.showAvatar ?? true,
+        showDate: loadedTheme.showDate ?? true,
+      },
+      filterMode: widget.filter_mode,
+      minRating: widget.min_rating,
+      maxItems: widget.max_items,
+      hideBranding: widget.hide_branding,
+      pinnedIds: loadedPinnedIds,
+    });
+  }, []);
+
+  // ── Fetch approved testimonials and all widgets for project ─────────────
   const fetchData = useCallback(async () => {
     if (!selectedProjectId) {
       setLoadingTestimonials(false);
@@ -280,25 +355,10 @@ export default function WidgetsPage() {
     }
     setLoadingTestimonials(true);
     // Reset widget state when project changes
-    setSavedWidgetId(null);
-    setSettings({
-      name: 'My Widget',
-      layout: 'grid',
-      theme: {
-        primaryColor: '#6366F1',
-        backgroundColor: '#ffffff',
-        textColor: '#0f172a',
-        cardStyle: 'shadow',
-        showRating: true,
-        showAvatar: true,
-        showDate: true,
-      },
-      filterMode: 'all',
-      minRating: 4,
-      maxItems: 12,
-      hideBranding: false,
-      pinnedIds: [],
-    });
+    setActiveWidgetId(null);
+    setWidgets([]);
+    setSettings(DEFAULT_SETTINGS);
+
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
@@ -314,57 +374,37 @@ export default function WidgetsPage() {
 
       const fetchedTestimonials = (testimonialsRes.data as Testimonial[]) ?? [];
       setTestimonials(fetchedTestimonials);
+      setOrderedTestimonials(fetchedTestimonials);
 
-      // Try to load existing widget for this project
-      const { data: widgetData } = await supabase
+      // Load ALL widgets for this project (not just one)
+      const { data: widgetsData } = await supabase
         .from('widgets')
         .select('*')
         .eq('user_id', user.id)
         .eq('project_id', selectedProjectId)
-        .limit(1)
-        .single();
+        .order('created_at', { ascending: true });
 
-      const loadedPinnedIds: string[] = Array.isArray(widgetData?.pinned_ids)
-        ? (widgetData.pinned_ids as string[])
-        : [];
+      const loadedWidgets = (widgetsData as Widget[]) ?? [];
+      setWidgets(loadedWidgets);
 
-      if (loadedPinnedIds.length > 0) {
-        const orderMap = new Map(loadedPinnedIds.map((id, idx) => [id, idx]));
-        setOrderedTestimonials([...fetchedTestimonials].sort((a, b) =>
-          (orderMap.get(a.id) ?? Infinity) - (orderMap.get(b.id) ?? Infinity)
-        ));
-      } else {
-        setOrderedTestimonials(fetchedTestimonials);
-      }
+      // Count total widgets across all projects for free plan gate
+      const { count } = await supabase
+        .from('widgets')
+        .select('id', { count: 'exact', head: true })
+        .eq('user_id', user.id);
+      setTotalWidgetCount(count ?? 0);
 
-      if (widgetData) {
-        setSavedWidgetId(widgetData.id);
-        const loadedTheme = widgetData.theme as WidgetTheme;
-        setSettings({
-          name: widgetData.name,
-          layout: widgetData.layout,
-          theme: {
-            primaryColor: loadedTheme.primaryColor ?? '#6366F1',
-            backgroundColor: loadedTheme.backgroundColor ?? '#ffffff',
-            textColor: loadedTheme.textColor ?? '#0f172a',
-            cardStyle: loadedTheme.cardStyle ?? 'shadow',
-            showRating: loadedTheme.showRating ?? true,
-            showAvatar: loadedTheme.showAvatar ?? true,
-            showDate: loadedTheme.showDate ?? true,
-          },
-          filterMode: widgetData.filter_mode,
-          minRating: widgetData.min_rating,
-          maxItems: widgetData.max_items,
-          hideBranding: widgetData.hide_branding,
-          pinnedIds: loadedPinnedIds,
-        });
+      // Auto-select first widget
+      if (loadedWidgets.length > 0) {
+        setActiveWidgetId(loadedWidgets[0].id);
+        loadWidgetIntoSettings(loadedWidgets[0], fetchedTestimonials);
       }
     } catch (err) {
       console.error(err);
     } finally {
       setLoadingTestimonials(false);
     }
-  }, [supabase, selectedProjectId]);
+  }, [supabase, selectedProjectId, DEFAULT_SETTINGS, loadWidgetIntoSettings]);
 
   useEffect(() => {
     fetchData();
@@ -404,25 +444,105 @@ export default function WidgetsPage() {
     }
   }, [testimonials.length]);
 
+  // ── Switch widget ────────────────────────────────────────────────────────
+  const handleSwitchWidget = useCallback((widgetId: string) => {
+    const widget = widgets.find((w) => w.id === widgetId);
+    if (!widget) return;
+    setActiveWidgetId(widgetId);
+    loadWidgetIntoSettings(widget, testimonials);
+  }, [widgets, testimonials, loadWidgetIntoSettings]);
+
+  // ── Create widget ──────────────────────────────────────────────────────────
+  const handleCreateWidget = useCallback(async () => {
+    if (!selectedProjectId) {
+      toast.error('No project found. Create a project in Settings first.');
+      return;
+    }
+    // Free plan gate: max 1 widget total across all projects
+    if (userPlan === 'free' && totalWidgetCount >= 1) {
+      setShowUpgradePrompt(true);
+      return;
+    }
+
+    setCreatingWidget(true);
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('Not authenticated');
+
+      const widgetNumber = widgets.length + 1;
+      const payload = {
+        user_id: user.id,
+        project_id: selectedProjectId,
+        name: `Widget ${widgetNumber}`,
+        layout: 'grid' as WidgetLayout,
+        theme: DEFAULT_SETTINGS.theme,
+        filter_mode: DEFAULT_SETTINGS.filterMode,
+        min_rating: DEFAULT_SETTINGS.minRating,
+        max_items: DEFAULT_SETTINGS.maxItems,
+        hide_branding: DEFAULT_SETTINGS.hideBranding,
+        pinned_ids: DEFAULT_SETTINGS.pinnedIds,
+      };
+
+      const { data, error } = await supabase.from('widgets').insert(payload).select('*').single();
+      if (error) throw error;
+
+      const newWidget = data as Widget;
+      setWidgets((prev) => [...prev, newWidget]);
+      setTotalWidgetCount((prev) => prev + 1);
+      setActiveWidgetId(newWidget.id);
+      setSettings({ ...DEFAULT_SETTINGS, name: newWidget.name });
+      setOrderedTestimonials(testimonials);
+      toast.success('Widget created');
+    } catch (err) {
+      toast.error('Failed to create widget');
+      console.error(err);
+    } finally {
+      setCreatingWidget(false);
+    }
+  }, [supabase, selectedProjectId, userPlan, totalWidgetCount, widgets.length, testimonials, DEFAULT_SETTINGS]);
+
+  // ── Delete widget ──────────────────────────────────────────────────────────
+  const handleDeleteWidget = useCallback(async (widgetId: string) => {
+    setDeletingWidgetId(widgetId);
+    try {
+      const { error } = await supabase.from('widgets').delete().eq('id', widgetId);
+      if (error) throw error;
+
+      setWidgets((prev) => {
+        const remaining = prev.filter((w) => w.id !== widgetId);
+        // If we deleted the active widget, switch to the next one or clear
+        if (activeWidgetId === widgetId) {
+          if (remaining.length > 0) {
+            setActiveWidgetId(remaining[0].id);
+            loadWidgetIntoSettings(remaining[0], testimonials);
+          } else {
+            setActiveWidgetId(null);
+            setSettings(DEFAULT_SETTINGS);
+            setOrderedTestimonials(testimonials);
+          }
+        }
+        return remaining;
+      });
+      setTotalWidgetCount((prev) => Math.max(0, prev - 1));
+      setConfirmDeleteId(null);
+      toast.success('Widget deleted');
+    } catch (err) {
+      toast.error('Failed to delete widget');
+      console.error(err);
+    } finally {
+      setDeletingWidgetId(null);
+    }
+  }, [supabase, activeWidgetId, testimonials, DEFAULT_SETTINGS, loadWidgetIntoSettings]);
+
   // ── Save widget ───────────────────────────────────────────────────────────
   const handleSave = useCallback(async () => {
     if (!selectedProjectId) {
       toast.error('No project found. Create a project in Settings first.');
       return;
     }
-    if (userPlan === 'free' && !savedWidgetId) {
-      // Check if already has a widget
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user) {
-        const { count } = await supabase
-          .from('widgets')
-          .select('id', { count: 'exact', head: true })
-          .eq('user_id', user.id);
-        if ((count ?? 0) >= 1) {
-          toast.error('Free plan allows 1 widget. Upgrade to Pro for unlimited widgets.');
-          return;
-        }
-      }
+    if (!activeWidgetId) {
+      toast.error('No widget selected. Create a widget first.');
+      return;
     }
 
     setSaving(true);
@@ -443,14 +563,17 @@ export default function WidgetsPage() {
         pinned_ids: settings.pinnedIds,
       };
 
-      if (savedWidgetId) {
-        const { error } = await supabase.from('widgets').update(payload).eq('id', savedWidgetId);
-        if (error) throw error;
-      } else {
-        const { data, error } = await supabase.from('widgets').insert(payload).select('id').single();
-        if (error) throw error;
-        setSavedWidgetId(data.id);
-      }
+      const { error } = await supabase.from('widgets').update(payload).eq('id', activeWidgetId);
+      if (error) throw error;
+
+      // Update local widgets state with new settings
+      setWidgets((prev) =>
+        prev.map((w) =>
+          w.id === activeWidgetId
+            ? { ...w, name: settings.name, layout: settings.layout, theme: settings.theme as WidgetTheme, filter_mode: settings.filterMode, min_rating: settings.minRating, max_items: settings.maxItems, hide_branding: settings.hideBranding, pinned_ids: settings.pinnedIds }
+            : w
+        )
+      );
       toast.success('Widget saved successfully');
     } catch (err) {
       toast.error('Failed to save widget');
@@ -458,20 +581,20 @@ export default function WidgetsPage() {
     } finally {
       setSaving(false);
     }
-  }, [supabase, selectedProjectId, settings, savedWidgetId, userPlan]);
+  }, [supabase, selectedProjectId, settings, activeWidgetId]);
 
   // ── Embed snippets ────────────────────────────────────────────────────────
-  const iframeSnippet = savedWidgetId
-    ? `<iframe\n  src="${SITE_URL}/embed/${savedWidgetId}"\n  width="100%"\n  height="600"\n  frameborder="0"\n  loading="lazy"\n></iframe>`
+  const iframeSnippet = activeWidgetId
+    ? `<iframe\n  src="${SITE_URL}/embed/${activeWidgetId}"\n  width="100%"\n  height="600"\n  frameborder="0"\n  loading="lazy"\n></iframe>`
     : '';
 
   // Shadow DOM embed: renders testimonials directly in the page DOM (SEO-friendly).
   // Attribute name 'data-vouch' must match public/embed.js exactly. Do not rename either.
-  const scriptSnippet = savedWidgetId
-    ? `<div data-vouch="${savedWidgetId}"></div>\n<script src="${SITE_URL}/embed.js" defer></script>`
+  const scriptSnippet = activeWidgetId
+    ? `<div data-vouch="${activeWidgetId}"></div>\n<script src="${SITE_URL}/embed.js" defer></script>`
     : '';
 
-  const reactSnippet = savedWidgetId
+  const reactSnippet = activeWidgetId
     ? `'use client';
 import { useEffect, useState } from 'react';
 
@@ -488,7 +611,7 @@ export function Testimonials() {
   const [items, setItems] = useState<Testimonial[]>([]);
 
   useEffect(() => {
-    fetch('${SITE_URL}/api/testimonials/widget/${savedWidgetId}')
+    fetch('${SITE_URL}/api/testimonials/widget/${activeWidgetId}')
       .then((r) => r.json())
       .then((d) => setItems(d.testimonials ?? []));
   }, []);
@@ -537,14 +660,16 @@ export function Testimonials() {
             Customize your testimonial widget and embed it on your website.
           </p>
         </div>
-        <Button
-          onClick={handleSave}
-          disabled={saving}
-          className="gap-2 rounded-xl bg-indigo-600 hover:bg-indigo-700"
-        >
-          {saving ? <Loader2 className="size-4 animate-spin" /> : <Save className="size-4" />}
-          {savedWidgetId ? 'Save Changes' : 'Save Widget'}
-        </Button>
+        {activeWidgetId && (
+          <Button
+            onClick={handleSave}
+            disabled={saving}
+            className="gap-2 rounded-xl bg-indigo-600 hover:bg-indigo-700"
+          >
+            {saving ? <Loader2 className="size-4 animate-spin" /> : <Save className="size-4" />}
+            Save Changes
+          </Button>
+        )}
       </div>
 
       {!selectedProjectId && !loadingTestimonials && (
@@ -564,7 +689,108 @@ export function Testimonials() {
         </div>
       )}
 
-      <div className="grid grid-cols-1 xl:grid-cols-[380px_1fr] gap-6">
+      {/* ── Widget Selector Bar ── */}
+      {selectedProjectId && !loadingTestimonials && (
+        <div className="mb-6">
+          <div className="flex items-center gap-2 overflow-x-auto pb-1">
+            {widgets.map((widget) => {
+              const isActive = widget.id === activeWidgetId;
+              const layoutIcon = LAYOUT_OPTIONS.find((l) => l.value === widget.layout)?.icon;
+              return (
+                <div key={widget.id} className="relative group shrink-0">
+                  <button
+                    onClick={() => handleSwitchWidget(widget.id)}
+                    className={cn(
+                      'flex items-center gap-2 rounded-xl border-2 px-3 py-2 text-sm font-medium transition-all',
+                      isActive
+                        ? 'border-indigo-500 bg-indigo-50/60 text-indigo-700'
+                        : 'border-border text-muted-foreground hover:border-indigo-200 hover:bg-muted/30'
+                    )}
+                  >
+                    <span className="size-4 shrink-0">{layoutIcon}</span>
+                    <span className="truncate max-w-[120px]">{widget.name}</span>
+                  </button>
+                  {/* Delete button on hover */}
+                  {widgets.length > 0 && (
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        if (confirmDeleteId === widget.id) {
+                          handleDeleteWidget(widget.id);
+                        } else {
+                          setConfirmDeleteId(widget.id);
+                        }
+                      }}
+                      disabled={deletingWidgetId === widget.id}
+                      className={cn(
+                        'absolute -top-1.5 -right-1.5 size-5 rounded-full flex items-center justify-center transition-all',
+                        confirmDeleteId === widget.id
+                          ? 'bg-red-500 text-white'
+                          : 'bg-muted border border-border text-muted-foreground opacity-0 group-hover:opacity-100 hover:bg-red-50 hover:text-red-500 hover:border-red-200',
+                        deletingWidgetId === widget.id && 'opacity-50'
+                      )}
+                      title={confirmDeleteId === widget.id ? 'Click again to confirm' : 'Delete widget'}
+                    >
+                      {deletingWidgetId === widget.id ? (
+                        <Loader2 className="size-3 animate-spin" />
+                      ) : confirmDeleteId === widget.id ? (
+                        <Check className="size-3" />
+                      ) : (
+                        <X className="size-3" />
+                      )}
+                    </button>
+                  )}
+                </div>
+              );
+            })}
+            {/* Create new widget button */}
+            <button
+              onClick={handleCreateWidget}
+              disabled={creatingWidget}
+              className={cn(
+                'flex items-center gap-1.5 rounded-xl border-2 border-dashed px-3 py-2 text-sm font-medium transition-all shrink-0',
+                'border-border text-muted-foreground hover:border-indigo-300 hover:text-indigo-600 hover:bg-indigo-50/30',
+                creatingWidget && 'opacity-50 cursor-not-allowed'
+              )}
+            >
+              {creatingWidget ? <Loader2 className="size-4 animate-spin" /> : <Plus className="size-4" />}
+              New Widget
+            </button>
+          </div>
+          {/* Clear delete confirmation when clicking elsewhere */}
+          {confirmDeleteId && (
+            <button
+              className="fixed inset-0 z-10 cursor-default"
+              onClick={() => setConfirmDeleteId(null)}
+              aria-label="Cancel delete"
+            />
+          )}
+        </div>
+      )}
+
+      {/* ── Empty State: No widgets yet ── */}
+      {selectedProjectId && !loadingTestimonials && widgets.length === 0 && !activeWidgetId && (
+        <div className="flex flex-col items-center justify-center py-20 text-center">
+          <div className="rounded-2xl bg-indigo-50 p-4 mb-4">
+            <LayoutGrid className="size-8 text-indigo-400" />
+          </div>
+          <h2 className="text-lg font-semibold text-foreground mb-1">Create your first widget</h2>
+          <p className="text-sm text-muted-foreground max-w-sm mb-6">
+            Widgets let you embed testimonials on your website. Choose a layout, customize the design, and copy the embed code.
+          </p>
+          <Button
+            onClick={handleCreateWidget}
+            disabled={creatingWidget}
+            className="gap-2 rounded-xl bg-indigo-600 hover:bg-indigo-700"
+          >
+            {creatingWidget ? <Loader2 className="size-4 animate-spin" /> : <Plus className="size-4" />}
+            Create Widget
+          </Button>
+        </div>
+      )}
+
+      {/* ── Builder (only shown when a widget is selected) ── */}
+      {activeWidgetId && <div className="grid grid-cols-1 xl:grid-cols-[380px_1fr] gap-6">
         {/* ── Left Panel: Settings ── */}
         <div className="space-y-5">
           {/* Widget Name */}
@@ -878,7 +1104,7 @@ export function Testimonials() {
                 <p className="text-sm font-medium text-foreground">Remove &quot;Powered by Vouch&quot;</p>
                 <p className="text-xs text-muted-foreground mt-0.5">Hide the Vouch branding from your widget</p>
               </div>
-              {userPlan === 'pro' ? (
+              {userPlan !== 'free' ? (
                 <Switch
                   checked={settings.hideBranding}
                   onCheckedChange={(v) => update('hideBranding', v)}
@@ -1015,7 +1241,7 @@ export function Testimonials() {
                 {
                   id: 'react' as const,
                   label: 'React',
-                  icon: userPlan !== 'pro'
+                  icon: userPlan === 'free'
                     ? <Lock className="size-3.5 text-indigo-400" />
                     : <Code2 className="size-3.5" />,
                 },
@@ -1088,7 +1314,7 @@ export function Testimonials() {
                   <p className="text-xs text-muted-foreground">
                     Works with Webflow, Squarespace, Wix, Framer, and any builder that has an &ldquo;Embed&rdquo; block.
                   </p>
-                  {savedWidgetId ? (
+                  {activeWidgetId ? (
                     <>
                       <div>
                         <div className="flex items-center justify-between mb-1.5">
@@ -1132,7 +1358,7 @@ export function Testimonials() {
                   <p className="text-xs text-muted-foreground">
                     Add to any HTML page. Testimonials render directly in your page DOM so Google indexes them as your content. Zero style conflicts (Shadow DOM isolation).
                   </p>
-                  {savedWidgetId ? (
+                  {activeWidgetId ? (
                     <>
                       <div>
                         <div className="flex items-center justify-between mb-1.5">
@@ -1158,7 +1384,7 @@ export function Testimonials() {
               {/* ── React tab ── */}
               {embedTab === 'react' && (
                 <div className="space-y-4">
-                  {userPlan !== 'pro' ? (
+                  {userPlan === 'free' ? (
                     /* Pro gate */
                     <div className="rounded-2xl border border-indigo-100 bg-gradient-to-br from-indigo-50 to-violet-50 p-6 text-center">
                       <div className="inline-flex items-center justify-center size-12 rounded-xl bg-indigo-100 mb-3">
@@ -1192,7 +1418,7 @@ export function Testimonials() {
                           </p>
                         </div>
                       </div>
-                      {savedWidgetId ? (
+                      {activeWidgetId ? (
                         <>
                           <div>
                             <div className="flex items-center justify-between mb-1.5">
@@ -1266,7 +1492,59 @@ export function Testimonials() {
             </div>
           )}
         </div>
-      </div>
+      </div>}
+
+      {/* ── Upgrade Prompt Dialog ── */}
+      <Dialog open={showUpgradePrompt} onOpenChange={setShowUpgradePrompt}>
+        <DialogContent className="max-w-md rounded-2xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Lock className="size-5 text-amber-500" />
+              Free plan limit reached
+            </DialogTitle>
+            <DialogDescription>
+              The Free plan allows 1 embed widget. Upgrade to Pro to create unlimited widgets.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="rounded-xl border border-amber-100 bg-amber-50 p-4">
+            <ul className="space-y-2 text-sm text-amber-900">
+              {[
+                'Unlimited embed widgets',
+                'Unlimited collection forms',
+                'Carousel, Wall of Love, and List layouts',
+                'Google Review nudge after 4-5 stars',
+                'Remove Vouch branding',
+                'Custom public page address',
+              ].map((f) => (
+                <li key={f} className="flex items-center gap-2">
+                  <Check className="size-3.5 text-amber-600 shrink-0" />
+                  {f}
+                </li>
+              ))}
+            </ul>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowUpgradePrompt(false)} className="rounded-xl">
+              Maybe later
+            </Button>
+            <Button
+              className="gap-2 rounded-xl bg-indigo-600 hover:bg-indigo-700"
+              onClick={async () => {
+                try {
+                  const res = await fetch('/api/stripe/checkout', { method: 'POST' });
+                  const { url } = await res.json();
+                  if (url) window.location.href = url;
+                } catch {
+                  toast.error('Could not start checkout');
+                }
+              }}
+            >
+              <Zap className="size-4" />
+              Upgrade to Pro, $19/mo
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </motion.div>
   );
 }

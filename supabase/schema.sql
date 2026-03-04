@@ -158,11 +158,13 @@ create index on public.form_views (form_id, created_at);
 create index on public.collection_forms (project_id);
 create index on public.collection_forms (user_id);
 create index on public.widgets (user_id);
+create index on public.widgets (project_id);
 
 -- To add missing indexes to an existing database run:
 -- CREATE INDEX IF NOT EXISTS idx_testimonials_form_id ON public.testimonials (form_id);
 -- CREATE INDEX IF NOT EXISTS idx_collection_forms_user_id ON public.collection_forms (user_id);
 -- CREATE INDEX IF NOT EXISTS idx_widgets_user_id ON public.widgets (user_id);
+-- CREATE INDEX IF NOT EXISTS idx_widgets_project_id ON public.widgets (project_id);
 
 -- ============================================================
 -- ROW LEVEL SECURITY

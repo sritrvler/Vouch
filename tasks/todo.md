@@ -1,21 +1,31 @@
 # Active Work Queue
 
-## Session Handoff (March 4, 2026, session 3)
+## Session Handoff (March 4, 2026, session 4)
 
 **What was done this session:**
-1. Multi-project support shipped (commit `490018d`). Created ProjectContext, refactored layout with sidebar project switcher (Popover), refactored settings to sync from context, refactored widgets to scope by project_id.
-2. Bug fix: widgets page infinite loading for 0-project users (commit `5b2c060`). Found during multi-persona testing.
-3. Process improvements: strengthened post-implementation gate to require all-persona testing. Added 9-category Test Scenario Checklist to pre/post implementation gates (commits `ad0aa20`, `7560559`).
-4. Added video cost optimization task (compress + thumbnail + fair use) to todo.
+1. Multi-widget management shipped. Widget page now loads all widgets per project (removed `.limit(1).single()`). Added widget selector bar with pills, create/delete/switch handlers, empty state, and upgrade dialog for free plan. Existing builder UI (1272 lines) unchanged.
+2. Fixed `isPro` checks to use `userPlan !== 'free'` instead of `userPlan === 'pro'` (branding toggle, React tab gate) so agency plan works too.
+3. Added `project_id` index to schema.sql for widget queries.
+4. All 15 test scenarios traced: personas (3), empty state (2), boundary (2), plan transitions (2), data transitions (1), stale data (1), concurrent state (1), failure (2), permissions (1), reverse actions (2).
 
 **What's next:**
-Multi-widget management. This is the next broken promise (pricing says "Unlimited embed widgets" for Pro, but widget page only loads one).
+Custom fonts. This is a brand blending improvement (not a broken promise). See todo.md "AFTER: Custom Fonts" section.
 
 **What to watch out for:**
-1. PRE-IMPLEMENTATION now has 6 steps (step 6 = enumerate test scenarios from 9 categories). POST-IMPLEMENTATION step 2 requires verifying every listed scenario.
-2. Widget query in widgets page already scopes by `project_id` (done in multi-project). Multi-widget needs to remove the `.limit(1).single()` on the widget query and add a widget list/selector.
-3. Downgrade behavior is intentional: all existing widgets keep working, free users just can't create new ones beyond limit.
-4. `useProject()` context is available in all dashboard pages. Use `selectedProjectId` and `plan` from it.
+1. The widget delete uses inline two-click confirmation (not a Dialog). First click shows red check icon, second click confirms. Clicking elsewhere dismisses. This is intentional for the small selector bar context.
+2. `totalWidgetCount` is tracked across ALL projects (not per-project). This is correct for the free plan gate (1 widget total).
+3. `handleSave` now only does updates (not insert). Creation is handled by `handleCreateWidget`. This is a deliberate split.
+4. Existing single-widget users will see their widget loaded normally (auto-selected as first widget in the list).
+
+---
+
+## Previous: Session Handoff (March 4, 2026, session 3)
+
+**What was done:**
+1. Multi-project support shipped (commit `490018d`).
+2. Bug fix: widgets page infinite loading for 0-project users (commit `5b2c060`).
+3. Process improvements: strengthened gates, added Test Scenario Checklist.
+4. Added video cost optimization task.
 
 ---
 
@@ -90,25 +100,21 @@ grep -rn "from('projects')" src/ --include="*.tsx" --include="*.ts"
 
 ---
 
-## AFTER: Multi-Widget Management
+## DONE: Multi-Widget Management — shipped session 4
 
 **The broken promise:**
 Pro features list says "Unlimited embed widgets." Free gets "1 embed widget."
-Reality: Widget page does `.limit(1).single()` and only loads one widget.
+Reality was: Widget page does `.limit(1).single()` and only loads one widget.
 
-**Depends on:** Multi-project (widgets are scoped to projects).
-
-**Implementation plan:**
-1. Widget page: Add sidebar with list of saved widgets + "Create new widget" button
-2. Each widget card shows: name, layout icon, project name, testimonial count
-3. Clicking a widget loads its settings into the builder
-4. Delete widget button with confirmation
-5. Free plan: max 1 widget total. Pro/Agency: unlimited.
-6. Embed code tabs update per selected widget
-
-### Key files:
-`src/app/(dashboard)/dashboard/widgets/page.tsx` (main change)
-Widget query: change `.limit(1).single()` to load all widgets for user, group by project
+**What was built:**
+1. Widget selector bar (horizontal pills) between header and builder
+2. Create/delete/switch handlers with proper state management
+3. Empty state when no widgets for current project
+4. Free plan gate: max 1 widget total across all projects (upgrade dialog)
+5. Embed codes update when switching widgets
+6. `handleSave` split into save (update only) and `handleCreateWidget` (insert)
+7. Added `project_id` index to schema.sql
+8. Fixed `isPro` checks to include agency plan
 
 ---
 
