@@ -61,7 +61,7 @@ const FAQS = [
   },
   {
     q: "Does the testimonial widget slow down my site?",
-    a: "No. Vouch renders testimonials as static HTML inside an iframe. There are no external JavaScript libraries, no third-party trackers, and no cookie banners added to your page. Your Lighthouse score and Core Web Vitals stay exactly where you left them.",
+    a: "No. Vouch renders testimonials as native HTML directly in your page. There are no external JavaScript libraries, no third-party trackers, and no cookie banners added to your page. Your Lighthouse score and Core Web Vitals stay exactly where you left them.",
   },
   {
     q: "Can my clients record video testimonials?",

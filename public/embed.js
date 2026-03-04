@@ -457,6 +457,18 @@
 
     var container = document.createElement('div');
 
+    // Project logo
+    if (data.project && data.project.logoUrl) {
+      var logoWrap = document.createElement('div');
+      logoWrap.style.cssText = 'text-align:center;margin-bottom:16px';
+      var logoImg = document.createElement('img');
+      logoImg.src = data.project.logoUrl;
+      logoImg.alt = data.project.name || '';
+      logoImg.style.cssText = 'height:40px;width:auto;display:inline-block;border-radius:8px;object-fit:contain';
+      logoWrap.appendChild(logoImg);
+      container.appendChild(logoWrap);
+    }
+
     if (!testimonials.length) {
       container.innerHTML = '<p style="color:#94a3b8;font-size:14px;text-align:center;padding:32px 16px">No testimonials yet.</p>';
     } else {

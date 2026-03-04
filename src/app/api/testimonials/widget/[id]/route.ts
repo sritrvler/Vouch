@@ -43,13 +43,20 @@ export async function GET(request: NextRequest, { params }: PageProps) {
       );
     }
 
+    // ── Fetch project info for branding ──────────────────────────────────────
+    const { data: project } = await supabase
+      .from('projects')
+      .select('name, logo_url')
+      .eq('id', widget.project_id)
+      .single();
+
     // ── Check Pro status for display limit ────────────────────────────────────
     const { data: sub } = await supabase
       .from('subscriptions')
       .select('plan')
       .eq('user_id', widget.user_id)
       .single();
-    const isPro = sub?.plan === 'pro';
+    const isPro = sub?.plan === 'pro' || sub?.plan === 'agency';
     const hardLimit = isPro ? (widget.max_items ?? 12) : Math.min(widget.max_items ?? 12, 5);
 
     const pinnedIds: string[] = Array.isArray(widget.pinned_ids) ? (widget.pinned_ids as string[]) : [];
@@ -105,6 +112,7 @@ export async function GET(request: NextRequest, { params }: PageProps) {
           theme: widget.theme,
           hideBranding: widget.hide_branding,
         },
+        project: project ? { name: project.name, logoUrl: project.logo_url } : null,
         testimonials,
         isPro,
         totalApproved,

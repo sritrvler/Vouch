@@ -35,7 +35,7 @@ import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
-type WidgetLayout = 'grid' | 'carousel' | 'wall' | 'list';
+type WidgetLayout = 'grid' | 'carousel' | 'wall' | 'list' | 'single';
 type FilterMode = 'all' | 'featured' | 'rating';
 
 interface WidgetTheme {
@@ -135,6 +135,7 @@ const LAYOUT_OPTIONS: { value: WidgetLayout; label: string; icon: React.ReactNod
   { value: 'carousel', label: 'Carousel', icon: <Rows3 className="size-5" />, desc: 'Horizontal scroll' },
   { value: 'wall', label: 'Wall of Love', icon: <Heart className="size-5" />, desc: 'Masonry layout' },
   { value: 'list', label: 'List', icon: <List className="size-5" />, desc: 'Single column' },
+  { value: 'single', label: 'Single', icon: <Star className="size-5" />, desc: 'Featured card' },
 ];
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000';
@@ -952,6 +953,11 @@ export function Testimonials() {
                             <TestimonialPreviewCard testimonial={t} theme={settings.theme} />
                           </div>
                         ))}
+                      </div>
+                    )}
+                    {settings.layout === 'single' && previewTestimonials.length > 0 && (
+                      <div className="max-w-lg mx-auto">
+                        <TestimonialPreviewCard testimonial={previewTestimonials[0]} theme={settings.theme} />
                       </div>
                     )}
                   </motion.div>
