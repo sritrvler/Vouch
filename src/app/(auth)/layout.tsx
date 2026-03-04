@@ -1,5 +1,6 @@
 import React from 'react';
 import { Palette, Gauge, Zap } from 'lucide-react';
+import { Toaster } from '@/components/ui/sonner';
 
 const BENEFITS = [
   {
@@ -87,6 +88,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
       <div className="flex flex-1 items-center justify-center bg-background px-4 py-12">
         {children}
       </div>
+      <Toaster richColors position="top-right" />
     </div>
   );
 }

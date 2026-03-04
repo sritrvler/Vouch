@@ -16,6 +16,7 @@ import {
   ChevronDown,
   Zap,
 } from 'lucide-react';
+import { Toaster } from '@/components/ui/sonner';
 import { createClient } from '@/lib/supabase/client';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -260,6 +261,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       </main>
 
       <UpgradeModal open={upgradeModalOpen} onOpenChange={setUpgradeModalOpen} />
+      <Toaster richColors position="top-right" />
 
       {/* Mobile Bottom Nav */}
       <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-border z-50 safe-area-inset-bottom">

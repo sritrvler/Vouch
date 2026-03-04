@@ -213,11 +213,7 @@ export default function PricingPage() {
     <div className="pt-24 pb-20">
       {/* Hero */}
       <section className="py-16 sm:py-20 text-center px-4">
-        <motion.div
-          initial={{ opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.55 }}
-        >
+        <div>
           <div className="inline-flex items-center gap-2 px-4 py-2 bg-indigo-50 border border-indigo-100 rounded-full text-indigo-700 text-sm font-medium mb-5">
             <Zap className="w-3.5 h-3.5" />
             No contracts. Cancel anytime.
@@ -228,49 +224,35 @@ export default function PricingPage() {
           <p className="text-lg text-gray-500 max-w-xl mx-auto mb-10">
             Start free. Upgrade when you need more.
           </p>
-        </motion.div>
+        </div>
 
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.1 }}
-        >
-          <PricingCards />
-        </motion.div>
+        <PricingCards />
 
       </section>
 
       {/* Full comparison table */}
-      <section className="max-w-3xl mx-auto px-4 sm:px-6 py-12">
-        <motion.div
-          initial={{ opacity: 0, y: 14 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.5 }}
-        >
+      <div className="below-fold">
+        <section className="max-w-3xl mx-auto px-4 sm:px-6 py-12">
           <h2 className="text-2xl font-bold text-gray-900 mb-8 text-center">
             Full feature comparison
           </h2>
           <div className="bg-white border border-gray-100 rounded-2xl overflow-hidden shadow-sm px-6 py-2">
             <ComparisonTable />
           </div>
-        </motion.div>
-      </section>
+        </section>
+      </div>
 
       {/* Pricing FAQ */}
-      <section className="max-w-3xl mx-auto px-4 sm:px-6">
-        <PricingFAQ />
-      </section>
+      <div className="below-fold">
+        <section className="max-w-3xl mx-auto px-4 sm:px-6">
+          <PricingFAQ />
+        </section>
+      </div>
 
       {/* Bottom CTA */}
-      <section className="max-w-2xl mx-auto px-4 text-center mt-16">
-        <motion.div
-          initial={{ opacity: 0, y: 14 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.5 }}
-          className="bg-indigo-600 rounded-2xl px-8 py-12 text-white shadow-xl shadow-indigo-200"
-        >
+      <div className="below-fold">
+        <section className="max-w-2xl mx-auto px-4 text-center mt-16">
+          <div className="bg-indigo-600 rounded-2xl px-8 py-12 text-white shadow-xl shadow-indigo-200">
           <h2 className="text-2xl sm:text-3xl font-bold mb-3">
             Start collecting testimonials today
           </h2>
@@ -299,8 +281,9 @@ export default function PricingPage() {
           <p className="text-xs text-indigo-300 mt-5">
             No credit card required to start
           </p>
-        </motion.div>
-      </section>
+          </div>
+        </section>
+      </div>
     </div>
   );
 }
