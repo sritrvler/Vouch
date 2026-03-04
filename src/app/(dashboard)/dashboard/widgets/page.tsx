@@ -701,14 +701,22 @@ export function Testimonials() {
                   <button
                     onClick={() => handleSwitchWidget(widget.id)}
                     className={cn(
-                      'flex items-center gap-2 rounded-xl border-2 px-3 py-2 text-sm font-medium transition-all',
+                      'flex items-center gap-2.5 rounded-xl border-2 px-3.5 py-2 transition-all',
                       isActive
                         ? 'border-indigo-500 bg-indigo-50/60 text-indigo-700'
                         : 'border-border text-muted-foreground hover:border-indigo-200 hover:bg-muted/30'
                     )}
                   >
                     <span className="size-4 shrink-0">{layoutIcon}</span>
-                    <span className="truncate max-w-[120px]">{widget.name}</span>
+                    <div className="text-left min-w-0">
+                      <span className="block text-sm font-medium truncate max-w-[180px]">{widget.name}</span>
+                      <span className={cn(
+                        'block text-[10px] leading-tight',
+                        isActive ? 'text-indigo-500/70' : 'text-muted-foreground/60'
+                      )}>
+                        {LAYOUT_OPTIONS.find((l) => l.value === widget.layout)?.label}
+                      </span>
+                    </div>
                   </button>
                   {/* Delete button on hover */}
                   {widgets.length > 0 && (

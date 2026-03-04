@@ -76,6 +76,7 @@ Enter plan mode for any non-trivial task (3+ steps or architectural decisions).
 If something goes sideways, STOP and re-plan immediately. Do not keep pushing.
 Use plan mode for verification steps, not just building.
 Write detailed specs upfront to reduce ambiguity.
+**Plans that include UI must contain Persona UI Intents for every affected persona.** A plan without persona intents for UI choices will produce defaulted designs. Write them during planning, not after.
 
 ### Subagent Strategy
 
@@ -179,10 +180,41 @@ Before writing any code for a task, answer these questions explicitly. Do not sk
 4. **Security considered?** For any new route, API, or form: auth gates, input validation, RLS, rate limiting. Reference the test-and-ship security checklist.
 5. **Interface design applied?** For any UI change: persona intent stated, subtle layering principles followed, token architecture consistent.
 6. **Test scenarios enumerated?** Using the Test Scenario Checklist below, list every scenario that applies to this feature. Write them out explicitly. This becomes the verification list for post-implementation. Skip a category only if it genuinely does not apply, and say why.
+7. **Persona-driven UI selection?** For any UI component choice (layout, navigation, controls, information density), write a Persona UI Intent for EACH persona affected. Every UI decision must be justified per persona, not defaulted. See the Persona-Driven UI Selection section below.
 
 If any answer is "no" or "skipped," pause and address it before writing code.
 
-**After answering all 6 questions, say exactly:** `I FOLLOWED PRE-IMPLEMENTATION RULES` — this signals to the user that pre-implementation validation was completed. Do not say this phrase unless all 6 questions were explicitly answered.
+**After answering all 7 questions, say exactly:** `I FOLLOWED PRE-IMPLEMENTATION RULES` — this signals to the user that pre-implementation validation was completed. Do not say this phrase unless all 7 questions were explicitly answered.
+
+### Persona-Driven UI Selection (referenced by pre-implementation step 7)
+
+**LIVE AND BREATHE AROUND THE USER.** Every UI decision exists to serve a specific human in a specific context on a specific device. A choice that works for one persona may fail for another. The goal: everyone is happy, no one feels left out, AND the business benefits.
+
+**For EVERY UI component or pattern choice, write this for EACH affected persona:**
+
+```
+Persona: [Name] ([role], [plan])
+Device: [specific device, screen size, input method]
+Context: [where they are, what they just did, time pressure]
+Task: [what they need to accomplish in the next 60 seconds]
+Feel: [how this interaction should feel to THEM]
+UI evaluation: [does this specific component/pattern serve THIS persona? why or why not?]
+```
+
+**The rules:**
+1. NEVER pick a UI pattern because "it's common" or "it matches existing patterns." That is defaulting, not designing.
+2. If a pattern works for Persona A but fails for Persona B, you must find a solution that works for BOTH, or present the tradeoff to the user for a decision.
+3. Consider device constraints per persona: mobile (375px, one thumb, touch targets 44px+), tablet (768px), desktop (1920px). If any persona is primarily mobile, the mobile experience is not optional.
+4. Consider information density per persona: power users (agency managing 10 clients) need different density than occasional users (freelancer with 2 widgets).
+5. Consider cognitive load per persona: a busy founder between meetings needs different complexity than a developer customizing settings.
+6. **Business impact check:** Does this UI choice support retention, reduce churn, encourage upgrades? A confused user churns. A delighted user refers.
+
+**Red flags that mean you defaulted instead of designed:**
+1. "This matches the existing pattern" (consistency is good, but don't use it as an excuse to skip thinking)
+2. "This is the standard approach" (standard for whom?)
+3. "This is clean/simple" (clean for which persona on which device?)
+4. You can swap your choice for any common alternative and the experience feels the same
+5. You picked the UI before writing the persona intents
 
 ### Test Scenario Checklist (referenced by pre-implementation step 6)
 
