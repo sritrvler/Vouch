@@ -15,12 +15,16 @@ import {
   Sparkles,
   ChevronDown,
   Zap,
+  Check,
+  Plus,
 } from 'lucide-react';
 import { Toaster } from '@/components/ui/sonner';
 import { createClient } from '@/lib/supabase/client';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { UpgradeModal } from '@/components/upgrade-modal';
+import { ProjectProvider, useProject } from '@/context/ProjectContext';
+import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
 import type { User } from '@supabase/supabase-js';
 
 interface NavItem {
@@ -96,14 +100,22 @@ function NavLink({
 }
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <ProjectProvider>
+      <DashboardLayoutInner>{children}</DashboardLayoutInner>
+    </ProjectProvider>
+  );
+}
+
+function DashboardLayoutInner({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
+  const { projects, selectedProjectId, selectedProject, plan, switchProject } = useProject();
   const [user, setUser] = useState<User | null>(null);
-  const [plan, setPlan] = useState<'free' | 'pro'>('free');
-  const [projectName, setProjectName] = useState<string>('My Project');
   const [pendingCount, setPendingCount] = useState(0);
   const [isSigningOut, setIsSigningOut] = useState(false);
   const [upgradeModalOpen, setUpgradeModalOpen] = useState(false);
+  const [projectPopoverOpen, setProjectPopoverOpen] = useState(false);
 
   useEffect(() => {
     const supabase = createClient();
@@ -119,27 +131,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       }
 
       setUser(user);
-
-      // Load subscription
-      const { data: sub } = await supabase
-        .from('subscriptions')
-        .select('plan')
-        .eq('user_id', user.id)
-        .single();
-
-      if (sub) setPlan(sub.plan as 'free' | 'pro');
-
-      // Load first project name
-      const { data: projects } = await supabase
-        .from('projects')
-        .select('name')
-        .eq('user_id', user.id)
-        .order('created_at', { ascending: true })
-        .limit(1);
-
-      if (projects && projects.length > 0) {
-        setProjectName(projects[0].name);
-      }
 
       // Load pending testimonials count
       const { count } = await supabase
@@ -184,15 +175,67 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             <span className="text-lg font-bold tracking-tight text-foreground">Vouch</span>
           </Link>
 
-          {/* Project selector (display only) */}
-          <button
-            className="w-full flex items-center justify-between gap-2 px-3 py-2 rounded-xl bg-muted/60 hover:bg-muted text-sm font-medium text-foreground transition-colors"
-            type="button"
-            aria-label="Select project"
-          >
-            <span className="truncate">{projectName}</span>
-            <ChevronDown className="size-3.5 shrink-0 text-muted-foreground" />
-          </button>
+          {/* Project selector */}
+          <Popover open={projectPopoverOpen} onOpenChange={setProjectPopoverOpen}>
+            <PopoverTrigger asChild>
+              <button
+                className="w-full flex items-center justify-between gap-2 px-3 py-2 rounded-xl bg-muted/60 hover:bg-muted text-sm font-medium text-foreground transition-colors"
+                type="button"
+                aria-label="Select project"
+              >
+                <span className="truncate">{selectedProject?.name ?? 'No projects'}</span>
+                <ChevronDown className="size-3.5 shrink-0 text-muted-foreground" />
+              </button>
+            </PopoverTrigger>
+            <PopoverContent align="start" className="w-60 p-1.5">
+              <div className="max-h-60 overflow-y-auto space-y-0.5">
+                {projects.map((p) => (
+                  <button
+                    key={p.id}
+                    type="button"
+                    onClick={() => {
+                      switchProject(p.id);
+                      setProjectPopoverOpen(false);
+                    }}
+                    className={cn(
+                      'w-full flex items-center gap-2 px-2.5 py-2 rounded-lg text-sm transition-colors text-left',
+                      p.id === selectedProjectId
+                        ? 'bg-accent text-primary font-medium'
+                        : 'text-foreground hover:bg-muted/60'
+                    )}
+                  >
+                    <span className="flex-1 truncate">{p.name}</span>
+                    {p.id === selectedProjectId && <Check className="size-3.5 shrink-0 text-primary" />}
+                  </button>
+                ))}
+                {projects.length === 0 && (
+                  <p className="px-2.5 py-2 text-xs text-muted-foreground">No projects yet</p>
+                )}
+              </div>
+              <div className="border-t border-border mt-1.5 pt-1.5">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setProjectPopoverOpen(false);
+                    if (plan === 'free' && projects.length >= 1) {
+                      toast('Upgrade to Pro for unlimited projects', {
+                        action: {
+                          label: 'Upgrade',
+                          onClick: () => setUpgradeModalOpen(true),
+                        },
+                      });
+                      return;
+                    }
+                    router.push('/dashboard/settings?tab=project&new=true');
+                  }}
+                  className="w-full flex items-center gap-2 px-2.5 py-2 rounded-lg text-sm text-muted-foreground hover:bg-muted/60 hover:text-foreground transition-colors"
+                >
+                  <Plus className="size-3.5" />
+                  New Project
+                </button>
+              </div>
+            </PopoverContent>
+          </Popover>
         </div>
 
         {/* Nav items */}

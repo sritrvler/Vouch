@@ -34,6 +34,7 @@ import { Label } from '@/components/ui/label';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
+import { useProject } from '@/context/ProjectContext';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 interface Project {
@@ -128,6 +129,7 @@ function SettingsInner() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const searchParams = useSearchParams();
   const router = useRouter();
+  const { selectedProject, selectedProjectId, plan, refetchProjects, switchProject, loading: projectsLoading } = useProject();
 
   // ── Auth state ─────────────────────────────────────────────────────────────
   const [userEmail, setUserEmail] = useState('');
@@ -158,6 +160,7 @@ function SettingsInner() {
 
   // ── Active tab (URL-driven) ────────────────────────────────────────────────
   const tabParam = searchParams.get('tab');
+  const isNewProject = searchParams.get('new') === 'true';
   const initialTab = tabParam === 'billing' || searchParams.get('upgrade') === 'success'
     ? 'billing'
     : tabParam === 'project'
@@ -176,7 +179,47 @@ function SettingsInner() {
     }
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // ── Initial load ──────────────────────────────────────────────────────────
+  // ── Sync project fields from context when selectedProject changes ─────────
+  useEffect(() => {
+    if (isNewProject) {
+      // Create mode: clear all fields
+      setProject(null);
+      setProjectName('');
+      setProjectSlug('');
+      setProjectWebsite('');
+      setGoogleReviewUrl('');
+      setLinkedinUrl('');
+      setAccentColor('#6366F1');
+      setLogoPreview(null);
+      setReportToken(null);
+      return;
+    }
+    if (selectedProject) {
+      const p = selectedProject;
+      setProject(p);
+      setProjectName(p.name);
+      setProjectSlug(p.slug ?? '');
+      setProjectWebsite(p.website ?? '');
+      setGoogleReviewUrl(p.google_review_url ?? '');
+      setLinkedinUrl(p.linkedin_url ?? '');
+      setAccentColor(p.accent_color ?? '#6366F1');
+      setLogoPreview(p.logo_url);
+      setReportToken(p.report_token ?? null);
+    } else if (!projectsLoading) {
+      // No projects at all: clear fields for create mode
+      setProject(null);
+      setProjectName('');
+      setProjectSlug('');
+      setProjectWebsite('');
+      setGoogleReviewUrl('');
+      setLinkedinUrl('');
+      setAccentColor('#6366F1');
+      setLogoPreview(null);
+      setReportToken(null);
+    }
+  }, [selectedProject, selectedProjectId, isNewProject, projectsLoading]);
+
+  // ── Initial load (auth + subscription only) ───────────────────────────────
   const [loading, setLoading] = useState(true);
 
   const fetchData = useCallback(async () => {
@@ -188,35 +231,14 @@ function SettingsInner() {
       setUserEmail(user.email ?? '');
       setDisplayName(user.user_metadata?.full_name ?? user.user_metadata?.name ?? '');
 
-      const [projectRes, subRes] = await Promise.all([
-        supabase
-          .from('projects')
-          .select('*')
-          .eq('user_id', user.id)
-          .limit(1)
-          .single(),
-        supabase
-          .from('subscriptions')
-          .select('*')
-          .eq('user_id', user.id)
-          .single(),
-      ]);
+      const { data: subData } = await supabase
+        .from('subscriptions')
+        .select('*')
+        .eq('user_id', user.id)
+        .single();
 
-      if (projectRes.data) {
-        const p = projectRes.data as Project;
-        setProject(p);
-        setProjectName(p.name);
-        setProjectSlug(p.slug ?? '');
-        setProjectWebsite(p.website ?? '');
-        setGoogleReviewUrl(p.google_review_url ?? '');
-        setLinkedinUrl(p.linkedin_url ?? '');
-        setAccentColor(p.accent_color ?? '#6366F1');
-        setLogoPreview(p.logo_url);
-        setReportToken(p.report_token ?? null);
-      }
-
-      if (subRes.data) {
-        setSubscription(subRes.data as Subscription);
+      if (subData) {
+        setSubscription(subData as Subscription);
       }
     } catch (err) {
       toast.error('Failed to load settings');
@@ -367,6 +389,7 @@ function SettingsInner() {
           .update(payload)
           .eq('id', project.id);
         if (error) throw error;
+        await refetchProjects();
       } else {
         const { data, error } = await supabase
           .from('projects')
@@ -374,7 +397,16 @@ function SettingsInner() {
           .select()
           .single();
         if (error) throw error;
-        setProject(data as Project);
+        const newProject = data as Project;
+        setProject(newProject);
+        await refetchProjects();
+        switchProject(newProject.id);
+        // Clean ?new=true from URL
+        if (isNewProject) {
+          const url = new URL(window.location.href);
+          url.searchParams.delete('new');
+          router.replace(url.pathname + (url.search || ''));
+        }
       }
 
       toast.success('Project settings saved');
@@ -384,7 +416,7 @@ function SettingsInner() {
     } finally {
       setSavingProject(false);
     }
-  }, [supabase, project, projectName, projectSlug, projectWebsite, googleReviewUrl, linkedinUrl, accentColor, logoPreview, subscription]);
+  }, [supabase, project, projectName, projectSlug, projectWebsite, googleReviewUrl, linkedinUrl, accentColor, logoPreview, subscription, refetchProjects, switchProject, isNewProject, router]);
 
   // ── Generate report token ─────────────────────────────────────────────────
   const handleGenerateReportToken = useCallback(async () => {

@@ -33,6 +33,7 @@ import { Switch } from '@/components/ui/switch';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
+import { useProject } from '@/context/ProjectContext';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 type WidgetLayout = 'grid' | 'carousel' | 'wall' | 'list' | 'single';
@@ -244,14 +245,12 @@ function CopyCodeButton({ code }: { code: string }) {
 // ─── Page ─────────────────────────────────────────────────────────────────────
 export default function WidgetsPage() {
   const supabase = createClient();
+  const { selectedProjectId, selectedProject, plan: userPlan } = useProject();
   const [testimonials, setTestimonials] = useState<Testimonial[]>([]);
   const [orderedTestimonials, setOrderedTestimonials] = useState<Testimonial[]>([]);
   const [loadingTestimonials, setLoadingTestimonials] = useState(true);
   const [saving, setSaving] = useState(false);
   const [savedWidgetId, setSavedWidgetId] = useState<string | null>(null);
-  const [userPlan, setUserPlan] = useState<'free' | 'pro' | 'agency'>('free');
-  const [projectId, setProjectId] = useState<string | null>(null);
-  const [projectSlug, setProjectSlug] = useState<string | null>(null);
   const [embedTab, setEmbedTab] = useState<'link' | 'builder' | 'dev' | 'react'>('link');
 
   const [settings, setSettings] = useState<WidgetSettings>({
@@ -275,36 +274,50 @@ export default function WidgetsPage() {
 
   // ── Fetch approved testimonials ────────────────────────────────────────────
   const fetchData = useCallback(async () => {
+    if (!selectedProjectId) return;
     setLoadingTestimonials(true);
+    // Reset widget state when project changes
+    setSavedWidgetId(null);
+    setSettings({
+      name: 'My Widget',
+      layout: 'grid',
+      theme: {
+        primaryColor: '#6366F1',
+        backgroundColor: '#ffffff',
+        textColor: '#0f172a',
+        cardStyle: 'shadow',
+        showRating: true,
+        showAvatar: true,
+        showDate: true,
+      },
+      filterMode: 'all',
+      minRating: 4,
+      maxItems: 12,
+      hideBranding: false,
+      pinnedIds: [],
+    });
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
-      const [testimonialsRes, subRes, projectsRes] = await Promise.all([
-        supabase
-          .from('testimonials')
-          .select('id, author_name, author_role, author_company, author_avatar_url, rating, content, featured, created_at')
-          .eq('user_id', user.id)
-          .eq('status', 'approved')
-          .order('created_at', { ascending: false })
-          .limit(50),
-        supabase.from('subscriptions').select('plan').eq('user_id', user.id).single(),
-        supabase.from('projects').select('id, slug').eq('user_id', user.id).limit(1).single(),
-      ]);
+      const testimonialsRes = await supabase
+        .from('testimonials')
+        .select('id, author_name, author_role, author_company, author_avatar_url, rating, content, featured, created_at')
+        .eq('user_id', user.id)
+        .eq('project_id', selectedProjectId)
+        .eq('status', 'approved')
+        .order('created_at', { ascending: false })
+        .limit(50);
 
       const fetchedTestimonials = (testimonialsRes.data as Testimonial[]) ?? [];
       setTestimonials(fetchedTestimonials);
-      if (subRes.data) setUserPlan(subRes.data.plan);
-      if (projectsRes.data) {
-        setProjectId(projectsRes.data.id);
-        setProjectSlug((projectsRes.data as { id: string; slug: string | null }).slug);
-      }
 
-      // Try to load existing widget
+      // Try to load existing widget for this project
       const { data: widgetData } = await supabase
         .from('widgets')
         .select('*')
         .eq('user_id', user.id)
+        .eq('project_id', selectedProjectId)
         .limit(1)
         .single();
 
@@ -348,7 +361,7 @@ export default function WidgetsPage() {
     } finally {
       setLoadingTestimonials(false);
     }
-  }, [supabase]);
+  }, [supabase, selectedProjectId]);
 
   useEffect(() => {
     fetchData();
@@ -390,7 +403,7 @@ export default function WidgetsPage() {
 
   // ── Save widget ───────────────────────────────────────────────────────────
   const handleSave = useCallback(async () => {
-    if (!projectId) {
+    if (!selectedProjectId) {
       toast.error('No project found. Create a project in Settings first.');
       return;
     }
@@ -416,7 +429,7 @@ export default function WidgetsPage() {
 
       const payload = {
         user_id: user.id,
-        project_id: projectId,
+        project_id: selectedProjectId,
         name: settings.name,
         layout: settings.layout,
         theme: settings.theme,
@@ -442,7 +455,7 @@ export default function WidgetsPage() {
     } finally {
       setSaving(false);
     }
-  }, [supabase, projectId, settings, savedWidgetId, userPlan]);
+  }, [supabase, selectedProjectId, settings, savedWidgetId, userPlan]);
 
   // ── Embed snippets ────────────────────────────────────────────────────────
   const iframeSnippet = savedWidgetId
@@ -531,7 +544,7 @@ export function Testimonials() {
         </Button>
       </div>
 
-      {!projectId && !loadingTestimonials && (
+      {!selectedProjectId && !loadingTestimonials && (
         <div className="mb-6 flex items-start gap-3 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3">
           <AlertTriangle className="size-5 text-amber-600 shrink-0 mt-0.5" />
           <div className="flex-1">
@@ -1030,17 +1043,17 @@ export function Testimonials() {
                     <p className="text-xs text-muted-foreground mb-3">
                       No website needed. Share this link anywhere. Customers can see all your approved testimonials instantly.
                     </p>
-                    {projectSlug ? (
+                    {selectedProject?.slug ? (
                       <div className="flex items-center gap-2">
                         <div className="flex-1 flex items-center gap-2 rounded-xl border border-border bg-muted/30 px-3 py-2">
                           <Globe className="size-3.5 text-muted-foreground shrink-0" />
                           <span className="text-xs font-mono text-foreground truncate">
-                            {SITE_URL}/p/{projectSlug}
+                            {SITE_URL}/p/{selectedProject?.slug}
                           </span>
                         </div>
-                        <CopyCodeButton code={`${SITE_URL}/p/${projectSlug}`} />
+                        <CopyCodeButton code={`${SITE_URL}/p/${selectedProject?.slug}`} />
                         <a
-                          href={`/p/${projectSlug}`}
+                          href={`/p/${selectedProject?.slug}`}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="rounded-lg border border-border bg-muted/40 p-1.5 text-muted-foreground hover:text-foreground hover:bg-muted transition-all"
