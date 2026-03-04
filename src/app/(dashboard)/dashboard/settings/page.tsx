@@ -75,6 +75,13 @@ const ACCENT_PRESETS = [
   { label: 'Sky', value: '#0EA5E9' },
 ];
 
+const FORM_THEMES = [
+  { label: 'Light', bg: '#ffffff', text: '#1a1a1a', input: '#ffffff' },
+  { label: 'Cream', bg: '#fef9ef', text: '#1a1a1a', input: '#ffffff' },
+  { label: 'Slate', bg: '#f1f5f9', text: '#1e293b', input: '#ffffff' },
+  { label: 'Dark', bg: '#0f172a', text: '#f8fafc', input: '#1e293b' },
+];
+
 // ─── Pro Features List ────────────────────────────────────────────────────────
 const PRO_FEATURES = [
   'Unlimited forms and embed widgets',
@@ -841,7 +848,7 @@ function SettingsInner() {
               </div>
             </Section>
 
-            {/* Brand Color + Text Color with live preview */}
+            {/* Brand Color with live preview */}
             <Section title="Brand Color">
               <div className="flex gap-8">
                 {/* Preview */}
@@ -855,7 +862,7 @@ function SettingsInner() {
                         </svg>
                       ))}
                     </div>
-                    <p className="text-xs leading-relaxed mb-3" style={{ color: `${textColor}cc` }}>&ldquo;Absolutely transformed our workflow. The team was incredible to work with.&rdquo;</p>
+                    <p className="text-xs text-muted-foreground leading-relaxed mb-3">&ldquo;Absolutely transformed our workflow. The team was incredible to work with.&rdquo;</p>
                     <div className="flex items-center gap-2">
                       <div
                         className="size-7 rounded-full flex items-center justify-center text-white text-[10px] font-bold shrink-0"
@@ -864,239 +871,106 @@ function SettingsInner() {
                         JD
                       </div>
                       <div>
-                        <p className="text-[11px] font-semibold" style={{ color: textColor }}>Jane Doe</p>
-                        <p className="text-[10px]" style={{ color: `${textColor}99` }}>CEO, Acme Inc</p>
+                        <p className="text-[11px] font-semibold text-foreground">Jane Doe</p>
+                        <p className="text-[10px] text-muted-foreground">CEO, Acme Inc</p>
                       </div>
                     </div>
                   </div>
                 </div>
-                {/* Pickers */}
-                <div className="w-[200px] shrink-0 space-y-5">
-                  <div>
-                    <Label className="text-xs font-medium mb-2 block">Accent</Label>
-                    <div className="flex gap-1.5 flex-wrap mb-2">
-                      {ACCENT_PRESETS.map((c) => (
-                        <button
-                          key={c.value}
-                          onClick={() => setButtonColor(c.value)}
-                          title={c.label}
-                          className={cn(
-                            'size-7 rounded-full border-2 transition-all',
-                            (buttonColor || accentColor) === c.value
-                              ? 'border-foreground scale-110 shadow-md'
-                              : 'border-transparent hover:scale-105 hover:border-muted-foreground'
-                          )}
-                          style={{ backgroundColor: c.value }}
-                        />
-                      ))}
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <div className="relative">
-                        <input
-                          type="color"
-                          value={buttonColor || accentColor}
-                          onChange={(e) => setButtonColor(e.target.value)}
-                          className="size-7 rounded-full cursor-pointer border-2 border-dashed border-muted-foreground/50 bg-[conic-gradient(red,yellow,lime,aqua,blue,magenta,red)]"
-                        />
-                      </div>
-                      <input
-                        type="text"
-                        value={buttonColor || accentColor}
-                        onChange={(e) => {
-                          let v = e.target.value;
-                          if (!v.startsWith('#')) v = '#' + v;
-                          if (/^#[0-9A-Fa-f]{0,6}$/.test(v)) setButtonColor(v);
-                        }}
-                        onBlur={() => {
-                          if (buttonColor && !/^#[0-9A-Fa-f]{6}$/.test(buttonColor)) setButtonColor('');
-                        }}
-                        maxLength={7}
-                        className="w-20 text-xs font-mono px-2 py-1 rounded border border-border bg-muted/50 focus:outline-none focus:ring-1 focus:ring-ring"
-                        placeholder="#6366F1"
+                {/* Picker */}
+                <div className="w-[200px] shrink-0">
+                  <div className="flex gap-1.5 flex-wrap mb-3">
+                    {ACCENT_PRESETS.map((c) => (
+                      <button
+                        key={c.value}
+                        onClick={() => setButtonColor(c.value)}
+                        title={c.label}
+                        className={cn(
+                          'size-7 rounded-full border-2 transition-all',
+                          (buttonColor || accentColor) === c.value
+                            ? 'border-foreground scale-110 shadow-md'
+                            : 'border-transparent hover:scale-105 hover:border-muted-foreground'
+                        )}
+                        style={{ backgroundColor: c.value }}
                       />
-                    </div>
+                    ))}
                   </div>
-                  <div>
-                    <Label className="text-xs font-medium mb-2 block">Text</Label>
-                    <div className="flex gap-1.5 flex-wrap mb-2">
-                      {[
-                        { label: 'Near Black', value: '#1a1a1a' },
-                        { label: 'Dark Gray', value: '#374151' },
-                        { label: 'White', value: '#ffffff' },
-                      ].map((c) => (
-                        <button
-                          key={c.value}
-                          onClick={() => setTextColor(c.value)}
-                          title={c.label}
-                          className={cn(
-                            'size-7 rounded-full border-2 transition-all',
-                            textColor === c.value
-                              ? 'border-foreground scale-110 shadow-md'
-                              : 'border-muted-foreground/30 hover:scale-105 hover:border-muted-foreground'
-                          )}
-                          style={{ backgroundColor: c.value }}
-                        />
-                      ))}
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <div className="relative">
-                        <input
-                          type="color"
-                          value={textColor}
-                          onChange={(e) => setTextColor(e.target.value)}
-                          className="size-7 rounded-full cursor-pointer border-2 border-dashed border-muted-foreground/50 bg-[conic-gradient(red,yellow,lime,aqua,blue,magenta,red)]"
-                        />
-                      </div>
+                  <div className="flex items-center gap-2">
+                    <div className="relative">
                       <input
-                        type="text"
-                        value={textColor}
-                        onChange={(e) => {
-                          let v = e.target.value;
-                          if (!v.startsWith('#')) v = '#' + v;
-                          if (/^#[0-9A-Fa-f]{0,6}$/.test(v)) setTextColor(v);
-                        }}
-                        onBlur={() => {
-                          if (!/^#[0-9A-Fa-f]{6}$/.test(textColor)) setTextColor('#1a1a1a');
-                        }}
-                        maxLength={7}
-                        className="w-20 text-xs font-mono px-2 py-1 rounded border border-border bg-muted/50 focus:outline-none focus:ring-1 focus:ring-ring"
-                        placeholder="#1a1a1a"
+                        type="color"
+                        value={buttonColor || accentColor}
+                        onChange={(e) => setButtonColor(e.target.value)}
+                        className="size-7 rounded-full cursor-pointer border-2 border-dashed border-muted-foreground/50 bg-[conic-gradient(red,yellow,lime,aqua,blue,magenta,red)]"
                       />
                     </div>
+                    <input
+                      type="text"
+                      value={buttonColor || accentColor}
+                      onChange={(e) => {
+                        let v = e.target.value;
+                        if (!v.startsWith('#')) v = '#' + v;
+                        if (/^#[0-9A-Fa-f]{0,6}$/.test(v)) setButtonColor(v);
+                      }}
+                      onBlur={() => {
+                        if (buttonColor && !/^#[0-9A-Fa-f]{6}$/.test(buttonColor)) setButtonColor('');
+                      }}
+                      maxLength={7}
+                      className="w-20 text-xs font-mono px-2 py-1 rounded border border-border bg-muted/50 focus:outline-none focus:ring-1 focus:ring-ring"
+                      placeholder="#6366F1"
+                    />
                   </div>
                 </div>
               </div>
             </Section>
 
-            {/* Collection Form with live preview */}
-            <Section title="Collection Form">
-              <div className="flex gap-8">
-                {/* Preview */}
-                <div className="flex-1 min-w-0">
-                  <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wide mb-2">Preview</p>
-                  <div
-                    className="rounded-xl border border-border overflow-hidden p-5 transition-colors"
-                    style={{ background: `linear-gradient(135deg, ${formBgColor}, ${formBgColor})` }}
-                  >
-                    <div
-                      className="size-8 rounded-lg bg-muted/50 mb-2 flex items-center justify-center text-[8px] text-muted-foreground border border-border/50"
+            {/* Form Theme */}
+            <Section title="Form Theme">
+              <div className="grid grid-cols-4 gap-3">
+                {FORM_THEMES.map((theme) => {
+                  const isActive = formBgColor === theme.bg && textColor === theme.text && inputColor === theme.input;
+                  return (
+                    <button
+                      key={theme.label}
+                      onClick={() => {
+                        setFormBgColor(theme.bg);
+                        setTextColor(theme.text);
+                        setInputColor(theme.input);
+                      }}
+                      className={cn(
+                        'rounded-xl border-2 overflow-hidden transition-all text-left',
+                        isActive
+                          ? 'border-foreground shadow-md scale-[1.02]'
+                          : 'border-border hover:border-muted-foreground hover:shadow-sm'
+                      )}
                     >
-                      Logo
-                    </div>
-                    <p className="text-sm font-bold mb-1 transition-colors" style={{ color: textColor }}>Share your experience</p>
-                    <p className="text-[11px] mb-3 transition-colors" style={{ color: `${textColor}99` }}>We&apos;d love to hear from you</p>
-                    <div className="h-7 rounded-md border mb-2 transition-colors" style={{ backgroundColor: inputColor, borderColor: `${textColor}20` }} />
-                    <div className="h-12 rounded-md border mb-3 transition-colors" style={{ backgroundColor: inputColor, borderColor: `${textColor}20` }} />
-                    <div
-                      className="h-7 w-20 rounded-md flex items-center justify-center text-white text-[10px] font-semibold"
-                      style={{ backgroundColor: buttonColor || accentColor }}
-                    >
-                      Submit
-                    </div>
-                  </div>
-                </div>
-                {/* Pickers */}
-                <div className="w-[200px] shrink-0 space-y-5">
-                  <div>
-                    <Label className="text-xs font-medium mb-2 block">Background</Label>
-                    <div className="flex gap-1.5 flex-wrap mb-2">
-                      {[
-                        { label: 'White', value: '#ffffff' },
-                        { label: 'Snow', value: '#fafafa' },
-                        { label: 'Cream', value: '#fef9ef' },
-                        { label: 'Slate', value: '#f1f5f9' },
-                        { label: 'Dark', value: '#0f172a' },
-                      ].map((c) => (
-                        <button
-                          key={c.value}
-                          onClick={() => setFormBgColor(c.value)}
-                          title={c.label}
-                          className={cn(
-                            'size-7 rounded-full border-2 transition-all',
-                            formBgColor === c.value
-                              ? 'border-foreground scale-110 shadow-md'
-                              : 'border-muted-foreground/30 hover:scale-105 hover:border-muted-foreground'
-                          )}
-                          style={{ backgroundColor: c.value }}
-                        />
-                      ))}
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <div className="relative">
-                        <input
-                          type="color"
-                          value={formBgColor}
-                          onChange={(e) => setFormBgColor(e.target.value)}
-                          className="size-7 rounded-full cursor-pointer border-2 border-dashed border-muted-foreground/50 bg-[conic-gradient(red,yellow,lime,aqua,blue,magenta,red)]"
-                        />
+                      {/* Mini form preview */}
+                      <div className="p-3 transition-colors" style={{ backgroundColor: theme.bg }}>
+                        <div className="flex gap-0.5 mb-1.5">
+                          {[1,2,3,4,5].map((i) => (
+                            <svg key={i} width="8" height="8" viewBox="0 0 24 24" fill={buttonColor || accentColor} stroke="none">
+                              <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+                            </svg>
+                          ))}
+                        </div>
+                        <div className="h-1.5 w-3/4 rounded-sm mb-1" style={{ backgroundColor: theme.text, opacity: 0.7 }} />
+                        <div className="h-1 w-1/2 rounded-sm mb-2" style={{ backgroundColor: theme.text, opacity: 0.3 }} />
+                        <div className="h-4 rounded mb-1.5 border" style={{ backgroundColor: theme.input, borderColor: `${theme.text}15` }} />
+                        <div className="h-6 rounded mb-1.5 border" style={{ backgroundColor: theme.input, borderColor: `${theme.text}15` }} />
+                        <div
+                          className="h-4 w-12 rounded flex items-center justify-center"
+                          style={{ backgroundColor: buttonColor || accentColor }}
+                        >
+                          <span className="text-[6px] font-semibold text-white">Submit</span>
+                        </div>
                       </div>
-                      <input
-                        type="text"
-                        value={formBgColor}
-                        onChange={(e) => {
-                          let v = e.target.value;
-                          if (!v.startsWith('#')) v = '#' + v;
-                          if (/^#[0-9A-Fa-f]{0,6}$/.test(v)) setFormBgColor(v);
-                        }}
-                        onBlur={() => {
-                          if (!/^#[0-9A-Fa-f]{6}$/.test(formBgColor)) setFormBgColor('#ffffff');
-                        }}
-                        maxLength={7}
-                        className="w-20 text-xs font-mono px-2 py-1 rounded border border-border bg-muted/50 focus:outline-none focus:ring-1 focus:ring-ring"
-                        placeholder="#ffffff"
-                      />
-                    </div>
-                  </div>
-                  <div>
-                    <Label className="text-xs font-medium mb-2 block">Input Fields</Label>
-                    <div className="flex gap-1.5 flex-wrap mb-2">
-                      {[
-                        { label: 'White', value: '#ffffff' },
-                        { label: 'Snow', value: '#fafafa' },
-                        { label: 'Cream', value: '#fef9ef' },
-                        { label: 'Transparent', value: '#ffffff00' },
-                      ].map((c) => (
-                        <button
-                          key={c.value}
-                          onClick={() => setInputColor(c.value)}
-                          title={c.label}
-                          className={cn(
-                            'size-7 rounded-full border-2 transition-all',
-                            inputColor === c.value
-                              ? 'border-foreground scale-110 shadow-md'
-                              : 'border-muted-foreground/30 hover:scale-105 hover:border-muted-foreground'
-                          )}
-                          style={{ backgroundColor: c.value === '#ffffff00' ? 'transparent' : c.value, backgroundImage: c.value === '#ffffff00' ? 'linear-gradient(45deg, #ccc 25%, transparent 25%, transparent 75%, #ccc 75%), linear-gradient(45deg, #ccc 25%, transparent 25%, transparent 75%, #ccc 75%)' : 'none', backgroundSize: c.value === '#ffffff00' ? '8px 8px' : 'auto', backgroundPosition: c.value === '#ffffff00' ? '0 0, 4px 4px' : 'auto' }}
-                        />
-                      ))}
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <div className="relative">
-                        <input
-                          type="color"
-                          value={inputColor === '#ffffff00' ? '#ffffff' : inputColor}
-                          onChange={(e) => setInputColor(e.target.value)}
-                          className="size-7 rounded-full cursor-pointer border-2 border-dashed border-muted-foreground/50 bg-[conic-gradient(red,yellow,lime,aqua,blue,magenta,red)]"
-                        />
+                      {/* Label */}
+                      <div className="px-3 py-2 bg-background border-t border-border">
+                        <span className="text-xs font-medium text-foreground">{theme.label}</span>
                       </div>
-                      <input
-                        type="text"
-                        value={inputColor}
-                        onChange={(e) => {
-                          let v = e.target.value;
-                          if (!v.startsWith('#')) v = '#' + v;
-                          if (/^#[0-9A-Fa-f]{0,8}$/.test(v)) setInputColor(v);
-                        }}
-                        onBlur={() => {
-                          if (!/^#[0-9A-Fa-f]{6,8}$/.test(inputColor)) setInputColor('#ffffff');
-                        }}
-                        maxLength={9}
-                        className="w-20 text-xs font-mono px-2 py-1 rounded border border-border bg-muted/50 focus:outline-none focus:ring-1 focus:ring-ring"
-                        placeholder="#ffffff"
-                      />
-                    </div>
-                  </div>
-                </div>
+                    </button>
+                  );
+                })}
               </div>
             </Section>
 
