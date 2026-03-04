@@ -44,6 +44,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { cn } from '@/lib/utils';
+import { useProject } from '@/context/ProjectContext';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 interface Project {
@@ -397,6 +398,7 @@ function EmptyState({ onCreateClick }: { onCreateClick: () => void }) {
 // ─── Page ─────────────────────────────────────────────────────────────────────
 export default function FormsPage() {
   const supabase = createClient();
+  const { selectedProjectId: activeProjectId } = useProject();
   const router = useRouter();
   const [forms, setForms] = useState<CollectionForm[]>([]);
   const [projects, setProjects] = useState<Project[]>([]);
@@ -500,9 +502,9 @@ export default function FormsPage() {
     setFormDesc('');
     setCustomQuestions([]);
     setNewQuestion('');
-    setSelectedProjectId(projects[0]?.id ?? '');
+    setSelectedProjectId(activeProjectId ?? projects[0]?.id ?? '');
     setCreateOpen(true);
-  }, [userPlan, forms.length, projects, router]);
+  }, [userPlan, forms.length, projects, activeProjectId, router]);
 
   // ── Create Form ────────────────────────────────────────────────────────────
   const handleCreate = useCallback(async () => {
@@ -787,14 +789,17 @@ export default function FormsPage() {
           </DialogHeader>
 
           <div className="space-y-5">
-            {/* Project */}
+            {/* Project (only show selector when user has multiple projects) */}
+            {projects.length === 0 ? (
             <div className="space-y-1.5">
               <Label htmlFor="form-project">Project</Label>
-              {projects.length === 0 ? (
                 <p className="text-xs text-muted-foreground bg-muted rounded-lg p-3">
                   No projects found. Create a project in Settings first.
                 </p>
-              ) : (
+            </div>
+            ) : projects.length > 1 ? (
+            <div className="space-y-1.5">
+              <Label htmlFor="form-project">Project</Label>
                 <Select value={selectedProjectId} onValueChange={setSelectedProjectId}>
                   <SelectTrigger id="form-project" className="rounded-xl w-full">
                     <SelectValue placeholder="Select a project" />
@@ -807,8 +812,8 @@ export default function FormsPage() {
                     ))}
                   </SelectContent>
                 </Select>
-              )}
             </div>
+            ) : null}
 
             {/* Title */}
             <div className="space-y-1.5">
