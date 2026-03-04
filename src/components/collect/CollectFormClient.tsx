@@ -4,6 +4,7 @@ import { useState, useRef, useCallback, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
 import { Loader2, Star, ChevronRight, Check, ExternalLink, Upload, X, Linkedin, Camera, Video, Square, Pause, Play } from 'lucide-react';
+import { resolveFontUrl, sanitizeFontFamily } from '@/lib/fonts';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -17,6 +18,8 @@ interface Project {
   name: string;
   logo_url: string | null;
   accent_color: string | null;
+  font_family: string | null;
+  font_url: string | null;
   google_review_url: string | null;
   linkedin_url: string | null;
 }
@@ -377,6 +380,34 @@ export default function CollectFormClient({
   showBranding,
 }: CollectFormClientProps) {
   const accentColor = project.accent_color || '#6366F1';
+  const fontFamily = sanitizeFontFamily(project.font_family);
+  const fontStyleUrl = resolveFontUrl(project.font_family, project.font_url);
+
+  // Load custom font stylesheet
+  useEffect(() => {
+    if (!fontStyleUrl) return;
+    const linkId = 'vouch-custom-font';
+    if (document.getElementById(linkId)) return;
+    const preconnect = document.createElement('link');
+    preconnect.rel = 'preconnect';
+    preconnect.href = 'https://fonts.googleapis.com';
+    document.head.appendChild(preconnect);
+    const preconnect2 = document.createElement('link');
+    preconnect2.rel = 'preconnect';
+    preconnect2.href = 'https://fonts.gstatic.com';
+    preconnect2.crossOrigin = 'anonymous';
+    document.head.appendChild(preconnect2);
+    const link = document.createElement('link');
+    link.id = linkId;
+    link.rel = 'stylesheet';
+    link.href = fontStyleUrl;
+    document.head.appendChild(link);
+    return () => {
+      preconnect.remove();
+      preconnect2.remove();
+      link.remove();
+    };
+  }, [fontStyleUrl]);
 
   // Step state
   const [step, setStep] = useState<1 | 2 | 3 | 4 | 5>(1);
@@ -713,7 +744,10 @@ export default function CollectFormClient({
   return (
     <div
       className="min-h-screen flex flex-col items-center justify-start py-8 px-4"
-      style={{ background: `linear-gradient(to bottom right, #f8fafc, #ffffff, ${accentColor}12)` }}
+      style={{
+        background: `linear-gradient(to bottom right, #f8fafc, #ffffff, ${accentColor}12)`,
+        ...(fontFamily ? { fontFamily: `"${fontFamily}", sans-serif` } : {}),
+      }}
     >
       <div className="w-full max-w-md">
         {/* Business header */}

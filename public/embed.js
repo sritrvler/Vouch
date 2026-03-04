@@ -16,6 +16,68 @@
     return fallback;
   }
 
+  function safeFontUrl(url) {
+    if (!url || typeof url !== 'string') return null;
+    var trimmed = url.trim();
+    if (trimmed.indexOf('https://') !== 0) return null;
+    if (/javascript:|data:/i.test(trimmed)) return null;
+    return trimmed;
+  }
+
+  function safeFontFamily(val) {
+    if (!val || typeof val !== 'string') return null;
+    var cleaned = val.replace(/[^a-zA-Z0-9 -]/g, '').trim();
+    return cleaned || null;
+  }
+
+  // Known Google Fonts lookup (value -> CSS URL)
+  var GFONT_MAP = {
+    'Inter': 'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap',
+    'Roboto': 'https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap',
+    'Open Sans': 'https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&display=swap',
+    'Lato': 'https://fonts.googleapis.com/css2?family=Lato:wght@400;700&display=swap',
+    'Poppins': 'https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap',
+    'Montserrat': 'https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap',
+    'Nunito': 'https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap',
+    'Raleway': 'https://fonts.googleapis.com/css2?family=Raleway:wght@400;500;600;700&display=swap',
+    'Source Sans 3': 'https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600;700&display=swap',
+    'Work Sans': 'https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;500;600;700&display=swap',
+    'DM Sans': 'https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&display=swap',
+    'Plus Jakarta Sans': 'https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap',
+    'Outfit': 'https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap',
+    'Manrope': 'https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap',
+    'Space Grotesk': 'https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap'
+  };
+
+  function resolveFontConfig(theme, project) {
+    // Widget theme font takes precedence over project font
+    var family = (theme && theme.fontFamily) || null;
+    var url = (theme && theme.fontUrl) || null;
+
+    // If widget says "inherit", check project-level font
+    if (!family || family === 'inherit') {
+      family = (project && project.fontFamily) || null;
+      url = (project && project.fontUrl) || null;
+    }
+
+    // Still inherit or null? No font to load
+    if (!family || family === 'inherit') return null;
+
+    var safeName = safeFontFamily(family);
+    if (!safeName) return null;
+
+    // Check Google Fonts map first
+    var gUrl = GFONT_MAP[safeName];
+    if (gUrl) return { family: safeName, url: gUrl };
+
+    // Custom URL
+    var safeUrl = safeFontUrl(url);
+    if (safeUrl) return { family: safeName, url: safeUrl };
+
+    // Family name but no loadable URL: set family anyway (may already be loaded on host page)
+    return { family: safeName, url: null };
+  }
+
   function timeAgo(dateStr) {
     if (!dateStr) return '';
     var then = new Date(dateStr).getTime();
@@ -442,13 +504,36 @@
     var theme = w.theme || {};
     var tc = safeColor(theme.textColor, '#0f172a');
 
+    // Resolve font
+    var fontConfig = resolveFontConfig(theme, data.project);
+    var fontStack = fontConfig && fontConfig.family
+      ? '"' + fontConfig.family + '",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif'
+      : 'inherit';
+
     // Create shadow root
     var shadow = el.attachShadow({ mode: 'open' });
+
+    // Inject font stylesheet into shadow root if needed
+    if (fontConfig && fontConfig.url) {
+      var preconnect = document.createElement('link');
+      preconnect.rel = 'preconnect';
+      preconnect.href = 'https://fonts.googleapis.com';
+      shadow.appendChild(preconnect);
+      var preconnect2 = document.createElement('link');
+      preconnect2.rel = 'preconnect';
+      preconnect2.href = 'https://fonts.gstatic.com';
+      preconnect2.crossOrigin = 'anonymous';
+      shadow.appendChild(preconnect2);
+      var fontLink = document.createElement('link');
+      fontLink.rel = 'stylesheet';
+      fontLink.href = fontConfig.url;
+      shadow.appendChild(fontLink);
+    }
 
     // Base styles (scoped to shadow)
     var style = document.createElement('style');
     style.textContent =
-      ':host{display:block;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;' +
+      ':host{display:block;font-family:' + fontStack + ';' +
       '-webkit-font-smoothing:antialiased;color:' + tc + '}' +
       '*{box-sizing:border-box;margin:0;padding:0}' +
       'img{max-width:100%}' +

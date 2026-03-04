@@ -15,6 +15,8 @@ interface WidgetTheme {
   backgroundColor?: string;
   textColor?: string;
   cardStyle?: 'shadow' | 'border' | 'flat';
+  fontFamily?: string;
+  fontUrl?: string | null;
   showRating?: boolean;
   showAvatar?: boolean;
   showDate?: boolean;
@@ -676,6 +678,35 @@ export default async function EmbedPage({ params }: PageProps) {
   const bg = theme.backgroundColor || '#ffffff';
   const textColor = theme.textColor || '#0f172a';
 
+  // Resolve font for iframe embed
+  const themeFontFamily = theme.fontFamily && theme.fontFamily !== 'inherit' ? theme.fontFamily : null;
+  const resolvedFontFamily = themeFontFamily ? themeFontFamily.replace(/[^a-zA-Z0-9 -]/g, '') : null;
+
+  // Determine font CSS URL (check Google Fonts map, then custom URL)
+  const GFONT_MAP: Record<string, string> = {
+    'Inter': 'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap',
+    'Roboto': 'https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap',
+    'Open Sans': 'https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&display=swap',
+    'Lato': 'https://fonts.googleapis.com/css2?family=Lato:wght@400;700&display=swap',
+    'Poppins': 'https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap',
+    'Montserrat': 'https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap',
+    'Nunito': 'https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap',
+    'Raleway': 'https://fonts.googleapis.com/css2?family=Raleway:wght@400;500;600;700&display=swap',
+    'Source Sans 3': 'https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600;700&display=swap',
+    'Work Sans': 'https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;500;600;700&display=swap',
+    'DM Sans': 'https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&display=swap',
+    'Plus Jakarta Sans': 'https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap',
+    'Outfit': 'https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap',
+    'Manrope': 'https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap',
+    'Space Grotesk': 'https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap',
+  };
+  const fontCssUrl = resolvedFontFamily
+    ? (GFONT_MAP[resolvedFontFamily] || (theme.fontUrl && theme.fontUrl.startsWith('https://') ? theme.fontUrl : null))
+    : null;
+  const fontStack = resolvedFontFamily
+    ? `"${resolvedFontFamily}",-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif`
+    : `-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif`;
+
   function renderLayout() {
     switch (typedWidget.layout) {
       case 'carousel':
@@ -695,10 +726,17 @@ export default async function EmbedPage({ params }: PageProps) {
     <html>
       <head>
         <meta name="viewport" content="width=device-width, initial-scale=1" />
+        {fontCssUrl && (
+          <>
+            <link rel="preconnect" href="https://fonts.googleapis.com" />
+            <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+            <link rel="stylesheet" href={fontCssUrl} />
+          </>
+        )}
         <style>{`
           * { box-sizing: border-box; margin: 0; padding: 0; }
           body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            font-family: ${fontStack};
             background: ${bg};
             color: ${textColor};
             padding: 8px;

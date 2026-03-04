@@ -1,6 +1,35 @@
 # Active Work Queue
 
-## Session Handoff (March 4, 2026, session 4)
+## Session Handoff (March 4, 2026, session 5)
+
+**What was done this session:**
+1. Custom fonts shipped. All 11 files changed (see plan). Build passes.
+2. New shared utility: `src/lib/fonts.ts` with GOOGLE_FONTS array (15 fonts), sanitizeFontUrl, sanitizeFontFamily, resolveFontUrl.
+3. Database: Added `font_family` and `font_url` columns to projects table. Added `fontFamily`/`fontUrl` to widget theme JSONB default.
+4. ProjectContext: Added font_family and font_url to Project interface and select query.
+5. Settings page: Font picker with Google Fonts dropdown + custom CSS URL input + live preview.
+6. Widget builder: Per-widget font override (inherit from page default, or pick specific font). Live preview renders chosen font.
+7. Widget API: Exposes project fontFamily and fontUrl in response.
+8. Collection form: Loads font via useEffect (injects link tags into head), applies fontFamily inline style.
+9. Public page: Loads font via link tags in JSX, applies fontFamily inline style.
+10. embed.js: Font sanitizers, GFONT_MAP lookup, resolveFontConfig() resolves widget theme font > project font > inherit. Injects link tags into shadow root.
+11. Iframe embed: Resolves font, injects link tags in head, applies fontStack to body CSS.
+12. All 12 test scenarios traced and passed (personas, empty state, boundary, data transitions, stale data, concurrent, failure, permissions, reverse, security, performance).
+
+**What's next:**
+Video cost optimization (compress + thumbnail + fair use). See "AFTER: Video Cost Optimization" section below.
+
+**What to watch out for:**
+1. shadcn Select component was installed during this session. If `src/components/ui/select.tsx` doesn't exist after a fresh clone, run `npx shadcn@latest add select`.
+2. The embed.js GFONT_MAP must be kept in sync with `src/lib/fonts.ts` GOOGLE_FONTS array. If you add or remove a font from one, update the other.
+3. Font loading in embed.js uses preconnect hints inside the shadow root. This is intentional. Host page preconnect doesn't help shadow DOM in all browsers.
+4. `updateTheme` in widgets page now accepts `string | boolean | null` (was `string | boolean`). This is because fontUrl can be null.
+5. The iframe embed (`src/app/embed/[id]/page.tsx`) has its own GFONT_MAP constant (duplicated from embed.js). A future refactor could share these, but the iframe is lower priority (v1 compat only).
+6. Font is free for all plans (not gated). Intentional. Same as accent_color.
+
+---
+
+## Previous: Session Handoff (March 4, 2026, session 4)
 
 **What was done this session:**
 1. Multi-widget management shipped (commit `7687fcf`). Widget page loads all widgets per project. Added widget selector bar, create/delete/switch handlers, empty state, upgrade dialog. Builder UI unchanged.
@@ -122,7 +151,7 @@ Reality was: Widget page does `.limit(1).single()` and only loads one widget.
 
 ---
 
-## AFTER: Custom Fonts
+## DONE: Custom Fonts — shipped session 5
 
 **The gap:**
 FAQ says "The component renders using your page's existing font stack." True for embed.js (uses system fonts). But users can't customize fonts to match their brand.

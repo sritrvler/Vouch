@@ -36,6 +36,8 @@ create table public.projects (
   website text,
   logo_url text,
   accent_color text default '#6366F1',
+  font_family text,
+  font_url text,
   google_review_url text,
   linkedin_url text,
   report_token text unique,
@@ -108,6 +110,8 @@ create table public.widgets (
     "backgroundColor": "#ffffff",
     "textColor": "#0f172a",
     "cardStyle": "shadow",
+    "fontFamily": "inherit",
+    "fontUrl": null,
     "showRating": true,
     "showAvatar": true,
     "showDate": true,
@@ -123,6 +127,10 @@ create table public.widgets (
 );
 -- To add pinned_ids to an existing database run:
 -- ALTER TABLE public.widgets ADD COLUMN IF NOT EXISTS pinned_ids jsonb default '[]';
+
+-- To add font columns to an existing database run:
+-- ALTER TABLE public.projects ADD COLUMN IF NOT EXISTS font_family text;
+-- ALTER TABLE public.projects ADD COLUMN IF NOT EXISTS font_url text;
 
 -- ============================================================
 -- ANALYTICS — Form views

@@ -26,15 +26,18 @@ import {
   Copy,
   RefreshCw,
   Link2,
+  Type,
 } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 import { useProject } from '@/context/ProjectContext';
+import { GOOGLE_FONTS, sanitizeFontUrl, sanitizeFontFamily, resolveFontUrl } from '@/lib/fonts';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 interface Project {
@@ -46,6 +49,8 @@ interface Project {
   linkedin_url: string | null;
   logo_url: string | null;
   accent_color: string;
+  font_family: string | null;
+  font_url: string | null;
   report_token: string | null;
 }
 
@@ -146,6 +151,8 @@ function SettingsInner() {
   const [googleReviewUrl, setGoogleReviewUrl] = useState('');
   const [linkedinUrl, setLinkedinUrl] = useState('');
   const [accentColor, setAccentColor] = useState('#6366F1');
+  const [fontFamily, setFontFamily] = useState<string | null>(null);
+  const [fontUrl, setFontUrl] = useState<string | null>(null);
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
   const [savingProject, setSavingProject] = useState(false);
   const [uploadingLogo, setUploadingLogo] = useState(false);
@@ -190,6 +197,8 @@ function SettingsInner() {
       setGoogleReviewUrl('');
       setLinkedinUrl('');
       setAccentColor('#6366F1');
+      setFontFamily(null);
+      setFontUrl(null);
       setLogoPreview(null);
       setReportToken(null);
       return;
@@ -203,6 +212,8 @@ function SettingsInner() {
       setGoogleReviewUrl(p.google_review_url ?? '');
       setLinkedinUrl(p.linkedin_url ?? '');
       setAccentColor(p.accent_color ?? '#6366F1');
+      setFontFamily(p.font_family ?? null);
+      setFontUrl(p.font_url ?? null);
       setLogoPreview(p.logo_url);
       setReportToken(p.report_token ?? null);
     } else if (!projectsLoading) {
@@ -214,6 +225,8 @@ function SettingsInner() {
       setGoogleReviewUrl('');
       setLinkedinUrl('');
       setAccentColor('#6366F1');
+      setFontFamily(null);
+      setFontUrl(null);
       setLogoPreview(null);
       setReportToken(null);
     }
@@ -380,6 +393,8 @@ function SettingsInner() {
         google_review_url: googleReviewUrl.trim() || null,
         linkedin_url: linkedinUrl.trim() || null,
         accent_color: accentColor,
+        font_family: sanitizeFontFamily(fontFamily),
+        font_url: sanitizeFontUrl(fontUrl),
         logo_url: logoPreview,
       };
 
@@ -416,7 +431,7 @@ function SettingsInner() {
     } finally {
       setSavingProject(false);
     }
-  }, [supabase, project, projectName, projectSlug, projectWebsite, googleReviewUrl, linkedinUrl, accentColor, logoPreview, subscription, refetchProjects, switchProject, isNewProject, router]);
+  }, [supabase, project, projectName, projectSlug, projectWebsite, googleReviewUrl, linkedinUrl, accentColor, fontFamily, fontUrl, logoPreview, subscription, refetchProjects, switchProject, isNewProject, router]);
 
   // ── Generate report token ─────────────────────────────────────────────────
   const handleGenerateReportToken = useCallback(async () => {
@@ -842,6 +857,84 @@ function SettingsInner() {
                   />
                   <span className="text-xs text-muted-foreground font-mono">{accentColor}</span>
                 </div>
+              </div>
+            </Section>
+
+            {/* Font */}
+            <Section title="Font" description="Applied to your collection form and public testimonials page.">
+              <div className="space-y-4">
+                <div className="space-y-1.5">
+                  <Label>Google Fonts</Label>
+                  <Select
+                    value={fontFamily ?? '__none__'}
+                    onValueChange={(val) => {
+                      if (val === '__none__') {
+                        setFontFamily(null);
+                        setFontUrl(null);
+                      } else {
+                        setFontFamily(val);
+                        setFontUrl(null);
+                      }
+                    }}
+                  >
+                    <SelectTrigger className="rounded-xl">
+                      <SelectValue placeholder="System default" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="__none__">System default</SelectItem>
+                      {GOOGLE_FONTS.map((f) => (
+                        <SelectItem key={f.value} value={f.value}>{f.label}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-1.5">
+                  <Label htmlFor="custom-font-url">Custom CSS URL</Label>
+                  <div className="relative">
+                    <Type className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
+                    <Input
+                      id="custom-font-url"
+                      value={fontUrl ?? ''}
+                      onChange={(e) => {
+                        setFontUrl(e.target.value || null);
+                        if (e.target.value) setFontFamily(null);
+                      }}
+                      placeholder="https://fonts.adobe.com/..."
+                      className="pl-9 rounded-xl"
+                    />
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    Paste a CSS URL from Adobe Fonts, Fontshare, or your own hosted font. When using a custom URL, type the font family name in the field below.
+                  </p>
+                </div>
+                {fontUrl && !fontFamily && (
+                  <div className="space-y-1.5">
+                    <Label htmlFor="custom-font-family">Font Family Name</Label>
+                    <Input
+                      id="custom-font-family"
+                      value={fontFamily ?? ''}
+                      onChange={(e) => setFontFamily(e.target.value || null)}
+                      placeholder="e.g. Proxima Nova"
+                      className="rounded-xl"
+                    />
+                  </div>
+                )}
+                {/* Live preview */}
+                {fontFamily && (
+                  <>
+                    {resolveFontUrl(fontFamily, fontUrl) && (
+                      // eslint-disable-next-line @next/next/no-page-custom-font
+                      <link rel="stylesheet" href={resolveFontUrl(fontFamily, fontUrl)!} />
+                    )}
+                    <div
+                      className="rounded-xl border border-border p-4 bg-muted/20"
+                      style={{ fontFamily: `"${fontFamily}", sans-serif` }}
+                    >
+                      <p className="text-sm text-foreground">The quick brown fox jumps over the lazy dog.</p>
+                      <p className="text-xs text-muted-foreground mt-1">Preview: {fontFamily}</p>
+                    </div>
+                  </>
+                )}
               </div>
             </Section>
 

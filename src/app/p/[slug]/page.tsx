@@ -3,6 +3,7 @@ import { createAdminClient } from '@/lib/supabase/admin';
 import type { Metadata } from 'next';
 import { Star, ExternalLink, Play } from 'lucide-react';
 import Link from 'next/link';
+import { resolveFontUrl, sanitizeFontFamily } from '@/lib/fonts';
 
 // ─── Helpers ───────────────────────────────────────────────────────────────
 
@@ -50,7 +51,7 @@ export default async function PublicTestimonialsPage({ params }: PageProps) {
   // Fetch project by slug
   const { data: project } = await supabase
     .from('projects')
-    .select('id, name, logo_url, accent_color, website, user_id')
+    .select('id, name, logo_url, accent_color, font_family, font_url, website, user_id')
     .eq('slug', slug)
     .single();
 
@@ -120,6 +121,8 @@ export default async function PublicTestimonialsPage({ params }: PageProps) {
       : 0;
 
   const accentColor = project.accent_color ?? '#4f46e5';
+  const fontFamily = sanitizeFontFamily(project.font_family);
+  const fontStyleUrl = resolveFontUrl(project.font_family, project.font_url);
 
   const jsonLd = {
     '@context': 'https://schema.org',
@@ -152,11 +155,22 @@ export default async function PublicTestimonialsPage({ params }: PageProps) {
 
   return (
     <>
+    {fontStyleUrl && (
+      <>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        {/* eslint-disable-next-line @next/next/no-page-custom-font */}
+        <link rel="stylesheet" href={fontStyleUrl} />
+      </>
+    )}
     <script
       type="application/ld+json"
       dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
     />
-    <div className="min-h-screen bg-gray-50">
+    <div
+      className="min-h-screen bg-gray-50"
+      style={fontFamily ? { fontFamily: `"${fontFamily}", sans-serif` } : undefined}
+    >
       {/* Header: accent-tinted gradient with decorative quotation mark */}
       <div
         className="border-b border-black/5"

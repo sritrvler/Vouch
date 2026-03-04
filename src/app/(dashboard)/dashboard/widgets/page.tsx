@@ -42,9 +42,11 @@ import {
   DialogDescription,
   DialogFooter,
 } from '@/components/ui/dialog';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 import { useProject } from '@/context/ProjectContext';
+import { GOOGLE_FONTS, resolveFontUrl, sanitizeFontUrl } from '@/lib/fonts';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 type WidgetLayout = 'grid' | 'carousel' | 'wall' | 'list' | 'single';
@@ -55,6 +57,8 @@ interface WidgetTheme {
   backgroundColor: string;
   textColor: string;
   cardStyle: 'shadow' | 'border' | 'flat';
+  fontFamily: string;
+  fontUrl: string | null;
   showRating: boolean;
   showAvatar: boolean;
   showDate: boolean;
@@ -280,6 +284,8 @@ export default function WidgetsPage() {
       backgroundColor: '#ffffff',
       textColor: '#0f172a',
       cardStyle: 'shadow',
+      fontFamily: 'inherit',
+      fontUrl: null,
       showRating: true,
       showAvatar: true,
       showDate: true,
@@ -300,6 +306,8 @@ export default function WidgetsPage() {
       backgroundColor: '#ffffff',
       textColor: '#0f172a',
       cardStyle: 'shadow' as const,
+      fontFamily: 'inherit',
+      fontUrl: null,
       showRating: true,
       showAvatar: true,
       showDate: true,
@@ -335,6 +343,8 @@ export default function WidgetsPage() {
         backgroundColor: loadedTheme.backgroundColor ?? '#ffffff',
         textColor: loadedTheme.textColor ?? '#0f172a',
         cardStyle: loadedTheme.cardStyle ?? 'shadow',
+        fontFamily: loadedTheme.fontFamily ?? 'inherit',
+        fontUrl: loadedTheme.fontUrl ?? null,
         showRating: loadedTheme.showRating ?? true,
         showAvatar: loadedTheme.showAvatar ?? true,
         showDate: loadedTheme.showDate ?? true,
@@ -426,7 +436,7 @@ export default function WidgetsPage() {
   const usingSampleData = testimonials.length === 0;
 
   // ── Update helpers ─────────────────────────────────────────────────────────
-  const updateTheme = useCallback((key: keyof WidgetTheme, value: string | boolean) => {
+  const updateTheme = useCallback((key: keyof WidgetTheme, value: string | boolean | null) => {
     setSettings((prev) => ({
       ...prev,
       theme: { ...prev.theme, [key]: value },
@@ -975,6 +985,46 @@ export function Testimonials() {
               </div>
             </div>
 
+            {/* Font */}
+            <div>
+              <Label className="text-xs text-muted-foreground mb-2 block">Font</Label>
+              <Select
+                value={settings.theme.fontFamily}
+                onValueChange={(val) => {
+                  if (val === 'inherit') {
+                    updateTheme('fontFamily', 'inherit');
+                    updateTheme('fontUrl', null);
+                  } else if (val === '__custom__') {
+                    updateTheme('fontFamily', 'inherit');
+                  } else {
+                    updateTheme('fontFamily', val);
+                    updateTheme('fontUrl', null);
+                  }
+                }}
+              >
+                <SelectTrigger className="rounded-xl text-sm">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="inherit">Inherit from page</SelectItem>
+                  {GOOGLE_FONTS.map((f) => (
+                    <SelectItem key={f.value} value={f.value}>{f.label}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {settings.theme.fontFamily !== 'inherit' && (
+                <div className="mt-2 space-y-1.5">
+                  <Label className="text-xs text-muted-foreground">Custom CSS URL (optional)</Label>
+                  <Input
+                    value={settings.theme.fontUrl ?? ''}
+                    onChange={(e) => updateTheme('fontUrl', e.target.value || null)}
+                    placeholder="https://fonts.adobe.com/..."
+                    className="rounded-xl text-sm"
+                  />
+                </div>
+              )}
+            </div>
+
             {/* Toggles */}
             <div className="space-y-2 pt-1">
               {(
@@ -1148,8 +1198,22 @@ export function Testimonials() {
               )}
             </div>
 
+            {/* Font loading for preview */}
+            {settings.theme.fontFamily !== 'inherit' && resolveFontUrl(settings.theme.fontFamily, settings.theme.fontUrl) && (
+              // eslint-disable-next-line @next/next/no-page-custom-font
+              <link rel="stylesheet" href={resolveFontUrl(settings.theme.fontFamily, settings.theme.fontUrl)!} />
+            )}
+
             {/* Preview Area */}
-            <div className="p-5" style={{ backgroundColor: settings.theme.backgroundColor + '80' }}>
+            <div
+              className="p-5"
+              style={{
+                backgroundColor: settings.theme.backgroundColor + '80',
+                fontFamily: settings.theme.fontFamily !== 'inherit'
+                  ? `"${settings.theme.fontFamily}", sans-serif`
+                  : undefined,
+              }}
+            >
               {loadingTestimonials ? (
                 <div className="flex items-center justify-center py-16 gap-2 text-muted-foreground">
                   <Loader2 className="size-5 animate-spin" />

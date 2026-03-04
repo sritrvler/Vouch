@@ -20,6 +20,8 @@ interface Project {
   linkedin_url: string | null;
   logo_url: string | null;
   accent_color: string;
+  font_family: string | null;
+  font_url: string | null;
   report_token: string | null;
 }
 
@@ -56,7 +58,7 @@ export function ProjectProvider({ children }: { children: ReactNode }) {
     const [projectsRes, subRes] = await Promise.all([
       supabase
         .from('projects')
-        .select('id, name, slug, website, google_review_url, linkedin_url, logo_url, accent_color, report_token')
+        .select('id, name, slug, website, google_review_url, linkedin_url, logo_url, accent_color, font_family, font_url, report_token')
         .eq('user_id', user.id)
         .order('created_at', { ascending: true }),
       supabase

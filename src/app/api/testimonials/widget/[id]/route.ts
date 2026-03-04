@@ -46,7 +46,7 @@ export async function GET(request: NextRequest, { params }: PageProps) {
     // ── Fetch project info for branding ──────────────────────────────────────
     const { data: project } = await supabase
       .from('projects')
-      .select('name, logo_url')
+      .select('name, logo_url, font_family, font_url')
       .eq('id', widget.project_id)
       .single();
 
@@ -112,7 +112,7 @@ export async function GET(request: NextRequest, { params }: PageProps) {
           theme: widget.theme,
           hideBranding: widget.hide_branding,
         },
-        project: project ? { name: project.name, logoUrl: project.logo_url } : null,
+        project: project ? { name: project.name, logoUrl: project.logo_url, fontFamily: project.font_family, fontUrl: project.font_url } : null,
         testimonials,
         isPro,
         totalApproved,
