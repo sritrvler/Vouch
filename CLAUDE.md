@@ -178,17 +178,32 @@ Before writing any code for a task, answer these questions explicitly. Do not sk
 3. **Persona defined?** Who is the specific human this change is for? Name them. What is their context, device, pain, motivation? (Not "users" or "customers.")
 4. **Security considered?** For any new route, API, or form: auth gates, input validation, RLS, rate limiting. Reference the test-and-ship security checklist.
 5. **Interface design applied?** For any UI change: persona intent stated, subtle layering principles followed, token architecture consistent.
+6. **Test scenarios enumerated?** Using the Test Scenario Checklist below, list every scenario that applies to this feature. Write them out explicitly. This becomes the verification list for post-implementation. Skip a category only if it genuinely does not apply, and say why.
 
 If any answer is "no" or "skipped," pause and address it before writing code.
 
-**After answering all 5 questions, say exactly:** `I FOLLOWED PRE-IMPLEMENTATION RULES` — this signals to the user that pre-implementation validation was completed. Do not say this phrase unless all 5 questions were explicitly answered.
+**After answering all 6 questions, say exactly:** `I FOLLOWED PRE-IMPLEMENTATION RULES` — this signals to the user that pre-implementation validation was completed. Do not say this phrase unless all 6 questions were explicitly answered.
+
+### Test Scenario Checklist (referenced by pre-implementation step 6)
+
+For every feature, enumerate scenarios from ALL of these categories:
+
+1. **Personas:** Every user type affected. Test each separately.
+2. **Empty state:** 0 of everything. Brand new user, no data at all.
+3. **Boundary:** Exactly at plan limits (1 project on free, 1 widget on free).
+4. **Plan transitions:** Free to Pro (upgrade), Pro to Free (downgrade/cancel), Pro to Agency, Agency to Free. What happens to existing data, UI state, and public-facing output?
+5. **Stale/orphaned data:** Data created under old assumptions (e.g., testimonials with null project_id, widgets referencing deleted projects, localStorage pointing to a deleted project).
+6. **Concurrent state:** Two browser tabs, action in one while other is stale.
+7. **Failure mid-action:** Network drops during save, auth expires mid-session, API returns error.
+8. **Permission boundaries:** User A accessing User B's data, free user accessing pro endpoints, unauthenticated access.
+9. **Reverse actions:** Create then delete, approve then reject, enable then disable. Does undo work cleanly?
 
 ### Post-Implementation Checklist (Mandatory Before Marking Done)
 
 After completing code changes, before reporting completion:
 
 1. **Build passes?** `npx next build` exits 0.
-2. **All personas tested?** List ALL personas affected by this change (not just the primary one). Test each separately. For each, name the persona, state their context, and trace their code path. A feature tested with one persona is not tested. Include edge cases: new user (0 data), free user hitting limits, downgraded user with legacy data.
+2. **All test scenarios verified?** Trace code paths for EVERY scenario listed in pre-implementation step 6. For each, name what you tested and the result. Any untested scenario is a potential shipped bug. If a scenario reveals a bug, fix it before proceeding.
 3. **End-to-end flow?** For features touching the customer journey: test the full flow (form > submit > approve > embed > verify).
 4. **Security spot check?** For new routes/APIs: test auth bypass, verify RLS, check error messages don't leak internals.
 5. **Lessons captured?** Any new patterns, mistakes, or discoveries written to `tasks/lessons.md`.
