@@ -1,5 +1,20 @@
 # Active Work Queue
 
+## Session Handoff (March 4, 2026, session 2)
+
+**What was done this session:**
+No product code was written. This session was entirely about process improvement. We audited CLAUDE.md compliance, identified 6 process failures from the previous session (skills never read, no persona testing, no security pass, no validation, no e2e flow test, no interface design skill for UI changes), and built a 4-gate enforcement system with automated reminders and human-verifiable confirmation phrases.
+
+**What's next:**
+Pick one of the three remaining broken promises below and build it. Recommended order: Multi-Project first (it's CRITICAL and Multi-Widget depends on it).
+
+**What to watch out for:**
+1. This is the first session where the new process gates are active. Follow them strictly. The user expects to see `I FOLLOWED SESSION START RULES` before any code is written.
+2. Multi-Project touches many files. Grep for ALL `.limit(1).single()` occurrences before starting. See implementation plan below.
+3. The user's workflow: they ask what's in the todo, choose what to work on, you execute. Do not auto-pick.
+
+---
+
 ## Context: Why We Are Doing This
 
 Our core promise: **"Social proof that looks like you built it."**
