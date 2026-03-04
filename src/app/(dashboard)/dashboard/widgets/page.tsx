@@ -423,9 +423,10 @@ export default function WidgetsPage() {
     ? `<iframe\n  src="${SITE_URL}/embed/${savedWidgetId}"\n  width="100%"\n  height="600"\n  frameborder="0"\n  loading="lazy"\n></iframe>`
     : '';
 
-  // IMPORTANT: attribute name 'data-widget-id' must match public/widget.js exactly. Do not rename either.
+  // Shadow DOM embed: renders testimonials directly in the page DOM (SEO-friendly).
+  // Attribute name 'data-vouch' must match public/embed.js exactly. Do not rename either.
   const scriptSnippet = savedWidgetId
-    ? `<div id="vouch-widget" data-widget-id="${savedWidgetId}"></div>\n<script src="${SITE_URL}/widget.js" async></script>`
+    ? `<div data-vouch="${savedWidgetId}"></div>\n<script src="${SITE_URL}/embed.js" defer></script>`
     : '';
 
   const reactSnippet = savedWidgetId
@@ -1007,7 +1008,7 @@ export function Testimonials() {
               {embedTab === 'dev' && (
                 <div className="space-y-4">
                   <p className="text-xs text-muted-foreground">
-                    Add to any HTML page. The widget loads asynchronously and won&apos;t slow down your site.
+                    Add to any HTML page. Testimonials render directly in your page DOM so Google indexes them as your content. Zero style conflicts (Shadow DOM isolation).
                   </p>
                   {savedWidgetId ? (
                     <>
@@ -1021,7 +1022,7 @@ export function Testimonials() {
                         </pre>
                       </div>
                       <p className="text-xs text-muted-foreground">
-                        The widget updates automatically whenever you approve new testimonials. No code changes needed.
+                        Updates automatically when you approve new testimonials. Also adds star rating schema markup to your page for Google rich snippets.
                       </p>
                     </>
                   ) : (
