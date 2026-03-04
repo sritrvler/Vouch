@@ -1,0 +1,57 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+
+  "permissions": {
+    "deny": [
+      "Bash(rm *)",
+      "Bash(rm -rf *)",
+      "Bash(rm -f *)",
+      "Bash(rmdir *)",
+      "Bash(unlink *)",
+      "Bash(shred *)",
+      "Bash(find * -delete*)",
+      "Bash(find * -exec rm*)",
+      "Bash(git push*)",
+      "Bash(git push --force*)",
+      "Bash(git push -f*)",
+      "Bash(git push --mirror*)",
+      "Bash(git push --delete*)",
+      "Bash(git clean -f*)",
+      "Bash(git clean -fd*)",
+      "Bash(git branch -D*)",
+      "Bash(git stash drop*)",
+      "Bash(git stash clear*)",
+      "Bash(git filter-branch*)"
+    ]
+  },
+
+  "hooks": {
+
+    "SessionStart": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo '=== SESSION START ==='; echo 'Rules: grep before cat | finish tasks before stopping | never delete (archive instead) | never push without instruction'; if git rev-parse --git-dir > /dev/null 2>&1; then echo '--- Recent checkpoints ---'; git log --oneline -5 2>/dev/null; fi; if [ -f 'tasks/lessons.md' ]; then echo '--- Lessons (read these) ---'; cat tasks/lessons.md; fi",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+
+    "Stop": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "if git rev-parse --git-dir > /dev/null 2>&1; then CHANGES=$(git status --porcelain 2>/dev/null); if [ -n \"$CHANGES\" ]; then git add -A && git commit -m \"auto-checkpoint: session end $(date '+%Y-%m-%d %H:%M')\" --quiet && echo 'Checkpoint saved.'; else echo 'Clean — nothing to checkpoint.'; fi; else echo 'No git repo. Changes not checkpointed.'; fi; echo 'Next task? Run /clear first.'",
+            "timeout": 30
+          }
+        ]
+      }
+    ]
+
+  }
+}
