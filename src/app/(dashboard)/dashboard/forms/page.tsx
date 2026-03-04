@@ -36,13 +36,6 @@ import {
   DialogDescription,
   DialogFooter,
 } from '@/components/ui/dialog';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
 import { cn } from '@/lib/utils';
 import { useProject } from '@/context/ProjectContext';
 
@@ -860,31 +853,21 @@ export default function FormsPage() {
           </DialogHeader>
 
           <div className="space-y-5">
-            {/* Project (only show selector when creating and user has multiple projects) */}
-            {editingForm ? null : projects.length === 0 ? (
+            {/* Project (read-only, always uses active project from sidebar) */}
+            {!editingForm && (
             <div className="space-y-1.5">
-              <Label htmlFor="form-project">Project</Label>
+              <Label>Project</Label>
+              {projects.length === 0 ? (
                 <p className="text-xs text-muted-foreground bg-muted rounded-lg p-3">
                   No projects found. Create a project in Settings first.
                 </p>
+              ) : (
+                <div className="rounded-xl bg-muted/50 border border-border px-3 py-2 text-sm text-muted-foreground">
+                  {projects.find((p) => p.id === selectedProjectId)?.name ?? 'Unknown project'}
+                </div>
+              )}
             </div>
-            ) : projects.length > 1 ? (
-            <div className="space-y-1.5">
-              <Label htmlFor="form-project">Project</Label>
-                <Select value={selectedProjectId} onValueChange={setSelectedProjectId}>
-                  <SelectTrigger id="form-project" className="rounded-xl w-full">
-                    <SelectValue placeholder="Select a project" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {projects.map((p) => (
-                      <SelectItem key={p.id} value={p.id}>
-                        {p.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-            </div>
-            ) : null}
+            )}
 
             {/* Title */}
             <div className="space-y-1.5">
