@@ -21,6 +21,8 @@ interface WidgetTheme {
   showAvatar?: boolean;
   showDate?: boolean;
   showSource?: boolean;
+  showText?: boolean;
+  showVideo?: boolean;
 }
 
 interface Widget {
@@ -303,29 +305,31 @@ function TestimonialCard({
         )}
       </div>
 
-      {/* Zone B: Quote */}
-      <blockquote style={{ margin: 0, padding: 0 }}>
-        <p data-vouch-quote="" style={{ fontSize: compact ? 13 : 14, lineHeight: 1.65, margin: 0, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 6, WebkitBoxOrient: 'vertical' as const }}>
-          &ldquo;
-          {hasGolden ? (
-            <>
-              {beforeGolden && <span style={{ color: '#9ca3af' }}>{beforeGolden}</span>}
-              <span style={{ color: textColor, fontWeight: 600 }}>{golden}</span>
-              {afterGolden && <span style={{ color: '#9ca3af' }}>{afterGolden}</span>}
-            </>
-          ) : (
-            <span style={{ color: '#374151' }}>{testimonial.content}</span>
-          )}
-          &rdquo;
-        </p>
-        <button
-          data-vouch-read-more=""
-          style={{ display: 'none', fontSize: 11, color: primaryColor, background: 'none', border: 'none', padding: '4px 0 0', cursor: 'pointer', fontWeight: 600 }}
-        >
-          Read more
-        </button>
-        <cite style={{ display: 'none' }}>{testimonial.author_name}</cite>
-      </blockquote>
+      {/* Zone B: Quote (hidden when showText is false and testimonial has video) */}
+      {(theme.showText !== false || !testimonial.video_url) && (
+        <blockquote style={{ margin: 0, padding: 0 }}>
+          <p data-vouch-quote="" style={{ fontSize: compact ? 13 : 14, lineHeight: 1.65, margin: 0, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 6, WebkitBoxOrient: 'vertical' as const }}>
+            &ldquo;
+            {hasGolden ? (
+              <>
+                {beforeGolden && <span style={{ color: '#9ca3af' }}>{beforeGolden}</span>}
+                <span style={{ color: textColor, fontWeight: 600 }}>{golden}</span>
+                {afterGolden && <span style={{ color: '#9ca3af' }}>{afterGolden}</span>}
+              </>
+            ) : (
+              <span style={{ color: '#374151' }}>{testimonial.content}</span>
+            )}
+            &rdquo;
+          </p>
+          <button
+            data-vouch-read-more=""
+            style={{ display: 'none', fontSize: 11, color: primaryColor, background: 'none', border: 'none', padding: '4px 0 0', cursor: 'pointer', fontWeight: 600 }}
+          >
+            Read more
+          </button>
+          <cite style={{ display: 'none' }}>{testimonial.author_name}</cite>
+        </blockquote>
+      )}
 
       {/* Zone C: Proof */}
       <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 8 }}>
@@ -356,7 +360,7 @@ function TestimonialCard({
       </div>
 
       {/* Inline video player with first-frame thumbnail */}
-      {testimonial.video_url && (
+      {testimonial.video_url && theme.showVideo !== false && (
         // eslint-disable-next-line jsx-a11y/media-has-caption
         <video
           src={testimonial.video_url}
@@ -506,22 +510,24 @@ function SingleLayout({
           <Stars rating={featured.rating} color={primaryColor} />
         </div>
       )}
-      <blockquote style={{ margin: '0 0 24px' }}>
-        <p style={{ fontSize: 18, lineHeight: 1.7, fontStyle: 'italic', margin: 0, color: '#374151' }}>
-          &ldquo;
-          {hasGolden ? (
-            <>
-              {beforeGolden && <span style={{ color: '#9ca3af' }}>{beforeGolden}</span>}
-              <span style={{ color: textColor, fontWeight: 600 }}>{golden}</span>
-              {afterGolden && <span style={{ color: '#9ca3af' }}>{afterGolden}</span>}
-            </>
-          ) : (
-            featured.content
-          )}
-          &rdquo;
-        </p>
-        <cite style={{ display: 'none' }}>{featured.author_name}</cite>
-      </blockquote>
+      {(theme.showText !== false || !featured.video_url) && (
+        <blockquote style={{ margin: '0 0 24px' }}>
+          <p style={{ fontSize: 18, lineHeight: 1.7, fontStyle: 'italic', margin: 0, color: '#374151' }}>
+            &ldquo;
+            {hasGolden ? (
+              <>
+                {beforeGolden && <span style={{ color: '#9ca3af' }}>{beforeGolden}</span>}
+                <span style={{ color: textColor, fontWeight: 600 }}>{golden}</span>
+                {afterGolden && <span style={{ color: '#9ca3af' }}>{afterGolden}</span>}
+              </>
+            ) : (
+              featured.content
+            )}
+            &rdquo;
+          </p>
+          <cite style={{ display: 'none' }}>{featured.author_name}</cite>
+        </blockquote>
+      )}
       <div
         style={{
           display: 'flex',

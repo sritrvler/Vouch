@@ -258,11 +258,13 @@
     html += verifyHtml;
     html += '</div>';
 
-    // Quote
-    html +=
-      '<blockquote style="margin:0;padding:0"><p style="font-size:' + (compact ? '13' : '14') +
-      'px;line-height:1.65;margin:0;overflow:hidden;display:-webkit-box;-webkit-line-clamp:6;-webkit-box-orient:vertical">' +
-      '&ldquo;' + quoteHtml + '&rdquo;</p></blockquote>';
+    // Quote (hidden when showText is false and testimonial has video)
+    if (theme.showText !== false || !t.video_url) {
+      html +=
+        '<blockquote style="margin:0;padding:0"><p style="font-size:' + (compact ? '13' : '14') +
+        'px;line-height:1.65;margin:0;overflow:hidden;display:-webkit-box;-webkit-line-clamp:6;-webkit-box-orient:vertical">' +
+        '&ldquo;' + quoteHtml + '&rdquo;</p></blockquote>';
+    }
 
     // Proof
     html += '<div style="display:flex;align-items:center;flex-wrap:wrap;gap:8px">';
@@ -281,8 +283,8 @@
     }
     html += '</div>';
 
-    // Video
-    if (t.video_url) {
+    // Video (hidden when showVideo is false)
+    if (t.video_url && theme.showVideo !== false) {
       html +=
         '<video src="' + esc(t.video_url) + '"' +
         (t.video_thumbnail_url ? ' poster="' + esc(t.video_thumbnail_url) + '"' : '') +
@@ -331,9 +333,11 @@
     if (theme.showRating !== false) {
       html += '<div style="display:flex;justify-content:center;margin-bottom:16px">' + stars(t.rating, pc) + '</div>';
     }
-    html +=
-      '<blockquote style="margin:0 0 24px"><p style="font-size:18px;line-height:1.7;font-style:italic;margin:0;color:#374151">&ldquo;' +
-      quoteHtml + '&rdquo;</p></blockquote>';
+    if (theme.showText !== false || !t.video_url) {
+      html +=
+        '<blockquote style="margin:0 0 24px"><p style="font-size:18px;line-height:1.7;font-style:italic;margin:0;color:#374151">&ldquo;' +
+        quoteHtml + '&rdquo;</p></blockquote>';
+    }
     html += '<div style="display:flex;align-items:center;justify-content:center;gap:12px">';
     if (theme.showAvatar !== false) {
       html += avatarHtml(t.author_name, t.author_avatar_url, t.author_company, pc);
