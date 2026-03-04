@@ -1,17 +1,21 @@
 # Active Work Queue
 
-## Session Handoff (March 4, 2026, session 2)
+## Session Handoff (March 4, 2026, session 3)
 
 **What was done this session:**
-No product code was written. This session was entirely about process improvement. We audited CLAUDE.md compliance, identified 6 process failures from the previous session (skills never read, no persona testing, no security pass, no validation, no e2e flow test, no interface design skill for UI changes), and built a 4-gate enforcement system with automated reminders and human-verifiable confirmation phrases.
+1. Multi-project support shipped (commit `490018d`). Created ProjectContext, refactored layout with sidebar project switcher (Popover), refactored settings to sync from context, refactored widgets to scope by project_id.
+2. Bug fix: widgets page infinite loading for 0-project users (commit `5b2c060`). Found during multi-persona testing.
+3. Process improvements: strengthened post-implementation gate to require all-persona testing. Added 9-category Test Scenario Checklist to pre/post implementation gates (commits `ad0aa20`, `7560559`).
+4. Added video cost optimization task (compress + thumbnail + fair use) to todo.
 
 **What's next:**
-Pick one of the three remaining broken promises below and build it. Recommended order: Multi-Project first (it's CRITICAL and Multi-Widget depends on it).
+Multi-widget management. This is the next broken promise (pricing says "Unlimited embed widgets" for Pro, but widget page only loads one).
 
 **What to watch out for:**
-1. This is the first session where the new process gates are active. Follow them strictly. The user expects to see `I FOLLOWED SESSION START RULES` before any code is written.
-2. Multi-Project touches many files. Grep for ALL `.limit(1).single()` occurrences before starting. See implementation plan below.
-3. The user's workflow: they ask what's in the todo, choose what to work on, you execute. Do not auto-pick.
+1. PRE-IMPLEMENTATION now has 6 steps (step 6 = enumerate test scenarios from 9 categories). POST-IMPLEMENTATION step 2 requires verifying every listed scenario.
+2. Widget query in widgets page already scopes by `project_id` (done in multi-project). Multi-widget needs to remove the `.limit(1).single()` on the widget query and add a widget list/selector.
+3. Downgrade behavior is intentional: all existing widgets keep working, free users just can't create new ones beyond limit.
+4. `useProject()` context is available in all dashboard pages. Use `selectedProjectId` and `plan` from it.
 
 ---
 
@@ -27,7 +31,7 @@ The pricing page explicitly states features that don't work yet. **Every day the
 
 ---
 
-## NEXT: Multi-Project Support (CRITICAL)
+## DONE: Multi-Project Support (CRITICAL) — shipped session 3, commit 490018d
 
 **The broken promise:**
 Pricing table says Free: 1 project, Pro: Unlimited, Agency: Unlimited.
