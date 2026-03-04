@@ -304,7 +304,7 @@ function DashboardLayoutInner({ children }: { children: React.ReactNode }) {
       </main>
 
       <UpgradeModal open={upgradeModalOpen} onOpenChange={setUpgradeModalOpen} />
-      <Toaster richColors position="top-right" />
+      <Toaster richColors position="bottom-right" />
 
       {/* Mobile Bottom Nav */}
       <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-border z-50 safe-area-inset-bottom">
