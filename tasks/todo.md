@@ -3,19 +3,23 @@
 ## Session Handoff (March 4, 2026, session 4)
 
 **What was done this session:**
-1. Multi-widget management shipped. Widget page now loads all widgets per project (removed `.limit(1).single()`). Added widget selector bar with pills, create/delete/switch handlers, empty state, and upgrade dialog for free plan. Existing builder UI (1272 lines) unchanged.
-2. Fixed `isPro` checks to use `userPlan !== 'free'` instead of `userPlan === 'pro'` (branding toggle, React tab gate) so agency plan works too.
-3. Added `project_id` index to schema.sql for widget queries.
-4. All 15 test scenarios traced: personas (3), empty state (2), boundary (2), plan transitions (2), data transitions (1), stale data (1), concurrent state (1), failure (2), permissions (1), reverse actions (2).
+1. Multi-widget management shipped (commit `7687fcf`). Widget page loads all widgets per project. Added widget selector bar, create/delete/switch handlers, empty state, upgrade dialog. Builder UI unchanged.
+2. Fixed `isPro` checks to use `userPlan !== 'free'` (branding toggle, React tab) so agency plan works.
+3. Added `project_id` index to schema.sql.
+4. All 15 test scenarios traced and passed.
+5. Process update (commit `33d7ccc`): baked Persona-Driven UI Selection into pre-implementation step 7. Every UI choice now requires per-persona intent statements before picking a pattern.
+6. Process update (commit `7dec1c5`): added Business Impact Assessment (6 questions: retention, conversion, time to value, churn risk, expansion, referral) as mandatory companion to persona intents. Business is not an afterthought.
+7. Widget selector refined: name width 120px to 180px, layout type label added below name.
 
 **What's next:**
-Custom fonts. This is a brand blending improvement (not a broken promise). See todo.md "AFTER: Custom Fonts" section.
+Custom fonts. Brand blending improvement. See "AFTER: Custom Fonts" section below. Key files: widget builder (font picker), embed.js (font loading into shadow root), schema (font_family field). Remember: pre-implementation now has 7 steps (step 7 = persona UI intents + business impact assessment).
 
 **What to watch out for:**
-1. The widget delete uses inline two-click confirmation (not a Dialog). First click shows red check icon, second click confirms. Clicking elsewhere dismisses. This is intentional for the small selector bar context.
-2. `totalWidgetCount` is tracked across ALL projects (not per-project). This is correct for the free plan gate (1 widget total).
-3. `handleSave` now only does updates (not insert). Creation is handled by `handleCreateWidget`. This is a deliberate split.
-4. Existing single-widget users will see their widget loaded normally (auto-selected as first widget in the list).
+1. PRE-IMPLEMENTATION now has 7 steps (was 6). Step 7 = Persona UI Intents + Business Impact Assessment. Both required for any UI decision.
+2. Widget delete uses inline two-click confirmation (not Dialog). Intentional for compact selector bar.
+3. `totalWidgetCount` is tracked across ALL projects for free plan gate.
+4. `handleSave` only updates. Creation is `handleCreateWidget`. Deliberate split.
+5. embed.js is vanilla JS (no React, no TypeScript). Changes require manual DOM string building and careful testing.
 
 ---
 
