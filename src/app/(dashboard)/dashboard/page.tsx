@@ -21,6 +21,7 @@ import { createClient } from '@/lib/supabase/client';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { useProject } from '@/context/ProjectContext';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -278,11 +279,19 @@ function GettingStarted({ stats }: { stats: Stats }) {
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 export default function DashboardPage() {
+  const { projects, selectedProjectId, loading: projectsLoading } = useProject();
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState<Stats>({ total: 0, pending: 0, approved: 0, widgetViews: 0, hasProject: false, hasForm: false, hasWidget: false });
   const [recentTestimonials, setRecentTestimonials] = useState<RecentTestimonial[]>([]);
+  const [filterMode, setFilterMode] = useState<'project' | 'all'>('project');
+
+  // Default to "project" filter. Show "all" option only when multiple projects exist.
+  const showAllOption = projects.length > 1;
+  const effectiveFilter = showAllOption ? filterMode : 'project';
 
   useEffect(() => {
+    if (projectsLoading) return;
+
     async function fetchData() {
       const supabase = createClient();
 
@@ -296,34 +305,37 @@ export default function DashboardPage() {
       }
 
       try {
-        // Run queries in parallel
+        // Scope key: filter by project_id when a specific project is selected, otherwise by user_id
+        const scopeKey = effectiveFilter === 'project' && selectedProjectId ? 'project_id' : 'user_id';
+        const scopeVal = effectiveFilter === 'project' && selectedProjectId ? selectedProjectId : user.id;
+
         const [totalRes, pendingRes, approvedRes, recentRes, widgetsRes, projectsRes, formsRes] = await Promise.all([
           supabase
             .from('testimonials')
             .select('id', { count: 'exact', head: true })
-            .eq('user_id', user.id),
+            .eq(scopeKey, scopeVal),
           supabase
             .from('testimonials')
             .select('id', { count: 'exact', head: true })
-            .eq('user_id', user.id)
+            .eq(scopeKey, scopeVal)
             .eq('status', 'pending'),
           supabase
             .from('testimonials')
             .select('id', { count: 'exact', head: true })
-            .eq('user_id', user.id)
+            .eq(scopeKey, scopeVal)
             .eq('status', 'approved'),
           supabase
             .from('testimonials')
             .select('id, author_name, rating, content, status, created_at')
-            .eq('user_id', user.id)
+            .eq(scopeKey, scopeVal)
             .order('created_at', { ascending: false })
             .limit(5),
-          supabase.from('widgets').select('id').eq('user_id', user.id),
+          supabase.from('widgets').select('id').eq(scopeKey, scopeVal),
           supabase.from('projects').select('id', { count: 'exact', head: true }).eq('user_id', user.id),
-          supabase.from('collection_forms').select('id', { count: 'exact', head: true }).eq('user_id', user.id),
+          supabase.from('collection_forms').select('id', { count: 'exact', head: true }).eq(scopeKey, scopeVal),
         ]);
 
-        // Widget views: get all widget ids for this user, then count views
+        // Widget views: get widget ids from scoped query, then count views
         let widgetViews = 0;
         if (widgetsRes.data && widgetsRes.data.length > 0) {
           const widgetIds = widgetsRes.data.map((w) => w.id);
@@ -352,8 +364,9 @@ export default function DashboardPage() {
       }
     }
 
+    setLoading(true);
     fetchData();
-  }, []);
+  }, [selectedProjectId, effectiveFilter, projectsLoading]);
 
   if (loading) return <DashboardSkeleton />;
 
@@ -361,16 +374,47 @@ export default function DashboardPage() {
 
   return (
     <div className="p-6 md:p-8 max-w-6xl mx-auto space-y-8">
-      {/* Page title */}
+      {/* Page title + filter */}
       <motion.div
         initial={{ opacity: 0, y: 8 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.3, ease: 'easeOut' }}
+        className="flex items-start justify-between gap-4"
       >
-        <h1 className="text-2xl font-bold text-foreground">Overview</h1>
-        <p className="text-sm text-muted-foreground mt-0.5">
-          {hasTestimonials ? "Here\u0027s what\u0027s happening with your testimonials." : "Let\u0027s get your first testimonial."}
-        </p>
+        <div>
+          <h1 className="text-2xl font-bold text-foreground">Overview</h1>
+          <p className="text-sm text-muted-foreground mt-0.5">
+            {hasTestimonials ? "Here\u0027s what\u0027s happening with your testimonials." : "Let\u0027s get your first testimonial."}
+          </p>
+        </div>
+        {showAllOption && (
+          <div className="flex items-center rounded-lg border border-border bg-muted/40 p-0.5 shrink-0">
+            <button
+              type="button"
+              onClick={() => setFilterMode('project')}
+              className={cn(
+                'px-3 py-1.5 rounded-md text-xs font-medium transition-colors',
+                filterMode === 'project'
+                  ? 'bg-white text-foreground shadow-sm'
+                  : 'text-muted-foreground hover:text-foreground'
+              )}
+            >
+              {projects.find((p) => p.id === selectedProjectId)?.name ?? 'Project'}
+            </button>
+            <button
+              type="button"
+              onClick={() => setFilterMode('all')}
+              className={cn(
+                'px-3 py-1.5 rounded-md text-xs font-medium transition-colors',
+                filterMode === 'all'
+                  ? 'bg-white text-foreground shadow-sm'
+                  : 'text-muted-foreground hover:text-foreground'
+              )}
+            >
+              All projects
+            </button>
+          </div>
+        )}
       </motion.div>
 
       {/* Pending banner, only shown when there are testimonials to review */}

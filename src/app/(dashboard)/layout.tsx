@@ -17,6 +17,7 @@ import {
   Zap,
   Check,
   Plus,
+  Search,
 } from 'lucide-react';
 import { Toaster } from '@/components/ui/sonner';
 import { createClient } from '@/lib/supabase/client';
@@ -116,6 +117,14 @@ function DashboardLayoutInner({ children }: { children: React.ReactNode }) {
   const [isSigningOut, setIsSigningOut] = useState(false);
   const [upgradeModalOpen, setUpgradeModalOpen] = useState(false);
   const [projectPopoverOpen, setProjectPopoverOpen] = useState(false);
+  const [projectSearch, setProjectSearch] = useState('');
+
+  // Sort projects alphabetically, show search when > 5
+  const sortedProjects = [...projects].sort((a, b) => a.name.localeCompare(b.name));
+  const showProjectSearch = sortedProjects.length > 5;
+  const filteredProjects = projectSearch
+    ? sortedProjects.filter((p) => p.name.toLowerCase().includes(projectSearch.toLowerCase()))
+    : sortedProjects;
 
   useEffect(() => {
     const supabase = createClient();
@@ -176,7 +185,7 @@ function DashboardLayoutInner({ children }: { children: React.ReactNode }) {
           </Link>
 
           {/* Project selector */}
-          <Popover open={projectPopoverOpen} onOpenChange={setProjectPopoverOpen}>
+          <Popover open={projectPopoverOpen} onOpenChange={(open) => { setProjectPopoverOpen(open); if (!open) setProjectSearch(''); }}>
             <PopoverTrigger asChild>
               <button
                 className="w-full flex items-center justify-between gap-2 px-3 py-2 rounded-xl bg-muted/60 hover:bg-muted text-sm font-medium text-foreground transition-colors"
@@ -188,14 +197,28 @@ function DashboardLayoutInner({ children }: { children: React.ReactNode }) {
               </button>
             </PopoverTrigger>
             <PopoverContent align="start" className="w-60 p-1.5">
+              {showProjectSearch && (
+                <div className="relative mb-1.5">
+                  <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 size-3.5 text-muted-foreground pointer-events-none" />
+                  <input
+                    type="text"
+                    placeholder="Search projects..."
+                    value={projectSearch}
+                    onChange={(e) => setProjectSearch(e.target.value)}
+                    className="w-full pl-8 pr-3 py-2 rounded-lg text-sm bg-muted/40 border border-border placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary"
+                    autoFocus
+                  />
+                </div>
+              )}
               <div className="max-h-60 overflow-y-auto space-y-0.5">
-                {projects.map((p) => (
+                {filteredProjects.map((p) => (
                   <button
                     key={p.id}
                     type="button"
                     onClick={() => {
                       switchProject(p.id);
                       setProjectPopoverOpen(false);
+                      setProjectSearch('');
                     }}
                     className={cn(
                       'w-full flex items-center gap-2 px-2.5 py-2 rounded-lg text-sm transition-colors text-left',
@@ -208,6 +231,9 @@ function DashboardLayoutInner({ children }: { children: React.ReactNode }) {
                     {p.id === selectedProjectId && <Check className="size-3.5 shrink-0 text-primary" />}
                   </button>
                 ))}
+                {filteredProjects.length === 0 && projectSearch && (
+                  <p className="px-2.5 py-2 text-xs text-muted-foreground">No projects match "{projectSearch}"</p>
+                )}
                 {projects.length === 0 && (
                   <p className="px-2.5 py-2 text-xs text-muted-foreground">No projects yet</p>
                 )}

@@ -64,7 +64,7 @@ export function ProjectProvider({ children }: { children: ReactNode }) {
         .from('projects')
         .select('id, name, slug, website, google_review_url, linkedin_url, logo_url, accent_color, form_bg_color, button_color, text_color, input_color, font_family, font_url, report_token')
         .eq('user_id', user.id)
-        .order('created_at', { ascending: true }),
+        .order('name', { ascending: true }),
       supabase
         .from('subscriptions')
         .select('plan')
