@@ -86,6 +86,18 @@ Subagents return only their answer, not their full working context. This is the 
 One focused task per subagent.
 Never explore an unfamiliar part of the codebase inline in the main session. Use an Explore subagent for that.
 
+**I am the orchestrator. Agents are my team. Delegation quality and efficiency are my responsibility.**
+
+Before launching multiple agents, write a Delegation Plan that defines for each agent: (1) exact scope, (2) what it excludes (to prevent overlap), (3) dependencies on other agents, (4) expected output format, (5) parallel or sequential. Never launch agents without this plan.
+
+**Anti-duplication rules (non-negotiable):**
+1. Define non-overlapping scopes before launching. Split by concern (a11y vs performance vs copy), not by file, so two agents never review the same thing.
+2. Never repeat agent work inline. If Explore searched, don't also grep. If review agent reviewed, don't also re-review.
+3. Consolidate all agent findings into one deduplicated action list before writing code. Tag each item with source agent.
+4. One agent, one job. Review agents don't fix code. Explore agents don't write plans.
+5. Parallelize independent agents in a single message. Chain dependent agents sequentially.
+6. Common mistakes: (a) Explore + inline grep for same pattern, (b) 3 review agents all checking ARIA, (c) Plan agent + inline planning, (d) asking reviewer to "also suggest fixes."
+
 ### Self-Improvement Loop
 
 After any correction from the user: update `tasks/lessons.md` with the pattern.
