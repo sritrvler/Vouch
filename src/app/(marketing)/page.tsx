@@ -2,10 +2,11 @@ import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import { Star, ArrowRight, Check, Zap, MessageSquare, Code2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-
 // Dynamic imports for client components with Framer Motion (code-split for smaller main bundle)
 const HeroVisual = dynamic(() => import('./_components/HeroVisual'));
 const CollectVisual = dynamic(() => import('./_components/CollectVisual'));
+const FAQAccordion = dynamic(() => import('./_components/FAQAccordion').then(m => ({ default: m.FAQAccordion })));
+const MotionCTA = dynamic(() => import('./_components/MotionCTA').then(m => ({ default: m.MotionCTA })));
 
 // Regular imports for other client components (below fold, no urgency)
 import EmbedVisual from './_components/EmbedVisual';
@@ -129,27 +130,31 @@ function HeroSection() {
             </h1>
 
             <p className="text-lg sm:text-xl text-gray-500 leading-relaxed mb-9 max-w-lg">
-              Branded video and text testimonials that load fast and keep your SEO intact with zero Lighthouse impact.
+              Send a link, your client records in 2 minutes, paste one line of code. Your testimonial section is live and looks like you built it.
             </p>
 
             <div className="flex flex-col sm:flex-row gap-3 mb-10">
-              <Button
-                asChild
-                size="lg"
-                className="bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl px-7 py-6 text-base font-semibold shadow-lg shadow-indigo-200 hover:shadow-indigo-300 transition-all"
-              >
-                <Link href="/signup">
-                  Start for free <ArrowRight className="ml-1.5 w-4 h-4" />
-                </Link>
-              </Button>
-              <Button
-                asChild
-                variant="ghost"
-                size="lg"
-                className="rounded-xl px-7 py-6 text-base font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 border border-gray-200"
-              >
-                <a href="#how-it-works">See how it works</a>
-              </Button>
+              <MotionCTA>
+                <Button
+                  asChild
+                  size="lg"
+                  className="bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl px-7 py-6 text-base font-semibold shadow-lg shadow-indigo-200 hover:shadow-indigo-300 transition-all"
+                >
+                  <Link href="/signup">
+                    Collect my first testimonial <ArrowRight className="ml-1.5 w-4 h-4" />
+                  </Link>
+                </Button>
+              </MotionCTA>
+              <MotionCTA>
+                <Button
+                  asChild
+                  variant="ghost"
+                  size="lg"
+                  className="rounded-xl px-7 py-6 text-base font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 border border-gray-200"
+                >
+                  <a href="#how-it-works">Watch how it works</a>
+                </Button>
+              </MotionCTA>
             </div>
 
           </div>
@@ -443,21 +448,7 @@ function FAQSection() {
           </p>
         </div>
 
-        <div className="space-y-2">
-          {FAQS.map((faq, i) => (
-            <details key={i} className="bg-white border border-gray-100 rounded-xl overflow-hidden group">
-              <summary className="flex items-center justify-between px-5 py-4 cursor-pointer text-sm font-medium text-gray-900 select-none list-none [&::-webkit-details-marker]:hidden">
-                {faq.q}
-                <svg className="w-4 h-4 text-gray-400 shrink-0 transition-transform group-open:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
-                </svg>
-              </summary>
-              <div className="px-5 pb-4 text-sm text-gray-500 leading-relaxed">
-                {faq.a}
-              </div>
-            </details>
-          ))}
-        </div>
+        <FAQAccordion items={FAQS} />
       </div>
     </section>
   );
@@ -496,32 +487,36 @@ function BottomCTA() {
             </div>
 
             <h2 className="text-3xl sm:text-4xl font-bold text-white tracking-tight mb-4">
-              Ship a testimonial section today.
-              <br className="hidden sm:block" /> Branded, fast, and live in 15 minutes.
+              Your next client is reading your site right now.
+              <br className="hidden sm:block" /> What will they see?
             </h2>
             <p className="text-indigo-100 text-lg mb-9 max-w-lg mx-auto">
-              Free to start. Set up in 15 minutes. Upgrade when your work grows
-              and it covers everything you build.
+              Every day without real testimonials is a day you are leaving trust on the table.
+              Set up takes 15 minutes. No credit card, no commitment.
             </p>
 
             <div className="flex flex-col sm:flex-row gap-3 justify-center">
-              <Button
-                asChild
-                size="lg"
-                className="bg-white text-indigo-600 hover:bg-indigo-50 rounded-xl px-8 py-6 text-base font-semibold shadow-lg"
-              >
-                <Link href="/signup">
-                  Start for free <ArrowRight className="ml-1.5 w-4 h-4" />
-                </Link>
-              </Button>
-              <Button
-                asChild
-                variant="ghost"
-                size="lg"
-                className="text-white border border-white/25 hover:bg-white/10 rounded-xl px-8 py-6 text-base"
-              >
-                <Link href="/pricing">See pricing</Link>
-              </Button>
+              <MotionCTA>
+                <Button
+                  asChild
+                  size="lg"
+                  className="bg-white text-indigo-600 hover:bg-indigo-50 rounded-xl px-8 py-6 text-base font-semibold shadow-lg"
+                >
+                  <Link href="/signup">
+                    Collect my first testimonial <ArrowRight className="ml-1.5 w-4 h-4" />
+                  </Link>
+                </Button>
+              </MotionCTA>
+              <MotionCTA>
+                <Button
+                  asChild
+                  variant="ghost"
+                  size="lg"
+                  className="text-white border border-white/25 hover:bg-white/10 rounded-xl px-8 py-6 text-base"
+                >
+                  <Link href="/pricing">See pricing</Link>
+                </Button>
+              </MotionCTA>
             </div>
 
             <p className="text-indigo-200 text-xs mt-6">

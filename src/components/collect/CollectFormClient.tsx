@@ -416,6 +416,7 @@ export default function CollectFormClient({
   const [videoUrl, setVideoUrl] = useState<string | null>(null);
   const [videoThumbnailUrl, setVideoThumbnailUrl] = useState<string | null>(null);
   const [cameraError, setCameraError] = useState(false);
+  const [cameraErrorMessage, setCameraErrorMessage] = useState('');
   const [isCameraInitializing, setIsCameraInitializing] = useState(false);
   const [isCameraActive, setIsCameraActive] = useState(false);
   const [isCameraVisible, setIsCameraVisible] = useState(false);
@@ -554,7 +555,19 @@ export default function CollectFormClient({
         setIsCameraActive(true);
         // isCameraInitializing stays true until video element fires onPlaying
       })
-      .catch(() => {
+      .catch((err: Error) => {
+        // Provide specific, actionable error messages based on the error type
+        let message = 'Camera is not available right now.';
+        if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
+          message = 'Camera permission was denied. Check your browser settings to allow camera access for this site.';
+        } else if (err.name === 'NotFoundError' || err.name === 'DevicesNotFoundError') {
+          message = 'No camera found on this device.';
+        } else if (err.name === 'NotReadableError' || err.name === 'TrackStartError') {
+          message = 'Camera is in use by another app. Close other apps using your camera and try again.';
+        } else if (err.name === 'OverconstrainedError') {
+          message = 'Camera does not support the required settings.';
+        }
+        setCameraErrorMessage(message);
         setCameraError(true);
         cameraInitRef.current = false;
         setIsCameraInitializing(false);
@@ -677,9 +690,9 @@ export default function CollectFormClient({
       if (!res.ok) {
         const errData = data as { error?: string };
         if (res.status === 429) {
-          toast.error("This business has reached its testimonial limit. Please contact them directly.");
+          toast.error("This business has reached its testimonial limit. Please contact them directly.", { duration: 8000 });
         } else {
-          toast.error(errData?.error || 'Something went wrong. Please try again.');
+          toast.error(errData?.error || 'Something went wrong. Your response has been saved. Please try submitting again.', { duration: 8000 });
         }
         setIsSubmitting(false);
         return;
@@ -687,7 +700,7 @@ export default function CollectFormClient({
 
       goTo(5, 'forward');
     } catch {
-      toast.error('Network error. Please check your connection and try again.');
+      toast.error('Network error. Your response is still here. Please check your connection and try again.', { duration: 8000 });
     } finally {
       setIsSubmitting(false);
     }
@@ -1060,7 +1073,7 @@ export default function CollectFormClient({
                 ) : cameraError ? (
                   <div className="text-center py-6 space-y-4">
                     <p className="text-sm text-muted-foreground">
-                      Camera access denied. You can skip and continue without a video.
+                      {cameraErrorMessage || 'Camera is not available right now.'} You can skip and continue without a video.
                     </p>
                     <Button
                       onClick={() => { leaveVideoStep(); goTo(4, 'forward'); }}

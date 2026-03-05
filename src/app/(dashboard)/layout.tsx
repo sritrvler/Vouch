@@ -83,12 +83,19 @@ function NavLink({
     <Link
       href={item.href}
       className={cn(
-        'flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors w-full',
+        'relative flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors w-full',
         isActive
           ? 'bg-accent text-primary'
           : 'text-muted-foreground hover:text-foreground hover:bg-muted/60'
       )}
     >
+      {isActive && (
+        <motion.div
+          layoutId="sidebar-active"
+          className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-5 rounded-r-full bg-primary"
+          transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+        />
+      )}
       <Icon className="size-4 shrink-0" />
       <span className="flex-1">{item.label}</span>
       {item.label === 'Inbox' && pendingCount && pendingCount > 0 ? (

@@ -86,15 +86,31 @@ function StatusBadge({ status }: { status: RecentTestimonial['status'] }) {
 
 // ─── Skeleton ─────────────────────────────────────────────────────────────────
 
+const SHIMMER_STYLE = `@keyframes shimmer { 0% { transform: translateX(-100%); } 100% { transform: translateX(100%); } }`;
+
 function Skeleton({ className }: { className?: string }) {
   return (
-    <div className={cn('animate-pulse rounded-xl bg-muted', className)} />
+    <div
+      className={cn(
+        'rounded-xl bg-muted relative overflow-hidden',
+        className
+      )}
+    >
+      <div
+        className="absolute inset-0"
+        style={{
+          background: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.4) 50%, transparent 100%)',
+          animation: 'shimmer 1.5s infinite',
+        }}
+      />
+    </div>
   );
 }
 
 function DashboardSkeleton() {
   return (
     <div className="p-6 md:p-8 max-w-6xl mx-auto space-y-8">
+      <style>{SHIMMER_STYLE}</style>
       <Skeleton className="h-8 w-36" />
       <Skeleton className="h-16 rounded-2xl" />
       <div className="grid sm:grid-cols-2 gap-4">
@@ -168,8 +184,9 @@ function MetricCard({
     <motion.div
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
+      whileHover={{ y: -2, boxShadow: '0 4px 12px rgba(0,0,0,0.08)' }}
       transition={{ duration: 0.3, delay, ease: 'easeOut' }}
-      className="bg-white rounded-2xl border border-border/60 shadow-sm px-6 py-5 flex items-center gap-4 hover:shadow-md transition-shadow"
+      className="bg-white rounded-2xl border border-border/60 shadow-sm px-6 py-5 flex items-center gap-4 cursor-default"
     >
       <div className={cn('size-11 rounded-2xl flex items-center justify-center shrink-0', iconClass)}>
         <Icon className="size-5" />

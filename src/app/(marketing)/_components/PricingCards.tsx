@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { Check, Minus } from "lucide-react";
+import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { STUDIO_FEATURES as STUDIO_FEATURES_SOURCE } from "@/lib/lemonsqueezy";
@@ -44,13 +45,21 @@ export function PricingCards() {
     <div className="max-w-5xl mx-auto">
       {/* Billing toggle */}
       <div className="flex justify-center mb-8">
-        <div className="flex items-center gap-1 bg-gray-100 rounded-full p-1">
+        <div className="relative flex items-center gap-1 bg-gray-100 rounded-full p-1">
+          <motion.div
+            className="absolute top-1 bottom-1 bg-white rounded-full shadow-sm"
+            animate={{
+              left: billing === 'monthly' ? 4 : 'calc(40% - 0px)',
+              width: billing === 'monthly' ? 'calc(40% - 4px)' : 'calc(60% - 4px)',
+            }}
+            transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+          />
           <button
             onClick={() => setBilling('monthly')}
             className={cn(
-              'px-4 py-1.5 rounded-full text-sm font-medium transition-all',
+              'relative z-10 px-4 py-1.5 rounded-full text-sm font-medium transition-colors',
               billing === 'monthly'
-                ? 'bg-white shadow-sm text-gray-900'
+                ? 'text-gray-900'
                 : 'text-gray-700 hover:text-gray-900'
             )}
           >
@@ -59,9 +68,9 @@ export function PricingCards() {
           <button
             onClick={() => setBilling('yearly')}
             className={cn(
-              'px-4 py-1.5 rounded-full text-sm font-medium transition-all flex items-center gap-2',
+              'relative z-10 px-4 py-1.5 rounded-full text-sm font-medium transition-colors flex items-center gap-2',
               billing === 'yearly'
-                ? 'bg-white shadow-sm text-gray-900'
+                ? 'text-gray-900'
                 : 'text-gray-700 hover:text-gray-900'
             )}
           >

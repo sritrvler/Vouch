@@ -1411,7 +1411,7 @@ export function Testimonials() {
                     </>
                   ) : (
                     <p className="text-xs text-amber-600 bg-amber-50 border border-amber-200 rounded-xl px-3 py-2">
-                      Save your widget first to get the embed code.
+                      Click "Save Widget" above to generate your embed code.
                     </p>
                   )}
                 </div>
@@ -1440,7 +1440,7 @@ export function Testimonials() {
                     </>
                   ) : (
                     <p className="text-xs text-amber-600 bg-amber-50 border border-amber-200 rounded-xl px-3 py-2">
-                      Save your widget first to get the embed code.
+                      Click "Save Widget" above to generate your embed code.
                     </p>
                   )}
                 </div>
