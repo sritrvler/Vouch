@@ -10,31 +10,109 @@
 
 # Active Work Queue
 
-## Session Handoff (March 5, 2026, session 12: Studio Rename + Test Coverage)
+## Session Handoff (March 5, 2026, session 13: UX Polish Batch)
 
 **What was done this session:**
-1. Renamed Agency to Studio across all 19 files (full internal rename, not just UI). DB CHECK constraint, env vars, plan types, feature lists, admin panel, webhook, all updated.
-2. Added 39 new tests across 4 test files (plans, disposable emails, fonts, webhook logic). Total: 66 tests, 5 suites, all passing.
+1. Fixed all 16 remaining UX/polish issues from the audit (see audit-report.md sections 1, 4, 5).
+2. Senior dev review caught 6 issues (shimmer style duplication, AnimatePresence missing, bundle split, billing pill positioning, error typing, FAQ keys). All fixed.
+3. Build passes, 66 tests pass, committed at `5ac59e6`.
 
-**DB migration required (no users yet, so safe to re-run schema):**
+**Files changed (9):**
+`src/app/(marketing)/page.tsx`, `src/app/(marketing)/_components/FAQAccordion.tsx` (new), `src/app/(marketing)/_components/MotionCTA.tsx` (new), `src/app/(marketing)/_components/PricingCards.tsx`, `src/app/(dashboard)/layout.tsx`, `src/app/(dashboard)/dashboard/page.tsx`, `src/app/(dashboard)/dashboard/settings/page.tsx`, `src/app/(dashboard)/dashboard/widgets/page.tsx`, `src/components/collect/CollectFormClient.tsx`
+
+**What's next:**
+Pick from the prioritized backlog below. Recommended: start with P1 items (conversion/growth, then security hardening).
+
+**What to watch out for:**
+1. FAQAccordion and MotionCTA use `dynamic()` imports. If adding more client components to the landing page, follow the same pattern.
+2. Upgrade celebration banner auto-dismisses after 8 seconds. If users report it disappears too fast, increase the timeout.
+3. 1 commit ahead of origin/main. Push when ready.
+
+---
+
+## Prioritized Backlog (from audit-report.md)
+
+Items are grouped by priority. P1 = do before or soon after launch. P2 = first month. P3 = when relevant. P4 = nice to have.
+
+### P1: Conversion and Growth (directly affects signups, activation, retention)
+
+- [ ] **Email onboarding sequence.** 3-email Resend sequence: welcome, day 3 nudge, day 7 tip. Zero re-engagement after signup today. (1 day)
+- [ ] **Email notification when testimonials arrive.** Users must check dashboard manually. Retention risk. New testimonial = Resend email to project owner. (half day)
+- [ ] **Post-signup email confirmation screen is cold.** "Back to sign in" CTA is a dead end. Add warmth and next-step guidance. (1 hour)
+- [ ] **No "send yourself a test testimonial" flow.** Let new users preview the experience from the submitter side. (2 hours)
+- [ ] **Social proof on landing page.** Use own product to display testimonials about Vouch. Needs real customers first. (2 hours once content exists)
+- [ ] **Getting-started checklist copy is procedural, not motivational.** Rewrite to emphasize outcomes. (1 hour)
+
+### P1: Security Hardening (attack surface gaps)
+
+- [ ] **8 endpoints have no rate limiting.** checkout, portal, upload-logo, all 4 admin routes. (2 hours)
+- [ ] **Video upload MIME validation is client-trust only.** Server should verify file magic bytes. (1 hour)
+- [ ] **Admin impersonate returns magic link in response body.** Leaks in DevTools/logs. Send via email instead. (1 hour)
+- [ ] **Font URL injection on public page.** `font_url` rendered as link href without validation on public page and collection form. `sanitizeFontUrl` exists but verify all render paths use it. (30 min)
+- [ ] **Password strength mismatch.** Signup requires 8 chars, login requires 6. Align to 8. (15 min)
+
+### P2: Stability and Monitoring (catch problems before users report them)
+
+- [ ] **Error Boundaries for dashboard.** Add `error.tsx` to every dashboard route segment. Rendering error currently white-screens the entire page. (2 hours)
+- [ ] **Sentry or equivalent monitoring.** First crash signal currently comes from user complaints. (2 hours)
+- [ ] **Structured logging.** All errors go to console.error(). Not queryable, not alertable. (2 hours)
+- [ ] **E2E tests with Playwright.** Automated critical path: signup, create form, submit testimonial, approve, embed. (1 day)
+- [ ] **Webhook idempotency.** Store processed event IDs to prevent duplicate processing on retries. (1 hour)
+
+### P2: Performance (noticeable at scale or for power users)
+
+- [ ] **Centralize auth + subscription from context.** Remove 12 redundant getUser() calls, 4 redundant subscription fetches across dashboard pages. (3 hours)
+- [ ] **select('*') over-fetching.** Inbox, widgets, settings, widget API all fetch all columns. Use explicit column lists. (2 hours)
+- [ ] **Forms N+1.** Forms page fetches ALL testimonial rows just to count per form. Use count queries. (1 hour)
+- [ ] **Collection form font FOUT.** Custom Google Fonts load via client-side useEffect, causing flash of unstyled text. Move to server component or preload. (1 hour)
+- [ ] **Server-side video compression.** Cloudinary, FFmpeg, or Mux integration. Deferred until Supabase storage costs become material. (1 week)
+
+### P2: Code Health (slows future development)
+
+- [ ] **Extract shared types to src/types/.** Single Project, Widget, Testimonial interface instead of 4+ duplicates. (2 hours)
+- [ ] **Settings page refactor.** 33 useState calls should be a single useReducer. (2 hours)
+- [ ] **5 monolith files.** widgets/page.tsx (1,558 lines), CollectFormClient (1,454), inbox (1,360), settings (1,246), forms (1,031). Extract subcomponents. (1 day)
+- [ ] **23 eslint-disable comments.** Audit each one; fix underlying issues or document why the disable is necessary. (2 hours)
+
+### P3: Competitive Features (gap-closers, build when demand is proven)
+
+- [ ] **Google Reviews import.** Biggest competitive gap. Cannot import existing reviews from Google. (1 week)
+- [ ] **AI golden sentence auto-extraction.** LLM call on submit to auto-populate golden_sentence field. ~$0.001/testimonial. (2 days)
+- [ ] **Twitter/X + LinkedIn import.** source_url field and social icons already exist. (3 days)
+- [ ] **Custom domains for collection forms.** DNS verification + SSL provisioning. Wait for 20+ Studio subscribers asking for it. (1 week)
+- [ ] **Team seats / client logins.** Report link covers 80% of "share with client" need. Full ACL is 2-4 weeks. Defer until demand.
+- [ ] **Zapier/Slack/CRM integrations.** No integrations today. Build when customers ask. (varies)
+
+### P3: Infrastructure (matters at 1,000+ users)
+
+- [ ] **widget_views/form_views tables: no TTL or partitioning.** Unbounded growth. Add data retention policy. (half day)
+- [ ] **In-memory rate limiter.** Per-instance, bypassed by distributed attacks. Move to Redis or Upstash. (half day)
+- [ ] **No graceful degradation for external service failures.** Supabase down = infinite spinner. (1 day)
+- [ ] **Dashboard pages all client-rendered.** No server-side rendering, no streaming. Acceptable for now but slower perceived load. (1 day)
+- [ ] **Radix UI monorepo package may bypass tree-shaking.** Verify optimizePackageImports covers it. (1 hour)
+
+### P4: Polish (nice to have, not urgent)
+
+- [ ] **Skeleton loaders on other dashboard pages** (inbox, forms, widgets use their own loaders; standardize shimmer pattern). (1 hour)
+- [ ] **FAQ accordion animation** on `/pricing` page too (currently only landing page). (15 min)
+
+---
+
+## Previous: Session Handoff (March 5, 2026, session 12: Studio Rename + Test Coverage)
+
+**What was done:**
+1. Renamed Agency to Studio across all 19 files. DB CHECK constraint, env vars, plan types, feature lists, admin panel, webhook, all updated.
+2. Added 39 new tests across 4 test files. Total: 66 tests, 5 suites, all passing.
+
+**DB migration required (DONE by user):**
 ```sql
 ALTER TABLE public.subscriptions DROP CONSTRAINT subscriptions_plan_check;
 ALTER TABLE public.subscriptions ADD CONSTRAINT subscriptions_plan_check CHECK (plan IN ('free', 'pro', 'studio'));
 ```
 
-**Vercel env var rename required:**
+**Vercel env var rename required (DONE by user):**
 LEMONSQUEEZY_AGENCY_VARIANT_ID -> LEMONSQUEEZY_STUDIO_VARIANT_ID
 LEMONSQUEEZY_AGENCY_YEARLY_VARIANT_ID -> LEMONSQUEEZY_STUDIO_YEARLY_VARIANT_ID
-
-**What's next:**
-1. Deferred features: custom domains, team seats
-2. Social proof on landing page (needs real customers first)
-3. Server-side video compression (deferred until storage costs are material)
-
-**What to watch out for:**
-1. DB migration and Vercel env vars must be updated before deploying the Studio rename.
-2. Test files live in `src/__tests__/`. Vitest config uses `@` path alias from tsconfig.
-3. 3 commits ahead of origin/main. Push when ready.
 
 ---
 
