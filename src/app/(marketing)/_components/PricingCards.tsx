@@ -200,7 +200,7 @@ export function PricingCards() {
             </a>
           </Button>
           <p className="text-xs text-slate-400 mt-3">
-            Custom pricing available for larger teams.
+            Includes a setup call. Cancel anytime.
           </p>
         </div>
       </div>
