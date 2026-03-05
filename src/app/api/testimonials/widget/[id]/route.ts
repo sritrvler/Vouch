@@ -59,7 +59,7 @@ export async function GET(request: NextRequest, { params }: PageProps) {
       .single();
 
     // Pre-build testimonials query (use generous limit; will be trimmed after plan check)
-    const fetchLimit = pinnedIds.length > 0 ? 200 : 12;
+    const fetchLimit = pinnedIds.length > 0 ? 200 : Math.max(widget.max_items ?? 12, 50);
     let tQuery = supabase
       .from('testimonials')
       .select('id, author_name, author_role, author_company, author_avatar_url, rating, content, enhanced_content, featured, source_url, golden_sentence, metric_label, video_url, video_thumbnail_url, email_domain, show_text, show_video, created_at', { count: 'exact' })
@@ -84,6 +84,14 @@ export async function GET(request: NextRequest, { params }: PageProps) {
       );
     }
 
+    if (testimonialError) {
+      console.error('Error fetching testimonials for widget:', testimonialError);
+      return NextResponse.json(
+        { error: 'Failed to fetch testimonials' },
+        { status: 500, headers: CORS_HEADERS }
+      );
+    }
+
     const isPro = sub?.plan === 'pro' || sub?.plan === 'agency';
     const hardLimit = isPro ? (widget.max_items ?? 12) : Math.min(widget.max_items ?? 12, 5);
 
@@ -96,14 +104,6 @@ export async function GET(request: NextRequest, { params }: PageProps) {
       );
     }
     testimonials = testimonials.slice(0, hardLimit);
-
-    if (testimonialError ?? false) {
-      console.error('Error fetching testimonials for widget:', testimonialError);
-      return NextResponse.json(
-        { error: 'Failed to fetch testimonials' },
-        { status: 500, headers: CORS_HEADERS }
-      );
-    }
 
     // ── Record widget view (non-blocking) ─────────────────────────────────────
     void supabase.from('widget_views').insert({ widget_id: widget.id });

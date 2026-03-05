@@ -56,12 +56,16 @@ const nextConfig: NextConfig = {
   async headers() {
     return [
       {
-        source: '/((?!embed|api/testimonials/widget).*)',
+        source: '/((?!embed|api\\/testimonials\\/widget).*)',
         headers: securityHeaders,
       },
       {
         source: '/embed/:path*',
         headers: securityHeaders.filter(h => h.key !== 'X-Frame-Options' && h.key !== 'Content-Security-Policy'),
+      },
+      {
+        source: '/api/testimonials/widget/:path*',
+        headers: securityHeaders.filter(h => h.key === 'X-Content-Type-Options' || h.key === 'Strict-Transport-Security'),
       },
     ];
   },
