@@ -10,7 +10,29 @@
 
 # Active Work Queue
 
-## Session Handoff (March 5, 2026, session 7)
+## Session Handoff (March 5, 2026, session 8)
+
+**What was done this session:**
+1. Agency Plan Task 1: Self-serve checkout. Replaced "Get in touch" mailto with real Lemon Squeezy checkout for Agency ($49/mo, $490/yr). Updated `createCheckoutUrl` to accept plan param. Updated checkout API route, UpgradeModal, and PricingCards.
+2. Agency Plan Tasks 2+3+4: White-label client reports, embed codes in reports, custom report intro. Added `report_footer_text` and `report_message` columns to projects. Settings page has "Report Customization" section (Agency-gated). Report page shows custom intro, conditional footer, and widget embed code snippets with copy buttons.
+3. Agency Plan Task 5: Updated AGENCY_FEATURES to match reality. Removed "Priority email support" and "Custom onboarding call" (fake). Added "White-label client reports", "Embed codes in client reports", "Custom report intro message", "Email support (1 business day)". Eliminated duplicate AGENCY_FEATURES in PricingCards (now imports from lemonsqueezy.ts). Updated comparison table on pricing page.
+4. Fixed Radix DialogTitle accessibility warning in upgrade modal (added sr-only DialogTitle).
+5. Added Agency variant IDs to .env.local (monthly: 1368721, yearly: 1368722).
+
+**What's next:**
+Agency Plan Overhaul is DONE (Tasks 1 through 5). Deferred items remain: Task 6 (rename to "Studio"), Task 7 (custom domains), Task 8 (team seats). Next priority: review the full product for any remaining gaps, or pick from deferred items. Consider a final pre-launch review using the Go-Live Checklist at the top of this file.
+
+**What to watch out for:**
+1. DB migration required: `ALTER TABLE public.projects ADD COLUMN IF NOT EXISTS report_footer_text text; ALTER TABLE public.projects ADD COLUMN IF NOT EXISTS report_message text;` (already run by user on current Supabase instance).
+2. Agency variant IDs in .env.local (LEMONSQUEEZY_AGENCY_VARIANT_ID=1368721, LEMONSQUEEZY_AGENCY_YEARLY_VARIANT_ID=1368722). Must also be set in Vercel env vars for production.
+3. PricingCards no longer defines its own AGENCY_FEATURES. It re-exports from lemonsqueezy.ts. If anything imports AGENCY_FEATURES from PricingCards, it still works (re-export).
+4. Report page now queries `user_id` from projects to check subscription plan. This is a server component query using service role, so RLS is bypassed. The token-based access is unchanged.
+5. The `report_message` field is capped at 200 characters (enforced in settings save + input maxLength). `report_footer_text` has no length cap (free text).
+6. Downgrade scenario: if Agency user downgrades, report_footer_text and report_message stay in DB but report page falls back to "Powered by Vouch" because `isAgency` will be false.
+
+---
+
+## Previous: Session Handoff (March 5, 2026, session 7)
 
 **What was done this session:**
 1. Fixed video playback delay in review step: added `preload="auto"` to the blob URL video in CollectFormClient.tsx (line 1001). Browser now buffers the local blob immediately instead of waiting for play.
@@ -239,7 +261,7 @@ Inter, Roboto, Open Sans, Lato, Poppins, Montserrat, Nunito, Raleway, Source San
 
 ---
 
-## NEXT: Agency Plan Overhaul (Make It Real and Self-Serve)
+## DONE: Agency Plan Overhaul — shipped session 8
 
 **The problem:**
 Agency ($49/mo) is currently "Pro + support theater." The only product feature is client report links. "Priority support" and "onboarding call" require founder time and don't scale. The "Get in touch" mailto CTA blocks self-serve revenue. Nobody pays 2.5x more for email support.
