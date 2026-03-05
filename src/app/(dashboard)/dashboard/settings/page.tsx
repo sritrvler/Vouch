@@ -1135,8 +1135,8 @@ function SettingsInner() {
               </div>
             </Section>
 
-            {/* Save Button (sticky at bottom) */}
-            <div className="sticky bottom-[calc(5rem+env(safe-area-inset-bottom))] md:bottom-0 pt-4 pb-2 bg-background/95 backdrop-blur-sm border-t border-border/40 -mx-1 px-1 mt-4">
+            {/* Save Button */}
+            <div className="pt-4 pb-2 mt-4">
               <Button
                 onClick={handleSaveProject}
                 disabled={savingProject || !projectName.trim()}
