@@ -10,23 +10,33 @@
 
 # Active Work Queue
 
-## Session Handoff (March 5, 2026, session 13: UX Polish Batch)
+## Session Handoff (March 5, 2026, session 14: A11y Review Fixes + Agent Guardrails)
 
 **What was done this session:**
-1. Fixed all 16 remaining UX/polish issues from the audit (see audit-report.md sections 1, 4, 5).
-2. Senior dev review caught 6 issues (shimmer style duplication, AnimatePresence missing, bundle split, billing pill positioning, error typing, FAQ keys). All fixed.
-3. Build passes, 66 tests pass, committed at `5ac59e6`.
+1. Implemented 16 a11y/UX fixes from 3 review agents (UX Copy, UI Animation, Accessibility) across 7 files.
+2. Ran senior dev review agent (general-purpose). It caught 3 issues: role="tab" without keyboard spec (HIGH), aria-label on plain span (MEDIUM), safe-area on mobile sticky (MEDIUM). All fixed.
+3. Added agent enforcement guardrails to CLAUDE.md, MEMORY.md, and lessons.md after user flagged that agents were not being used despite being documented.
+4. All pushed to origin/main. Build passes.
 
-**Files changed (9):**
-`src/app/(marketing)/page.tsx`, `src/app/(marketing)/_components/FAQAccordion.tsx` (new), `src/app/(marketing)/_components/MotionCTA.tsx` (new), `src/app/(marketing)/_components/PricingCards.tsx`, `src/app/(dashboard)/layout.tsx`, `src/app/(dashboard)/dashboard/page.tsx`, `src/app/(dashboard)/dashboard/settings/page.tsx`, `src/app/(dashboard)/dashboard/widgets/page.tsx`, `src/components/collect/CollectFormClient.tsx`
+**Commits pushed (session 13+14 combined):**
+`5ac59e6` ux: 16 audit polish items
+`19f424c` docs: prioritized backlog (40 items)
+`81234e6` a11y: 16 review fixes (FAQ ARIA, camera alerts, reduced motion, nav labels, billing toggle, copy)
+`d0dc8b3` a11y: 3 review agent fixes (radiogroup, sr-only badge, safe-area)
+
+**Key process changes:**
+1. Pre-implementation gate now has step 2: mandatory Agent Routing (list agents, justify, minimum by task size)
+2. Post-implementation gate now has steps 5-6: run all listed agents + verify each ran
+3. Delegation Plan template added: scope, excludes, dependencies, expected output, parallel/sequential
+4. Anti-duplication rules codified in both CLAUDE.md and MEMORY.md
 
 **What's next:**
-Pick from the prioritized backlog below. Recommended: start with P1 items (conversion/growth, then security hardening).
+Pick from the prioritized backlog below. Recommended: P1 items (conversion/growth, then security hardening).
 
 **What to watch out for:**
-1. FAQAccordion and MotionCTA use `dynamic()` imports. If adding more client components to the landing page, follow the same pattern.
-2. Upgrade celebration banner auto-dismisses after 8 seconds. If users report it disappears too fast, increase the timeout.
-3. 1 commit ahead of origin/main. Push when ready.
+1. FAQAccordion and MotionCTA use `dynamic()` imports. Follow same pattern for new client components on landing page.
+2. Billing toggle uses role="radiogroup"/role="radio" (not tablist/tab). If adding more toggle patterns, follow this semantic.
+3. Agent guardrails are new. First task next session is the test: does the pre-implementation gate actually force agent listing? Watch for it.
 
 ---
 
