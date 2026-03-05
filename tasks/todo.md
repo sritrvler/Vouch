@@ -10,7 +10,52 @@
 
 # Active Work Queue
 
-## Session Handoff (March 5, 2026, session 8)
+## Session Handoff (March 5, 2026, session 9: Product Readiness Audit)
+
+**What was done this session:**
+Full product readiness audit using 12 specialized agents across 8 phases. No code changes made. Full report saved to `tasks/audit-report.md`.
+
+Key findings:
+1. 5 CRITICAL bugs found (webhook Agency plan, open redirect, logo XSS, RLS INSERT, disposable email)
+2. 9 HIGH severity issues across security, performance, UX, and copy
+3. 26 conversion copy issues identified
+4. Competitive analysis completed (Vouch vs Senja, Testimonial.to, EmbedSocial, Endorsal)
+5. 0% test coverage confirmed (no test files exist)
+6. Build passes clean (exit code 0)
+7. Verdict: CONDITIONAL GO. Fix 5 critical items (~65 min) + security headers (~15 min) to launch.
+
+**What's next:**
+Start fixing audit findings in priority order. The full prioritized list is in `tasks/audit-report.md` under "Final Action Plan." Recommended order:
+
+**BEFORE LAUNCH (do all 12 items, ~2-3 hours):**
+1. Webhook: set plan='agency' when variant matches Agency env vars (api/stripe/webhook/route.ts)
+2. Open redirect: validate `next` param in auth callback (api/auth/callback/route.ts:12)
+3. Logo upload: allowlist file extensions + MIME types (api/upload-logo/route.ts:21,34)
+4. RLS INSERT: add public INSERT policy for testimonials (schema.sql)
+5. Disposable email: uncomment isDisposableEmail in signup (already in go-live checklist)
+6. Supabase email confirmation: toggle in dashboard (already in go-live checklist)
+7. Security headers: add CSP, X-Frame-Options, HSTS, nosniff to next.config.ts
+8. Widget API: check is_banned after subscription fetch
+9. Admin secret: make mandatory (deny if env var unset)
+10. Widget API: Promise.all queries 2,3,4 (parallelize)
+11. Agency custom slug: change `=== 'pro'` to `!== 'free'` in settings:384
+12. Add projects.user_id index in schema.sql
+
+**FIRST WEEK post-launch:** Items 13-23 in audit-report.md (embed quote color bug, email footer copy, form prompt, wrong default tabs, unused deps, trust signals, embed.js error handling, Vitest setup)
+
+**FIRST MONTH post-launch:** Items 24-35 (email onboarding, social proof on landing, Google Reviews import, AI golden sentence, animations, Error Boundaries, monitoring)
+
+**What to watch out for:**
+1. The audit report references line numbers that may shift as fixes are applied. Use grep to locate the exact code.
+2. The image card API route DOES exist (confirmed by build). The product strategist agent incorrectly claimed it was missing. Always verify agent claims with direct file checks (lesson #20).
+3. Webhook Agency fix requires checking variant_id against LEMONSQUEEZY_AGENCY_VARIANT_ID and LEMONSQUEEZY_AGENCY_YEARLY_VARIANT_ID env vars. Both must be set.
+4. RLS INSERT policy for testimonials needs careful scoping: only allow inserts where form_id matches an existing public form.
+5. Security headers CSP must allow Supabase, Lemon Squeezy, Google Fonts, and Clearbit (logo CDN) domains.
+6. Deferred features still remain: rename Agency to Studio, custom domains, team seats.
+
+---
+
+## Previous: Session Handoff (March 5, 2026, session 8)
 
 **What was done this session:**
 1. Agency Plan Task 1: Self-serve checkout. Replaced "Get in touch" mailto with real Lemon Squeezy checkout for Agency ($49/mo, $490/yr). Updated `createCheckoutUrl` to accept plan param. Updated checkout API route, UpgradeModal, and PricingCards.
