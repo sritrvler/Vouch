@@ -10,7 +10,35 @@
 
 # Active Work Queue
 
-## Session Handoff (March 5, 2026, session 11: Post-Launch Items + Security Hardening)
+## Session Handoff (March 5, 2026, session 12: Studio Rename + Test Coverage)
+
+**What was done this session:**
+1. Renamed Agency to Studio across all 19 files (full internal rename, not just UI). DB CHECK constraint, env vars, plan types, feature lists, admin panel, webhook, all updated.
+2. Added 39 new tests across 4 test files (plans, disposable emails, fonts, webhook logic). Total: 66 tests, 5 suites, all passing.
+
+**DB migration required (no users yet, so safe to re-run schema):**
+```sql
+ALTER TABLE public.subscriptions DROP CONSTRAINT subscriptions_plan_check;
+ALTER TABLE public.subscriptions ADD CONSTRAINT subscriptions_plan_check CHECK (plan IN ('free', 'pro', 'studio'));
+```
+
+**Vercel env var rename required:**
+LEMONSQUEEZY_AGENCY_VARIANT_ID -> LEMONSQUEEZY_STUDIO_VARIANT_ID
+LEMONSQUEEZY_AGENCY_YEARLY_VARIANT_ID -> LEMONSQUEEZY_STUDIO_YEARLY_VARIANT_ID
+
+**What's next:**
+1. Deferred features: custom domains, team seats
+2. Social proof on landing page (needs real customers first)
+3. Server-side video compression (deferred until storage costs are material)
+
+**What to watch out for:**
+1. DB migration and Vercel env vars must be updated before deploying the Studio rename.
+2. Test files live in `src/__tests__/`. Vitest config uses `@` path alias from tsconfig.
+3. 3 commits ahead of origin/main. Push when ready.
+
+---
+
+## Previous: Session Handoff (March 5, 2026, session 11: Post-Launch Items + Security Hardening)
 
 **What was done this session:**
 1. All 11 post-launch items (13-23) from audit-report.md completed.
@@ -50,10 +78,10 @@
 
 **What's next:**
 All audit items and security backlog complete. Remaining work:
-1. Deferred features: rename Agency to Studio, custom domains, team seats
+1. ~~Rename Agency to Studio~~ DONE (session 12). Deferred: custom domains, team seats
 2. Social proof on landing page (needs real customers first)
 3. Server-side video compression (deferred until storage costs are material)
-4. More test coverage beyond the 5 security suites
+4. ~~More test coverage beyond the 5 security suites~~ DONE (session 12, 39 new tests)
 
 **What to watch out for:**
 1. Platform SVG paths in page.tsx use 24x24 viewBox. Next.js and Shopify were fixed this session.
