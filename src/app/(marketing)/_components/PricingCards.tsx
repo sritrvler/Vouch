@@ -45,7 +45,7 @@ export function PricingCards() {
     <div className="max-w-5xl mx-auto">
       {/* Billing toggle */}
       <div className="flex justify-center mb-8">
-        <div className="relative flex items-center gap-1 bg-gray-100 rounded-full p-1" role="tablist" aria-label="Billing frequency">
+        <div className="relative flex items-center gap-1 bg-gray-100 rounded-full p-1" role="radiogroup" aria-label="Billing frequency">
           <motion.div
             className="absolute top-1 bottom-1 bg-white rounded-full shadow-sm"
             aria-hidden="true"
@@ -56,8 +56,8 @@ export function PricingCards() {
             transition={{ type: 'spring', stiffness: 400, damping: 30 }}
           />
           <button
-            role="tab"
-            aria-selected={billing === 'monthly'}
+            role="radio"
+            aria-checked={billing === 'monthly'}
             onClick={() => setBilling('monthly')}
             className={cn(
               'relative z-10 px-4 py-1.5 rounded-full text-sm font-medium transition-colors',
@@ -69,8 +69,8 @@ export function PricingCards() {
             Monthly
           </button>
           <button
-            role="tab"
-            aria-selected={billing === 'yearly'}
+            role="radio"
+            aria-checked={billing === 'yearly'}
             onClick={() => setBilling('yearly')}
             className={cn(
               'relative z-10 px-4 py-1.5 rounded-full text-sm font-medium transition-colors flex items-center gap-2',

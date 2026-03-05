@@ -100,8 +100,9 @@ function NavLink({
       <Icon className="size-4 shrink-0" />
       <span className="flex-1">{item.label}</span>
       {item.label === 'Inbox' && pendingCount && pendingCount > 0 ? (
-        <span className="min-w-[20px] h-5 rounded-full bg-primary text-primary-foreground text-xs font-bold flex items-center justify-center px-1.5 leading-none" aria-label={`${pendingCount} pending`}>
+        <span className="min-w-[20px] h-5 rounded-full bg-primary text-primary-foreground text-xs font-bold flex items-center justify-center px-1.5 leading-none">
           {pendingCount > 99 ? '99+' : pendingCount}
+          <span className="sr-only"> pending</span>
         </span>
       ) : null}
     </Link>
