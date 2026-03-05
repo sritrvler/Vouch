@@ -86,7 +86,7 @@ function StatusBadge({ status }: { status: RecentTestimonial['status'] }) {
 
 // ─── Skeleton ─────────────────────────────────────────────────────────────────
 
-const SHIMMER_STYLE = `@keyframes shimmer { 0% { transform: translateX(-100%); } 100% { transform: translateX(100%); } }`;
+const SHIMMER_STYLE = `@keyframes shimmer { 0% { transform: translateX(-100%); } 100% { transform: translateX(100%); } } @media (prefers-reduced-motion: reduce) { @keyframes shimmer { 0%, 100% { transform: none; } } }`;
 
 function Skeleton({ className }: { className?: string }) {
   return (
@@ -109,7 +109,7 @@ function Skeleton({ className }: { className?: string }) {
 
 function DashboardSkeleton() {
   return (
-    <div className="p-6 md:p-8 max-w-6xl mx-auto space-y-8">
+    <div className="p-6 md:p-8 max-w-6xl mx-auto space-y-8" aria-busy="true" aria-label="Loading dashboard">
       <style>{SHIMMER_STYLE}</style>
       <Skeleton className="h-8 w-36" />
       <Skeleton className="h-16 rounded-2xl" />

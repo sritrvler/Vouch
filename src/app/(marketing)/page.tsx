@@ -152,7 +152,7 @@ function HeroSection() {
                   size="lg"
                   className="rounded-xl px-7 py-6 text-base font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 border border-gray-200"
                 >
-                  <a href="#how-it-works">Watch how it works</a>
+                  <a href="#how-it-works">See how it works</a>
                 </Button>
               </MotionCTA>
             </div>
@@ -520,7 +520,7 @@ function BottomCTA() {
             </div>
 
             <p className="text-indigo-200 text-xs mt-6">
-              Free forever · No credit card required to start
+              Free plan included · No credit card required to start
             </p>
           </div>
         </div>

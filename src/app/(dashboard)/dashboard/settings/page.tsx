@@ -520,9 +520,11 @@ function SettingsInner() {
       <AnimatePresence>
       {showUpgradeSuccess && (
         <motion.div
+          role="status"
           initial={{ opacity: 0, y: -12 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -12 }}
+          transition={{ duration: 0.3, ease: 'easeOut' }}
           className="mb-6 rounded-2xl border border-emerald-200 bg-gradient-to-r from-emerald-50 to-teal-50 px-5 py-4 flex items-center gap-4"
         >
           <div className="size-10 rounded-xl bg-emerald-100 flex items-center justify-center shrink-0">
@@ -533,7 +535,7 @@ function SettingsInner() {
               You are all set! Your plan has been upgraded.
             </p>
             <p className="text-xs text-emerald-700 mt-0.5">
-              All features are now unlocked. Go build something amazing.
+              All Pro features are now active.
             </p>
           </div>
           <button
@@ -1134,7 +1136,7 @@ function SettingsInner() {
             </Section>
 
             {/* Save Button (sticky at bottom) */}
-            <div className="sticky bottom-0 pt-4 pb-2 bg-background/95 backdrop-blur-sm border-t border-border/40 -mx-1 px-1 mt-4">
+            <div className="sticky bottom-20 md:bottom-0 pt-4 pb-2 bg-background/95 backdrop-blur-sm border-t border-border/40 -mx-1 px-1 mt-4">
               <Button
                 onClick={handleSaveProject}
                 disabled={savingProject || !projectName.trim()}

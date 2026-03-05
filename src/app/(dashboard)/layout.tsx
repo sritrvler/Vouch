@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { motion } from 'framer-motion';
+import { motion, MotionConfig } from 'framer-motion';
 import { toast } from 'sonner';
 import {
   LayoutDashboard,
@@ -94,12 +94,13 @@ function NavLink({
           layoutId="sidebar-active"
           className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-5 rounded-r-full bg-primary"
           transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+          aria-hidden="true"
         />
       )}
       <Icon className="size-4 shrink-0" />
       <span className="flex-1">{item.label}</span>
       {item.label === 'Inbox' && pendingCount && pendingCount > 0 ? (
-        <span className="min-w-[20px] h-5 rounded-full bg-primary text-primary-foreground text-xs font-bold flex items-center justify-center px-1.5 leading-none">
+        <span className="min-w-[20px] h-5 rounded-full bg-primary text-primary-foreground text-xs font-bold flex items-center justify-center px-1.5 leading-none" aria-label={`${pendingCount} pending`}>
           {pendingCount > 99 ? '99+' : pendingCount}
         </span>
       ) : null}
@@ -109,9 +110,11 @@ function NavLink({
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   return (
-    <ProjectProvider>
-      <DashboardLayoutInner>{children}</DashboardLayoutInner>
-    </ProjectProvider>
+    <MotionConfig reducedMotion="user">
+      <ProjectProvider>
+        <DashboardLayoutInner>{children}</DashboardLayoutInner>
+      </ProjectProvider>
+    </MotionConfig>
   );
 }
 
@@ -267,7 +270,7 @@ function DashboardLayoutInner({ children }: { children: React.ReactNode }) {
         </div>
 
         {/* Nav items */}
-        <nav className="flex-1 overflow-y-auto px-3 py-4 space-y-0.5">
+        <nav aria-label="Main navigation" className="flex-1 overflow-y-auto px-3 py-4 space-y-0.5">
           {NAV_ITEMS.map((item) => (
             <NavLink
               key={item.href}
@@ -335,7 +338,7 @@ function DashboardLayoutInner({ children }: { children: React.ReactNode }) {
       <Toaster richColors position="bottom-right" />
 
       {/* Mobile Bottom Nav */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-border z-50 safe-area-inset-bottom">
+      <nav aria-label="Mobile navigation" className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-border z-50 safe-area-inset-bottom">
         <div className="flex items-center justify-around px-2 py-2">
           {NAV_ITEMS.map((item) => (
             <NavLink
