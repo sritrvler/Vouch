@@ -10,37 +10,58 @@
 
 # Active Work Queue
 
-## Session Handoff (March 5, 2026, session 11: Post-Launch Items 13-23)
+## Session Handoff (March 5, 2026, session 11: Post-Launch Items + Security Hardening)
 
 **What was done this session:**
-All 11 first-week post-launch items (13-23) from audit-report.md completed in one batch.
+1. All 11 post-launch items (13-23) from audit-report.md completed.
+2. Senior dev review ran on session 11 changes: fixed 2 SVG viewBox bugs, removed unused @vitejs/plugin-react, added backslash bypass tests.
+3. Senior dev review ran on session 10 changes: fixed HIGH widget API fetchLimit regression, moved error check before data processing, added nosniff to widget API responses.
+4. Fixed all 6 security backlog items from the reviews.
+5. Updated MEMORY.md with agent strategy (mandatory review agent in post-implementation gate).
 
 **POST-LAUNCH ITEMS (ALL 11 COMPLETE):**
-13. [x] Embed widget quote color: replaced hardcoded #374151 with theme textColor (`tc`) in embed.js (2 occurrences: grid card and single layout).
-14. [x] Email footer: removed hostile "cannot be turned off" copy from src/lib/email.ts.
-15. [x] Collection form prompt: changed "What could be better?" to "What stood out?" across 3 files (CollectFormClient.tsx, [formId]/page.tsx, forms/page.tsx).
-16. [x] Widget builder default tab: changed from 'link' to 'builder' in widgets/page.tsx.
-17. [x] Billing defaults: changed from 'monthly' to 'yearly' in both upgrade-modal.tsx and PricingCards.tsx.
-18. [x] Removed 5 unused npm dependencies: @anthropic-ai/sdk, @google/generative-ai, @stripe/stripe-js, cmdk, recharts (42 packages removed). Kept next-themes (used by sonner). Archived unused command.tsx to _archive/.
-19. [x] Removed "30-day export" FAQ: rewrote to "your data stays and you keep access to everything within free plan limits."
-20. [x] Trust signals: added Lock icon + "Secure checkout via Lemon Squeezy" below pricing CTA buttons.
-21. [x] Platform trust bar: replaced text-only pills with SVG icon + name for 7 platforms (Framer, Webflow, WordPress, Next.js, Squarespace, Wix, Shopify). Removed Ghost, Notion Sites, Carrd (less recognizable as SVGs).
-22. [x] embed.js error handling: added res.ok check, console.warn for API errors and fetch failures (no more silent swallow).
-23. [x] Vitest installed + 5 critical security test suites (25 tests total): open redirect validation, logo upload allowlisting, admin secret guard, font URL sanitization, font family sanitization. All pass.
+13. [x] Embed widget quote color uses theme textColor instead of hardcoded #374151.
+14. [x] Email footer hostile copy removed.
+15. [x] Collection form prompt: "What stood out?" replaces "What could be better?"
+16. [x] Widget builder defaults to 'builder' tab.
+17. [x] Billing defaults to yearly in upgrade modal + pricing page.
+18. [x] Removed 5 unused npm deps (42 packages). Archived unused command.tsx.
+19. [x] Removed "30-day export" FAQ. Rewrote to match reality.
+20. [x] Trust signals (lock icon + Lemon Squeezy) near pricing CTA.
+21. [x] Platform trust bar with SVG icons for 7 platforms.
+22. [x] embed.js error handling (res.ok check, console.warn).
+23. [x] Vitest + 27 security tests across 5 suites (all passing).
+
+**SECURITY BACKLOG (ALL 6 COMPLETE):**
+1. [x] SVG upload XSS: removed SVG from logo upload allowlist (raster only now).
+2. [x] RLS INSERT: tightened policy to constrain user_id/project_id to match form. DB migration applied.
+3. [x] Open redirect: now blocks /\ backslash bypass.
+4. [x] verifyAdmin: extracted to src/lib/admin-auth.ts (was duplicated in 4 files).
+5. [x] CSP: removed unsafe-eval from script-src.
+6. [x] Disposable email: server-side check in auth callback (defense-in-depth).
+
+**REVIEW FIXES (from code reviews):**
+1. [x] Widget API fetchLimit: was hardcoded 12, now Math.max(max_items, 50). (HIGH regression)
+2. [x] Widget API error check: moved before sorting/slicing (was dead code).
+3. [x] Widget API: added nosniff + HSTS headers.
+4. [x] Next.js SVG path: fixed viewBox mismatch (was 28x28 coords in 24x24 box).
+5. [x] Shopify SVG path: replaced with correct 24x24 path.
+6. [x] Removed unused @vitejs/plugin-react devDependency.
 
 **What's next:**
-All audit items (1-23) are complete. Remaining work:
+All audit items and security backlog complete. Remaining work:
 1. Deferred features: rename Agency to Studio, custom domains, team seats
-2. Social proof on landing page (testimonials about Vouch itself, needs real customers first)
+2. Social proof on landing page (needs real customers first)
 3. Server-side video compression (deferred until storage costs are material)
-4. Consider adding more test coverage beyond the initial 5 security suites
+4. More test coverage beyond the 5 security suites
 
 **What to watch out for:**
-1. Platform SVG paths in page.tsx are inline. If a logo renders incorrectly, the SVG path may need adjustment (they use 24x24 viewBox).
-2. `next-themes` was NOT removed (sonner depends on it). The audit said 6 unused deps but only 5 were actually unused.
-3. `_archive/2026-03-05/command.tsx` exists but is excluded from tsconfig.json. If you re-add cmdk later, restore this file.
-4. Vitest config uses `@` path alias. If tsconfig paths change, update vitest.config.ts too.
-5. The test file tests validation logic as pure functions extracted from route handlers. To test the actual routes, you'd need integration tests with mocked Supabase.
+1. Platform SVG paths in page.tsx use 24x24 viewBox. Next.js and Shopify were fixed this session.
+2. `_archive/2026-03-05/command.tsx` excluded from tsconfig. Restore if cmdk is re-added.
+3. Vitest config uses `@` path alias. Keep in sync with tsconfig paths.
+4. Auth callback now has server-side disposable email check. If it blocks a legitimate user, check the domain list in src/lib/disposable-emails.ts.
+5. CSP no longer has unsafe-eval. If Next.js production breaks with eval errors, this is the first thing to check.
+6. **PROCESS: Always run senior dev review agent before committing.** Baked into MEMORY.md post-implementation gate.
 
 ---
 
