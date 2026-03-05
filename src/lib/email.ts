@@ -79,7 +79,7 @@ export async function sendNewTestimonialNotification({
           <tr>
             <td style="padding:16px 32px 24px;border-top:1px solid #f1f5f9;">
               <p style="margin:0;font-size:12px;color:#94a3b8;">
-                You received this because you have a Vouch account. Notification emails cannot be turned off.
+                You received this because you have a Vouch account.
               </p>
             </td>
           </tr>

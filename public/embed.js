@@ -208,7 +208,7 @@
         '<span style="color:' + tc + ';font-weight:600">' + esc(golden) + '</span>' +
         (after ? '<span style="color:#9ca3af">' + esc(after) + '</span>' : '');
     } else {
-      quoteHtml = '<span style="color:#374151">' + esc(content) + '</span>';
+      quoteHtml = '<span style="color:' + tc + '">' + esc(content) + '</span>';
     }
 
     // Skip card if no content at all
@@ -342,7 +342,7 @@
     }
     if (t.show_text !== false || !t.video_url) {
       html +=
-        '<blockquote style="margin:0 0 24px"><p style="font-size:18px;line-height:1.7;font-style:italic;margin:0;color:#374151">&ldquo;' +
+        '<blockquote style="margin:0 0 24px"><p style="font-size:18px;line-height:1.7;font-style:italic;margin:0;color:' + tc + '">&ldquo;' +
         quoteHtml + '&rdquo;</p></blockquote>';
     }
     html += '<div style="display:flex;align-items:center;justify-content:center;gap:12px">';
@@ -636,12 +636,20 @@
     el._vouchLoaded = true;
 
     fetch(base + '/api/testimonials/widget/' + encodeURIComponent(id))
-      .then(function (res) { return res.json(); })
+      .then(function (res) {
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        return res.json();
+      })
       .then(function (data) {
-        if (data.error) return;
+        if (data.error) {
+          console.warn('[Vouch] Widget ' + id + ': ' + data.error);
+          return;
+        }
         renderWidget(el, data);
       })
-      .catch(function () {});
+      .catch(function (err) {
+        console.warn('[Vouch] Failed to load widget ' + id + (err.message ? ': ' + err.message : ''));
+      });
   }
 
   function init() {

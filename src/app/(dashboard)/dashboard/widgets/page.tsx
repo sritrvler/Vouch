@@ -258,7 +258,7 @@ export default function WidgetsPage() {
   const [orderedTestimonials, setOrderedTestimonials] = useState<Testimonial[]>([]);
   const [loadingTestimonials, setLoadingTestimonials] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [embedTab, setEmbedTab] = useState<'link' | 'builder' | 'dev' | 'react'>('link');
+  const [embedTab, setEmbedTab] = useState<'link' | 'builder' | 'dev' | 'react'>('builder');
 
   // Multi-widget state
   const [widgets, setWidgets] = useState<Widget[]>([]);

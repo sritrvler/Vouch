@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { Check, X, Zap, ArrowRight } from "lucide-react";
+import { Check, X, Zap, ArrowRight, Lock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { PricingCards } from "../_components/PricingCards";
 
@@ -145,7 +145,7 @@ const PRICING_FAQS = [
   },
   {
     q: "What happens to my data if I cancel?",
-    a: "Your testimonials are yours. If you downgrade, your data stays. If you close your account entirely, we give you a 30-day window to export everything.",
+    a: "Your testimonials are yours. If you downgrade, your data stays and you keep access to everything within free plan limits.",
   },
   {
     q: "Do you offer discounts for non-profits or early-stage startups?",
@@ -279,9 +279,14 @@ export default function PricingPage() {
               <Link href="/signup?plan=pro">Upgrade to Pro</Link>
             </Button>
           </div>
-          <p className="text-xs text-indigo-100 mt-5">
-            No credit card required to start
-          </p>
+          <div className="flex flex-col items-center gap-2 mt-5">
+            <p className="text-xs text-indigo-100">
+              No credit card required to start
+            </p>
+            <p className="text-xs text-indigo-200 flex items-center gap-1">
+              <Lock className="w-3 h-3" /> Secure checkout via Lemon Squeezy
+            </p>
+          </div>
           </div>
         </section>
       </div>

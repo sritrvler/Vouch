@@ -422,7 +422,7 @@ export default function FormsPage() {
   const [formTitle, setFormTitle] = useState('Share your experience');
   const [formDesc, setFormDesc] = useState('');
   const [selectedProjectId, setSelectedProjectId] = useState('');
-  const [formPrompt, setFormPrompt] = useState('What did you love? What could be better?');
+  const [formPrompt, setFormPrompt] = useState('What did you love? What stood out?');
   const [customQuestions, setCustomQuestions] = useState<string[]>([]);
   const [newQuestion, setNewQuestion] = useState('');
   const [showUpgradePrompt, setShowUpgradePrompt] = useState(false);
@@ -517,7 +517,7 @@ export default function FormsPage() {
     }
     setFormTitle('Share your experience');
     setFormDesc('');
-    setFormPrompt('What did you love? What could be better?');
+    setFormPrompt('What did you love? What stood out?');
     setCustomQuestions([]);
     setNewQuestion('');
     setSelectedProjectId(activeProjectId ?? projects[0]?.id ?? '');
@@ -529,7 +529,7 @@ export default function FormsPage() {
     setEditingForm(form);
     setFormTitle(form.title);
     setFormDesc(form.description ?? '');
-    setFormPrompt(form.prompt || 'What did you love? What could be better?');
+    setFormPrompt(form.prompt || 'What did you love? What stood out?');
     setCustomQuestions(form.custom_questions ?? []);
     setNewQuestion('');
     setSelectedProjectId(form.project_id);
@@ -681,7 +681,7 @@ export default function FormsPage() {
             project_id: original.project_id,
             title: `${original.title} (Copy)`,
             description: original.description,
-            prompt: original.prompt || 'What did you love? What could be better?',
+            prompt: original.prompt || 'What did you love? What stood out?',
             custom_questions: original.custom_questions,
             is_active: false,
           })
@@ -878,7 +878,7 @@ export default function FormsPage() {
                 id="form-prompt"
                 value={formPrompt}
                 onChange={(e) => setFormPrompt(e.target.value)}
-                placeholder="What did you love? What could be better?"
+                placeholder="What did you love? What stood out?"
                 className="rounded-xl"
                 maxLength={200}
               />

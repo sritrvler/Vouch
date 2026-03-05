@@ -10,45 +10,58 @@
 
 # Active Work Queue
 
-## Session Handoff (March 5, 2026, session 10: Before-Launch Audit Fixes)
+## Session Handoff (March 5, 2026, session 11: Post-Launch Items 13-23)
+
+**What was done this session:**
+All 11 first-week post-launch items (13-23) from audit-report.md completed in one batch.
+
+**POST-LAUNCH ITEMS (ALL 11 COMPLETE):**
+13. [x] Embed widget quote color: replaced hardcoded #374151 with theme textColor (`tc`) in embed.js (2 occurrences: grid card and single layout).
+14. [x] Email footer: removed hostile "cannot be turned off" copy from src/lib/email.ts.
+15. [x] Collection form prompt: changed "What could be better?" to "What stood out?" across 3 files (CollectFormClient.tsx, [formId]/page.tsx, forms/page.tsx).
+16. [x] Widget builder default tab: changed from 'link' to 'builder' in widgets/page.tsx.
+17. [x] Billing defaults: changed from 'monthly' to 'yearly' in both upgrade-modal.tsx and PricingCards.tsx.
+18. [x] Removed 5 unused npm dependencies: @anthropic-ai/sdk, @google/generative-ai, @stripe/stripe-js, cmdk, recharts (42 packages removed). Kept next-themes (used by sonner). Archived unused command.tsx to _archive/.
+19. [x] Removed "30-day export" FAQ: rewrote to "your data stays and you keep access to everything within free plan limits."
+20. [x] Trust signals: added Lock icon + "Secure checkout via Lemon Squeezy" below pricing CTA buttons.
+21. [x] Platform trust bar: replaced text-only pills with SVG icon + name for 7 platforms (Framer, Webflow, WordPress, Next.js, Squarespace, Wix, Shopify). Removed Ghost, Notion Sites, Carrd (less recognizable as SVGs).
+22. [x] embed.js error handling: added res.ok check, console.warn for API errors and fetch failures (no more silent swallow).
+23. [x] Vitest installed + 5 critical security test suites (25 tests total): open redirect validation, logo upload allowlisting, admin secret guard, font URL sanitization, font family sanitization. All pass.
+
+**What's next:**
+All audit items (1-23) are complete. Remaining work:
+1. Deferred features: rename Agency to Studio, custom domains, team seats
+2. Social proof on landing page (testimonials about Vouch itself, needs real customers first)
+3. Server-side video compression (deferred until storage costs are material)
+4. Consider adding more test coverage beyond the initial 5 security suites
+
+**What to watch out for:**
+1. Platform SVG paths in page.tsx are inline. If a logo renders incorrectly, the SVG path may need adjustment (they use 24x24 viewBox).
+2. `next-themes` was NOT removed (sonner depends on it). The audit said 6 unused deps but only 5 were actually unused.
+3. `_archive/2026-03-05/command.tsx` exists but is excluded from tsconfig.json. If you re-add cmdk later, restore this file.
+4. Vitest config uses `@` path alias. If tsconfig paths change, update vitest.config.ts too.
+5. The test file tests validation logic as pure functions extracted from route handlers. To test the actual routes, you'd need integration tests with mocked Supabase.
+
+---
+
+## Previous: Session Handoff (March 5, 2026, session 10: Before-Launch Audit Fixes)
 
 **What was done this session:**
 All 12 before-launch audit items fixed, built, pushed to origin/main, and DB migrations applied.
 
 **BEFORE LAUNCH (ALL 12 COMPLETE):**
-1. [x] Webhook: set plan='agency' when variant matches Agency env vars. Checks variant_id against both monthly and yearly Agency variant IDs.
+1. [x] Webhook: set plan='agency' when variant matches Agency env vars.
 2. [x] Open redirect: validates `next` param starts with `/` and not `//`.
-3. [x] Logo upload: allowlists extensions (jpg/jpeg/png/gif/webp/svg) AND MIME types.
-4. [x] RLS INSERT: added "Public can insert testimonials" policy scoped to active forms only. SQL migration applied.
-5. [x] Disposable email: uncommented isDisposableEmail check in signup.
-6. [x] Supabase email confirmation: was already enabled with custom branded template.
-7. [x] Security headers: CSP, X-Frame-Options (SAMEORIGIN), HSTS, nosniff, Referrer-Policy added to next.config.ts. Embed route exempted from X-Frame-Options and CSP so iframes work on customer sites.
-8. [x] Widget API: returns 403 "Widget unavailable" if user is_banned.
-9. [x] Admin secret: all 4 admin routes now deny access when ADMIN_SECRET env var is unset.
-10. [x] Widget API: project, subscription, and testimonials queries run in parallel via Promise.all (~300ms savings).
-11. [x] Agency custom slug: changed `=== 'pro'` to `!== 'free'` in settings.
-12. [x] projects.user_id index: added to schema.sql. SQL migration applied.
-
-**What's next:**
-First-week post-launch items (13-23 from audit-report.md):
-13. Embed widget quote color ignores theme (hardcoded #374151 in embed.js)
-14. Email footer hostile copy ("cannot be turned off")
-15. Collection form prompt invites criticism ("What could be better?")
-16. Widget builder wrong default tab (useState('link') should be 'builder')
-17. Upgrade modal defaults to monthly (should default to yearly)
-18. Remove 6 unused npm dependencies
-19. Remove "30-day export" FAQ until built
-20. Add trust signals near pricing CTA
-21. Platform trust bar: real SVG logos
-22. embed.js error handling (check res.ok, show error state)
-23. Install Vitest + 5 critical tests
-
-**What to watch out for:**
-1. Line numbers in audit-report.md have shifted due to the 12 fixes applied. Use grep to locate exact code.
-2. CSP allows Supabase, Lemon Squeezy, Google Fonts, and Clearbit domains. If a new external service is added, update the CSP in next.config.ts.
-3. The embed route (/embed/*) and widget API (/api/testimonials/widget/*) are exempted from X-Frame-Options and CSP. This is intentional for iframe embedding.
-4. Widget API now fetches `is_banned` alongside `plan` in the subscription query. If the subscriptions table doesn't have an `is_banned` column, the query still works (returns null for that field).
-5. Deferred features still remain: rename Agency to Studio, custom domains, team seats.
+3. [x] Logo upload: allowlists extensions AND MIME types.
+4. [x] RLS INSERT: added policy scoped to active forms only.
+5. [x] Disposable email: uncommented isDisposableEmail check.
+6. [x] Supabase email confirmation: already enabled.
+7. [x] Security headers: CSP, X-Frame-Options, HSTS, nosniff, Referrer-Policy.
+8. [x] Widget API: returns 403 if user is_banned.
+9. [x] Admin secret: all 4 routes deny access when env var is unset.
+10. [x] Widget API: parallel queries via Promise.all.
+11. [x] Agency custom slug: `!== 'free'` in settings.
+12. [x] projects.user_id index: added to schema.sql.
 
 ---
 

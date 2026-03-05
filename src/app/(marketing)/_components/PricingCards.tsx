@@ -38,7 +38,7 @@ export const PRO_FEATURES: string[] = [
 export const AGENCY_FEATURES = AGENCY_FEATURES_SOURCE;
 
 export function PricingCards() {
-  const [billing, setBilling] = useState<'monthly' | 'yearly'>('monthly');
+  const [billing, setBilling] = useState<'monthly' | 'yearly'>('yearly');
 
   return (
     <div className="max-w-5xl mx-auto">
