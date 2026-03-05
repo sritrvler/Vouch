@@ -175,16 +175,17 @@ Suggest `/compact` only when mid-task continuation is needed and stopping would 
 Before writing any code for a task, answer these questions explicitly. Do not skip any.
 
 1. **Skills loaded?** Which skill files did you read? List them. If you did not read core-principles + the relevant task skills, stop and read them now.
-2. **Validation pass (core-principles)?** Does this task pass the "matters" test (would users complain if removed)? Does it pass the "80/50" test (80% value with 50% complexity)?
-3. **Persona defined?** Who is the specific human this change is for? Name them. What is their context, device, pain, motivation? (Not "users" or "customers.")
-4. **Security considered?** For any new route, API, or form: auth gates, input validation, RLS, rate limiting. Reference the test-and-ship security checklist.
-5. **Interface design applied?** For any UI change: persona intent stated, subtle layering principles followed, token architecture consistent.
-6. **Test scenarios enumerated?** Using the Test Scenario Checklist below, list every scenario that applies to this feature. Write them out explicitly. This becomes the verification list for post-implementation. Skip a category only if it genuinely does not apply, and say why.
-7. **Persona-driven UI selection + business impact?** For any UI component choice, write a Persona UI Intent for EACH persona AND a Business Impact Assessment (retention, conversion, time to value, churn risk, expansion, referral). Both are required. A UI that serves users but ignores business dies. A UI that serves business but ignores users churns. See the Persona-Driven UI Selection section below.
+2. **Agent routing (mandatory).** Which agents will you use for this task? Consult the Agent Routing Table in MEMORY.md. List each agent and its purpose. Minimum requirements by task size: (a) Small fix (1-2 files): general-purpose review after implementation. (b) Medium change (3-5 files): Explore before implementation + general-purpose review after. (c) Large feature (5+ files): Explore + Plan before + general-purpose review + perf-optimizer after. (d) Multi-domain (schema+API+UI): Orchestrator or Plan + Explore + db-optimizer + review. If you list "no agents," you must justify why none of the 9 available agent types applies.
+3. **Validation pass (core-principles)?** Does this task pass the "matters" test (would users complain if removed)? Does it pass the "80/50" test (80% value with 50% complexity)?
+4. **Persona defined?** Who is the specific human this change is for? Name them. What is their context, device, pain, motivation? (Not "users" or "customers.")
+5. **Security considered?** For any new route, API, or form: auth gates, input validation, RLS, rate limiting. Reference the test-and-ship security checklist.
+6. **Interface design applied?** For any UI change: persona intent stated, subtle layering principles followed, token architecture consistent.
+7. **Test scenarios enumerated?** Using the Test Scenario Checklist below, list every scenario that applies to this feature. Write them out explicitly. This becomes the verification list for post-implementation. Skip a category only if it genuinely does not apply, and say why.
+8. **Persona-driven UI selection + business impact?** For any UI component choice, write a Persona UI Intent for EACH persona AND a Business Impact Assessment (retention, conversion, time to value, churn risk, expansion, referral). Both are required. A UI that serves users but ignores business dies. A UI that serves business but ignores users churns. See the Persona-Driven UI Selection section below.
 
 If any answer is "no" or "skipped," pause and address it before writing code.
 
-**After answering all 7 questions, say exactly:** `I FOLLOWED PRE-IMPLEMENTATION RULES` — this signals to the user that pre-implementation validation was completed. Do not say this phrase unless all 7 questions were explicitly answered.
+**After answering all 8 questions, say exactly:** `I FOLLOWED PRE-IMPLEMENTATION RULES` — this signals to the user that pre-implementation validation was completed. Do not say this phrase unless all 8 questions were explicitly answered.
 
 ### Persona-Driven UI Selection (referenced by pre-implementation step 7)
 
@@ -262,12 +263,14 @@ For every feature, enumerate scenarios from ALL of these categories:
 After completing code changes, before reporting completion:
 
 1. **Build passes?** `npx next build` exits 0.
-2. **All test scenarios verified?** Trace code paths for EVERY scenario listed in pre-implementation step 6. For each, name what you tested and the result. Any untested scenario is a potential shipped bug. If a scenario reveals a bug, fix it before proceeding.
+2. **All test scenarios verified?** Trace code paths for EVERY scenario listed in pre-implementation step 7. For each, name what you tested and the result. Any untested scenario is a potential shipped bug. If a scenario reveals a bug, fix it before proceeding.
 3. **End-to-end flow?** For features touching the customer journey: test the full flow (form > submit > approve > embed > verify).
 4. **Security spot check?** For new routes/APIs: test auth bypass, verify RLS, check error messages don't leak internals.
-5. **Lessons captured?** Any new patterns, mistakes, or discoveries written to `tasks/lessons.md`.
+5. **Run ALL agents listed in pre-implementation step 2.** At minimum: general-purpose as senior dev reviewer on the diff. Also run perf-optimizer if layout/component changes were made. Fix any HIGH/MEDIUM issues before proceeding.
+6. **Agent verification.** List each agent from pre-implementation step 2, confirm it ran, and note its verdict. If an agent was listed but not run, explain why. This step makes agent skipping visible.
+7. **Lessons captured?** Any new patterns, mistakes, or discoveries written to `tasks/lessons.md`.
 
-**After completing all 5 checks, say exactly:** `I FOLLOWED POST-IMPLEMENTATION RULES` — this signals to the user that post-implementation validation was completed. Do not say this phrase unless all 5 checks were genuinely done.
+**After completing all 7 checks, say exactly:** `I FOLLOWED POST-IMPLEMENTATION RULES` — this signals to the user that post-implementation validation was completed. Do not say this phrase unless all 7 checks were genuinely done.
 
 ### Response Style
 
