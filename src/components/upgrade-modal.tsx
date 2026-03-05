@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Check, Zap, Loader2, Mail, Crown } from 'lucide-react';
+import { Check, Zap, Loader2, Crown } from 'lucide-react';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import { AGENCY_FEATURES } from '@/lib/lemonsqueezy';
@@ -25,26 +25,24 @@ interface UpgradeModalProps {
 
 export function UpgradeModal({ open, onOpenChange }: UpgradeModalProps) {
   const [billing, setBilling] = useState<'monthly' | 'yearly'>('monthly');
-  const [loading, setLoading] = useState(false);
+  const [loadingPlan, setLoadingPlan] = useState<'pro' | 'agency' | null>(null);
 
-  async function handleUpgrade() {
-    setLoading(true);
+  async function handleUpgrade(plan: 'pro' | 'agency') {
+    setLoadingPlan(plan);
     try {
       const res = await fetch('/api/stripe/checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ billing }),
+        body: JSON.stringify({ billing, plan }),
       });
       if (!res.ok) throw new Error();
       const { url } = await res.json();
       if (url) window.location.href = url;
     } catch {
       toast.error('Could not start checkout. Please try again.');
-      setLoading(false);
+      setLoadingPlan(null);
     }
   }
-
-  const supportEmail = process.env.NEXT_PUBLIC_SUPPORT_EMAIL ?? 'hello@example.com';
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -111,11 +109,11 @@ export function UpgradeModal({ open, onOpenChange }: UpgradeModalProps) {
             </div>
 
             <Button
-              onClick={handleUpgrade}
-              disabled={loading}
+              onClick={() => handleUpgrade('pro')}
+              disabled={loadingPlan !== null}
               className="w-full h-9 gap-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-sm"
             >
-              {loading ? (
+              {loadingPlan === 'pro' ? (
                 <>
                   <Loader2 className="size-3.5 animate-spin" />
                   Starting checkout...
@@ -139,10 +137,16 @@ export function UpgradeModal({ open, onOpenChange }: UpgradeModalProps) {
               <h3 className="text-base font-bold text-foreground">Agency</h3>
             </div>
             <div className="flex items-end gap-1">
-              <span className="text-2xl font-bold text-foreground leading-none">$49</span>
-              <span className="text-sm text-muted-foreground mb-0.5">/mo</span>
+              <span className="text-2xl font-bold text-foreground leading-none">
+                {billing === 'yearly' ? '$490' : '$49'}
+              </span>
+              <span className="text-sm text-muted-foreground mb-0.5">
+                /{billing === 'yearly' ? 'year' : 'mo'}
+              </span>
             </div>
-            <p className="text-xs text-muted-foreground mt-0.5 mb-3">For teams managing client accounts</p>
+            <p className="text-xs text-muted-foreground mt-0.5 mb-3">
+              {billing === 'yearly' ? '$40.83/mo, billed annually' : 'For teams managing client accounts'}
+            </p>
 
             <div className="space-y-2 flex-1 mb-4">
               {AGENCY_FEATURES.map((f) => (
@@ -154,17 +158,25 @@ export function UpgradeModal({ open, onOpenChange }: UpgradeModalProps) {
             </div>
 
             <Button
-              asChild
+              onClick={() => handleUpgrade('agency')}
+              disabled={loadingPlan !== null}
               variant="outline"
               className="w-full h-9 gap-2 rounded-xl text-sm"
             >
-              <a href={`mailto:${supportEmail}?subject=Agency%20Plan`}>
-                <Mail className="size-3.5" />
-                Get in touch
-              </a>
+              {loadingPlan === 'agency' ? (
+                <>
+                  <Loader2 className="size-3.5 animate-spin" />
+                  Starting checkout...
+                </>
+              ) : (
+                <>
+                  <Crown className="size-3.5" />
+                  Get Agency
+                </>
+              )}
             </Button>
             <p className="mt-1.5 text-center text-[11px] text-muted-foreground">
-              Includes a setup call. Cancel anytime.
+              No contracts. Cancel anytime.
             </p>
           </div>
         </div>

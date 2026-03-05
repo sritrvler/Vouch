@@ -6,6 +6,7 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json().catch(() => ({}));
     const billing: 'monthly' | 'yearly' = body.billing === 'yearly' ? 'yearly' : 'monthly';
+    const plan: 'pro' | 'agency' = body.plan === 'agency' ? 'agency' : 'pro';
 
     const supabase = await createServerSupabaseClient();
 
@@ -24,7 +25,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Already on a paid plan' }, { status: 400 });
     }
 
-    const url = await createCheckoutUrl(user.email!, user.id, billing);
+    const url = await createCheckoutUrl(user.email!, user.id, billing, plan);
 
     if (!url) {
       return NextResponse.json({ error: 'Failed to create checkout' }, { status: 500 });

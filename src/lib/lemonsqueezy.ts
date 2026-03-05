@@ -11,12 +11,21 @@ export function lsHeaders() {
 export async function createCheckoutUrl(
   userEmail: string,
   userId: string,
-  billing: 'monthly' | 'yearly' = 'monthly'
+  billing: 'monthly' | 'yearly' = 'monthly',
+  plan: 'pro' | 'agency' = 'pro'
 ): Promise<string | null> {
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
-  const variantId = billing === 'yearly'
-    ? String(process.env.LEMONSQUEEZY_YEARLY_VARIANT_ID)
-    : String(process.env.LEMONSQUEEZY_VARIANT_ID);
+
+  let variantId: string;
+  if (plan === 'agency') {
+    variantId = billing === 'yearly'
+      ? String(process.env.LEMONSQUEEZY_AGENCY_YEARLY_VARIANT_ID)
+      : String(process.env.LEMONSQUEEZY_AGENCY_VARIANT_ID);
+  } else {
+    variantId = billing === 'yearly'
+      ? String(process.env.LEMONSQUEEZY_YEARLY_VARIANT_ID)
+      : String(process.env.LEMONSQUEEZY_VARIANT_ID);
+  }
 
   const res = await fetch(`${LS_API_URL}/checkouts`, {
     method: 'POST',

@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Check, Minus, Mail } from "lucide-react";
+import { Check, Minus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -171,11 +171,15 @@ export function PricingCards() {
           <div className="mb-6">
             <p className="text-sm font-semibold text-slate-400 mb-1">Agency</p>
             <div className="flex items-end gap-1.5 mb-1">
-              <span className="text-4xl font-bold text-white">$49</span>
-              <span className="text-slate-400 mb-1">/month</span>
+              <span className="text-4xl font-bold text-white">
+                {billing === 'yearly' ? '$490' : '$49'}
+              </span>
+              <span className="text-slate-400 mb-1">
+                {billing === 'yearly' ? '/year' : '/month'}
+              </span>
             </div>
             <p className="text-sm text-slate-400">
-              For teams managing multiple client accounts.
+              {billing === 'yearly' ? '$40.83/mo, billed annually.' : 'For teams managing multiple client accounts.'}
             </p>
           </div>
           <ul className="space-y-3 flex-1 mb-7">
@@ -191,16 +195,14 @@ export function PricingCards() {
           </ul>
           <Button
             asChild
-            variant="outline"
-            className="w-full rounded-xl border-slate-700 text-slate-300 hover:bg-slate-800 hover:text-white bg-transparent"
+            className="w-full rounded-xl bg-slate-800 hover:bg-slate-700 text-white border border-slate-700"
           >
-            <a href={`mailto:${process.env.NEXT_PUBLIC_SUPPORT_EMAIL ?? 'hello@example.com'}?subject=Agency%20Plan`}>
-              <Mail className="w-4 h-4 mr-2" />
-              Get in touch
-            </a>
+            <Link href={`/signup?plan=agency${billing === 'yearly' ? '&billing=yearly' : ''}`}>
+              Get started with Agency
+            </Link>
           </Button>
           <p className="text-xs text-slate-400 mt-3">
-            Includes a setup call. Cancel anytime.
+            Cancel anytime.
           </p>
         </div>
       </div>
