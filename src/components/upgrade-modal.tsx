@@ -6,24 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Check, Zap, Loader2, Mail, Crown } from 'lucide-react';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
-
-const PRO_FEATURES = [
-  'Unlimited forms and embed widgets',
-  'Unlimited video testimonials',
-  'Google Review and LinkedIn nudges',
-  'Image cards for social sharing',
-  'Carousel, wall of love, and list layouts',
-  'React component embed',
-  'Custom public page address',
-  'Remove Vouch branding',
-];
-
-const AGENCY_FEATURES = [
-  'Everything in Pro',
-  'Client report links for clients',
-  'Priority email support',
-  'Custom onboarding call',
-];
+import { PRO_FEATURES, AGENCY_FEATURES } from '@/lib/lemonsqueezy';
 
 interface UpgradeModalProps {
   open: boolean;

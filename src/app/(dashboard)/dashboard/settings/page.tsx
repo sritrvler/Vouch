@@ -83,19 +83,7 @@ const FORM_THEMES = [
   { label: 'Dark', bg: '#0f172a', text: '#f8fafc', input: '#1e293b' },
 ];
 
-// ─── Pro Features List ────────────────────────────────────────────────────────
-const PRO_FEATURES = [
-  'Unlimited forms and embed widgets',
-  'Unlimited video testimonials',
-  'Google Review and LinkedIn nudges',
-  'Image cards for social sharing',
-  'Carousel, wall of love, and list layouts',
-  'React component embed',
-  'CSV export of testimonials',
-  'Custom public page address',
-  'Remove Vouch branding',
-  'Email support',
-];
+import { PRO_FEATURES, AGENCY_FEATURES } from '@/lib/lemonsqueezy';
 
 // ─── Section Wrapper ──────────────────────────────────────────────────────────
 function Section({ title, description, children, className }: {
@@ -673,7 +661,7 @@ function SettingsInner() {
                   <p className="text-xs text-muted-foreground">
                     {subscription?.plan !== 'free'
                       ? 'This is the link to your public testimonials page. You can customise the address above.'
-                      : 'This is the link where people can view your testimonials. Upgrade to Pro to set a custom address.'}
+                      : 'This is the link where people can view your testimonials. Upgrade to set a custom address.'}
                   </p>
                 </div>
 
@@ -713,7 +701,7 @@ function SettingsInner() {
                   <p className="text-xs text-muted-foreground leading-relaxed">
                     {subscription?.plan !== 'free'
                       ? "Paste your Google Business review link. After customers give a 4 or 5 star rating, we'll nudge them to also leave a Google review."
-                      : 'Upgrade to Pro to automatically nudge 4 and 5 star customers to leave a Google review.'}
+                      : 'Upgrade to automatically nudge 4 and 5 star customers to leave a Google review.'}
                   </p>
                 </div>
                 <div className="space-y-1.5">
@@ -738,7 +726,7 @@ function SettingsInner() {
                   <p className="text-xs text-muted-foreground leading-relaxed">
                     {subscription?.plan !== 'free'
                       ? "After a 4 or 5 star rating, we'll copy their review text to the clipboard and open your LinkedIn page so they can post it."
-                      : 'Upgrade to Pro to nudge happy customers to share their experience on LinkedIn.'}
+                      : 'Upgrade to nudge happy customers to share their experience on LinkedIn.'}
                   </p>
                 </div>
               </div>
@@ -1128,34 +1116,22 @@ function SettingsInner() {
 
             {/* Free Plan → Upgrade */}
             {subscription?.plan === 'free' && (
-              <div className="bg-white rounded-2xl border border-indigo-100 p-6">
-                <div className="flex items-start justify-between gap-4 mb-5">
-                  <div>
-                    <h3 className="text-base font-semibold text-foreground">Pro Plan</h3>
-                    <p className="text-sm text-muted-foreground mt-0.5">
-                      Unlimited forms, video, Google Review nudges, and no Vouch branding.
-                    </p>
-                  </div>
-                  <div className="text-right shrink-0">
-                    <div className="text-2xl font-bold text-foreground leading-none">$19</div>
-                    <div className="text-xs text-muted-foreground mt-0.5">/month</div>
-                  </div>
-                </div>
+              <div className="bg-white rounded-2xl border border-indigo-100 p-6 text-center">
+                <Zap className="size-8 text-indigo-600 mx-auto mb-3" />
+                <h3 className="text-base font-semibold text-foreground mb-1">Unlock more with Pro or Agency</h3>
+                <p className="text-sm text-muted-foreground mb-4">
+                  Unlimited forms, widgets, video, and more. Choose the plan that fits your needs.
+                </p>
                 <Button
-                  onClick={handleUpgrade}
-                  disabled={loadingBilling}
-                  className="w-full gap-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 h-11"
+                  onClick={() => setShowUpgradeModal(true)}
+                  className="gap-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 h-11"
                   size="lg"
                 >
-                  {loadingBilling ? (
-                    <Loader2 className="size-4 animate-spin" />
-                  ) : (
-                    <Zap className="size-4" />
-                  )}
-                  Upgrade to Pro — $19/mo
+                  <Zap className="size-4" />
+                  View plans
                 </Button>
-                <p className="mt-2 text-center text-xs text-muted-foreground">
-                  No contracts. Cancel anytime. Billed monthly.
+                <p className="mt-2 text-xs text-muted-foreground">
+                  No contracts. Cancel anytime.
                 </p>
               </div>
             )}
@@ -1169,6 +1145,14 @@ function SettingsInner() {
                       <div key={feature} className="flex items-center gap-2">
                         <div className="size-5 rounded-full bg-indigo-50 flex items-center justify-center shrink-0">
                           <Check className="size-3 text-indigo-600" />
+                        </div>
+                        <span className="text-sm text-foreground/80">{feature}</span>
+                      </div>
+                    ))}
+                    {subscription?.plan === 'agency' && AGENCY_FEATURES.filter((f) => f !== 'Everything in Pro').map((feature) => (
+                      <div key={feature} className="flex items-center gap-2">
+                        <div className="size-5 rounded-full bg-amber-50 flex items-center justify-center shrink-0">
+                          <Check className="size-3 text-amber-600" />
                         </div>
                         <span className="text-sm text-foreground/80">{feature}</span>
                       </div>

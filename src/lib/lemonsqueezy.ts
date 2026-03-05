@@ -74,12 +74,45 @@ export const PLANS = {
     testimonialLimit: Infinity,
     widgetLimit: Infinity,
     formLimit: Infinity,
-    projectLimit: 5,
+    projectLimit: Infinity,
     googleReviewNudge: true,
     shareableCards: true,
     removeBranding: true,
     customSlug: true,
   },
+  agency: {
+    name: 'Agency',
+    testimonialLimit: Infinity,
+    widgetLimit: Infinity,
+    formLimit: Infinity,
+    projectLimit: Infinity,
+    googleReviewNudge: true,
+    shareableCards: true,
+    removeBranding: true,
+    customSlug: true,
+    clientReports: true,
+    prioritySupport: true,
+  },
 } as const;
 
 export type PlanKey = keyof typeof PLANS;
+
+export const PRO_FEATURES = [
+  'Unlimited forms and embed widgets',
+  'Unlimited video testimonials',
+  'Google Review and LinkedIn nudges',
+  'Image cards for social sharing',
+  'Carousel, wall of love, and list layouts',
+  'React component embed',
+  'CSV export of testimonials',
+  'Form cloning',
+  'Custom public page address',
+  'Remove Vouch branding',
+];
+
+export const AGENCY_FEATURES = [
+  'Everything in Pro',
+  'Client report links for clients',
+  'Priority email support',
+  'Custom onboarding call',
+];

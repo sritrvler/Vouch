@@ -12,8 +12,6 @@ import {
   ExternalLink,
   Loader2,
   X,
-  Lock,
-  Zap,
   QrCode,
   Download,
   MessageCircle,

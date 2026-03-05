@@ -34,14 +34,6 @@ import { Label } from '@/components/ui/label';
 import { Slider } from '@/components/ui/slider';
 import { Switch } from '@/components/ui/switch';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-  DialogFooter,
-} from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
@@ -1463,7 +1455,7 @@ export function Testimonials() {
                       <div className="inline-flex items-center justify-center size-12 rounded-xl bg-indigo-100 mb-3">
                         <Lock className="size-5 text-indigo-600" />
                       </div>
-                      <p className="text-sm font-semibold text-foreground mb-1">React component is Pro</p>
+                      <p className="text-sm font-semibold text-foreground mb-1">React component is a paid feature</p>
                       <p className="text-xs text-muted-foreground mb-4 max-w-xs mx-auto">
                         Get a copy-paste React component that fetches your testimonials directly from
                         the Vouch API. No npm install, no iframe, full control over styling.
@@ -1471,10 +1463,10 @@ export function Testimonials() {
                       <Button
                         size="sm"
                         className="bg-indigo-600 hover:bg-indigo-700 text-white gap-1.5"
-                        onClick={() => window.location.href = '/dashboard/settings?tab=billing'}
+                        onClick={() => setShowUpgradePrompt(true)}
                       >
                         <Zap className="size-3.5" />
-                        Upgrade to Pro
+                        View plans
                       </Button>
                     </div>
                   ) : (
@@ -1532,7 +1524,7 @@ export function Testimonials() {
             </div>
           </motion.div>
 
-          {/* ── Pro upgrade for branding ── */}
+          {/* ── Upgrade banner for branding ── */}
           {userPlan === 'free' && (
             <div className="bg-gradient-to-r from-indigo-50 to-violet-50 rounded-2xl border border-indigo-100 p-5">
               <div className="flex items-start gap-3">
@@ -1540,25 +1532,17 @@ export function Testimonials() {
                   <Zap className="size-5 text-indigo-600" />
                 </div>
                 <div className="flex-1">
-                  <p className="text-sm font-semibold text-indigo-900">Upgrade to Pro</p>
+                  <p className="text-sm font-semibold text-indigo-900">Unlock more</p>
                   <p className="text-xs text-indigo-700/80 mt-0.5">
                     Remove branding, get all layouts, and create unlimited widgets.
                   </p>
                   <Button
                     size="sm"
                     className="mt-3 gap-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-xs"
-                    onClick={async () => {
-                      try {
-                        const res = await fetch('/api/stripe/checkout', { method: 'POST' });
-                        const { url } = await res.json();
-                        if (url) window.location.href = url;
-                      } catch {
-                        toast.error('Could not start checkout');
-                      }
-                    }}
+                    onClick={() => setShowUpgradePrompt(true)}
                   >
                     <Zap className="size-3.5" />
-                    Upgrade to Pro, $19/mo
+                    View plans
                   </Button>
                 </div>
               </div>
