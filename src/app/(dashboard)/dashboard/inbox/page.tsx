@@ -60,6 +60,7 @@ import {
 } from '@/components/ui/dialog';
 import { Switch } from '@/components/ui/switch';
 import { cn } from '@/lib/utils';
+import { UpgradeModal } from '@/components/upgrade-modal';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 type TestimonialStatus = 'pending' | 'approved' | 'rejected';
@@ -1352,36 +1353,7 @@ export default function InboxPage() {
       )}
 
       {/* Upgrade nudge dialog */}
-      <Dialog open={showUpgradeDialog} onOpenChange={setShowUpgradeDialog}>
-        <DialogContent className="max-w-sm">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <Zap className="size-5 text-amber-500" />
-              Pro feature
-            </DialogTitle>
-          </DialogHeader>
-          <p className="text-sm text-muted-foreground">
-            Shareable image cards are a Pro feature. Upgrade to download and share beautiful testimonial cards on social media.
-          </p>
-          <div className="flex gap-3 mt-2">
-            <Button
-              onClick={() => setShowUpgradeDialog(false)}
-              variant="outline"
-              className="flex-1 rounded-xl"
-            >
-              <X className="size-4 mr-2" />
-              Not now
-            </Button>
-            <Button
-              onClick={() => { window.location.href = '/dashboard/settings?tab=billing'; }}
-              className="flex-1 gap-2 rounded-xl bg-indigo-600 hover:bg-indigo-700"
-            >
-              <Zap className="size-4" />
-              Upgrade to Pro
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
+      <UpgradeModal open={showUpgradeDialog} onOpenChange={setShowUpgradeDialog} />
 
     </motion.div>
   );

@@ -244,12 +244,7 @@ function DashboardLayoutInner({ children }: { children: React.ReactNode }) {
                   onClick={() => {
                     setProjectPopoverOpen(false);
                     if (plan === 'free' && projects.length >= 1) {
-                      toast('Upgrade to Pro for unlimited projects', {
-                        action: {
-                          label: 'Upgrade',
-                          onClick: () => setUpgradeModalOpen(true),
-                        },
-                      });
+                      setUpgradeModalOpen(true);
                       return;
                     }
                     router.push('/dashboard/settings?tab=project&new=true');
@@ -285,7 +280,7 @@ function DashboardLayoutInner({ children }: { children: React.ReactNode }) {
               className="flex items-center gap-2 px-3 py-2.5 rounded-xl bg-gradient-to-r from-indigo-50 to-violet-50 border border-indigo-100 text-primary text-sm font-semibold hover:from-indigo-100 hover:to-violet-100 transition-all w-full shadow-sm"
             >
               <Sparkles className="size-4 shrink-0 text-violet-500" />
-              Upgrade to Pro
+              Upgrade
             </button>
           )}
 

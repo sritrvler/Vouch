@@ -38,6 +38,7 @@ import {
 } from '@/components/ui/dialog';
 import { cn } from '@/lib/utils';
 import { useProject } from '@/context/ProjectContext';
+import { UpgradeModal } from '@/components/upgrade-modal';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 interface Project {
@@ -817,56 +818,7 @@ export default function FormsPage() {
       )}
 
       {/* ── Upgrade prompt dialog ── */}
-      <Dialog open={showUpgradePrompt} onOpenChange={setShowUpgradePrompt}>
-        <DialogContent className="max-w-md rounded-2xl">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <Lock className="size-5 text-amber-500" />
-              Free plan limit reached
-            </DialogTitle>
-            <DialogDescription>
-              The Free plan allows 1 collection form. Upgrade to Pro to create unlimited forms.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="rounded-xl border border-amber-100 bg-amber-50 p-4">
-            <ul className="space-y-2 text-sm text-amber-900">
-              {[
-                'Unlimited collection forms',
-                'Unlimited embed widgets',
-                'Google Review nudge after 4-5 stars',
-                'Carousel, Wall of Love, and List layouts',
-                'Remove Vouch branding',
-                'Custom public page address',
-              ].map((f) => (
-                <li key={f} className="flex items-center gap-2">
-                  <Check className="size-3.5 text-amber-600 shrink-0" />
-                  {f}
-                </li>
-              ))}
-            </ul>
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setShowUpgradePrompt(false)} className="rounded-xl">
-              Maybe later
-            </Button>
-            <Button
-              className="gap-2 rounded-xl bg-indigo-600 hover:bg-indigo-700"
-              onClick={async () => {
-                try {
-                  const res = await fetch('/api/stripe/checkout', { method: 'POST' });
-                  const { url } = await res.json();
-                  if (url) window.location.href = url;
-                } catch {
-                  toast.error('Could not start checkout');
-                }
-              }}
-            >
-              <Zap className="size-4" />
-              Upgrade to Pro, $19/mo
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <UpgradeModal open={showUpgradePrompt} onOpenChange={setShowUpgradePrompt} />
 
       {/* ── Create Form Dialog ── */}
       <Dialog open={createOpen} onOpenChange={(open) => { setCreateOpen(open); if (!open) setEditingForm(null); }}>

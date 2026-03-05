@@ -20,8 +20,8 @@ export async function POST(request: NextRequest) {
       .eq('user_id', user.id)
       .single();
 
-    if (subscription?.plan === 'pro') {
-      return NextResponse.json({ error: 'Already on Pro plan' }, { status: 400 });
+    if (subscription?.plan === 'pro' || subscription?.plan === 'agency') {
+      return NextResponse.json({ error: 'Already on a paid plan' }, { status: 400 });
     }
 
     const url = await createCheckoutUrl(user.email!, user.id, billing);

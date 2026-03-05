@@ -38,6 +38,7 @@ import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 import { useProject } from '@/context/ProjectContext';
 import { GOOGLE_FONTS, sanitizeFontUrl, sanitizeFontFamily, resolveFontUrl } from '@/lib/fonts';
+import { UpgradeModal } from '@/components/upgrade-modal';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 interface Project {
@@ -179,6 +180,7 @@ function SettingsInner() {
   // ── Billing state ──────────────────────────────────────────────────────────
   const [subscription, setSubscription] = useState<Subscription | null>(null);
   const [loadingBilling, setLoadingBilling] = useState(false);
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
 
   // ── Active tab (URL-driven) ────────────────────────────────────────────────
   const tabParam = searchParams.get('tab');
@@ -419,7 +421,7 @@ function SettingsInner() {
       } else {
         // Free plan: max 1 project
         if (plan === 'free' && projects.length >= 1) {
-          toast.error('Free plan allows 1 project. Upgrade to Pro for unlimited projects.');
+          setShowUpgradeModal(true);
           setSavingProject(false);
           return;
         }
@@ -1202,6 +1204,7 @@ function SettingsInner() {
           </TabsContent>
         </Tabs>
       )}
+      <UpgradeModal open={showUpgradeModal} onOpenChange={setShowUpgradeModal} />
     </motion.div>
   );
 }

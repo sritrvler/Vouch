@@ -3,11 +3,11 @@
 import { useState } from 'react';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Check, Zap, Loader2 } from 'lucide-react';
+import { Check, Zap, Loader2, Mail, Crown } from 'lucide-react';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 
-const FEATURES = [
+const PRO_FEATURES = [
   'Unlimited forms and embed widgets',
   'Unlimited video testimonials',
   'Google Review and LinkedIn nudges',
@@ -16,6 +16,13 @@ const FEATURES = [
   'React component embed',
   'Custom public page address',
   'Remove Vouch branding',
+];
+
+const AGENCY_FEATURES = [
+  'Everything in Pro',
+  'Client report links for clients',
+  'Priority email support',
+  'Custom onboarding call',
 ];
 
 interface UpgradeModalProps {
@@ -44,12 +51,15 @@ export function UpgradeModal({ open, onOpenChange }: UpgradeModalProps) {
     }
   }
 
+  const supportEmail = process.env.NEXT_PUBLIC_SUPPORT_EMAIL ?? 'hello@example.com';
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-sm p-0 overflow-hidden gap-0">
+      <DialogContent className="max-w-2xl p-0 overflow-hidden gap-0">
         {/* Billing toggle */}
         <div className="px-6 pt-6 pb-4 border-b border-border">
-          <div className="flex items-center gap-1 bg-muted/60 rounded-full p-1 mb-4 w-fit">
+          <h2 className="text-lg font-bold text-foreground mb-3">Choose your plan</h2>
+          <div className="flex items-center gap-1 bg-muted/60 rounded-full p-1 w-fit">
             <button
               onClick={() => setBilling('monthly')}
               className={cn(
@@ -76,68 +86,101 @@ export function UpgradeModal({ open, onOpenChange }: UpgradeModalProps) {
               </span>
             </button>
           </div>
+        </div>
 
-          {/* Price */}
-          <div className="flex items-start justify-between gap-4">
-            <div>
-              <div className="flex items-center gap-2 mb-1">
-                <Zap className="size-4 text-indigo-600" />
-                <h2 className="text-lg font-bold text-foreground">Upgrade to Pro</h2>
-              </div>
-              <p className="text-sm text-muted-foreground">
-                {billing === 'yearly'
-                  ? '$15.83/mo, billed as $190/year.'
-                  : 'Unlock everything. Cancel anytime.'}
-              </p>
+        {/* Plans side by side */}
+        <div className="grid sm:grid-cols-2 gap-0 sm:divide-x divide-border">
+          {/* Pro */}
+          <div className="px-6 py-5 flex flex-col">
+            <div className="flex items-center gap-2 mb-1">
+              <Zap className="size-4 text-indigo-600" />
+              <h3 className="text-base font-bold text-foreground">Pro</h3>
             </div>
-            <div className="text-right shrink-0">
-              <div className="text-3xl font-bold text-foreground leading-none">
+            <div className="flex items-end gap-1 mb-1">
+              <span className="text-3xl font-bold text-foreground leading-none">
                 {billing === 'yearly' ? '$190' : '$19'}
-              </div>
-              <div className="text-xs text-muted-foreground mt-0.5">
-                {billing === 'yearly' ? '/year' : '/month'}
-              </div>
+              </span>
+              <span className="text-sm text-muted-foreground mb-0.5">
+                /{billing === 'yearly' ? 'year' : 'month'}
+              </span>
             </div>
-          </div>
-        </div>
-
-        {/* Features */}
-        <div className="px-6 py-5 space-y-3">
-          {FEATURES.map((f) => (
-            <div key={f} className="flex items-center gap-3">
-              <div className="size-5 rounded-full bg-indigo-50 flex items-center justify-center shrink-0">
-                <Check className="size-3 text-indigo-600" />
-              </div>
-              <span className="text-sm text-foreground/80">{f}</span>
-            </div>
-          ))}
-        </div>
-
-        {/* CTA */}
-        <div className="px-6 pb-6">
-          <Button
-            onClick={handleUpgrade}
-            disabled={loading}
-            className="w-full h-11 gap-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white"
-            size="lg"
-          >
-            {loading ? (
-              <>
-                <Loader2 className="size-4 animate-spin" />
-                Starting checkout...
-              </>
-            ) : (
-              <>
-                <Zap className="size-4" />
-                {billing === 'yearly'
-                  ? 'Upgrade to Pro — $190/yr'
-                  : 'Upgrade to Pro — $19/mo'}
-              </>
+            {billing === 'yearly' && (
+              <p className="text-xs text-muted-foreground mb-3">$15.83/mo, billed annually</p>
             )}
-          </Button>
-          <p className="mt-2 text-center text-xs text-muted-foreground">
-            No contracts. Cancel anytime.
-          </p>
+            {billing === 'monthly' && (
+              <p className="text-xs text-muted-foreground mb-3">For freelancers and solo founders</p>
+            )}
+
+            <div className="space-y-2.5 flex-1 mb-5">
+              {PRO_FEATURES.map((f) => (
+                <div key={f} className="flex items-start gap-2.5">
+                  <div className="size-4.5 rounded-full bg-indigo-50 flex items-center justify-center shrink-0 mt-0.5">
+                    <Check className="size-3 text-indigo-600" />
+                  </div>
+                  <span className="text-sm text-foreground/80">{f}</span>
+                </div>
+              ))}
+            </div>
+
+            <Button
+              onClick={handleUpgrade}
+              disabled={loading}
+              className="w-full h-10 gap-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white"
+            >
+              {loading ? (
+                <>
+                  <Loader2 className="size-4 animate-spin" />
+                  Starting checkout...
+                </>
+              ) : (
+                <>
+                  <Zap className="size-4" />
+                  Get Pro
+                </>
+              )}
+            </Button>
+            <p className="mt-2 text-center text-xs text-muted-foreground">
+              No contracts. Cancel anytime.
+            </p>
+          </div>
+
+          {/* Agency */}
+          <div className="px-6 py-5 flex flex-col border-t sm:border-t-0 border-border">
+            <div className="flex items-center gap-2 mb-1">
+              <Crown className="size-4 text-amber-500" />
+              <h3 className="text-base font-bold text-foreground">Agency</h3>
+            </div>
+            <div className="flex items-end gap-1 mb-1">
+              <span className="text-3xl font-bold text-foreground leading-none">$49</span>
+              <span className="text-sm text-muted-foreground mb-0.5">/month</span>
+            </div>
+            <p className="text-xs text-muted-foreground mb-3">For teams managing client accounts</p>
+
+            <div className="space-y-2.5 flex-1 mb-5">
+              {AGENCY_FEATURES.map((f) => (
+                <div key={f} className="flex items-start gap-2.5">
+                  <div className="size-4.5 rounded-full bg-amber-50 flex items-center justify-center shrink-0 mt-0.5">
+                    <Check className="size-3 text-amber-600" />
+                  </div>
+                  <span className="text-sm text-foreground/80">{f}</span>
+                </div>
+              ))}
+            </div>
+
+            <Button
+              asChild
+              variant="outline"
+              className="w-full h-10 gap-2 rounded-xl"
+            >
+              <a href={`mailto:${supportEmail}?subject=Agency%20Plan`}>
+                <Mail className="size-4" />
+                Get in touch
+              </a>
+            </Button>
+            <p className="mt-2 text-center text-xs text-muted-foreground">
+              Custom pricing for larger teams.
+            </p>
+          </div>
         </div>
       </DialogContent>
     </Dialog>
