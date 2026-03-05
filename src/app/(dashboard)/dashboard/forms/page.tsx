@@ -409,7 +409,7 @@ export default function FormsPage() {
   const [loading, setLoading] = useState(true);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [duplicatingId, setDuplicatingId] = useState<string | null>(null);
-  const [userPlan, setUserPlan] = useState<'free' | 'pro' | 'agency'>('free');
+  const [userPlan, setUserPlan] = useState<'free' | 'pro' | 'studio'>('free');
 
   // QR dialog state
   const [qrFormId, setQrFormId] = useState<string | null>(null);

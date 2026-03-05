@@ -12,45 +12,45 @@ import { PricingCards } from "../_components/PricingCards";
 ───────────────────────────────────────────────── */
 type FeatureRow =
   | { type: "category"; label: string }
-  | { type: "feature"; label: string; free: string | boolean; pro: string | boolean; agency: string | boolean };
+  | { type: "feature"; label: string; free: string | boolean; pro: string | boolean; studio: string | boolean };
 
 const TABLE_ROWS: FeatureRow[] = [
   { type: "category", label: "Collecting Testimonials" },
-  { type: "feature", label: "Testimonials collected", free: "Unlimited", pro: "Unlimited", agency: "Unlimited" },
-  { type: "feature", label: "Collection forms", free: "1", pro: "Unlimited", agency: "Unlimited" },
-  { type: "feature", label: "Projects", free: "1", pro: "Unlimited", agency: "Unlimited" },
-  { type: "feature", label: "Video testimonials", free: "3 per project", pro: "Unlimited", agency: "Unlimited" },
-  { type: "feature", label: "Star ratings and written reviews", free: true, pro: true, agency: true },
-  { type: "feature", label: "Custom questions on form", free: true, pro: true, agency: true },
-  { type: "feature", label: "Approval and reject flow", free: true, pro: true, agency: true },
-  { type: "feature", label: "Form cloning", free: false, pro: true, agency: true },
-  { type: "feature", label: "CSV export of testimonials", free: false, pro: true, agency: true },
+  { type: "feature", label: "Testimonials collected", free: "Unlimited", pro: "Unlimited", studio: "Unlimited" },
+  { type: "feature", label: "Collection forms", free: "1", pro: "Unlimited", studio: "Unlimited" },
+  { type: "feature", label: "Projects", free: "1", pro: "Unlimited", studio: "Unlimited" },
+  { type: "feature", label: "Video testimonials", free: "3 per project", pro: "Unlimited", studio: "Unlimited" },
+  { type: "feature", label: "Star ratings and written reviews", free: true, pro: true, studio: true },
+  { type: "feature", label: "Custom questions on form", free: true, pro: true, studio: true },
+  { type: "feature", label: "Approval and reject flow", free: true, pro: true, studio: true },
+  { type: "feature", label: "Form cloning", free: false, pro: true, studio: true },
+  { type: "feature", label: "CSV export of testimonials", free: false, pro: true, studio: true },
 
   { type: "category", label: "Review Nudges" },
-  { type: "feature", label: "Google Review nudge after 4-5 stars", free: false, pro: true, agency: true },
-  { type: "feature", label: "LinkedIn nudge after 4-5 stars", free: false, pro: true, agency: true },
+  { type: "feature", label: "Google Review nudge after 4-5 stars", free: false, pro: true, studio: true },
+  { type: "feature", label: "LinkedIn nudge after 4-5 stars", free: false, pro: true, studio: true },
 
   { type: "category", label: "Public Page" },
-  { type: "feature", label: "Public testimonial page (/p/you)", free: true, pro: true, agency: true },
-  { type: "feature", label: "Custom public page address", free: false, pro: true, agency: true },
+  { type: "feature", label: "Public testimonial page (/p/you)", free: true, pro: true, studio: true },
+  { type: "feature", label: "Custom public page address", free: false, pro: true, studio: true },
 
   { type: "category", label: "Display and Embed" },
-  { type: "feature", label: "Embed widgets", free: "1", pro: "Unlimited", agency: "Unlimited" },
-  { type: "feature", label: "Grid layout", free: true, pro: true, agency: true },
-  { type: "feature", label: "Carousel, Wall of Love, and List layouts", free: false, pro: true, agency: true },
-  { type: "feature", label: "Image cards for social sharing", free: false, pro: true, agency: true },
-  { type: "feature", label: "React component embed", free: false, pro: true, agency: true },
-  { type: "feature", label: "Custom widget colors", free: true, pro: true, agency: true },
-  { type: "feature", label: "Remove Vouch branding", free: false, pro: true, agency: true },
+  { type: "feature", label: "Embed widgets", free: "1", pro: "Unlimited", studio: "Unlimited" },
+  { type: "feature", label: "Grid layout", free: true, pro: true, studio: true },
+  { type: "feature", label: "Carousel, Wall of Love, and List layouts", free: false, pro: true, studio: true },
+  { type: "feature", label: "Image cards for social sharing", free: false, pro: true, studio: true },
+  { type: "feature", label: "React component embed", free: false, pro: true, studio: true },
+  { type: "feature", label: "Custom widget colors", free: true, pro: true, studio: true },
+  { type: "feature", label: "Remove Vouch branding", free: false, pro: true, studio: true },
 
-  { type: "category", label: "Agency Tools" },
-  { type: "feature", label: "Client report links", free: false, pro: false, agency: true },
-  { type: "feature", label: "White-label client reports", free: false, pro: false, agency: true },
-  { type: "feature", label: "Embed codes in client reports", free: false, pro: false, agency: true },
-  { type: "feature", label: "Custom report intro message", free: false, pro: false, agency: true },
+  { type: "category", label: "Studio Tools" },
+  { type: "feature", label: "Client report links", free: false, pro: false, studio: true },
+  { type: "feature", label: "White-label client reports", free: false, pro: false, studio: true },
+  { type: "feature", label: "Embed codes in client reports", free: false, pro: false, studio: true },
+  { type: "feature", label: "Custom report intro message", free: false, pro: false, studio: true },
 
   { type: "category", label: "Support" },
-  { type: "feature", label: "Email support", free: true, pro: true, agency: "1 business day" },
+  { type: "feature", label: "Email support", free: true, pro: true, studio: "1 business day" },
 ];
 
 function FeatureValue({ value }: { value: string | boolean }) {
@@ -93,7 +93,7 @@ function ComparisonTable() {
               Pro
             </th>
             <th className="text-center py-4 px-3 text-sm font-semibold text-slate-700 w-[19%]">
-              Agency
+              Studio
             </th>
           </tr>
         </thead>
@@ -124,7 +124,7 @@ function ComparisonTable() {
                   <FeatureValue value={row.pro} />
                 </td>
                 <td className="py-3.5 px-3 text-center">
-                  <FeatureValue value={row.agency} />
+                  <FeatureValue value={row.studio} />
                 </td>
               </tr>
             );

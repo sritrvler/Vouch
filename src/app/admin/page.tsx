@@ -13,7 +13,7 @@ function pct(num: number, den: number): string {
 const PLAN_COLORS: Record<string, string> = {
   free: 'bg-gray-100 text-gray-600',
   pro: 'bg-indigo-100 text-indigo-700',
-  agency: 'bg-slate-800 text-white',
+  studio: 'bg-slate-800 text-white',
 };
 
 export default async function AdminPage() {
@@ -69,8 +69,8 @@ export default async function AdminPage() {
   // Core metrics
   const totalUsers = subs.length;
   const proSubs = subs.filter((s) => s.plan === 'pro');
-  const agencySubs = subs.filter((s) => s.plan === 'agency');
-  const paidCount = proSubs.length + agencySubs.length;
+  const studioSubs = subs.filter((s) => s.plan === 'studio');
+  const paidCount = proSubs.length + studioSubs.length;
   const mrr = proSubs.length * 19;
   const pastDue = subs.filter((s) => s.status === 'past_due');
   const testimonialsThisWeek = testimonials.filter((t) => t.created_at > weekAgo).length;
@@ -103,7 +103,7 @@ export default async function AdminPage() {
   });
 
   // Feature adoption among paid users
-  const paidUserIds = new Set([...proSubs, ...agencySubs].map((s) => s.user_id));
+  const paidUserIds = new Set([...proSubs, ...studioSubs].map((s) => s.user_id));
   const paidProjects = projects.filter((p) => paidUserIds.has(p.user_id));
   const googleSet = paidProjects.filter((p) => p.google_review_url).length;
   const linkedinSet = paidProjects.filter((p) => p.linkedin_url).length;
@@ -196,7 +196,7 @@ export default async function AdminPage() {
               icon: <DollarSign className="size-5 text-emerald-500" />,
               label: 'MRR (Pro)',
               value: `$${mrr}`,
-              sub: `${proSubs.length} Pro · ${agencySubs.length} Agency`,
+              sub: `${proSubs.length} Pro · ${studioSubs.length} Studio`,
             },
             {
               icon: <MessageSquare className="size-5 text-amber-500" />,

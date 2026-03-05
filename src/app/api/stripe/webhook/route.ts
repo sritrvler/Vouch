@@ -47,14 +47,14 @@ export async function POST(request: NextRequest) {
       const isActive = dbStatus === 'active' || dbStatus === 'past_due';
 
       // Determine plan based on variant ID
-      let plan: 'free' | 'pro' | 'agency' = 'free';
+      let plan: 'free' | 'pro' | 'studio' = 'free';
       if (isActive) {
         const variantId = String(attributes.variant_id ?? attributes.first_subscription_item?.variant_id ?? '');
-        const agencyVariants = [
-          process.env.LEMONSQUEEZY_AGENCY_VARIANT_ID,
-          process.env.LEMONSQUEEZY_AGENCY_YEARLY_VARIANT_ID,
+        const studioVariants = [
+          process.env.LEMONSQUEEZY_STUDIO_VARIANT_ID,
+          process.env.LEMONSQUEEZY_STUDIO_YEARLY_VARIANT_ID,
         ].filter(Boolean);
-        plan = agencyVariants.includes(variantId) ? 'agency' : 'pro';
+        plan = studioVariants.includes(variantId) ? 'studio' : 'pro';
       }
 
       await supabase

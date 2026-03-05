@@ -6,7 +6,7 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json().catch(() => ({}));
     const billing: 'monthly' | 'yearly' = body.billing === 'yearly' ? 'yearly' : 'monthly';
-    const plan: 'pro' | 'agency' = body.plan === 'agency' ? 'agency' : 'pro';
+    const plan: 'pro' | 'studio' = body.plan === 'studio' ? 'studio' : 'pro';
 
     const supabase = await createServerSupabaseClient();
 
@@ -21,7 +21,7 @@ export async function POST(request: NextRequest) {
       .eq('user_id', user.id)
       .single();
 
-    if (subscription?.plan === 'pro' || subscription?.plan === 'agency') {
+    if (subscription?.plan === 'pro' || subscription?.plan === 'studio') {
       return NextResponse.json({ error: 'Already on a paid plan' }, { status: 400 });
     }
 

@@ -62,7 +62,7 @@ interface Project {
 }
 
 interface Subscription {
-  plan: 'free' | 'pro' | 'agency';
+  plan: 'free' | 'pro' | 'studio';
   status: string;
   current_period_end: string | null;
   stripe_customer_id: string | null;
@@ -85,7 +85,7 @@ const FORM_THEMES = [
   { label: 'Dark', bg: '#0f172a', text: '#f8fafc', input: '#1e293b' },
 ];
 
-import { PRO_FEATURES, AGENCY_FEATURES } from '@/lib/lemonsqueezy';
+import { PRO_FEATURES, STUDIO_FEATURES } from '@/lib/lemonsqueezy';
 
 // ─── Section Wrapper ──────────────────────────────────────────────────────────
 function Section({ title, description, children, className }: {
@@ -744,8 +744,8 @@ function SettingsInner() {
               </div>
             </Section>
 
-            {/* Client Report Link (Agency only) */}
-            {subscription?.plan === 'agency' && project && (
+            {/* Client Report Link (Studio only) */}
+            {subscription?.plan === 'studio' && project && (
               <Section
                 title="Client Report Link"
                 description="Share a read-only link with your client so they can view all approved testimonials."
@@ -803,8 +803,8 @@ function SettingsInner() {
               </Section>
             )}
 
-            {/* Report Customization (Agency only) */}
-            {subscription?.plan === 'agency' && project && (
+            {/* Report Customization (Studio only) */}
+            {subscription?.plan === 'studio' && project && (
               <Section
                 title="Report Customization"
                 description="Personalize the client report page with a custom intro and footer."
@@ -1127,7 +1127,7 @@ function SettingsInner() {
                       )}
                     />
                     <h3 className="text-base font-semibold text-foreground">
-                      {subscription?.plan === 'agency' ? 'Agency Plan' : subscription?.plan === 'pro' ? 'Pro Plan' : 'Free Plan'}
+                      {subscription?.plan === 'studio' ? 'Studio Plan' : subscription?.plan === 'pro' ? 'Pro Plan' : 'Free Plan'}
                     </h3>
                     {subscription?.plan !== 'free' && (
                       <span className="text-xs bg-indigo-600 text-white rounded-full px-2 py-0.5 font-medium">
@@ -1170,7 +1170,7 @@ function SettingsInner() {
             {subscription?.plan === 'free' && (
               <div className="bg-white rounded-2xl border border-indigo-100 p-6 text-center">
                 <Zap className="size-8 text-indigo-600 mx-auto mb-3" />
-                <h3 className="text-base font-semibold text-foreground mb-1">Unlock more with Pro or Agency</h3>
+                <h3 className="text-base font-semibold text-foreground mb-1">Unlock more with Pro or Studio</h3>
                 <p className="text-sm text-muted-foreground mb-4">
                   Unlimited forms, widgets, video, and more. Choose the plan that fits your needs.
                 </p>
@@ -1191,7 +1191,7 @@ function SettingsInner() {
             {/* Paid Plan → Features + Manage */}
             {subscription?.plan !== 'free' && (
               <>
-                <Section title="Plan Features" description={`What's included in your ${subscription?.plan === 'agency' ? 'Agency' : 'Pro'} plan.`}>
+                <Section title="Plan Features" description={`What's included in your ${subscription?.plan === 'studio' ? 'Studio' : 'Pro'} plan.`}>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                     {PRO_FEATURES.map((feature) => (
                       <div key={feature} className="flex items-center gap-2">
@@ -1201,7 +1201,7 @@ function SettingsInner() {
                         <span className="text-sm text-foreground/80">{feature}</span>
                       </div>
                     ))}
-                    {subscription?.plan === 'agency' && AGENCY_FEATURES.filter((f) => f !== 'Everything in Pro').map((feature) => (
+                    {subscription?.plan === 'studio' && STUDIO_FEATURES.filter((f) => f !== 'Everything in Pro').map((feature) => (
                       <div key={feature} className="flex items-center gap-2">
                         <div className="size-5 rounded-full bg-amber-50 flex items-center justify-center shrink-0">
                           <Check className="size-3 text-amber-600" />

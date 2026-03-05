@@ -9,7 +9,7 @@ export async function POST(req: NextRequest) {
   const body = await req.json();
   const { userId, plan } = body as { userId: string; plan: string };
 
-  if (!userId || !['free', 'pro', 'agency'].includes(plan)) {
+  if (!userId || !['free', 'pro', 'studio'].includes(plan)) {
     return NextResponse.json({ error: 'Invalid params' }, { status: 400 });
   }
 

@@ -621,7 +621,7 @@ export default async function EmbedPage({ params }: PageProps) {
     );
   }
 
-  const isPro = sub?.plan === 'pro' || sub?.plan === 'agency';
+  const isPro = sub?.plan === 'pro' || sub?.plan === 'studio';
   const hardLimit = isPro ? (widget.max_items ?? 12) : Math.min(widget.max_items ?? 12, 5);
 
   const typedWidget = widget as Widget;

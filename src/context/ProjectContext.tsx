@@ -35,7 +35,7 @@ interface ProjectContextValue {
   projects: Project[];
   selectedProjectId: string | null;
   selectedProject: Project | null;
-  plan: 'free' | 'pro' | 'agency';
+  plan: 'free' | 'pro' | 'studio';
   loading: boolean;
   switchProject: (id: string) => void;
   refetchProjects: () => Promise<void>;
@@ -48,7 +48,7 @@ const STORAGE_KEY = 'vouch_selected_project';
 export function ProjectProvider({ children }: { children: ReactNode }) {
   const [projects, setProjects] = useState<Project[]>([]);
   const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
-  const [plan, setPlan] = useState<'free' | 'pro' | 'agency'>('free');
+  const [plan, setPlan] = useState<'free' | 'pro' | 'studio'>('free');
   const [loading, setLoading] = useState(true);
 
   const fetchProjects = useCallback(async () => {
@@ -78,7 +78,7 @@ export function ProjectProvider({ children }: { children: ReactNode }) {
     setProjects(fetched);
 
     if (subRes.data) {
-      setPlan(subRes.data.plan as 'free' | 'pro' | 'agency');
+      setPlan(subRes.data.plan as 'free' | 'pro' | 'studio');
     }
 
     // Initialize selected project from localStorage, fallback to first

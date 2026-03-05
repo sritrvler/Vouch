@@ -35,13 +35,13 @@ export default async function ClientReportPage({ params }: PageProps) {
 
   if (!project) return notFound();
 
-  // Check if project owner is on Agency plan
+  // Check if project owner is on Studio plan
   const { data: subscription } = await supabase
     .from('subscriptions')
     .select('plan')
     .eq('user_id', project.user_id)
     .single();
-  const isAgency = subscription?.plan === 'agency';
+  const isStudio = subscription?.plan === 'studio';
 
   const [{ data: testimonials }, { data: widgets }] = await Promise.all([
     supabase
@@ -50,7 +50,7 @@ export default async function ClientReportPage({ params }: PageProps) {
       .eq('project_id', project.id)
       .eq('status', 'approved')
       .order('created_at', { ascending: false }),
-    isAgency
+    isStudio
       ? supabase
           .from('widgets')
           .select('id, name, layout')
@@ -100,8 +100,8 @@ export default async function ClientReportPage({ params }: PageProps) {
 
       {/* Content */}
       <div className="max-w-4xl mx-auto px-4 sm:px-6 py-10">
-        {/* Custom intro message (Agency only) */}
-        {isAgency && project.report_message && (
+        {/* Custom intro message (Studio only) */}
+        {isStudio && project.report_message && (
           <div className="mb-8 px-4 py-3 rounded-xl bg-white border border-gray-100 shadow-sm">
             <p className="text-sm text-gray-600 leading-relaxed">{project.report_message}</p>
           </div>
@@ -172,8 +172,8 @@ export default async function ClientReportPage({ params }: PageProps) {
         )}
       </div>
 
-      {/* Embed Codes (Agency only) */}
-      {isAgency && widgets && widgets.length > 0 && (
+      {/* Embed Codes (Studio only) */}
+      {isStudio && widgets && widgets.length > 0 && (
         <div className="max-w-4xl mx-auto px-4 sm:px-6 pb-10">
           <h2 className="text-sm font-bold text-gray-900 mb-4">Embed Codes</h2>
           <p className="text-xs text-gray-500 mb-4">
@@ -193,7 +193,7 @@ export default async function ClientReportPage({ params }: PageProps) {
 
       {/* Footer */}
       <div className="text-center py-8 text-xs text-gray-300">
-        {isAgency && project.report_footer_text
+        {isStudio && project.report_footer_text
           ? project.report_footer_text
           : 'Powered by Vouch'}
       </div>

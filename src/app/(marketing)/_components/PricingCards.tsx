@@ -5,7 +5,7 @@ import Link from "next/link";
 import { Check, Minus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { AGENCY_FEATURES as AGENCY_FEATURES_SOURCE } from "@/lib/lemonsqueezy";
+import { STUDIO_FEATURES as STUDIO_FEATURES_SOURCE } from "@/lib/lemonsqueezy";
 
 export type FeatureItem = { text: string; limitation?: true };
 
@@ -35,7 +35,7 @@ export const PRO_FEATURES: string[] = [
   "Remove Vouch branding",
 ];
 
-export const AGENCY_FEATURES = AGENCY_FEATURES_SOURCE;
+export const STUDIO_FEATURES = STUDIO_FEATURES_SOURCE;
 
 export function PricingCards() {
   const [billing, setBilling] = useState<'monthly' | 'yearly'>('yearly');
@@ -161,11 +161,11 @@ export function PricingCards() {
         </div>
       </div>
 
-      {/* Agency */}
+      {/* Studio */}
       <div>
         <div className="flex flex-col p-6 bg-slate-950 border border-slate-800 rounded-2xl h-full">
           <div className="mb-6">
-            <p className="text-sm font-semibold text-slate-400 mb-1">Agency</p>
+            <p className="text-sm font-semibold text-slate-400 mb-1">Studio</p>
             <div className="flex items-end gap-1.5 mb-1">
               <span className="text-4xl font-bold text-white">
                 {billing === 'yearly' ? '$490' : '$49'}
@@ -179,7 +179,7 @@ export function PricingCards() {
             </p>
           </div>
           <ul className="space-y-3 flex-1 mb-7">
-            {AGENCY_FEATURES.map((f) => (
+            {STUDIO_FEATURES.map((f) => (
               <li
                 key={f}
                 className="flex items-start gap-2.5 text-sm text-slate-300"
@@ -193,8 +193,8 @@ export function PricingCards() {
             asChild
             className="w-full rounded-xl bg-slate-800 hover:bg-slate-700 text-white border border-slate-700"
           >
-            <Link href={`/signup?plan=agency${billing === 'yearly' ? '&billing=yearly' : ''}`}>
-              Get started with Agency
+            <Link href={`/signup?plan=studio${billing === 'yearly' ? '&billing=yearly' : ''}`}>
+              Get started with Studio
             </Link>
           </Button>
           <p className="text-xs text-slate-400 mt-3">

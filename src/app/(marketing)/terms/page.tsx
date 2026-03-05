@@ -53,7 +53,7 @@ export default function TermsPage() {
         <section>
           <h2 className="text-base font-semibold text-foreground mb-2">5. Subscription and billing</h2>
           <p>
-            Vouch offers a free plan and paid plans (Pro, Agency) billed monthly or annually. By
+            Vouch offers a free plan and paid plans (Pro, Studio) billed monthly or annually. By
             subscribing to a paid plan, you authorise us to charge your payment method on a recurring
             basis. Subscriptions can be cancelled at any time via the billing portal. No refunds are
             provided for partial billing periods.

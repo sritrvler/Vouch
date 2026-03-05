@@ -1015,7 +1015,7 @@ export default function InboxPage() {
       const rows = (testimonialsRes.data as Testimonial[]) ?? [];
       setTestimonials(rows);
       setHasMore(rows.length === PAGE_SIZE);
-      setIsPro(subRes.data?.plan === 'pro' || subRes.data?.plan === 'agency');
+      setIsPro(subRes.data?.plan === 'pro' || subRes.data?.plan === 'studio');
     } catch (err) {
       toast.error('Failed to load testimonials');
       console.error(err);

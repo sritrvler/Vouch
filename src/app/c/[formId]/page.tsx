@@ -148,7 +148,7 @@ export default async function CollectPage({ params }: PageProps) {
     );
   }
 
-  const isPro = subscription?.plan === 'pro' || subscription?.plan === 'agency';
+  const isPro = subscription?.plan === 'pro' || subscription?.plan === 'studio';
   const showBranding = subscription?.plan === 'free' || !subscription;
 
   return (

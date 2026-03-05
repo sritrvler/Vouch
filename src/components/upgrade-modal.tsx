@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Check, Zap, Loader2, Crown } from 'lucide-react';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
-import { AGENCY_FEATURES } from '@/lib/lemonsqueezy';
+import { STUDIO_FEATURES } from '@/lib/lemonsqueezy';
 
 // Shorter list for the modal. Full list lives on the pricing page.
 const MODAL_PRO_HIGHLIGHTS = [
@@ -25,9 +25,9 @@ interface UpgradeModalProps {
 
 export function UpgradeModal({ open, onOpenChange }: UpgradeModalProps) {
   const [billing, setBilling] = useState<'monthly' | 'yearly'>('yearly');
-  const [loadingPlan, setLoadingPlan] = useState<'pro' | 'agency' | null>(null);
+  const [loadingPlan, setLoadingPlan] = useState<'pro' | 'studio' | null>(null);
 
-  async function handleUpgrade(plan: 'pro' | 'agency') {
+  async function handleUpgrade(plan: 'pro' | 'studio') {
     setLoadingPlan(plan);
     try {
       const res = await fetch('/api/stripe/checkout', {
@@ -131,11 +131,11 @@ export function UpgradeModal({ open, onOpenChange }: UpgradeModalProps) {
             </p>
           </div>
 
-          {/* Agency */}
+          {/* Studio */}
           <div className="px-5 py-4 flex flex-col border-t sm:border-t-0 border-border">
             <div className="flex items-center gap-2 mb-0.5">
               <Crown className="size-4 text-amber-500" />
-              <h3 className="text-base font-bold text-foreground">Agency</h3>
+              <h3 className="text-base font-bold text-foreground">Studio</h3>
             </div>
             <div className="flex items-end gap-1">
               <span className="text-2xl font-bold text-foreground leading-none">
@@ -150,7 +150,7 @@ export function UpgradeModal({ open, onOpenChange }: UpgradeModalProps) {
             </p>
 
             <div className="space-y-2 flex-1 mb-4">
-              {AGENCY_FEATURES.map((f) => (
+              {STUDIO_FEATURES.map((f) => (
                 <div key={f} className="flex items-start gap-2">
                   <Check className="size-3.5 text-amber-600 shrink-0 mt-0.5" />
                   <span className="text-[13px] text-foreground/80 leading-snug">{f}</span>
@@ -159,12 +159,12 @@ export function UpgradeModal({ open, onOpenChange }: UpgradeModalProps) {
             </div>
 
             <Button
-              onClick={() => handleUpgrade('agency')}
+              onClick={() => handleUpgrade('studio')}
               disabled={loadingPlan !== null}
               variant="outline"
               className="w-full h-9 gap-2 rounded-xl text-sm"
             >
-              {loadingPlan === 'agency' ? (
+              {loadingPlan === 'studio' ? (
                 <>
                   <Loader2 className="size-3.5 animate-spin" />
                   Starting checkout...
@@ -172,7 +172,7 @@ export function UpgradeModal({ open, onOpenChange }: UpgradeModalProps) {
               ) : (
                 <>
                   <Crown className="size-3.5" />
-                  Get Agency
+                  Get Studio
                 </>
               )}
             </Button>

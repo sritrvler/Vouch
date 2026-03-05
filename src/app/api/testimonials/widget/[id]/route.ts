@@ -92,7 +92,7 @@ export async function GET(request: NextRequest, { params }: PageProps) {
       );
     }
 
-    const isPro = sub?.plan === 'pro' || sub?.plan === 'agency';
+    const isPro = sub?.plan === 'pro' || sub?.plan === 'studio';
     const hardLimit = isPro ? (widget.max_items ?? 12) : Math.min(widget.max_items ?? 12, 5);
 
     // Apply custom ordering if set, then enforce hardLimit

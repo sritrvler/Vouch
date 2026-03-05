@@ -26,7 +26,7 @@ interface UserData {
 const PLAN_COLORS: Record<string, string> = {
   free: 'bg-gray-100 text-gray-700',
   pro: 'bg-indigo-100 text-indigo-700',
-  agency: 'bg-slate-800 text-white',
+  studio: 'bg-slate-800 text-white',
 };
 
 export default function AdminClient() {
@@ -242,7 +242,7 @@ export default function AdminClient() {
               >
                 <option value="free">Free</option>
                 <option value="pro">Pro</option>
-                <option value="agency">Agency</option>
+                <option value="studio">Studio</option>
               </select>
               <button
                 onClick={handleSetPlan}

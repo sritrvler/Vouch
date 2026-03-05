@@ -12,15 +12,15 @@ export async function createCheckoutUrl(
   userEmail: string,
   userId: string,
   billing: 'monthly' | 'yearly' = 'monthly',
-  plan: 'pro' | 'agency' = 'pro'
+  plan: 'pro' | 'studio' = 'pro'
 ): Promise<string | null> {
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
 
   let variantId: string;
-  if (plan === 'agency') {
+  if (plan === 'studio') {
     variantId = billing === 'yearly'
-      ? String(process.env.LEMONSQUEEZY_AGENCY_YEARLY_VARIANT_ID)
-      : String(process.env.LEMONSQUEEZY_AGENCY_VARIANT_ID);
+      ? String(process.env.LEMONSQUEEZY_STUDIO_YEARLY_VARIANT_ID)
+      : String(process.env.LEMONSQUEEZY_STUDIO_VARIANT_ID);
   } else {
     variantId = billing === 'yearly'
       ? String(process.env.LEMONSQUEEZY_YEARLY_VARIANT_ID)
@@ -89,8 +89,8 @@ export const PLANS = {
     removeBranding: true,
     customSlug: true,
   },
-  agency: {
-    name: 'Agency',
+  studio: {
+    name: 'Studio',
     testimonialLimit: Infinity,
     widgetLimit: Infinity,
     formLimit: Infinity,
@@ -121,7 +121,7 @@ export const PRO_FEATURES = [
   'Remove Vouch branding',
 ];
 
-export const AGENCY_FEATURES = [
+export const STUDIO_FEATURES = [
   'Everything in Pro',
   'White-label client reports',
   'Embed codes in client reports',
