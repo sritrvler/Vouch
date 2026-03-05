@@ -100,7 +100,9 @@ export const PLANS = {
     removeBranding: true,
     customSlug: true,
     clientReports: true,
-    prioritySupport: true,
+    whiteLabelReports: true,
+    embedCodesInReports: true,
+    reportIntroMessage: true,
   },
 } as const;
 
@@ -121,7 +123,8 @@ export const PRO_FEATURES = [
 
 export const AGENCY_FEATURES = [
   'Everything in Pro',
-  'Client report links for clients',
-  'Priority email support',
-  'Custom onboarding call',
+  'White-label client reports',
+  'Embed codes in client reports',
+  'Custom report intro message',
+  'Email support (1 business day)',
 ];

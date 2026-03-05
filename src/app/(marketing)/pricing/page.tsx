@@ -45,11 +45,12 @@ const TABLE_ROWS: FeatureRow[] = [
 
   { type: "category", label: "Agency Tools" },
   { type: "feature", label: "Client report links", free: false, pro: false, agency: true },
+  { type: "feature", label: "White-label client reports", free: false, pro: false, agency: true },
+  { type: "feature", label: "Embed codes in client reports", free: false, pro: false, agency: true },
+  { type: "feature", label: "Custom report intro message", free: false, pro: false, agency: true },
 
   { type: "category", label: "Support" },
-  { type: "feature", label: "Email support", free: true, pro: true, agency: true },
-  { type: "feature", label: "Priority email support", free: false, pro: false, agency: true },
-  { type: "feature", label: "Custom onboarding call", free: false, pro: false, agency: true },
+  { type: "feature", label: "Email support", free: true, pro: true, agency: "1 business day" },
 ];
 
 function FeatureValue({ value }: { value: string | boolean }) {

@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Check, Minus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { AGENCY_FEATURES as AGENCY_FEATURES_SOURCE } from "@/lib/lemonsqueezy";
 
 export type FeatureItem = { text: string; limitation?: true };
 
@@ -34,12 +35,7 @@ export const PRO_FEATURES: string[] = [
   "Remove Vouch branding",
 ];
 
-export const AGENCY_FEATURES: string[] = [
-  "Everything in Pro",
-  "Client report links for clients",
-  "Priority email support",
-  "Custom onboarding call",
-];
+export const AGENCY_FEATURES = AGENCY_FEATURES_SOURCE;
 
 export function PricingCards() {
   const [billing, setBilling] = useState<'monthly' | 'yearly'>('monthly');
