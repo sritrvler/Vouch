@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Dialog, DialogContent } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Check, Zap, Loader2, Crown } from 'lucide-react';
 import { toast } from 'sonner';
@@ -47,6 +47,7 @@ export function UpgradeModal({ open, onOpenChange }: UpgradeModalProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl p-0 gap-0 overflow-hidden">
+        <DialogTitle className="sr-only">Choose your plan</DialogTitle>
         {/* Header with billing toggle */}
         <div className="px-6 pt-5 pb-3 border-b border-border">
           <h2 className="text-lg font-bold text-foreground mb-2">Choose your plan</h2>
