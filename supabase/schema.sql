@@ -45,6 +45,8 @@ create table public.projects (
   google_review_url text,
   linkedin_url text,
   report_token text unique,
+  report_footer_text text,
+  report_message text,
   created_at timestamptz default now() not null,
   updated_at timestamptz default now() not null
 );
@@ -136,6 +138,10 @@ create table public.widgets (
 );
 -- To add pinned_ids to an existing database run:
 -- ALTER TABLE public.widgets ADD COLUMN IF NOT EXISTS pinned_ids jsonb default '[]';
+
+-- To add report customization columns to an existing database run:
+-- ALTER TABLE public.projects ADD COLUMN IF NOT EXISTS report_footer_text text;
+-- ALTER TABLE public.projects ADD COLUMN IF NOT EXISTS report_message text;
 
 -- To add font columns to an existing database run:
 -- ALTER TABLE public.projects ADD COLUMN IF NOT EXISTS font_family text;

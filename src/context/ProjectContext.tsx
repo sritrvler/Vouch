@@ -27,6 +27,8 @@ interface Project {
   font_family: string | null;
   font_url: string | null;
   report_token: string | null;
+  report_footer_text: string | null;
+  report_message: string | null;
 }
 
 interface ProjectContextValue {
@@ -62,7 +64,7 @@ export function ProjectProvider({ children }: { children: ReactNode }) {
     const [projectsRes, subRes] = await Promise.all([
       supabase
         .from('projects')
-        .select('id, name, slug, website, google_review_url, linkedin_url, logo_url, accent_color, form_bg_color, button_color, text_color, input_color, font_family, font_url, report_token')
+        .select('id, name, slug, website, google_review_url, linkedin_url, logo_url, accent_color, form_bg_color, button_color, text_color, input_color, font_family, font_url, report_token, report_footer_text, report_message')
         .eq('user_id', user.id)
         .order('name', { ascending: true }),
       supabase

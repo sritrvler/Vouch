@@ -2,6 +2,7 @@ import { createServerSupabaseClient } from '@/lib/supabase/server';
 import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
 import { Star } from 'lucide-react';
+import ReportEmbedCodes from './embed-codes';
 
 interface PageProps {
   params: Promise<{ token: string }>;
@@ -28,18 +29,35 @@ export default async function ClientReportPage({ params }: PageProps) {
 
   const { data: project } = await supabase
     .from('projects')
-    .select('id, name, logo_url, accent_color, button_color, text_color')
+    .select('id, user_id, name, logo_url, accent_color, button_color, text_color, report_footer_text, report_message')
     .eq('report_token', token)
     .single();
 
   if (!project) return notFound();
 
-  const { data: testimonials } = await supabase
-    .from('testimonials')
-    .select('id, author_name, author_role, author_company, author_avatar_url, rating, content, created_at')
-    .eq('project_id', project.id)
-    .eq('status', 'approved')
-    .order('created_at', { ascending: false });
+  // Check if project owner is on Agency plan
+  const { data: subscription } = await supabase
+    .from('subscriptions')
+    .select('plan')
+    .eq('user_id', project.user_id)
+    .single();
+  const isAgency = subscription?.plan === 'agency';
+
+  const [{ data: testimonials }, { data: widgets }] = await Promise.all([
+    supabase
+      .from('testimonials')
+      .select('id, author_name, author_role, author_company, author_avatar_url, rating, content, created_at')
+      .eq('project_id', project.id)
+      .eq('status', 'approved')
+      .order('created_at', { ascending: false }),
+    isAgency
+      ? supabase
+          .from('widgets')
+          .select('id, name, layout')
+          .eq('project_id', project.id)
+          .order('name', { ascending: true })
+      : Promise.resolve({ data: null }),
+  ]);
 
   const accent = project.button_color || project.accent_color || '#6366F1';
   const reportTextColor = project.text_color || '#1a1a1a';
@@ -82,6 +100,13 @@ export default async function ClientReportPage({ params }: PageProps) {
 
       {/* Content */}
       <div className="max-w-4xl mx-auto px-4 sm:px-6 py-10">
+        {/* Custom intro message (Agency only) */}
+        {isAgency && project.report_message && (
+          <div className="mb-8 px-4 py-3 rounded-xl bg-white border border-gray-100 shadow-sm">
+            <p className="text-sm text-gray-600 leading-relaxed">{project.report_message}</p>
+          </div>
+        )}
+
         {total === 0 ? (
           <div className="text-center py-24 text-gray-400">
             <p className="text-base">No approved testimonials yet.</p>
@@ -147,9 +172,30 @@ export default async function ClientReportPage({ params }: PageProps) {
         )}
       </div>
 
+      {/* Embed Codes (Agency only) */}
+      {isAgency && widgets && widgets.length > 0 && (
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 pb-10">
+          <h2 className="text-sm font-bold text-gray-900 mb-4">Embed Codes</h2>
+          <p className="text-xs text-gray-500 mb-4">
+            Copy and paste these snippets into your website to display the testimonial widgets.
+          </p>
+          <div className="space-y-4">
+            {widgets.map((w) => {
+              const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
+              const snippet = `<div data-vouch-widget="${w.id}"></div>\n<script src="${siteUrl}/embed.js" async></script>`;
+              return (
+                <ReportEmbedCodes key={w.id} name={w.name} layout={w.layout} snippet={snippet} />
+              );
+            })}
+          </div>
+        </div>
+      )}
+
       {/* Footer */}
       <div className="text-center py-8 text-xs text-gray-300">
-        Powered by Vouch
+        {isAgency && project.report_footer_text
+          ? project.report_footer_text
+          : 'Powered by Vouch'}
       </div>
     </div>
   );

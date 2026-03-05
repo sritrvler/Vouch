@@ -57,6 +57,8 @@ interface Project {
   font_family: string | null;
   font_url: string | null;
   report_token: string | null;
+  report_footer_text: string | null;
+  report_message: string | null;
 }
 
 interface Subscription {
@@ -164,6 +166,8 @@ function SettingsInner() {
   const [reportToken, setReportToken] = useState<string | null>(null);
   const [reportCopied, setReportCopied] = useState(false);
   const [generatingReport, setGeneratingReport] = useState(false);
+  const [reportFooterText, setReportFooterText] = useState('');
+  const [reportMessage, setReportMessage] = useState('');
 
   // ── Billing state ──────────────────────────────────────────────────────────
   const [subscription, setSubscription] = useState<Subscription | null>(null);
@@ -210,6 +214,8 @@ function SettingsInner() {
       setFontUrl(null);
       setLogoPreview(null);
       setReportToken(null);
+      setReportFooterText('');
+      setReportMessage('');
       return;
     }
     if (selectedProject) {
@@ -229,6 +235,8 @@ function SettingsInner() {
       setFontUrl(p.font_url ?? null);
       setLogoPreview(p.logo_url);
       setReportToken(p.report_token ?? null);
+      setReportFooterText(p.report_footer_text ?? '');
+      setReportMessage(p.report_message ?? '');
     } else if (!projectsLoading) {
       // No projects at all: clear fields for create mode
       setProject(null);
@@ -246,6 +254,8 @@ function SettingsInner() {
       setFontUrl(null);
       setLogoPreview(null);
       setReportToken(null);
+      setReportFooterText('');
+      setReportMessage('');
     }
   }, [selectedProject, selectedProjectId, isNewProject, projectsLoading]);
 
@@ -397,6 +407,8 @@ function SettingsInner() {
         font_family: sanitizeFontFamily(fontFamily),
         font_url: sanitizeFontUrl(fontUrl),
         logo_url: logoPreview,
+        report_footer_text: reportFooterText.trim() || null,
+        report_message: reportMessage.trim().slice(0, 200) || null,
       };
 
       if (project) {
@@ -788,6 +800,46 @@ function SettingsInner() {
                     </Button>
                   </div>
                 )}
+              </Section>
+            )}
+
+            {/* Report Customization (Agency only) */}
+            {subscription?.plan === 'agency' && project && (
+              <Section
+                title="Report Customization"
+                description="Personalize the client report page with a custom intro and footer."
+              >
+                <div className="space-y-4">
+                  <div>
+                    <label className="text-sm font-medium text-foreground mb-1.5 block">
+                      Client report intro
+                    </label>
+                    <Input
+                      value={reportMessage}
+                      onChange={(e) => setReportMessage(e.target.value.slice(0, 200))}
+                      placeholder="Prepared for [Client Name] by [Your Studio]"
+                      className="rounded-xl"
+                      maxLength={200}
+                    />
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Shown as a note above testimonials on the report page. {reportMessage.length}/200
+                    </p>
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-foreground mb-1.5 block">
+                      Report footer text
+                    </label>
+                    <Input
+                      value={reportFooterText}
+                      onChange={(e) => setReportFooterText(e.target.value)}
+                      placeholder="Report prepared by [Your Company]"
+                      className="rounded-xl"
+                    />
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Replaces &quot;Powered by Vouch&quot; at the bottom of the report.
+                    </p>
+                  </div>
+                </div>
               </Section>
             )}
 
