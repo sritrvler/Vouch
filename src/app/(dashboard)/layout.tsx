@@ -322,13 +322,13 @@ function DashboardLayoutInner({ children }: { children: React.ReactNode }) {
 
       {/* Main content */}
       <main className="flex-1 flex flex-col min-w-0 overflow-hidden">
-        <div className="flex-1 overflow-y-auto pb-32 md:pb-0">
+        <div className="flex-1 overflow-y-auto">
           <motion.div
             key={pathname}
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.25, ease: 'easeOut' }}
-            className="h-full"
+            className="min-h-full pb-24 md:pb-0"
           >
             {children}
           </motion.div>
