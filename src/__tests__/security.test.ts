@@ -9,7 +9,8 @@ import { sanitizeFontUrl, sanitizeFontFamily } from '@/lib/fonts';
 // ── 1. Open redirect validation ──────────────────────────────────────────────
 // Mirrors: src/app/api/auth/callback/route.ts line 10
 function validateRedirect(rawNext: string): string {
-  return (rawNext.startsWith('/') && !rawNext.startsWith('//')) ? rawNext : '/dashboard';
+  const isSafe = rawNext.startsWith('/') && !rawNext.startsWith('//') && !rawNext.startsWith('/\\');
+  return isSafe ? rawNext : '/dashboard';
 }
 
 describe('Open redirect validation', () => {
@@ -37,14 +38,14 @@ describe('Open redirect validation', () => {
 
   it('blocks backslash bypass attempts', () => {
     expect(validateRedirect('\\/evil.com')).toBe('/dashboard');
-    expect(validateRedirect('/\\evil.com')).toBe('/\\evil.com'); // starts with / and not //, so allowed (harmless as relative path)
+    expect(validateRedirect('/\\evil.com')).toBe('/dashboard');
   });
 });
 
 // ── 2. Logo upload extension allowlisting ────────────────────────────────────
 // Mirrors: src/app/api/upload-logo/route.ts lines 22-28
-const ALLOWED_EXTENSIONS = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'];
-const ALLOWED_MIMES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/svg+xml'];
+const ALLOWED_EXTENSIONS = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
+const ALLOWED_MIMES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
 
 function validateLogoUpload(fileName: string, mimeType: string): boolean {
   const ext = (fileName.split('.').pop() || '').toLowerCase();
@@ -55,8 +56,12 @@ describe('Logo upload validation', () => {
   it('allows valid image files', () => {
     expect(validateLogoUpload('logo.png', 'image/png')).toBe(true);
     expect(validateLogoUpload('logo.jpg', 'image/jpeg')).toBe(true);
-    expect(validateLogoUpload('icon.svg', 'image/svg+xml')).toBe(true);
     expect(validateLogoUpload('photo.webp', 'image/webp')).toBe(true);
+    expect(validateLogoUpload('photo.gif', 'image/gif')).toBe(true);
+  });
+
+  it('blocks SVG files (stored XSS vector)', () => {
+    expect(validateLogoUpload('icon.svg', 'image/svg+xml')).toBe(false);
   });
 
   it('blocks HTML files even with image MIME type', () => {

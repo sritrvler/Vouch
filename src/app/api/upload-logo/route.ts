@@ -19,12 +19,12 @@ export async function POST(request: NextRequest) {
     }
 
     // Validate file extension and MIME type
-    const ALLOWED_EXTENSIONS = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'];
-    const ALLOWED_MIMES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/svg+xml'];
+    const ALLOWED_EXTENSIONS = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
+    const ALLOWED_MIMES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
     const ext = (file.name.split('.').pop() || '').toLowerCase();
 
     if (!ALLOWED_EXTENSIONS.includes(ext) || !ALLOWED_MIMES.includes(file.type)) {
-      return NextResponse.json({ error: 'Only JPG, PNG, GIF, WebP, and SVG images are allowed' }, { status: 400 });
+      return NextResponse.json({ error: 'Only JPG, PNG, GIF, and WebP images are allowed' }, { status: 400 });
     }
 
     if (file.size > 2 * 1024 * 1024) {

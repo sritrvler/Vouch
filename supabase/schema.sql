@@ -232,8 +232,11 @@ create policy "Public can view approved testimonials" on public.testimonials
 create policy "Public can insert testimonials" on public.testimonials
   for insert with check (
     exists (
-      select 1 from public.collection_forms
-      where id = form_id and is_active = true
+      select 1 from public.collection_forms cf
+      where cf.id = form_id
+        and cf.is_active = true
+        and cf.project_id = project_id
+        and cf.user_id = user_id
     )
   );
 
