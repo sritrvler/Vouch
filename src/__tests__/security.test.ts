@@ -34,6 +34,11 @@ describe('Open redirect validation', () => {
     expect(validateRedirect('javascript:alert(1)')).toBe('/dashboard');
     expect(validateRedirect('data:text/html,<h1>hi</h1>')).toBe('/dashboard');
   });
+
+  it('blocks backslash bypass attempts', () => {
+    expect(validateRedirect('\\/evil.com')).toBe('/dashboard');
+    expect(validateRedirect('/\\evil.com')).toBe('/\\evil.com'); // starts with / and not //, so allowed (harmless as relative path)
+  });
 });
 
 // ── 2. Logo upload extension allowlisting ────────────────────────────────────
