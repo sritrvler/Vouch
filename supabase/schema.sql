@@ -190,8 +190,10 @@ create index on public.collection_forms (project_id);
 create index on public.collection_forms (user_id);
 create index on public.widgets (user_id);
 create index on public.widgets (project_id);
+create index on public.projects (user_id);
 
 -- To add missing indexes to an existing database run:
+-- CREATE INDEX IF NOT EXISTS idx_projects_user_id ON public.projects (user_id);
 -- CREATE INDEX IF NOT EXISTS idx_testimonials_form_id ON public.testimonials (form_id);
 -- CREATE INDEX IF NOT EXISTS idx_collection_forms_user_id ON public.collection_forms (user_id);
 -- CREATE INDEX IF NOT EXISTS idx_widgets_user_id ON public.widgets (user_id);
@@ -222,11 +224,18 @@ create policy "Owners manage forms" on public.collection_forms
 create policy "Public can view active forms" on public.collection_forms
   for select using (is_active = true);
 
--- Testimonials: owners manage, public can view approved
+-- Testimonials: owners manage, public can view approved, public can insert via valid form
 create policy "Owners manage testimonials" on public.testimonials
   for all using (auth.uid() = user_id);
 create policy "Public can view approved testimonials" on public.testimonials
   for select using (status = 'approved');
+create policy "Public can insert testimonials" on public.testimonials
+  for insert with check (
+    exists (
+      select 1 from public.collection_forms
+      where id = form_id and is_active = true
+    )
+  );
 
 -- Widgets: owners manage, public can read
 create policy "Owners manage widgets" on public.widgets

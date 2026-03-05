@@ -43,28 +43,24 @@ export async function GET(request: NextRequest, { params }: PageProps) {
       );
     }
 
-    // ── Fetch project info for branding ──────────────────────────────────────
-    const { data: project } = await supabase
+    const pinnedIds: string[] = Array.isArray(widget.pinned_ids) ? (widget.pinned_ids as string[]) : [];
+
+    // ── Parallel fetch: project, subscription, and testimonials ─────────────
+    const projectPromise = supabase
       .from('projects')
       .select('name, logo_url, font_family, font_url')
       .eq('id', widget.project_id)
       .single();
 
-    // ── Check Pro status for display limit ────────────────────────────────────
-    const { data: sub } = await supabase
+    const subPromise = supabase
       .from('subscriptions')
-      .select('plan')
+      .select('plan, is_banned')
       .eq('user_id', widget.user_id)
       .single();
-    const isPro = sub?.plan === 'pro' || sub?.plan === 'agency';
-    const hardLimit = isPro ? (widget.max_items ?? 12) : Math.min(widget.max_items ?? 12, 5);
 
-    const pinnedIds: string[] = Array.isArray(widget.pinned_ids) ? (widget.pinned_ids as string[]) : [];
-
-    // ── Build testimonials query ───────────────────────────────────────────────
-    // Fetch up to 200 when custom order is set (sort in JS), otherwise use DB ordering + limit
-    const fetchLimit = pinnedIds.length > 0 ? 200 : hardLimit;
-    let query = supabase
+    // Pre-build testimonials query (use generous limit; will be trimmed after plan check)
+    const fetchLimit = pinnedIds.length > 0 ? 200 : 12;
+    let tQuery = supabase
       .from('testimonials')
       .select('id, author_name, author_role, author_company, author_avatar_url, rating, content, enhanced_content, featured, source_url, golden_sentence, metric_label, video_url, video_thumbnail_url, email_domain, show_text, show_video, created_at', { count: 'exact' })
       .eq('project_id', widget.project_id)
@@ -73,12 +69,23 @@ export async function GET(request: NextRequest, { params }: PageProps) {
       .limit(fetchLimit);
 
     if (widget.filter_mode === 'featured') {
-      query = query.eq('featured', true);
+      tQuery = tQuery.eq('featured', true);
     } else if (widget.filter_mode === 'rating') {
-      query = query.gte('rating', widget.min_rating ?? 4);
+      tQuery = tQuery.gte('rating', widget.min_rating ?? 4);
     }
 
-    const { data: rawTestimonials, count: totalCount, error: testimonialError } = await query;
+    const [{ data: project }, { data: sub }, { data: rawTestimonials, count: totalCount, error: testimonialError }] =
+      await Promise.all([projectPromise, subPromise, tQuery]);
+
+    if (sub?.is_banned) {
+      return NextResponse.json(
+        { error: 'Widget unavailable' },
+        { status: 403, headers: CORS_HEADERS }
+      );
+    }
+
+    const isPro = sub?.plan === 'pro' || sub?.plan === 'agency';
+    const hardLimit = isPro ? (widget.max_items ?? 12) : Math.min(widget.max_items ?? 12, 5);
 
     // Apply custom ordering if set, then enforce hardLimit
     let testimonials = rawTestimonials ?? [];

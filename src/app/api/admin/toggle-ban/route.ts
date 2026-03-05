@@ -8,7 +8,7 @@ async function verifyAdmin(req: NextRequest) {
   const adminEmail = process.env.ADMIN_EMAIL;
   const adminSecret = process.env.ADMIN_SECRET;
   if (!adminEmail || !user || user.email !== adminEmail) return null;
-  if (adminSecret && req.headers.get('x-admin-secret') !== adminSecret) return null;
+  if (!adminSecret || req.headers.get('x-admin-secret') !== adminSecret) return null;
   return user;
 }
 

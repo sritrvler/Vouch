@@ -55,11 +55,10 @@ function SignupForm() {
   });
 
   async function onSubmit(values: SignupFormValues) {
-    // TODO: Re-enable before go-live. Disabled for testing with temp emails.
-    // if (isDisposableEmail(values.email)) {
-    //   toast.error('Temporary email addresses are not allowed. Please use a real email.');
-    //   return;
-    // }
+    if (isDisposableEmail(values.email)) {
+      toast.error('Temporary email addresses are not allowed. Please use a real email.');
+      return;
+    }
 
     setIsLoading(true);
     const supabase = createClient();

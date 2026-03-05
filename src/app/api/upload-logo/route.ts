@@ -18,8 +18,13 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'No file provided' }, { status: 400 });
     }
 
-    if (!file.type.startsWith('image/')) {
-      return NextResponse.json({ error: 'File must be an image' }, { status: 400 });
+    // Validate file extension and MIME type
+    const ALLOWED_EXTENSIONS = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'];
+    const ALLOWED_MIMES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/svg+xml'];
+    const ext = (file.name.split('.').pop() || '').toLowerCase();
+
+    if (!ALLOWED_EXTENSIONS.includes(ext) || !ALLOWED_MIMES.includes(file.type)) {
+      return NextResponse.json({ error: 'Only JPG, PNG, GIF, WebP, and SVG images are allowed' }, { status: 400 });
     }
 
     if (file.size > 2 * 1024 * 1024) {
@@ -30,8 +35,6 @@ export async function POST(request: NextRequest) {
 
     // Ensure bucket exists (lazy creation, ignore error if already exists)
     await adminClient.storage.createBucket('vouch-assets', { public: true });
-
-    const ext = file.name.split('.').pop() || 'png';
     const path = `logos/${user.id}/logo.${ext}`;
     const buffer = await file.arrayBuffer();
 

@@ -381,7 +381,7 @@ function SettingsInner() {
       // - Free users (or Pro with no custom slug typed) get an auto-generated slug from the project name
       // - Preserve existing slug if user hasn't changed it
       let resolvedSlug: string | undefined;
-      if (subscription?.plan === 'pro' && projectSlug.trim()) {
+      if (subscription?.plan !== 'free' && projectSlug.trim()) {
         resolvedSlug = projectSlug.trim().toLowerCase().replace(/[^a-z0-9-]/g, '-');
       } else if (!project?.slug) {
         // Auto-generate from project name for new projects or projects without a slug

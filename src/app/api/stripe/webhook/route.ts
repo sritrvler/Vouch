@@ -44,14 +44,25 @@ export async function POST(request: NextRequest) {
       else if (lsStatus === 'past_due') dbStatus = 'past_due';
       else if (lsStatus === 'cancelled' || attributes.cancelled) dbStatus = 'cancelled';
 
-      const isPro = dbStatus === 'active' || dbStatus === 'past_due';
+      const isActive = dbStatus === 'active' || dbStatus === 'past_due';
+
+      // Determine plan based on variant ID
+      let plan: 'free' | 'pro' | 'agency' = 'free';
+      if (isActive) {
+        const variantId = String(attributes.variant_id ?? attributes.first_subscription_item?.variant_id ?? '');
+        const agencyVariants = [
+          process.env.LEMONSQUEEZY_AGENCY_VARIANT_ID,
+          process.env.LEMONSQUEEZY_AGENCY_YEARLY_VARIANT_ID,
+        ].filter(Boolean);
+        plan = agencyVariants.includes(variantId) ? 'agency' : 'pro';
+      }
 
       await supabase
         .from('subscriptions')
         .update({
           stripe_subscription_id: subscriptionId,
           stripe_customer_id: String(attributes.customer_id ?? ''),
-          plan: isPro ? 'pro' : 'free',
+          plan,
           status: dbStatus,
           current_period_end: attributes.renews_at ?? null,
         })
