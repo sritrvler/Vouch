@@ -10,7 +10,35 @@
 
 # Active Work Queue
 
-## Session Handoff (March 4, 2026, session 5)
+## Session Handoff (March 5, 2026, session 6)
+
+**What was done this session:**
+1. Fixed font loading bug: changed `display: 'optional'` to `display: 'swap'` in layout.tsx. Inter font was falling back to Arial on first load.
+2. Dashboard metrics now scoped by project: uses ProjectContext's selectedProjectId. Added "All projects" toggle when user has > 1 project.
+3. Project dropdown improvements: sorted alphabetically (was created_at), search input appears when > 5 projects.
+4. Redesigned UpgradeModal to show Pro ($19) and Agency ($49) side by side. Was Pro-only.
+5. Replaced all 4 inline upgrade dialogs (widgets, forms, inbox, settings) with the shared UpgradeModal. Eliminated duplicate feature lists, hardcoded prices, and Pro-only copy.
+6. Centralized feature lists: PRO_FEATURES and AGENCY_FEATURES exported from `src/lib/lemonsqueezy.ts`. All surfaces import from there.
+7. Added Agency to PLANS object in lemonsqueezy.ts (was missing). Fixed Pro projectLimit from 5 to Infinity (contradicted "Unlimited" on pricing page).
+8. Fixed Agency users seeing only Pro features in billing tab. Now shows Agency-specific features too.
+9. Cleaned up dead imports in widgets/page.tsx and forms/page.tsx.
+10. Fixed "Upgrade to Pro" copy in settings help text to plan-neutral "Upgrade to..."
+11. Condensed modal Pro features from 10 items to 6 highlights to prevent viewport overflow.
+12. Agency plan strategy created and added to todo.md as "NEXT" task.
+
+**What's next:**
+Agency Plan Overhaul. Start with Task 1 (self-serve checkout). See "NEXT: Agency Plan Overhaul" section below.
+
+**What to watch out for:**
+1. The upgrade modal uses a condensed `MODAL_PRO_HIGHLIGHTS` list (6 items) while the pricing page uses the full `PRO_FEATURES` (10 items). These are intentionally different. Don't try to sync them.
+2. Agency checkout requires Lemon Squeezy variant IDs in .env.local (LEMONSQUEEZY_AGENCY_VARIANT_ID, LEMONSQUEEZY_AGENCY_YEARLY_VARIANT_ID). These don't exist yet.
+3. The `createCheckoutUrl` function in lemonsqueezy.ts currently only handles Pro variants. Task 1 of the Agency overhaul extends it.
+4. Settings page billing tab for free users now opens the UpgradeModal instead of having its own inline Pro card. The old `handleUpgrade` function in settings may be dead code now (verify before removing).
+5. ProjectContext sorts projects by name now (was created_at). This affects the order everywhere projects are listed.
+
+---
+
+## Previous: Session Handoff (March 4, 2026, session 5)
 
 **What was done this session:**
 1. Custom fonts shipped. All 11 files changed (see plan). Build passes.
@@ -184,6 +212,77 @@ Inter, Roboto, Open Sans, Lato, Poppins, Montserrat, Nunito, Raleway, Source San
 `src/components/collect/CollectFormClient.tsx` (form font)
 `src/app/p/[slug]/page.tsx` (public page font)
 `supabase/schema.sql` (add font_family to projects table, or use widget theme)
+
+---
+
+## NEXT: Agency Plan Overhaul (Make It Real and Self-Serve)
+
+**The problem:**
+Agency ($49/mo) is currently "Pro + support theater." The only product feature is client report links. "Priority support" and "onboarding call" require founder time and don't scale. The "Get in touch" mailto CTA blocks self-serve revenue. Nobody pays 2.5x more for email support.
+
+**The fix: Agency = Client Delivery Workflow**
+Pro is for managing your own social proof. Agency is for delivering social proof to clients professionally. The positioning shift: "Pro + support" becomes "Pro + client tools."
+
+**Target personas:**
+1. Marcus (agency owner, 8 client websites, needs to hand off reports and embed codes efficiently)
+2. Diana (freelance web designer, 5 clients, wants her deliverables to look professional, not "powered by some tool")
+
+### Task 1: Self-serve checkout (HIGHEST PRIORITY)
+Files: `src/components/upgrade-modal.tsx`, `src/app/(marketing)/_components/PricingCards.tsx`, `src/app/api/stripe/checkout/route.ts`, `src/lib/lemonsqueezy.ts`
+1. Add Agency variant IDs to `.env.local` (LEMONSQUEEZY_AGENCY_VARIANT_ID, LEMONSQUEEZY_AGENCY_YEARLY_VARIANT_ID)
+2. Update `createCheckoutUrl` to accept a `plan` parameter ('pro' | 'agency')
+3. Update checkout API route to accept `plan` in the request body
+4. Update UpgradeModal "Get in touch" button to trigger Agency checkout instead of mailto
+5. Update PricingCards "Get in touch" button to link to signup with agency plan param
+6. Estimated effort: 1 to 2 hours
+
+### Task 2: White-label client reports
+Files: `src/app/report/[token]/page.tsx`, `src/app/(dashboard)/dashboard/settings/page.tsx`, `supabase/schema.sql`
+1. Add `report_footer_text` column to projects table (nullable text, Agency only)
+2. Add field in settings (Agency gated): "Report footer text" with placeholder "Report prepared by [Your Company]"
+3. In report page: if project has `report_footer_text`, show that instead of "Powered by Vouch"
+4. Pro/Free users still see "Powered by Vouch"
+5. Estimated effort: half a day
+
+### Task 3: Embed codes on client report page
+Files: `src/app/report/[token]/page.tsx`, report page API query
+1. Query widgets for this project alongside testimonials
+2. Add "Embed Codes" section at the bottom of the report page
+3. Show each widget's embed snippet (script tag) with a copy button
+4. Agency only (check plan in the report query)
+5. This transforms the report from "data dump" to "complete client handoff document"
+6. Estimated effort: 1 day
+
+### Task 4: Custom report intro message
+Files: `src/app/(dashboard)/dashboard/settings/page.tsx`, `supabase/schema.sql`, `src/app/report/[token]/page.tsx`
+1. Add `report_message` column to projects table (nullable text, 200 char limit, Agency only)
+2. Add field in settings: "Client report intro" with placeholder "Prepared for [Client Name] by [Your Studio]"
+3. Render as a styled note above testimonials on the report page
+4. Estimated effort: 2 hours
+
+### Task 5: Kill onboarding call, update feature list
+Files: `src/lib/lemonsqueezy.ts`, `src/app/(marketing)/_components/PricingCards.tsx`, `src/app/(marketing)/pricing/page.tsx`
+1. Remove "Custom onboarding call" from AGENCY_FEATURES
+2. Remove "Priority email support" (replace with "Email support, 1 business day response")
+3. Add new Agency features to feature lists: "White-label client reports", "Embed codes in client reports", "Custom report intro message"
+4. Update pricing comparison table
+5. Estimated effort: 1 hour
+
+### Task 6 (DEFER): Consider renaming "Agency" to "Studio"
+"Agency" excludes freelancers. "Studio" works for both Diana (freelancer) and Marcus (agency). Evaluate after shipping tasks 1 to 5. Not urgent.
+
+### Task 7 (DEFER): Custom domains for collection forms
+Real value but requires DNS verification and SSL provisioning. Wait for 20+ Agency subscribers asking for it.
+
+### Task 8 (DEFER): Team seats / client logins
+Report link solves 80% of the "share with client" need. Full ACL is a 2 to 4 week project. Defer.
+
+**New Agency feature list (after tasks 1 to 5):**
+1. Everything in Pro
+2. White-label client reports (no Vouch branding, custom footer)
+3. Embed codes delivered via client report link
+4. Custom report intro message
+5. Email support (1 business day response)
 
 ---
 
