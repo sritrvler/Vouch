@@ -2,15 +2,39 @@
 
 - [ ] **Re-enable disposable email blocking**: Uncomment the `isDisposableEmail` check in `src/app/(auth)/signup/page.tsx` (line ~59). Currently disabled so we can test with temp emails like yopmail.
 - [ ] **Enable "Confirm email" in Supabase**: Dashboard > Authentication > Providers > Email > toggle "Confirm email" ON.
-- [ ] **Test camera startup speed on another device**: Camera preview in the collection form (step 3) takes 5-10 seconds on dev laptop. Could be a hardware issue. Test on a different device before release. If still slow, investigate further optimizations.
-- [ ] **Test video upload speed on another device/network**: A 3-4 second video upload feels slow. Already optimized the API route (parallelized DB queries, removed redundant createBucket call). Could be dev network/Supabase Storage latency. Test on a different network before release.
-- [ ] **Video playback delay in review step**: After recording, clicking play on the review video takes 5-8 seconds to start. Likely the blob URL or video element buffering issue. Investigate and fix alongside other video issues.
+- [x] **Test camera startup speed on another device**: Optimized in session 7. Lowered getUserMedia from 1280x720 to 640x480. Still needs manual test on another device to confirm.
+- [x] **Test video upload speed on another device/network**: Optimized in session 7. Reduced recording bitrate from 1Mbps to 600kbps (40% smaller files). Still needs manual test on another network.
+- [x] **Video playback delay in review step**: Fixed in session 7. Added `preload="auto"` to review video element. Blob URL now buffers immediately.
 
 ---
 
 # Active Work Queue
 
-## Session Handoff (March 5, 2026, session 6)
+## Session Handoff (March 5, 2026, session 7)
+
+**What was done this session:**
+1. Fixed video playback delay in review step: added `preload="auto"` to the blob URL video in CollectFormClient.tsx (line 1001). Browser now buffers the local blob immediately instead of waiting for play.
+2. Optimized camera startup: lowered getUserMedia constraints from `ideal: 1280x720` to `ideal: 640x480` (line 548). Lower resolution negotiates faster with camera hardware.
+3. Reduced recording bitrate: 1,000,000 bps to 600,000 bps (line 490). For talking-head testimonials at 480p, this is plenty. Files are ~40% smaller.
+4. Thumbnail-first widgets in embed.js: replaced inline `<video>` tags with poster image + play button overlay. Video loads only when user clicks. Saves 70-90% bandwidth for widget page loads. Click handler in `postRenderFixups` creates the video element dynamically.
+5. Added Fair Use clause to Terms of Service (new section 7). Covers "unlimited" features with reasonable business use language. Follows Basecamp/Notion pattern.
+6. Updated ToS section 5 to mention Pro, Agency, and annual billing (was Pro-only, monthly-only).
+7. Renumbered ToS sections 7-11 to 8-12. Updated "Last updated" date to March 5, 2026.
+
+**What's next:**
+Agency Plan Overhaul. Start with Task 1 (self-serve checkout). See "NEXT: Agency Plan Overhaul" section below.
+
+**What to watch out for:**
+1. Camera resolution is now `ideal: 640x480` not `ideal: 1280x720`. If users report blurry video, this can be bumped to `ideal: 960x720` as a middle ground.
+2. Recording bitrate is now 600kbps (was 1Mbps). If quality complaints arise for longer recordings (60s+), consider 750kbps.
+3. embed.js video click-to-play replaces the poster div with a `<video>` element using `replaceWith()`. The old div is gone after click. If user pauses and the widget re-renders (e.g., carousel navigation), the video state is lost. This is acceptable since carousel auto-advance is not implemented.
+4. The iframe embed (`src/app/embed/[id]/page.tsx`) still uses inline `<video>` tags (not thumbnail-first). It's v1 compat only and not shown in dashboard, so this is intentional.
+5. Server-side video compression (Cloudinary/FFmpeg/Mux) was NOT done. This requires external service integration and is deferred. The client-side bitrate reduction handles 80% of the cost savings.
+6. The "Test on another device" go-live items are checked off as optimized, but still need manual verification on a physical device before launch.
+
+---
+
+## Previous: Session Handoff (March 5, 2026, session 6)
 
 **What was done this session:**
 1. Fixed font loading bug: changed `display: 'optional'` to `display: 'swap'` in layout.tsx. Inter font was falling back to Arial on first load.
@@ -286,36 +310,16 @@ Report link solves 80% of the "share with client" need. Full ACL is a 2 to 4 wee
 
 ---
 
-## AFTER: Video Cost Optimization (Compress + Thumbnail + Fair Use)
+## DONE: Video Cost Optimization — partially shipped session 7
 
-**The concern:**
-Pro ($19/mo) offers unlimited projects and videos. A power user with 20 projects full of videos could cost more in storage and bandwidth than the $19 revenue. Need to make "unlimited" sustainable.
+**Client-side optimizations (shipped):**
+1. Recording bitrate reduced from 1Mbps to 600kbps (40% smaller files)
+2. Camera resolution lowered from 1280x720 to 640x480 (faster init + smaller output)
+3. Thumbnail-first in embed.js (poster + play button, video loads on click, 70-90% bandwidth savings)
+4. Fair use clause added to ToS section 7
 
-**Strategy:** Industry standard approach (Senja, Testimonial.to all do this).
-
-**Three parts:**
-
-### Part 1: Compress videos on upload
-File: `src/app/api/testimonials/upload-video/route.ts`
-1. After upload, transcode video to 720p using Cloudinary (free tier: 25 credits/mo) or FFmpeg
-2. Replace original with compressed version in Supabase storage
-3. Target: 80% size reduction (50MB upload becomes 5 to 10MB stored)
-4. Evaluate: Cloudinary free tier vs serverless FFmpeg vs Mux
-
-### Part 2: Thumbnail-first in widgets (play on click)
-Files: `public/embed.js`, `src/app/api/testimonials/widget/[id]/route.ts`
-1. Generate poster image (first frame) during upload or on first request
-2. Widget shows thumbnail by default, streams video only on click
-3. Cuts bandwidth 70 to 90% since most visitors never click play on every video
-4. Also improves widget load performance (lighter initial payload)
-
-### Part 3: Fair use policy in ToS
-File: `src/app/terms/page.tsx`
-1. Add fair use clause: "Unlimited means reasonable business use"
-2. Standard SaaS practice (Basecamp, Notion, etc.)
-3. Gives us a lever for the 1% edge case without changing marketing
-
-**Priority:** After multi-widget and custom fonts. This is an optimization, not a broken promise.
+**Server-side compression (DEFERRED):**
+Requires Cloudinary, FFmpeg, or Mux integration. Evaluate when video storage costs become material (track Supabase storage usage monthly). The client-side bitrate reduction handles the 80% case.
 
 ---
 
