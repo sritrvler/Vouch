@@ -487,7 +487,7 @@ export default function CollectFormClient({
     const mimeType = MediaRecorder.isTypeSupported('video/webm;codecs=vp8,opus')
       ? 'video/webm;codecs=vp8,opus'
       : 'video/mp4';
-    const mr = new MediaRecorder(stream, { videoBitsPerSecond: 1_000_000, mimeType });
+    const mr = new MediaRecorder(stream, { videoBitsPerSecond: 600_000, mimeType });
     mr.ondataavailable = (e) => { if (e.data.size > 0) chunks.push(e.data); };
     mr.onstop = () => {
       const blob = new Blob(chunks, { type: mimeType });
@@ -545,7 +545,7 @@ export default function CollectFormClient({
     setIsCameraInitializing(true);
     setCameraError(false);
     navigator.mediaDevices.getUserMedia({
-      video: { facingMode: 'user', width: { ideal: 1280 }, height: { ideal: 720 } },
+      video: { facingMode: 'user', width: { ideal: 640 }, height: { ideal: 480 } },
       audio: true,
     })
       .then((stream) => {
@@ -998,6 +998,7 @@ export default function CollectFormClient({
                     <video
                       src={videoObjectUrl!}
                       controls
+                      preload="auto"
                       poster={thumbnailFrames[selectedThumbnailIdx] || undefined}
                       className="w-full rounded-2xl border border-border bg-black"
                       style={{ maxHeight: 280 }}

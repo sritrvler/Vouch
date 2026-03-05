@@ -283,12 +283,19 @@
     }
     html += '</div>';
 
-    // Video (hidden when show_video is false)
+    // Video (thumbnail-first: poster + play button, loads video on click)
     if (t.video_url && t.show_video !== false) {
       html +=
-        '<video src="' + esc(t.video_url) + '"' +
-        (t.video_thumbnail_url ? ' poster="' + esc(t.video_thumbnail_url) + '"' : '') +
-        ' controls preload="metadata" style="width:100%;border-radius:8px;margin-top:8px;display:block;background:#000"></video>';
+        '<div data-vouch-video data-src="' + esc(t.video_url) + '"' +
+        (t.video_thumbnail_url ? ' data-poster="' + esc(t.video_thumbnail_url) + '"' : '') +
+        ' style="position:relative;width:100%;border-radius:8px;margin-top:8px;overflow:hidden;background:#000;cursor:pointer">' +
+        (t.video_thumbnail_url
+          ? '<img src="' + esc(t.video_thumbnail_url) + '" alt="" style="width:100%;display:block;aspect-ratio:16/9;object-fit:cover" />'
+          : '<div style="width:100%;aspect-ratio:16/9"></div>') +
+        '<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center">' +
+        '<div style="width:56px;height:56px;border-radius:50%;background:rgba(0,0,0,0.6);display:flex;align-items:center;justify-content:center">' +
+        '<svg width="24" height="24" viewBox="0 0 24 24" fill="white"><polygon points="8,5 20,12 8,19"/></svg>' +
+        '</div></div></div>';
     }
 
     html += '</article>';
@@ -474,6 +481,27 @@
             if (sib) sib.style.display = 'flex';
           }
         })(fallbackImgs[i]);
+      }
+
+      // Video thumbnail click-to-play
+      var videoWraps = shadow.querySelectorAll('[data-vouch-video]');
+      for (var v = 0; v < videoWraps.length; v++) {
+        (function (wrap) {
+          wrap.addEventListener('click', function () {
+            var src = wrap.getAttribute('data-src');
+            var poster = wrap.getAttribute('data-poster');
+            if (!src) return;
+            var video = document.createElement('video');
+            video.src = src;
+            if (poster) video.poster = poster;
+            video.controls = true;
+            video.autoplay = true;
+            video.playsInline = true;
+            video.preload = 'auto';
+            video.style.cssText = 'width:100%;display:block;border-radius:8px;background:#000';
+            wrap.replaceWith(video);
+          });
+        })(videoWraps[v]);
       }
 
       // Read-more expander (needs layout to measure scrollHeight)
