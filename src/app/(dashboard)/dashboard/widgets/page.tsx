@@ -27,7 +27,6 @@ import {
   Palette,
   SlidersHorizontal,
   ArrowUpDown,
-  Pencil,
   ArrowLeft,
 } from 'lucide-react';
 import Link from 'next/link';
@@ -786,17 +785,6 @@ export function Testimonials() {
           <p className="mt-0.5 text-sm text-muted-foreground">
             Customize how testimonials look on your site. Changes update automatically.
           </p>
-          {activeWidgetId && (
-            <div className="mt-1 flex items-center gap-1.5 group/name">
-              <input
-                value={settings.name}
-                onChange={(e) => update('name', e.target.value)}
-                className="text-sm text-muted-foreground bg-transparent border-b border-border/50 hover:border-border focus:border-indigo-400 focus:outline-none transition-colors py-0.5 min-w-0 max-w-[240px]"
-                placeholder="Widget name"
-              />
-              <Pencil className="size-3.5 text-muted-foreground/50 group-hover/name:text-muted-foreground transition-colors shrink-0" />
-            </div>
-          )}
         </div>
         <div className="flex items-center gap-2 shrink-0">
           {activeWidgetId && (
