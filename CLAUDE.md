@@ -188,6 +188,24 @@ Suggest `/compact` only when mid-task continuation is needed and stopping would 
 
 **Why this exists:** The user has repeatedly requested this and been frustrated by it not being followed. This is the highest-priority process rule. It overrides any urge to "just quickly fix it."
 
+#### Task Complexity Tiers (MUST classify before starting)
+
+Every task MUST be classified into a tier before any work begins. The tier determines which pipeline path to follow. Misclassifying to a lower tier to save effort is a process violation.
+
+| Tier | Description | Examples | Pipeline Path |
+|---|---|---|---|
+| **T1: Trivial** | Single string/value change, zero logic | Typo fix, color value, copy edit, env var | Skip pipeline. Just fix, build, done. |
+| **T2: Small** | Bug fixes, CSS, responsive, 1-5 files, no new logic or state | Responsive fixes, layout bugs, replacing HTML elements, adding classes, simple validation | **Inline pipeline:** Self-plan, code, Self-Review, self-test, build. Zero agents. |
+| **T3: Medium** | New component, significant refactor, API changes, state changes | New UI section, API route change, context/hook changes, multi-file refactor | **Lean agent pipeline:** 1-2 agents with code snippets in prompts. |
+| **T4: Large** | New feature, architecture change, multi-system, DB schema | New product feature, payment flow, auth changes, new page/route | **Full agent pipeline:** All applicable agents. |
+
+**Classification rules:**
+1. If the change touches DB schema, auth, payments, or public APIs: minimum T3, usually T4.
+2. If the change adds new state management (context, hooks, stores): minimum T3.
+3. If the change is purely CSS/HTML/copy with no logic: maximum T2.
+4. When in doubt, classify UP (T2 -> T3), never down.
+5. State the tier and justification before Step 1. Say: `TIER: T[n] - [one-line justification]`
+
 #### Available Agent Roster
 
 Use dedicated agents BY NAME. Do NOT use generic "general-purpose prompted as..." when a dedicated agent exists.
@@ -212,133 +230,272 @@ Use dedicated agents BY NAME. Do NOT use generic "general-purpose prompted as...
 
 **UI agent guide:** App UI = `interface-design` skill + `premium-ui-designer` + `ux-reviewer`. Landing pages = `frontend-design` skill + `premium-ui-designer` + `conversion-copywriter`. Minor UI tweaks = `premium-ui-designer` only.
 
-#### STEP 1: Plan and Review (Combined Pre-Implementation + Architect Review)
+**Agent token efficiency (MANDATORY for T3/T4):**
+1. **NEVER ask agents to "read the files."** Instead, paste the relevant code snippets or diffs directly into the agent prompt. Agents start with zero context and will re-read entire files, wasting tokens.
+2. **Include only what the agent needs.** A code reviewer needs the diff and surrounding context (10-20 lines). A UI reviewer needs the JSX and class names. A DB optimizer needs the query and schema.
+3. **One focused question per agent.** "Review this diff for bugs and security" not "read these 6 files and check everything."
+4. **Use Explore agents only for genuine discovery.** If you already know the file and line, don't use Explore. Read it directly.
 
-**Before writing ANY code**, complete this structured plan and present it to the `software-architect` agent for approval. This is a single gate that replaces the old separate pre-implementation checklist and architect review.
+---
 
-**Required fields (answer all 8, then present to architect):**
-1. **Skills loaded?** List which skill files you read. If none, stop and read them.
-2. **What and why?** What you plan to change, which files, the approach, alternatives considered.
-3. **Validation?** Does this pass the "matters" test and "80/50" test?
-4. **Persona?** Name the specific human(s) this is for (Sarah, Marcus, James, not "users").
-5. **Security?** For new routes/APIs/forms: auth, input validation, RLS, rate limiting.
-6. **UI design?** For UI changes: which design skill applies, persona intent stated.
-7. **Test scenarios?** Quick enumeration of scenarios to verify. The `test-suite-architect` in Step 4 will expand these into full test cases, so keep this list brief (scenario name + expected outcome).
-8. **Business impact?** For UI changes: how does this affect retention, conversion, time to value, churn risk?
+#### T1 PIPELINE (Trivial)
+
+Fix it. Run `npx next build`. Done.
+Say: `T1: [what changed]. Build passes. PIPELINE COMPLETE`
+
+---
+
+#### T2 PIPELINE (Small: Inline Self-Review)
+
+**Quality is identical to T3/T4. The difference is WHO reviews, not WHETHER review happens. Self-review with adversarial rigor replaces agent review for small tasks.**
+
+##### T2 STEP 1: Inline Plan
+Answer these 4 fields (reduced from 8, skip fields that don't apply to small fixes):
+1. **What and why?** What you plan to change, which files, approach.
+2. **Persona?** Name the human this affects.
+3. **Security?** Any input validation, auth, or injection concerns?
+4. **Test scenarios?** Quick list of what to verify.
+
+No architect agent. Plan inline. If the plan feels complex while writing it, reclassify to T3.
+
+Say: `STEP 1 COMPLETE: PLAN APPROVED (inline, T2)`
+
+##### T2 STEP 2: Write Code
+Implement. Apply relevant skills (interface-design, frontend-design) while coding.
+
+Say: `STEP 2 COMPLETE: CODE WRITTEN`
+
+##### T2 STEP 3: Adversarial Self-Review (THE CRITICAL GATE)
+
+**This is NOT a cursory glance. This is a structured, adversarial review with the mindset of a senior engineer reviewing someone else's PR. The goal: find real issues, not confirm your own code is fine.**
+
+**Anti-bias guardrails (read these before every self-review):**
+1. **You wrote this code. You are biased.** Your brain will skip over your own mistakes. Fight this actively.
+2. **Assume there is at least one bug.** If you found zero issues, you reviewed too fast. Go back and look harder. Only after a second deliberate pass can you declare zero issues, and you must explain WHY zero is justified (e.g., "change is purely additive CSS classes with no conditional logic").
+3. **Review the diff line by line.** Do not skim. Do not summarize what you did. Read each changed line as if you are seeing it for the first time.
+4. **Check what you did NOT change.** Did you miss a file that needs the same fix? Did you leave a related inconsistency? Grep for related patterns.
+
+**Mandatory review checklist (check every item, mark N/A with reason if not applicable):**
+
+```
+SELF-REVIEW CHECKLIST:
+[ ] BUGS: Read every changed line. Any logic errors, wrong conditions, off-by-one, null access?
+[ ] EDGE CASES: What happens with empty data, null values, zero items, maximum items?
+[ ] RESPONSIVE: Tested at 375px, 768px, 1024px, 1440px mentally? Any overflow, truncation, or stacking issues?
+[ ] ACCESSIBILITY: Interactive elements have labels/titles? Touch targets >= 44px? Keyboard navigable?
+[ ] STATE: Any shared state that could conflict? Any state not cleaned up? Any loading states missed?
+[ ] SECURITY: User input validated? No XSS vectors? No injection? Auth checks intact?
+[ ] CONSISTENCY: Does this match existing patterns in the codebase? Any style/naming inconsistencies?
+[ ] MISSED FILES: Grep for related patterns. Did you fix all instances, or leave some behind?
+[ ] REGRESSION: Could this break anything that was working before? What would a user on the happy path experience?
+```
+
+**After the checklist, write a verdict:**
+```
+SELF-REVIEW VERDICT:
+Issues found: [number]
+[For each issue: severity (HIGH/MEDIUM/LOW), description, fix applied]
+Zero-issue justification: [only if 0 issues, explain why that's credible]
+```
+
+Fix all HIGH/MEDIUM issues before proceeding. Then re-run the checklist on the fixes (a second pass is mandatory if any code changed during review).
+
+Say: `STEP 3 COMPLETE: SELF-REVIEW PASSED` and paste the filled checklist + verdict.
+
+##### T2 STEP 4: Test and Build
+1. Enumerate test scenarios (happy path, edge cases, breakpoints, regression).
+2. Trace each through the code. For each: name the scenario, the code path, and PASS/FAIL.
+3. Run `npx next build`. Must exit 0.
+
+Say: `STEP 4 COMPLETE: ALL TESTS PASS`
+
+Step 5 follows same conditional rule as T3/T4: only if code changed after Step 3.
+
+**After completing all steps, say:** `PIPELINE COMPLETE`
+
+---
+
+#### T3 PIPELINE (Medium: Lean Agent Review)
+
+##### T3 STEP 1: Plan and Review
+
+Answer all 8 required fields:
+1. **Skills loaded?** List which skill files you read.
+2. **What and why?** What you plan to change, which files, approach, alternatives.
+3. **Validation?** "Matters" test and "80/50" test.
+4. **Persona?** Named human(s).
+5. **Security?** Auth, validation, RLS, rate limiting.
+6. **UI design?** Which design skill, persona intent.
+7. **Test scenarios?** Scenario name + expected outcome.
+8. **Business impact?** Retention, conversion, time to value, churn risk.
+
+**Agent involvement for T3:**
+Present plan to `software-architect` agent for review. **Pass the plan text directly in the prompt.** Do not ask the agent to read files.
+
+If DB changes: also run `db-optimizer` with schema snippet in prompt.
+
+Strategic agents (`product-strategist`, `competitive-analyst`): skip for T3 unless explicitly a new feature.
+
+**Step 1 Completion Checklist:**
+```
+STEP 1 CHECKLIST:
+[ ] 8 required fields answered
+[ ] Strategic agents: [skipped: T3 task] or [product-strategist verdict if new feature]
+[ ] Architect approval: [software-architect approved] or [approved with changes: list]
+[ ] DB review: [db-optimizer ran] or [no DB changes]
+```
+
+Say: `STEP 1 COMPLETE: PLAN APPROVED`
+
+##### T3 STEP 2: Write Code
+Same as T2. Apply relevant design skills while coding.
+
+Say: `STEP 2 COMPLETE: CODE WRITTEN`
+
+##### T3 STEP 3: Code Review (1-2 agents + self-review)
+
+**Run BOTH: one agent review AND the adversarial self-review.**
+
+Agent review: Launch `senior-code-reviewer` (as general-purpose agent prompted as senior reviewer). **Pass the full diff as text in the agent prompt, not file paths.** Include 10-20 lines of surrounding context for each changed section.
+
+If UI changes: also launch `premium-ui-designer` agent in parallel, with the JSX diff pasted in.
+
+**Then run the T2 Self-Review Checklist yourself.** The agent catches what you miss. You catch what the agent misses. Double coverage.
+
+Consolidate all findings (agent + self-review), fix HIGH/MEDIUM, re-run self-review on fixes.
+
+**Step 3 Completion Checklist:**
+```
+STEP 3 CHECKLIST:
+[ ] Agent review: [which agent(s), verdict, # issues found, # fixed]
+[ ] Self-review checklist: [completed, # issues found, # fixed]
+[ ] All HIGH/MEDIUM issues fixed: [yes, list] or [none found]
+[ ] Re-review after fixes: [self-review on fix diff, clean] or [skipped: trivial fixes]
+```
+
+Say: `STEP 3 COMPLETE: REVIEW PASSED`
+
+##### T3 STEP 4: Test and Verify
+Same as T2 Step 4, but with more scenarios. Generate scenarios inline (no test-suite-architect agent). Trace each through code. Build must pass.
+
+Say: `STEP 4 COMPLETE: ALL TESTS PASS`
+
+##### T3 STEP 5: Final Verification (CONDITIONAL)
+Same conditional rule. If code changed after Step 3: re-run self-review on final diff. If no changes: skip.
+
+Say: `STEP 5 COMPLETE: FINAL VERIFICATION PASSED` or `STEP 5 SKIPPED`
+
+**After completing all steps, say:** `PIPELINE COMPLETE`
+
+---
+
+#### T4 PIPELINE (Large: Full Agent Review)
+
+##### T4 STEP 1: Plan and Review
+
+Answer all 8 required fields, then present to agents.
 
 **Strategic agent triggers (before presenting to architect):**
-- **New feature or significant scope change?** Run `product-strategist` for build/kill/simplify/defer verdict. If it says KILL or DEFER, stop. Do not proceed to architect.
-- **Feature needs market context?** Run `competitive-analyst` first, feed output to `product-strategist`. Example triggers: "how does this compare to competitors?", pricing changes, positioning decisions, "should we match feature X?".
-- **Bug fix, minor tweak, or already-validated feature?** Skip strategic agents. Go straight to architect.
+1. **New feature or significant scope change?** Run `product-strategist` for build/kill/simplify/defer verdict. If it says KILL or DEFER, stop.
+2. **Feature needs market context?** Run `competitive-analyst` first, feed output to `product-strategist`.
+3. **Already-validated feature?** Skip strategic agents. Go straight to architect.
 
-**UI flow design (before presenting to architect, for UI tasks only):**
-- **Does this task add or change UI screens/flows?** If yes, run `ux-reviewer` in **FLOW DESIGN mode** to create the flow spec (screens, sequence, states, interactions, persona notes). Then run `premium-ui-designer` for a **quick feasibility check** (breakpoint viability, premium pattern suggestions, component selection). The approved flow spec becomes the blueprint for Step 2.
-- **Minor UI tweak (color, spacing, copy change)?** Skip flow design. The existing flow is unchanged.
-- **The flow spec output** includes: screen definitions (with all 4 states), flow diagram, click counts, and persona validation. A developer reading only this spec should be able to build the feature without asking flow questions.
+**UI flow design (for UI tasks only):**
+1. **New or changed UI flows?** Run `ux-reviewer` in **FLOW DESIGN mode**. Then run `premium-ui-designer` for feasibility check.
+2. **Minor UI tweak?** Skip flow design.
 
 **Dependency chain for new features with UI:**
-`competitive-analyst` (optional) -> `product-strategist` (build/kill) -> `ux-reviewer` FLOW DESIGN (flow spec) -> `premium-ui-designer` (feasibility check) -> `software-architect` (implementation plan) -> proceed.
+`competitive-analyst` (optional) -> `product-strategist` (build/kill) -> `ux-reviewer` FLOW DESIGN -> `premium-ui-designer` (feasibility) -> `software-architect` (plan) -> proceed.
 
 **Dependency chain for new features without UI:**
-`competitive-analyst` (optional) -> `product-strategist` (build/kill) -> `software-architect` (implementation plan) -> proceed.
+`competitive-analyst` (optional) -> `product-strategist` (build/kill) -> `software-architect` (plan) -> proceed.
 
-**Present all 8 answers + approved flow spec (if UI) to `software-architect` agent.** If DB changes: also run `db-optimizer`. Wait for approval.
+Present all 8 answers + flow spec (if UI) to `software-architect` agent. If DB changes: also run `db-optimizer`. **Pass plan text and relevant code snippets in prompts, not file paths.**
 
-**Skip condition:** ONLY for trivially simple changes (typo, string literal, color value) where you have absolute confidence.
-
-**Step 1 Completion Checklist (MUST fill out before saying the confirmation phrase):**
+**Step 1 Completion Checklist:**
 ```
 STEP 1 CHECKLIST:
 [ ] 8 required fields answered
 [ ] Strategic agents: [product-strategist verdict: BUILD/KILL/SIMPLIFY/DEFER] or [skipped: reason]
 [ ] Competitive context: [competitive-analyst ran] or [not needed: reason]
-[ ] UI flow design: [ux-reviewer FLOW DESIGN ran, flow spec produced] or [not a UI task] or [minor tweak, no new flow]
-[ ] Flow feasibility: [premium-ui-designer reviewed flow] or [not a UI task] or [minor tweak]
+[ ] UI flow design: [ux-reviewer FLOW DESIGN ran] or [not a UI task] or [minor tweak]
+[ ] Flow feasibility: [premium-ui-designer reviewed] or [not a UI task] or [minor tweak]
 [ ] Architect approval: [software-architect approved] or [approved with changes: list]
 [ ] DB review: [db-optimizer ran] or [no DB changes]
 ```
-Every line must have a value. "Skipped" is acceptable only with a reason. Blank lines = gate violation.
 
-Say: `STEP 1 COMPLETE: PLAN APPROVED` and paste the filled checklist.
-If skipped: `STEP 1 SKIPPED: [reason]`
+Say: `STEP 1 COMPLETE: PLAN APPROVED`
 
-#### STEP 2: Write Code
-Implement the approved plan. Do not deviate without going back to Step 1.
-
-If building app UI: apply `interface-design` skill. If building landing/marketing pages: apply `frontend-design` skill. These are skills applied while coding, not separate agents.
+##### T4 STEP 2: Write Code
+Same rules. Apply design skills while coding.
 
 Say: `STEP 2 COMPLETE: CODE WRITTEN`
 
-#### STEP 3: Code Review (Multi-Agent, Parallel)
-Run the FULL diff through review agents. **Launch all applicable reviewers in parallel.**
+##### T4 STEP 3: Code Review (Multi-Agent + Self-Review)
 
-**Always:** `senior-code-reviewer` (bugs, security, logic, quality)
-**If UI changes (major):** `premium-ui-designer` (polish review) + `ux-reviewer` in IMPLEMENTATION REVIEW mode (friction + flow spec compliance). Launched in parallel with code review.
-**If UI changes (minor):** `premium-ui-designer` only
-**If DB changes:** `db-optimizer` (parallel with code review)
-**If landing page:** `conversion-copywriter` (parallel with code review)
-**If performance-sensitive:** `perf-optimizer` (parallel with code review)
+Launch all applicable review agents in parallel. **Pass diffs and code snippets in prompts.**
 
-**Review-Fix-Verify loop (how feedback is handled):**
-1. **Consolidate:** Collect all findings from all agents into one prioritized list. Tag each with source agent and severity (HIGH/MEDIUM/LOW). Deduplicate if two agents flagged the same issue.
-2. **Fix:** I (the orchestrator) fix all HIGH and MEDIUM issues. LOW issues are fixed if trivial, otherwise noted and deferred. Agents do NOT fix code. They identify problems only.
-3. **Re-review:** Re-run ONLY the agents whose findings required code changes, and ONLY on the new diff (not the full codebase). Example: if `ux-reviewer` flagged 2 issues and `senior-code-reviewer` flagged 1, and I fixed all 3, re-run both but only on the fix diff.
-4. **Approve or loop:** If re-review is clean, Step 3 is done. If new issues are found, fix and re-review again. **Max 2 re-review iterations** to prevent infinite loops. If issues persist after 2 rounds, document them as known limitations and proceed.
-5. **Skip re-review if:** Fixes were trivial (typo, CSS value, copy change) and could not introduce new problems.
+**Always:** `senior-code-reviewer` agent + adversarial self-review
+**If UI (major):** `premium-ui-designer` + `ux-reviewer` IMPLEMENTATION REVIEW
+**If UI (minor):** `premium-ui-designer` only
+**If DB:** `db-optimizer`
+**If landing page:** `conversion-copywriter`
+**If perf-sensitive:** `perf-optimizer`
 
-**Step 3 Completion Checklist (MUST fill out before saying the confirmation phrase):**
+**Review-Fix-Verify loop:**
+1. Consolidate all findings (agents + self-review) into one prioritized list.
+2. Fix all HIGH and MEDIUM.
+3. Re-run self-review on fix diff. Only re-run agents if fixes were non-trivial.
+4. Max 2 re-review iterations.
+
+**Step 3 Completion Checklist:**
 ```
 STEP 3 CHECKLIST:
 [ ] senior-code-reviewer: [verdict, # issues found, # fixed]
-[ ] premium-ui-designer: [verdict] or [not applicable: reason]
-[ ] ux-reviewer IMPLEMENTATION REVIEW: [verdict, flow spec compliance: yes/no] or [not applicable: reason]
+[ ] Self-review checklist: [completed, # issues found, # fixed]
+[ ] premium-ui-designer: [verdict] or [not applicable]
+[ ] ux-reviewer: [verdict] or [not applicable]
 [ ] db-optimizer: [verdict] or [not applicable]
 [ ] conversion-copywriter: [verdict] or [not applicable]
 [ ] perf-optimizer: [verdict] or [not applicable]
-[ ] All HIGH/MEDIUM issues fixed: [yes, list] or [no HIGH/MEDIUM found]
-[ ] Re-review after fixes: [ran on fix diff, clean] or [ran, found X, fixed] or [skipped: fixes were trivial] or [no fixes needed]
+[ ] All HIGH/MEDIUM fixed: [yes, list] or [none found]
+[ ] Re-review: [ran, clean] or [skipped: trivial] or [no fixes needed]
 [ ] Re-review rounds: [0/1/2]
 ```
 
-Say: `STEP 3 COMPLETE: REVIEW PASSED` and paste the filled checklist.
+Say: `STEP 3 COMPLETE: REVIEW PASSED`
 
-#### STEP 4: Test and Verify
-Run `test-suite-architect` to generate test cases, then trace every scenario through the code.
+##### T4 STEP 4: Test and Verify
+Run `test-suite-architect` agent to generate scenarios. **Pass the diff and changed file snippets in the prompt.** Trace every scenario through the code.
 
-The agent generates scenarios covering: happy path, edge cases, error cases, security boundaries, regression risks. I then verify each scenario via code path analysis, build verification, or runtime description.
+If a bug is found: fix, re-run self-review on fix.
 
-If a scenario reveals a bug: fix it, then re-run `senior-code-reviewer` on the fix (mini Step 3 loop). Continue until all scenarios pass.
+Say: `STEP 4 COMPLETE: ALL TESTS PASS`
 
-Say: `STEP 4 COMPLETE: ALL TESTS PASS` and list each scenario with result.
+##### T4 STEP 5: Final Verification (CONDITIONAL)
+If code changed after Step 3: `senior-code-reviewer` agent reviews final diff + self-review.
+If UI changes: `premium-ui-designer` reviews final state.
+If no changes after Step 3: skip.
 
-#### STEP 5: Final Verification (CONDITIONAL)
+Say: `STEP 5 COMPLETE: FINAL VERIFICATION PASSED` or `STEP 5 SKIPPED`
 
-**This step is mandatory IF any code was changed after Step 3 approval** (bug fixes from Step 4, review feedback fixes, etc.). If zero code changes were made after Step 3, skip this step.
+---
 
-When required:
-1. `senior-code-reviewer` reviews the final complete diff (the "ship it?" review)
-2. If UI changes: `premium-ui-designer` reviews final state
-3. `test-suite-architect` confirms all previously flagged issues are resolved and no new issues introduced
+#### Build Check (All Tiers except T1)
+`npx next build` must exit 0. Verified in Step 4 or 5.
 
-When skipped (zero changes after Step 3):
-Say: `STEP 5 SKIPPED: No code changes after Step 3 approval. Diff unchanged.`
-
-When completed:
-Say: `STEP 5 COMPLETE: FINAL VERIFICATION PASSED`
-
-#### Build Check
-`npx next build` must exit 0. This is verified as part of Step 4 or Step 5, not a separate numbered step.
-
-**After completing all steps, say:** `PIPELINE COMPLETE` — this is the ONLY signal that code is ready to commit/push.
+**After completing all steps for any tier, say:** `PIPELINE COMPLETE`
 
 #### Pipeline Efficiency Rules
 1. **I am the orchestrator.** Quality and efficiency are my responsibility.
-2. **One agent, one job.** Never mix roles. Never ask a reviewer to also fix code.
-3. **No duplicate work.** Trust agent output. Don't re-review what an agent already reviewed.
-4. **Parallelize independent agents** in a single message (e.g., code review + UI review + DB review all in Step 3).
-5. **Chain dependent steps.** Step 4 waits for Step 3 fixes. Step 5 waits for Step 4 fixes.
-6. **Use dedicated agents by name.** The dedicated agents have persistent memory and specialized instructions that generic prompts lack.
-7. **Consolidate before acting.** Deduplicate findings from multiple agents into one action list before writing any fixes.
+2. **Tier determines process, not laziness.** Classify honestly. If unsure, go UP.
+3. **Self-review is not optional at any tier.** T2 relies entirely on it. T3/T4 use it alongside agents. It always runs.
+4. **Agents receive snippets, not file paths.** Every agent prompt must include the actual code/diff. No "read the file at path X."
+5. **One agent, one job.** Never mix roles. Never ask a reviewer to also fix code.
+6. **No duplicate work.** Trust agent output. Don't re-review what an agent already reviewed (but DO run self-review independently).
+7. **Parallelize independent agents** in a single message.
+8. **Consolidate before acting.** Deduplicate findings from all sources before writing fixes.
+9. **Self-review bias is the #1 risk.** The adversarial checklist exists because you WILL miss your own bugs. Follow it mechanically, not intuitively.
 
 ---
 

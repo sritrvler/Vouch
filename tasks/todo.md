@@ -10,51 +10,45 @@
 
 # Active Work Queue
 
-## Session Handoff (March 6, 2026, session 15: Process Optimization + Agent Integration + Guardrails)
+## Session Handoff (March 6, 2026, session 16: Mobile Bug Fixes + Tiered Pipeline)
 
 **What was done this session:**
-1. Portal URL caching: Cached Lemon Squeezy portal URLs in DB with 7-day TTL, self-healing fallback, and domain validation. Fixes slow "Manage Subscription" loading. Code written, reviewed, build passes. User ran ALTER TABLE queries on Supabase. Ready to deploy (not pushed yet).
-2. Pipeline rewrite: Consolidated 7-step pipeline to 5 steps in CLAUDE.md. Combined pre-implementation checklist + architect review into single Step 1. Made Steps 6-7 conditional as Step 5.
-3. Agent cleanup: Merged `ux-simplifier` + `ux-pain-point-fixer` into single `ux-reviewer` agent. Archived deprecated files.
-4. Integrated `product-strategist` and `competitive-analyst` into pipeline Step 1 with clear triggers and dependency chain: competitive-analyst (optional, market context) -> product-strategist (build/kill verdict, mandatory for new features) -> software-architect (implementation plan). Bug fixes skip strategic agents.
-5. Removed overlap: product-strategist no longer does competitive analysis. competitive-analyst no longer makes build/kill decisions.
-6. Added north stars to all 9 agents. Each has a single guiding sentence defining success.
-7. competitive-analyst now MUST use live data (WebSearch, WebFetch) instead of knowledge cutoff data. Date-stamps required on all competitive claims.
-8. Trimmed design-and-build skill (removed duplicate design content), test-and-ship skill (removed non-executable sections), validate-and-plan skill (updated personas to Western market + added SaaS founder James).
-9. Archived `Testimonial App Competitive Strategy Research.md` (58KB) from commands/ to _archive/.
-10. MEMORY.md fully synced with all changes (156 lines, under 200 limit).
+
+1. **4 mobile bug fixes (pushed to remote):**
+   a. Mobile project selector: Added `md:hidden` project selector bar in dashboard layout with separate popover state. Full project list, search, new project, upgrade prompt.
+   b. Color picker: Removed all `<input type="color">` (1 in settings, 3 in widgets). Replaced with color swatch preview + hex text input with validation. No native dialog.
+   c. Landing page desktop-view-on-mobile: Changed all 3 `md:grid-cols-3` marketing grids to `sm:grid-cols-2 lg:grid-cols-3`. Pain points, steps, pricing cards.
+   d. Inbox toolbar: Button text hidden on mobile (`hidden sm:inline`), icon-only with title attributes.
+
+2. **Tiered pipeline rewrite:**
+   a. Added Task Complexity Tiers (T1 trivial, T2 small, T3 medium, T4 large) that route to different pipeline paths.
+   b. T1: fix and build, no steps. T2: inline self-review only, zero agents. T3: 1-2 agents + self-review. T4: full agents + self-review.
+   c. Added Adversarial Self-Review Protocol with 9-point checklist, anti-bias guardrails, and zero-issue justification requirement.
+   d. Added agent token efficiency rule: always pass code snippets in agent prompts, never ask agents to read files.
+   e. Updated CLAUDE.md, MEMORY.md, lessons.md with all changes.
 
 **Files changed:**
-- `CLAUDE.md` (pipeline rewrite, agent roster, strategic triggers)
-- `MEMORY.md` (synced pipeline, agent routing table)
-- `.claude/agents/product-strategist.md` (rewritten, north star, no competitive analysis)
-- `.claude/agents/competitive-analyst.md` (rewritten, north star, live data mandate)
-- `.claude/agents/software-architect.md` (added north star)
-- `.claude/agents/senior-code-reviewer.md` (added north star)
-- `.claude/agents/test-suite-architect.md` (added north star)
-- `.claude/agents/premium-ui-designer.md` (added north star)
-- `.claude/agents/conversion-copywriter.md` (added north star)
-- `.claude/agents/refactoring-specialist.md` (added north star)
-- `.claude/agents/ux-reviewer.md` (merged agent, now has dual mode: FLOW DESIGN + IMPLEMENTATION REVIEW)
-- `.claude/skills/design-and-build/SKILL.md` (trimmed)
-- `.claude/skills/test-and-ship/SKILL.md` (trimmed)
-- `.claude/skills/validate-and-plan/SKILL.md` (updated personas)
-- `src/app/api/stripe/portal/route.ts` (portal URL caching)
-- `src/app/api/stripe/webhook/route.ts` (portal URL from webhook)
-- `supabase/schema.sql` (portal URL cache columns)
-- `_archive/2026-03-06/` (3 archived files)
+- `src/app/(dashboard)/layout.tsx` (mobile project selector)
+- `src/app/(dashboard)/dashboard/inbox/page.tsx` (icon-only toolbar)
+- `src/app/(dashboard)/dashboard/settings/page.tsx` (removed native color picker)
+- `src/app/(dashboard)/dashboard/widgets/page.tsx` (replaced 3 native color pickers, added flex-wrap, aria-labels)
+- `src/app/(marketing)/page.tsx` (2 grid breakpoint fixes)
+- `src/app/(marketing)/_components/PricingCards.tsx` (1 grid breakpoint fix)
+- `CLAUDE.md` (tiered pipeline, self-review protocol, agent efficiency rules)
+- `MEMORY.md` (synced tiered pipeline, agent routing)
+- `tasks/lessons.md` (6 new lessons: #82-87)
+- `tasks/todo.md` (this handoff)
 
 **What's next:**
-Pick from the prioritized backlog below. Recommended: P1 items (conversion/growth, then security hardening). Portal URL caching code is ready to push if user says "push it."
+Pick from the prioritized backlog below. Recommended: P1 items (conversion/growth, then security hardening).
 
 **What to watch out for:**
-1. Pipeline is now 5 steps, not 7. All references updated but watch for old habits.
-2. Strategic agents (product-strategist, competitive-analyst) only trigger for NEW features, not bug fixes. Don't over-call them.
-3. competitive-analyst MUST use WebSearch/WebFetch for live data. Never trust knowledge cutoff for competitor info.
-4. ux-reviewer is the merged agent with dual mode: FLOW DESIGN (Step 1, before code) and IMPLEMENTATION REVIEW (Step 3, after code). Prompt must specify mode.
-5. Step 1 and Step 3 now have completion checklists that must be filled out and pasted alongside confirmation phrases. Every line needs a value. Blank = gate violation.
-6. Step 3 has a review-fix-verify loop: consolidate findings, fix, re-run affected agents on fix diff, max 2 rounds.
-7. UI tasks follow: ux-reviewer FLOW DESIGN -> premium-ui-designer feasibility check -> software-architect -> code -> reviews. Flow is designed BEFORE code, not after.
+1. Pipeline is now TIERED. Must classify task as T1/T2/T3/T4 before Step 1. Say `TIER: T[n]` before starting.
+2. T2 tasks use adversarial self-review only. No agents. The self-review checklist has 9 items and a zero-issue justification requirement.
+3. T3/T4 agents must receive code snippets in prompts. NEVER ask agents to "read the file." This was the main token waste issue.
+4. Self-review runs at ALL tiers T2+. It is mandatory alongside agents at T3/T4, not a replacement.
+5. Separate popover state for mobile vs desktop project selector (mobileProjectPopoverOpen). Do not merge these.
+6. `<input type="color">` is now fully removed from the codebase. If any new color pickers are needed, use the hex input + swatch pattern.
 
 ---
 
