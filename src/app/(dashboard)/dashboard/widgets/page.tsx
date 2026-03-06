@@ -883,9 +883,12 @@ export function Testimonials() {
                   />
                 ))}
                 <div className="flex items-center gap-1.5">
-                  <div
-                    className="size-7 rounded-full border-2 border-border shrink-0"
+                  <button
+                    type="button"
+                    className="size-7 rounded-full border-2 border-border shrink-0 cursor-pointer hover:scale-110 transition-transform"
                     style={{ backgroundColor: settings.theme.primaryColor }}
+                    title="Click to edit hex color"
+                    onClick={(e) => { const input = (e.currentTarget.nextElementSibling as HTMLInputElement); input?.focus(); input?.select(); }}
                   />
                   <input
                     type="text"
@@ -926,9 +929,12 @@ export function Testimonials() {
                   />
                 ))}
                 <div className="flex items-center gap-1.5">
-                  <div
-                    className="size-7 rounded-full border-2 border-border shrink-0"
+                  <button
+                    type="button"
+                    className="size-7 rounded-full border-2 border-border shrink-0 cursor-pointer hover:scale-110 transition-transform"
                     style={{ backgroundColor: settings.theme.backgroundColor }}
+                    title="Click to edit hex color"
+                    onClick={(e) => { const input = (e.currentTarget.nextElementSibling as HTMLInputElement); input?.focus(); input?.select(); }}
                   />
                   <input
                     type="text"
@@ -969,9 +975,12 @@ export function Testimonials() {
                   />
                 ))}
                 <div className="flex items-center gap-1.5">
-                  <div
-                    className="size-7 rounded-full border-2 border-border shrink-0"
+                  <button
+                    type="button"
+                    className="size-7 rounded-full border-2 border-border shrink-0 cursor-pointer hover:scale-110 transition-transform"
                     style={{ backgroundColor: settings.theme.textColor }}
+                    title="Click to edit hex color"
+                    onClick={(e) => { const input = (e.currentTarget.nextElementSibling as HTMLInputElement); input?.focus(); input?.select(); }}
                   />
                   <input
                     type="text"

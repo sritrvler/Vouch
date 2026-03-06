@@ -933,7 +933,7 @@ function SettingsInner() {
 
             {/* Brand Color with live preview */}
             <Section title="Brand Color">
-              <div className="flex gap-8">
+              <div className="flex flex-col sm:flex-row gap-6 sm:gap-8">
                 {/* Preview */}
                 <div className="flex-1 min-w-0">
                   <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wide mb-2">Preview</p>
@@ -961,7 +961,7 @@ function SettingsInner() {
                   </div>
                 </div>
                 {/* Picker */}
-                <div className="w-[200px] shrink-0">
+                <div className="sm:w-[200px] shrink-0">
                   <div className="flex gap-1.5 flex-wrap mb-3">
                     {ACCENT_PRESETS.map((c) => (
                       <button
@@ -979,9 +979,16 @@ function SettingsInner() {
                     ))}
                   </div>
                   <div className="flex items-center gap-2">
-                    <div
-                      className="size-7 rounded-full border-2 border-dashed border-muted-foreground/50 shrink-0"
+                    <button
+                      type="button"
+                      className="size-7 rounded-full border-2 border-dashed border-muted-foreground/50 shrink-0 cursor-pointer hover:scale-110 transition-transform"
                       style={{ backgroundColor: buttonColor || accentColor }}
+                      title="Click to edit hex color"
+                      onClick={(e) => {
+                        const input = (e.currentTarget.nextElementSibling as HTMLInputElement);
+                        input?.focus();
+                        input?.select();
+                      }}
                     />
                     <input
                       type="text"
