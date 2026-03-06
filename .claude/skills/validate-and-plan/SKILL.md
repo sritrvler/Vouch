@@ -40,29 +40,43 @@ Identify EVERY role involved in your product. For EACH role, create a specific p
 
 ### Example: Vouch Testimonial Collection
 
-**Persona 1: Priya (Salon Owner)**
-- 32, runs 2-person salon in Mumbai, makes ₹40k/month
-- Tech comfort: 5/10, uses WhatsApp/Instagram daily
-- Only has phone (Android, 3 years old), no laptop
-- At salon 10am-8pm, checks phone between customers
-- Problem: Needs testimonials but asking feels awkward
-- Current solution: Nothing systematic, asks verbally sometimes
-- Would pay: If it brought 2-3 extra customers per month
+**Persona 1: Sarah (Freelance Designer, Pro plan target)**
+- 29, freelance web designer in Austin, earns $6K/month
+- Tech comfort: 9/10, uses Figma, Notion, Slack daily
+- MacBook at desk, iPhone on the go
+- Works from home office and coffee shops, 3-5 active clients
+- Problem: Needs social proof for portfolio site but hates asking clients directly
+- Current solution: Screenshots LinkedIn recommendations, looks outdated
+- Would pay $19/mo: If it saves her the awkwardness and looks professional on her site
 
-**Persona 2: Anjali (Priya's Customer)**
-- 28, marketing professional, busy schedule
-- Tech comfort: 8/10, uses apps daily
-- Has iPhone, always connected
-- Context: Just finished salon visit, heading to next meeting
-- Willingness: Would share feedback if it takes <2 minutes on phone
-- Won't do: Fill long forms, create accounts, switch apps
+**Persona 2: Marcus (Agency Owner, Studio plan target)**
+- 41, runs a 6-person branding agency in London, revenue $30K/month
+- Tech comfort: 7/10, delegates technical work to team
+- Desktop at office, iPad in meetings
+- Manages 8-12 client projects simultaneously
+- Problem: Needs client testimonials for proposals and case studies, per-client
+- Current solution: Asks via email, gets 1 in 5 responses, manually formats them
+- Would pay $49/mo: If he can show client-specific reports in pitches
 
-**Persona 3: Ravi (Website Visitor)**
-- 35, looking for salon for wife's birthday
-- Tech comfort: 6/10, browses on phone during commute
-- Context: Comparing 3 salons, reading reviews on each
-- Needs: Social proof, recent reviews, real photos
-- Won't do: Sign up to see reviews, click multiple times
+**Persona 3: James (SaaS Founder, Pro plan target)**
+- 34, solo founder of a project management tool, 200 users, $4K MRR
+- Tech comfort: 10/10, builds his own product, understands APIs and embeds
+- MacBook Pro, codes 10 hours a day
+- Problem: Needs social proof on landing page to improve conversion from 2% to 4%
+- Current solution: Manually coded testimonial section, static, stale
+- Would pay $19/mo: If the widget looks premium and auto-updates with fresh testimonials
+
+**Persona 4: Client of Sarah/Marcus (End user who gives testimonial)**
+- Busy professional, received a link via email or Slack
+- Context: Between meetings, on phone, 2 minutes max
+- Willingness: Happy to help if it's quick and doesn't require account creation
+- Won't do: Download app, create account, write more than 3 sentences, record video over 60s
+
+**Persona 5: Website Visitor (Views testimonials)**
+- Browsing Sarah's portfolio or James's SaaS landing page
+- Comparing 3 alternatives, wants to see real reviews fast
+- On phone or desktop, impatient, will leave if page is slow
+- Needs: Social proof visible immediately, no clicks required
 
 **Minimum personas needed:**
 - Primary user (who pays/manages): 1 persona REQUIRED
@@ -106,9 +120,10 @@ Write every single step this specific persona takes:
 
 **The "distracted [persona name]" test:**
 Simulate THIS persona's actual context:
-- Priya (salon owner): Between customers, phone keeps getting interrupted, customer walks in mid-flow
-- Anjali (customer): On phone, in hurry, taxi arriving in 2 minutes
-- Ravi (visitor): Browsing on slow 3G, comparing 3 options simultaneously
+- Sarah (freelancer): Between client calls, Slack pinging, needs to send form link in 30 seconds
+- Marcus (agency owner): In back-to-back meetings, iPad in hand, delegate asks "where's the testimonial report?"
+- James (SaaS founder): Deploying a fix while checking conversion metrics, wants to embed widget in 2 minutes
+- Client: Just got email link, between meetings, will close tab if it takes more than 90 seconds
 
 Does journey still complete?
 
@@ -123,41 +138,41 @@ For THIS persona specifically:
 - Pain being solved: [How urgent/important for them?]
 - If effort > pain → Drop-off guaranteed
 
-### Example: Priya's Journey (Salon Owner)
+### Example: Sarah's Journey (Freelance Designer)
 
 **Context:**
-- Where: At salon, between customers
-- Device: Android phone, 3 years old, sometimes slow
-- Mental state: Rushed, next customer arriving soon
-- Time: Maybe 2 minutes if lucky
+- Where: Home office, between Figma sessions
+- Device: MacBook, Chrome, fast WiFi
+- Mental state: Productive but task-switching, wants to knock this out quickly
+- Time: 5 minutes max before context-switching back to client work
 
 **Journey:**
-1. **Send form to customer**
-   - Sees: QR code and WhatsApp share option
-   - Action: Tap WhatsApp, select contact, send
-   - Friction: Need to find customer's contact (might not have it saved)
-   - Time: 15-30 seconds
-   - Drop-off: If needs to manually type number → too slow, customer waiting
+1. **Create collection form**
+   - Sees: Dashboard with "Create Form" button
+   - Action: Name form, customize questions, copy link
+   - Friction: If customization is complex → she'll use defaults. If defaults look cheap → she won't send it.
+   - Time: 2-3 minutes
+   - Drop-off: If form preview doesn't match her brand aesthetic → she'll hesitate to send
 
-2. **Wait for testimonial**
-   - Sees: Notification when testimonial arrives
-   - Action: None required
-   - Friction: None
-   - Time: N/A
-   - Drop-off: None
+2. **Send form to client**
+   - Sees: Share options (copy link, email)
+   - Action: Copy link, paste into Slack DM with client
+   - Friction: None if copy-paste works cleanly
+   - Time: 15 seconds
+   - Drop-off: If she has to explain what this is → too much friction
 
-3. **Approve/reject testimonial**
-   - Sees: Notification, opens link
-   - Action: Read testimonial, tap approve
-   - Friction: If login required → friction, if inline approve → smooth
-   - Time: 20 seconds
-   - Drop-off: If requires app download or account creation → high
+3. **Approve testimonial and embed**
+   - Sees: Email notification, opens inbox, approves
+   - Action: Approve, go to widget builder, copy embed code
+   - Friction: If widget looks generic → she won't embed it on her portfolio
+   - Time: 2 minutes
+   - Drop-off: If embed doesn't match her site's design system
 
-**Verdict for Priya:** Journey works IF:
-- ✅ No typing phone numbers (QR or pre-saved contacts only)
-- ✅ No login required for approval (magic link or inline)
-- ✅ Total time <90 seconds per testimonial
-- ❌ If any step requires >30 seconds → Too much friction
+**Verdict for Sarah:** Journey works IF:
+- Form looks professional enough to send to a paying client
+- Total time from signup to embedded widget < 15 minutes
+- Widget on her portfolio looks custom, not "powered by Vouch"
+- If any step requires reading docs or watching tutorials → she'll abandon
 
 ### Red Flags (Persona-Specific)
 
@@ -198,23 +213,23 @@ Put yourself in their exact situation:
 
 ### Example: Testing Testimonial Submission
 
-**As Priya (Salon Owner):**
-- Context: Between customers, 3 minutes available
-- Test: "Would I actually pull out my phone, find this app, and share a form right now?"
-- Answer: Maybe - IF it's one tap to WhatsApp with message pre-written
-- Answer: NO - If I need to copy link, open WhatsApp, paste, type message
+**As Sarah (Freelance Designer):**
+- Context: Just finished a project, wants to collect testimonial while client is happy
+- Test: "Would I actually send this link to my client right now?"
+- Answer: YES - IF the form looks professional and branded, takes 30 seconds to set up
+- Answer: NO - If the form looks generic or cheap, she won't risk her professional image
 
-**As Anjali (Customer):**
-- Context: Just left salon, heading to office, 10 minutes to next meeting
-- Test: "Would I actually fill out a form about my salon visit right now?"
-- Answer: Maybe - IF form is <5 questions, on phone, no account needed
-- Answer: NO - If it requires email, account creation, or >2 minutes
+**As James (SaaS Founder):**
+- Context: Wants social proof on landing page to improve conversion
+- Test: "Would I actually switch from my hand-coded testimonials to this?"
+- Answer: YES - IF the widget looks premium, loads fast, and the embed is a single script tag
+- Answer: NO - If it adds page weight, looks like a third-party widget, or requires React dependency
 
-**As Ravi (Website Visitor):**
-- Context: Comparing salons, want to see reviews
-- Test: "Would I actually sign up or do anything to see reviews?"
-- Answer: NO - If reviews require any action from me
-- Answer: YES - If reviews show immediately, no friction
+**As Client (giving testimonial):**
+- Context: Got a Slack message from Sarah with a link, between meetings
+- Test: "Would I actually click this link and leave feedback?"
+- Answer: YES - IF it loads instantly, has 2-3 questions, and I can type or record in under 90 seconds
+- Answer: NO - If it asks me to create an account, sign in, or answer more than 5 questions
 
 ### Failure Signals (Persona-Specific)
 
@@ -228,9 +243,10 @@ Mark as "NO" if:
 ### The Honest Truth Test
 
 **Don't bullshit yourself:**
-- Priya won't log into a dashboard daily (she's busy, forgets passwords)
-- Anjali won't write long detailed reviews (she's rushing, has meetings)
-- Ravi won't click through 3 pages to see reviews (he has 2 other tabs open)
+- Sarah won't read docs or watch onboarding videos (she'll try the UI and give up if it's not obvious)
+- Marcus won't set up the tool himself (he'll assign it to a team member, who will abandon it if setup takes >10 minutes)
+- James won't use a widget that hurts his Lighthouse score (he'll rip it out the same day)
+- Clients won't leave a testimonial if it takes more than 90 seconds (they're doing someone a favor, not getting paid)
 
 If your honest answer is "probably not" for ANY key persona, treat as "NO". Fix the journey or don't build.
 
@@ -286,7 +302,7 @@ Answer all:
 6. What does comparable utility cost in this market?
 7. Would target customer (Step 1) pay this? Why/why not?
 
-**India-specific:** INR pricing validated separately from USD. $19/mo can be unaffordable for Indian SMBs (₹1,600/mo significant for ₹40k/mo salon).
+**Market-specific:** Vouch targets Western professionals ($19/mo Pro, $49/mo Studio). For Sarah ($6K/mo), $19 is 0.3% of income. For Marcus ($30K/mo), $49 is 0.16%. Both pass the <0.5% test. Validate that value proposition matches the specific persona's willingness to pay.
 
 **Red flag:** Customer needs >1-2 extra sales per month to justify price → Hard sell.
 

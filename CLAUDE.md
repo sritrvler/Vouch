@@ -182,145 +182,115 @@ Suggest `/compact` only when mid-task continuation is needed and stopping would 
 
 **Rule: never let knowledge die in a session.** If you learned it, write it down. If you fixed it, mark it done. If it is next, describe it in enough detail that a fresh session can execute without asking questions.
 
-### Pre-Implementation Checklist (Mandatory for Every Task)
+### Code Quality Pipeline (MANDATORY, NON-NEGOTIABLE)
 
-Before writing any code for a task, answer these questions explicitly. Do not skip any.
+**This pipeline is the ONLY way code gets written and shipped. No shortcuts. No skipping steps. Every step has a confirmation phrase. The user checks for these phrases. Missing a phrase = pipeline violation.**
 
-1. **Skills loaded?** Which skill files did you read? List them. If you did not read core-principles + the relevant task skills, stop and read them now.
-2. **Agent routing (mandatory).** Which agents will you use for this task? Consult the Agent Routing Table in MEMORY.md. List each agent and its purpose. Minimum requirements by task size: (a) Small fix (1-2 files): general-purpose review after implementation. (b) Medium change (3-5 files): Explore before implementation + general-purpose review after. (c) Large feature (5+ files): Explore + Plan before + general-purpose review + perf-optimizer after. (d) Multi-domain (schema+API+UI): Orchestrator or Plan + Explore + db-optimizer + review. If you list "no agents," you must justify why none of the 9 available agent types applies.
-3. **Validation pass (core-principles)?** Does this task pass the "matters" test (would users complain if removed)? Does it pass the "80/50" test (80% value with 50% complexity)?
-4. **Persona defined?** Who is the specific human this change is for? Name them. What is their context, device, pain, motivation? (Not "users" or "customers.")
-5. **Security considered?** For any new route, API, or form: auth gates, input validation, RLS, rate limiting. Reference the test-and-ship security checklist.
-6. **Interface design applied?** For any UI change: persona intent stated, subtle layering principles followed, token architecture consistent.
-7. **Test scenarios enumerated?** Using the Test Scenario Checklist below, list every scenario that applies to this feature. Write them out explicitly. This becomes the verification list for post-implementation. Skip a category only if it genuinely does not apply, and say why.
-8. **Persona-driven UI selection + business impact?** For any UI component choice, write a Persona UI Intent for EACH persona AND a Business Impact Assessment (retention, conversion, time to value, churn risk, expansion, referral). Both are required. A UI that serves users but ignores business dies. A UI that serves business but ignores users churns. See the Persona-Driven UI Selection section below.
-
-If any answer is "no" or "skipped," pause and address it before writing code.
-
-**After answering all 8 questions, say exactly:** `I FOLLOWED PRE-IMPLEMENTATION RULES`
-
----
-
-### Code Quality Pipeline (MANDATORY, NON-NEGOTIABLE, 7 STEPS)
-
-**This pipeline is the ONLY way code gets written and shipped. No shortcuts. No skipping steps. Every step has a confirmation phrase that must be said before proceeding to the next step. The user will check for these phrases. Missing a phrase = pipeline was violated.**
-
-**Why this exists:** The user has repeatedly requested this process and been frustrated by it not being followed. This is the highest-priority process rule in the entire codebase. It overrides any urge to "just quickly fix it." Even a one-line change goes through this pipeline (steps can be fast for simple changes, but they cannot be skipped).
+**Why this exists:** The user has repeatedly requested this and been frustrated by it not being followed. This is the highest-priority process rule. It overrides any urge to "just quickly fix it."
 
 #### Available Agent Roster
 
-These are the dedicated agents available. Use them BY NAME at the appropriate pipeline step. Do NOT use generic "general-purpose prompted as..." when a dedicated agent exists.
+Use dedicated agents BY NAME. Do NOT use generic "general-purpose prompted as..." when a dedicated agent exists.
 
-| Agent | Type | Model | Use For |
-|---|---|---|---|
-| `software-architect` | Custom | Opus | Step 1: plan/architecture review |
-| `senior-code-reviewer` | Custom | Opus | Steps 3 and 6: code review |
-| `test-suite-architect` | Custom | Sonnet | Steps 4 and 7: test generation and verification |
-| `premium-ui-designer` | Custom | Sonnet | Steps 3 and 6: UI polish, animations, premium feel |
-| `ux-simplifier` | Custom | Sonnet | Steps 3 and 6: flow simplification, reducing clicks |
-| `ux-pain-point-fixer` | Custom | Sonnet | Steps 3 and 6: friction/rage-quit analysis |
-| `db-optimizer` | Built-in | | Steps 1 and 3: schema review, query optimization |
-| `perf-optimizer` | Built-in | | Step 3: bundle size, render performance |
-| `refactoring-specialist` | Custom | | Large refactors, code decomposition |
-| `conversion-copywriter` | Custom | | Landing page copy, CTA text, upgrade prompts |
-| `frontend-design` | Skill | | Landing pages, marketing sites (NOT app UI) |
-| `interface-design` | Skill | | Dashboard, app UI, settings (NOT landing pages) |
+| Agent | Type | Use For |
+|---|---|---|
+| `software-architect` | Custom (Opus) | Step 1: plan/architecture review |
+| `senior-code-reviewer` | Custom (Opus) | Steps 3 and 6: code review |
+| `test-suite-architect` | Custom (Sonnet) | Steps 4 and 5: test generation and verification |
+| `premium-ui-designer` | Custom (Sonnet) | Step 3: UI polish, animations, premium feel |
+| `ux-reviewer` | Custom (Sonnet) | Step 3: flow friction, pain points, simplification |
+| `db-optimizer` | Built-in | Steps 1 and 3: schema review, query optimization |
+| `perf-optimizer` | Built-in | Step 3: bundle size, render performance |
+| `conversion-copywriter` | Custom | Step 3: landing page copy, CTA effectiveness |
+| `refactoring-specialist` | Custom | Large refactors, code decomposition |
+| `interface-design` | Skill | App/dashboard UI design (NOT landing pages) |
+| `frontend-design` | Skill | Landing pages, marketing sites (NOT app UI) |
 
-#### STEP 1: Plan Review (Software Architect)
-**Before writing ANY code**, present your execution plan to the `software-architect` agent. Include:
-1. What you plan to change and why
-2. Which files will be touched
-3. The approach and implementation strategy
-4. Alternatives you considered and why you rejected them
-5. If DB changes: also run `db-optimizer` agent on the schema/query plan
-6. If UI changes: flag which UI agents will be needed in Steps 3/6
+**UI agent guide:** App UI = `interface-design` skill + `premium-ui-designer` + `ux-reviewer`. Landing pages = `frontend-design` skill + `premium-ui-designer` + `conversion-copywriter`. Minor UI tweaks = `premium-ui-designer` only.
 
-Wait for the architect's verdict. If they request changes, revise the plan and re-submit.
+#### STEP 1: Plan and Review (Combined Pre-Implementation + Architect Review)
 
-**Skip condition:** ONLY for trivially simple changes (fixing a typo, changing a string literal, updating a color value) where you have absolute confidence. If there is ANY doubt, run the review.
+**Before writing ANY code**, complete this structured plan and present it to the `software-architect` agent for approval. This is a single gate that replaces the old separate pre-implementation checklist and architect review.
 
-Say: `STEP 1 COMPLETE: ARCHITECT APPROVED` or `STEP 1 COMPLETE: ARCHITECT APPROVED WITH CHANGES: [list changes]`
-If skipped: `STEP 1 SKIPPED: [reason, must be trivially simple]`
+**Required fields (answer all 8, then present to architect):**
+1. **Skills loaded?** List which skill files you read. If none, stop and read them.
+2. **What and why?** What you plan to change, which files, the approach, alternatives considered.
+3. **Validation?** Does this pass the "matters" test and "80/50" test?
+4. **Persona?** Name the specific human(s) this is for (Sarah, Marcus, James, not "users").
+5. **Security?** For new routes/APIs/forms: auth, input validation, RLS, rate limiting.
+6. **UI design?** For UI changes: which design skill applies, persona intent stated.
+7. **Test scenarios?** Quick enumeration of scenarios to verify. The `test-suite-architect` in Step 4 will expand these into full test cases, so keep this list brief (scenario name + expected outcome).
+8. **Business impact?** For UI changes: how does this affect retention, conversion, time to value, churn risk?
+
+**Present all 8 answers to `software-architect` agent.** If DB changes: also run `db-optimizer`. Wait for approval.
+
+**Skip condition:** ONLY for trivially simple changes (typo, string literal, color value) where you have absolute confidence.
+
+Say: `STEP 1 COMPLETE: PLAN APPROVED` or `STEP 1 COMPLETE: PLAN APPROVED WITH CHANGES: [list]`
+If skipped: `STEP 1 SKIPPED: [reason]`
 
 #### STEP 2: Write Code
-Implement the approved plan. Do not deviate from what the architect approved without going back to Step 1. If you discover mid-implementation that the plan needs to change, stop, get re-approval, then continue.
+Implement the approved plan. Do not deviate without going back to Step 1.
 
-If building UI: apply the `interface-design` skill (for app/dashboard UI) or `frontend-design` skill (for landing/marketing pages). These are skills, not agents. Apply their principles while writing code.
+If building app UI: apply `interface-design` skill. If building landing/marketing pages: apply `frontend-design` skill. These are skills applied while coding, not separate agents.
 
 Say: `STEP 2 COMPLETE: CODE WRITTEN`
 
-#### STEP 3: Code Review (Multi-Agent)
-Run the FULL diff through the appropriate review agents. **Launch independent reviewers in parallel.**
+#### STEP 3: Code Review (Multi-Agent, Parallel)
+Run the FULL diff through review agents. **Launch all applicable reviewers in parallel.**
 
-**Always run:**
-1. `senior-code-reviewer` agent: bugs, security, logic errors, edge cases, code quality
+**Always:** `senior-code-reviewer` (bugs, security, logic, quality)
+**If UI changes (major):** `premium-ui-designer` + `ux-reviewer` (launched in parallel with code review)
+**If UI changes (minor):** `premium-ui-designer` only
+**If DB changes:** `db-optimizer` (parallel with code review)
+**If landing page:** `conversion-copywriter` (parallel with code review)
+**If performance-sensitive:** `perf-optimizer` (parallel with code review)
 
-**Run if UI changes were made (parallel with code review):**
-2. `premium-ui-designer` agent: visual quality, animations, micro-interactions, premium feel
-3. `ux-simplifier` agent: unnecessary clicks, flow complexity, cognitive load
-4. `ux-pain-point-fixer` agent: friction points, rage-quit risks, dead ends
+Fix ALL HIGH/MEDIUM issues. If fixes are significant, re-run the relevant reviewer.
 
-**NOTE on UI agents:** Use ALL THREE UI agents for significant UI work (new pages, major redesigns). For minor UI tweaks (spacing, color, copy), use only `premium-ui-designer`. For flow changes, use `ux-simplifier` + `ux-pain-point-fixer`.
+Say: `STEP 3 COMPLETE: REVIEW PASSED` and list each agent, verdict, issues found/fixed.
 
-**Run if DB changes were made (parallel with code review):**
-5. `db-optimizer` agent: schema design, query performance, indexes
+#### STEP 4: Test and Verify
+Run `test-suite-architect` to generate test cases, then trace every scenario through the code.
 
-**Run if landing page changes were made:**
-6. `conversion-copywriter` agent: CTA effectiveness, copy quality, conversion optimization
+The agent generates scenarios covering: happy path, edge cases, error cases, security boundaries, regression risks. I then verify each scenario via code path analysis, build verification, or runtime description.
 
-Fix ALL issues rated HIGH or MEDIUM before proceeding. Re-run the relevant reviewer if significant changes were made during fixes.
+If a scenario reveals a bug: fix it, then re-run `senior-code-reviewer` on the fix (mini Step 3 loop). Continue until all scenarios pass.
 
-Say: `STEP 3 COMPLETE: CODE REVIEW PASSED` and list each agent that ran, its verdict, and issues found/fixed.
+Say: `STEP 4 COMPLETE: ALL TESTS PASS` and list each scenario with result.
 
-#### STEP 4: Test Case Generation
-Run the `test-suite-architect` agent to generate test cases for the change. The agent:
-1. Reads the diff and the affected files
-2. Produces a list of test scenarios covering: happy path, edge cases, error cases, security boundaries, and regression risks
-3. For each scenario: describes the setup, action, and expected result
+#### STEP 5: Final Verification (CONDITIONAL)
 
-Say: `STEP 4 COMPLETE: TEST CASES GENERATED` and list the test scenarios.
+**This step is mandatory IF any code was changed after Step 3 approval** (bug fixes from Step 4, review feedback fixes, etc.). If zero code changes were made after Step 3, skip this step.
 
-#### STEP 5: Execute Tests and Fix Bugs
-Trace every test scenario from Step 4 through the code. For scenarios that can be verified via build, API logic, or code path analysis, do so. For scenarios requiring runtime verification, describe what would happen based on code analysis.
+When required:
+1. `senior-code-reviewer` reviews the final complete diff (the "ship it?" review)
+2. If UI changes: `premium-ui-designer` reviews final state
+3. `test-suite-architect` confirms all previously flagged issues are resolved and no new issues introduced
 
-If any test scenario reveals a bug: fix it immediately. After fixing, go back to Step 3 (code review on the fix). This loop continues until all tests pass.
+When skipped (zero changes after Step 3):
+Say: `STEP 5 SKIPPED: No code changes after Step 3 approval. Diff unchanged.`
 
-Say: `STEP 5 COMPLETE: ALL TESTS PASS` and list each scenario with its result.
+When completed:
+Say: `STEP 5 COMPLETE: FINAL VERIFICATION PASSED`
 
-#### STEP 6: Final Verification Review
-Run `senior-code-reviewer` ONE MORE TIME on the final diff (including all bug fixes from Step 5). This is the "ship it?" review.
+#### Build Check
+`npx next build` must exit 0. This is verified as part of Step 4 or Step 5, not a separate numbered step.
 
-If UI changes: also re-run `premium-ui-designer` on the final state.
-If landing page: also re-run `conversion-copywriter` on the final state.
-If the reviewer requests changes: fix them and re-run this step.
+**After completing all steps, say:** `PIPELINE COMPLETE` — this is the ONLY signal that code is ready to commit/push.
 
-Say: `STEP 6 COMPLETE: FINAL REVIEW APPROVED`
-
-#### STEP 7: Tester Verification
-Run the `test-suite-architect` agent one final time to confirm all previously identified issues from Steps 3-5 are resolved. The agent:
-1. Reviews the final diff
-2. Confirms each previously flagged issue is fixed
-3. Checks that fixes did not introduce new issues
-
-Only after tester confirmation: code is ready to commit/push.
-
-Say: `STEP 7 COMPLETE: TESTER VERIFIED, READY TO SHIP`
-
-**After ALL 7 steps, say:** `PIPELINE COMPLETE` — this is the ONLY signal that code is ready. Do not commit or suggest pushing without this phrase.
-
-#### Pipeline Efficiency Rules (no overlap, no waste)
-1. **I am the orchestrator.** I coordinate all agents. Quality and efficiency are my responsibility.
-2. **One agent, one job.** Review agents review. Test agents test. Architect agents design. Never mix roles.
-3. **No duplicate work.** If the architect reviewed the plan, I do not re-design inline. If the reviewer checked security, I do not re-check the same things. Trust agent output.
-4. **Parallelize where possible.** In Step 3, launch `senior-code-reviewer` + UI agents + `db-optimizer` all in parallel. In Step 6, same pattern.
-5. **Chain where dependent.** Step 4 (tests) depends on Step 3 (review fixes). Step 6 depends on Step 5 (bug fixes). Never run these in parallel.
-6. **Use dedicated agents, not generic prompts.** `senior-code-reviewer` not "general-purpose as senior dev." `software-architect` not "general-purpose as architect." `test-suite-architect` not "general-purpose as QA." The dedicated agents have persistent memory and specialized instructions.
-7. **Consolidate before acting.** When multiple agents return findings, deduplicate into one action list before writing any code.
-8. **UI agent selection guide:** Landing/marketing pages = `frontend-design` skill + `conversion-copywriter` agent. App/dashboard UI = `interface-design` skill + `premium-ui-designer` + `ux-simplifier` + `ux-pain-point-fixer` agents. Never apply landing page agents to app UI or vice versa.
+#### Pipeline Efficiency Rules
+1. **I am the orchestrator.** Quality and efficiency are my responsibility.
+2. **One agent, one job.** Never mix roles. Never ask a reviewer to also fix code.
+3. **No duplicate work.** Trust agent output. Don't re-review what an agent already reviewed.
+4. **Parallelize independent agents** in a single message (e.g., code review + UI review + DB review all in Step 3).
+5. **Chain dependent steps.** Step 4 waits for Step 3 fixes. Step 5 waits for Step 4 fixes.
+6. **Use dedicated agents by name.** The dedicated agents have persistent memory and specialized instructions that generic prompts lack.
+7. **Consolidate before acting.** Deduplicate findings from multiple agents into one action list before writing any fixes.
 
 ---
 
-### Persona-Driven UI Selection (referenced by pre-implementation step 7)
+### Persona-Driven UI Selection (referenced by Step 1, fields 6 and 8)
 
 **LIVE AND BREATHE AROUND THE USER.** Every UI decision exists to serve a specific human in a specific context on a specific device. A choice that works for one persona may fail for another. The goal: everyone is happy, no one feels left out, AND the business benefits.
 
@@ -377,7 +347,7 @@ BUSINESS IMPACT ASSESSMENT:
 6. Business impact says "supports retention" without explaining HOW specifically
 7. Upgrade prompt copy/placement was copied from another page without evaluating timing and motivation
 
-### Test Scenario Checklist (referenced by pre-implementation step 6)
+### Test Scenario Checklist (referenced by Step 1, field 7)
 
 For every feature, enumerate scenarios from ALL of these categories:
 
@@ -393,7 +363,7 @@ For every feature, enumerate scenarios from ALL of these categories:
 
 ### Post-Implementation Checklist (Mandatory Before Marking Done)
 
-**The Code Quality Pipeline (7 steps above) IS the post-implementation process.** Do not mark a task done unless the pipeline reached `PIPELINE COMPLETE`.
+**The Code Quality Pipeline (5 steps above) IS the post-implementation process.** Do not mark a task done unless the pipeline reached `PIPELINE COMPLETE`.
 
 Additional checks after pipeline completion:
 1. **Build passes?** `npx next build` exits 0 (should already be verified in pipeline).

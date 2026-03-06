@@ -5,193 +5,11 @@ description: Use WHILE building features - design, implementation, security, sca
 
 # Design & Build
 
-Applied during active feature development - from design through implementation.
+Applied during active feature development. This skill covers implementation concerns: data model, security, scalability, and coding patterns. For UI/UX design principles (personas, intent, craft, layering, tokens), apply the `interface-design` skill (`.claude/commands/SKILL.md`) for app/dashboard UI or the `frontend-design` skill for landing/marketing pages. Those skills own all design/aesthetics decisions. This skill owns everything else.
 
 ---
 
-## PART 1: PERSONA-BASED DESIGN (Not Generic "User")
-
-### Before Any Design or Code: Define ALL Personas
-
-List EVERY role that interacts with this feature. For EACH role, reference the specific persona from validation.
-
-**Example:**
-- Primary user (manages): Priya (salon owner, 32, phone-only, busy)
-- End user (interacts): Anjali (customer, 28, iPhone, rushed)
-- Viewer (consumes): Ravi (website visitor, 35, browsing on commute)
-
-### For EACH Persona, Answer:
-
-**Who is THIS specific human?**
-- Where are THEY right now? (Priya: At salon between customers)
-- What device do THEY use? (Priya: 3-year-old Android)
-- What do THEY want to accomplish in next 60 seconds? (Priya: Send form, get back to customer)
-- What are THEY feeling? (Priya: Rushed, anxious about next customer)
-- What would make THEM stop and leave? (Priya: If it takes >30 seconds or requires typing)
-
-**User Psychology (MANDATORY for EACH Persona):**
-
-1. **Pain (Persona-Specific):**
-   - Priya's pain: Asking for testimonials feels awkward and pushy
-   - Anjali's pain: Generic review forms feel like homework
-   - Ravi's pain: Can't trust salon without seeing real reviews
-   
-   → Design relief differently for each
-
-2. **Motivation (Persona-Specific):**
-   - Priya's outcome: More customers booking appointments
-   - Anjali's outcome: Feel heard, take <2 minutes
-   - Ravi's outcome: Make confident decision which salon to book
-   
-   → Design for THEIR outcome, not the feature
-
-3. **Fear (Persona-Specific):**
-   - Priya's fear: Tech will break during customer interaction
-   - Anjali's fear: Form will take forever, she'll miss meeting
-   - Ravi's fear: Reviews are fake or filtered
-   
-   → Put reassurance next to THEIR specific concern
-
-4. **Monetization (if applicable, Persona-Specific):**
-   - What will make PRIYA pay? (When free tier means manually typing each customer's number)
-   - Don't think generic "users" - think specific persona's pain threshold
-
-### Design Decisions Per Persona
-
-For each screen/feature, ask:
-
-**For Priya (Salon Owner):**
-- Can she do this with one thumb while holding scissors?
-- Does this work if customer walks in mid-flow?
-- Can she do this without remembering a password?
-- Is it obvious without reading instructions?
-
-**For Anjali (Customer):**
-- Can she complete this while walking?
-- Does this work on slow connection?
-- Can she do this without creating an account?
-- Is it <2 minutes total time?
-
-**For Ravi (Website Visitor):**
-- Can he see what he needs without clicking?
-- Does this load fast on 3G?
-- Can he trust this is real?
-- Is it obvious which salon is better?
-
-### The Persona Swap Test
-
-Design same screen for different personas:
-
-**Wrong (Generic):**
-"Submit Testimonial Form"
-- Generic button text
-- Standard form layout
-- Works for everyone = optimized for no one
-
-**Right (Persona-Specific):**
-- For Priya: "Send to Customer" (her mental model)
-- For Anjali: "Share Quick Feedback" (feels easy, not formal)
-- For Ravi: "See Real Reviews" (addresses his trust concern)
-
-Same feature, different copy/design per persona's mental model.
-
----
-
-## PART 2: INTENT-FIRST DESIGN (Per Persona)
-
-Before touching code, state explicitly FOR EACH PRIMARY PERSONA:
-
-**Intent Statement (Priya - Salon Owner):**
-```
-Who: Priya, 32, salon owner, phone-only, between customers
-Context: At shop, customer just left, 3 minutes until next one
-What: Send testimonial request to customer who just left
-Feel: Fast like WhatsApp (familiar), simple like one tap
-Success: Sent in <15 seconds without typing
-```
-
-**Intent Statement (Anjali - Customer):**
-```
-Who: Anjali, 28, marketing professional, always busy
-Context: Just left salon, in taxi to meeting, phone in hand
-What: Share quick feedback about salon experience
-Feel: Easy like Instagram story (familiar), quick like emoji reaction
-Success: Done in <90 seconds, feels effortless
-```
-
-Design must serve BOTH personas' intents, not compromise to generic middle.
-
-**Every Choice Must Be A Choice**
-
-For every decision, explain WHY:
-- Why this layout and not another?
-- Why this color temperature?
-- Why this spacing density?
-- Why this information hierarchy?
-
-If answer is "it's common" or "it's clean" → You haven't chosen. You've defaulted.
-
-**The swap test:** If you swapped choices for most common alternatives and design didn't feel different, you never made real choices.
-
----
-
-## PART 3: DOMAIN EXPLORATION
-
-Required outputs BEFORE proposing any direction:
-
-**1. Domain** (5+ concepts)
-Concepts, metaphors, vocabulary from product's world. Not features - territory.
-
-**2. Color World** (5+ colors)
-What colors exist naturally in this product's domain? If product were physical space, what would you see?
-
-**3. Signature** (1 unique element)
-One element - visual, structural, interaction - that could ONLY exist for THIS product.
-
-**4. Defaults** (3 obvious choices)
-Three obvious choices for this interface type. You can't avoid patterns you haven't named.
-
-**Proposal must reference:**
-- Domain concepts explored
-- Colors from world exploration
-- Signature element
-- What replaces each default
-
-**Test:** Remove product name. Could someone identify what this is for? If not, it's generic. Explore deeper.
-
----
-
-## PART 4: CRAFT FOUNDATIONS
-
-### Subtle Layering
-- Surface elevation: Barely visible shifts (few % lightness), hierarchy emerges when stacked
-- Sidebars: Same background as canvas, not different. Subtle border enough.
-- Inputs: Slightly darker than surroundings (inset - receive content)
-- Borders: Low-opacity rgba, progression based on importance
-- Squint test: Blur eyes - still see hierarchy, but nothing jumps out
-
-### Token Architecture
-- Foreground: 4 text levels (primary, secondary, tertiary, muted)
-- Background: Surface elevation levels
-- Border: Progression (soft, standard, emphasis, max)
-- Controls: Dedicated tokens, not reused surface tokens
-
-### Spacing & Depth
-- Base unit, use multiples
-- Choose ONE depth approach: borders-only, subtle shadows, layered shadows, or surface shifts
-- Don't mix approaches
-
-### Typography
-- Distinct levels distinguishable at glance
-- Combine size, weight, letter-spacing (not size alone)
-
-### States
-Every interactive element: default, hover, active, focus, disabled
-Every data state: loading, empty, error
-
----
-
-## PART 5: DATA MODEL (Before Any UI)
+## PART 1: DATA MODEL (Before Any UI)
 
 Map complete schema before building UI:
 
@@ -205,7 +23,7 @@ Map complete schema before building UI:
 
 ---
 
-## PART 6: SECURITY PLANNING (Mandatory Before Code)
+## PART 2: SECURITY PLANNING (Mandatory Before Code)
 
 ### Authentication & Authorization
 - How verify user identity?
@@ -250,7 +68,7 @@ Map complete schema before building UI:
 
 ---
 
-## PART 7: SCALABILITY PLANNING (Mandatory Before Code)
+## PART 3: SCALABILITY PLANNING (Mandatory Before Code)
 
 ### Database Design
 - Proper indexes on frequently queried columns?
@@ -300,7 +118,7 @@ For each feature, state:
 
 ---
 
-## PART 8: PUBLIC URLs (Map Before Building)
+## PART 4: PUBLIC URLs (Map Before Building)
 
 List every public URL:
 
@@ -315,7 +133,7 @@ List every public URL:
 
 ---
 
-## PART 9: IMPLEMENTATION PATTERNS
+## PART 5: IMPLEMENTATION PATTERNS
 
 ### Never Hardcode Base URLs
 ```js
@@ -350,7 +168,7 @@ Before gating any feature as Pro, check pricing page. If pricing says custom que
 
 ---
 
-## PART 10: EMPTY STATES & ONBOARDING
+## PART 6: EMPTY STATES & ONBOARDING
 
 ### Every Empty State Must Tell User What To Do
 
@@ -396,7 +214,7 @@ Custom slug can be Pro feature (vanity URL), but basic functionality must work f
 
 ---
 
-## PART 11: SHARING & EMBED FLOWS
+## PART 7: SHARING & EMBED FLOWS
 
 ### Every Shareable Asset Needs All Three Methods
 
@@ -423,7 +241,7 @@ Public testimonials page showing reviews but no way to leave review = missed opp
 
 ---
 
-## PART 12: UI COPY RULES
+## PART 8: UI COPY RULES
 
 ### Never Use Em Dashes in UI
 Em dashes (—) look out of place in product UI. Use period, comma, or rewrite.
@@ -439,7 +257,7 @@ Permanent rule. Violation causes visible quality issues.
 
 ---
 
-## PART 13: TECHNICAL IMPLEMENTATION
+## PART 9: TECHNICAL IMPLEMENTATION
 
 ### iframe Height Auto-Sizing Requires postMessage
 
@@ -493,7 +311,7 @@ if (error) {
 
 ---
 
-## PART 14: END-TO-END TEST BEFORE "DONE"
+## PART 10: END-TO-END TEST BEFORE "DONE"
 
 Every new feature must pass this sequence before complete:
 
@@ -513,7 +331,7 @@ If ANY step fails, product is broken for real users. Run full test, not just par
 
 ---
 
-## PART 15: COMMON SILENT FAILURES
+## PART 11: COMMON SILENT FAILURES
 
 These produce no console error, no crash - just silently do nothing:
 
@@ -528,7 +346,7 @@ These produce no console error, no crash - just silently do nothing:
 
 ---
 
-## PART 16: WHEN TO BUILD VS SKIP
+## PART 12: WHEN TO BUILD VS SKIP
 
 Only build features in plan and validated against target user.
 
