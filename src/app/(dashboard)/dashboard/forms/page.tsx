@@ -740,7 +740,7 @@ export default function FormsPage() {
         <div>
           <h1 className="text-2xl font-bold tracking-tight text-foreground">Collection Forms</h1>
           <p className="mt-0.5 text-sm text-muted-foreground">
-            Share these links to collect testimonials from customers.
+            Create and share forms to collect testimonials from your customers.
           </p>
         </div>
         <Button
