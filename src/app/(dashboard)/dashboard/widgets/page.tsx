@@ -1350,12 +1350,12 @@ export function Testimonials() {
               {/* Vouch branding */}
               {!settings.hideBranding && (
                 <div className="mt-4 flex justify-center">
-                  <span className="text-xs text-muted-foreground/60">
+                  <a href="/via" target="_blank" rel="noopener noreferrer" className="text-xs text-muted-foreground/60 hover:text-muted-foreground transition-colors">
                     Powered by{' '}
                     <span style={{ color: settings.theme.primaryColor }} className="font-semibold">
                       Vouch
                     </span>
-                  </span>
+                  </a>
                 </div>
               )}
             </div>

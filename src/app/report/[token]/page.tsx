@@ -195,7 +195,7 @@ export default async function ClientReportPage({ params }: PageProps) {
       <div className="text-center py-8 text-xs text-gray-300">
         {isStudio && project.report_footer_text
           ? project.report_footer_text
-          : 'Powered by Vouch'}
+          : <a href="/via" target="_blank" rel="noopener noreferrer" className="hover:text-gray-400 transition-colors">Powered by Vouch</a>}
       </div>
     </div>
   );

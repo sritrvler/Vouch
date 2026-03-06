@@ -575,13 +575,15 @@ export default async function PublicTestimonialsPage({ params }: PageProps) {
 
       {/* Footer */}
       <div className="pb-10 text-center">
-        <Link
-          href="/"
+        <a
+          href="/via"
+          target="_blank"
+          rel="noopener noreferrer"
           className="inline-flex items-center gap-1.5 text-xs text-gray-400 hover:text-gray-600 transition-colors"
         >
           Powered by{' '}
           <span className="font-semibold">Vouch</span>
-        </Link>
+        </a>
       </div>
     </div>
     </>
