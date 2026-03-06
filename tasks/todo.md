@@ -10,7 +10,41 @@
 
 # Active Work Queue
 
-## Session Handoff (March 6, 2026, session 17: All Projects + Inbox Scoping + Dialog Consistency)
+## Session Handoff (March 6, 2026, session 18: Embed Modal Redesign + Widget UI Polish + Dashboard Subtexts)
+
+**What was done this session:**
+
+1. **Widget builder UI polish (T3, 10 fixes):** Accordion animations (Framer Motion height:'auto'), widget name pencil affordance, sticky preview, Escape key handler, mobile delete visibility, section rename, icon normalization, preview background fix, modal close touch target.
+2. **Embed modal complete redesign (T3):** Replaced 4-tab layout with intent-based 3-path guided flow:
+   a. "Share a link" path: public page URL with copy, share suggestions
+   b. "On my website" path: platform picker (Wix, Squarespace, Webflow, Framer, WordPress, Other) with Simple Icons brand logos, then platform-specific numbered step-by-step instructions with inline embed code
+   c. "Developer or AI tools" path: embed code with HTML label, AI prompt for vibe coders (Cursor, Claude Code, Bolt, Lovable, v0, Codex, Anti Gravity, Replit), React/Next.js component (Pro users get code, free users get benefit description + upgrade link)
+3. **Embed modal UX polish:** Fixed slide animation direction (useRef instead of useState for slideDirection, Framer Motion custom+variants pattern), fixed modal resizing (fixed height with flex layout), copy button visibility on dark code blocks (variant prop: dark/light), platform brand icons from Simple Icons, code block language labels (HTML/JSX), focus-visible styles, slug dead-end now links to settings, removed belittling copy, consistent SEO messaging, auto-update reassurance on chooser screen.
+4. **Dashboard subtexts:** Added descriptive subtexts to all dashboard pages (Inbox: "Review, approve, or reject testimonials from your customers", Widget Builder: "Customize how testimonials look on your site. Changes update automatically."). Rephrased Forms subtext. Fixed Settings profile description to explain where display name appears.
+5. **Button rename:** "Get Code" -> "Add to Website" with Globe icon (clearer intent).
+6. **Widget header cleanup:** Removed redundant inline widget name input (already visible in tab selector).
+7. **Created `src/lib/embed-platforms.ts`:** Extracted platform-specific embed instructions to a data file.
+
+**Files changed:**
+- `src/app/(dashboard)/dashboard/widgets/page.tsx` (major: embed modal redesign, UI polish, header cleanup)
+- `src/app/(dashboard)/dashboard/inbox/page.tsx` (added subtext)
+- `src/app/(dashboard)/dashboard/forms/page.tsx` (rephrased subtext)
+- `src/app/(dashboard)/dashboard/settings/page.tsx` (profile description)
+- `src/lib/embed-platforms.ts` (new: platform data)
+
+**What's next:**
+Pick from the prioritized backlog below. The embed modal and widget builder are now polished and ready for launch.
+
+**What to watch out for:**
+1. `slideDirection` is a `useRef` not `useState`. It's set synchronously before state updates to avoid Framer Motion reading stale values during AnimatePresence transitions.
+2. `CopyCodeButton` now has a `variant` prop ('dark' | 'light'). Default is 'dark' (for code blocks on bg-gray-950). Use `variant="light"` on light backgrounds.
+3. The embed modal uses fixed height `h-[70vh] sm:h-[65vh]` with flex layout. Header is `shrink-0`, content is `flex-1 overflow-y-auto`. This prevents modal resizing between steps.
+4. Platform icons are inline SVGs from Simple Icons (MIT license). If adding a new platform, fetch the SVG path from `https://raw.githubusercontent.com/simple-icons/simple-icons/master/icons/[name].svg`.
+5. Widget name input was removed from the header. Name shows in widget selector tab. If renaming is needed, consider adding it to a settings section or double-click on tab.
+
+---
+
+## Previous: Session Handoff (March 6, 2026, session 17: All Projects + Inbox Scoping + Dialog Consistency)
 
 **What was done this session:**
 
