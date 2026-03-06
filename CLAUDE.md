@@ -200,7 +200,7 @@ Use dedicated agents BY NAME. Do NOT use generic "general-purpose prompted as...
 | `senior-code-reviewer` | Custom (Opus) | Steps 3 and 5: code review |
 | `test-suite-architect` | Custom (Sonnet) | Steps 4 and 5: test generation and verification |
 | `premium-ui-designer` | Custom (Sonnet) | Step 3: UI polish, animations, premium feel |
-| `ux-reviewer` | Custom (Sonnet) | Step 3: flow friction, pain points, simplification |
+| `ux-reviewer` | Custom (Sonnet) | Step 1: flow design (before code). Step 3: friction review (after code) |
 | `db-optimizer` | Built-in | Steps 1 and 3: schema review, query optimization |
 | `perf-optimizer` | Built-in | Step 3: bundle size, render performance |
 | `conversion-copywriter` | Custom | Step 3: landing page copy, CTA effectiveness |
@@ -231,9 +231,18 @@ Use dedicated agents BY NAME. Do NOT use generic "general-purpose prompted as...
 - **Feature needs market context?** Run `competitive-analyst` first, feed output to `product-strategist`. Example triggers: "how does this compare to competitors?", pricing changes, positioning decisions, "should we match feature X?".
 - **Bug fix, minor tweak, or already-validated feature?** Skip strategic agents. Go straight to architect.
 
-**Dependency chain for new features:** `competitive-analyst` (optional, market context) -> `product-strategist` (build/kill verdict, mandatory for new features) -> `software-architect` (implementation plan) -> proceed.
+**UI flow design (before presenting to architect, for UI tasks only):**
+- **Does this task add or change UI screens/flows?** If yes, run `ux-reviewer` in **FLOW DESIGN mode** to create the flow spec (screens, sequence, states, interactions, persona notes). Then run `premium-ui-designer` for a **quick feasibility check** (breakpoint viability, premium pattern suggestions, component selection). The approved flow spec becomes the blueprint for Step 2.
+- **Minor UI tweak (color, spacing, copy change)?** Skip flow design. The existing flow is unchanged.
+- **The flow spec output** includes: screen definitions (with all 4 states), flow diagram, click counts, and persona validation. A developer reading only this spec should be able to build the feature without asking flow questions.
 
-**Present all 8 answers to `software-architect` agent.** If DB changes: also run `db-optimizer`. Wait for approval.
+**Dependency chain for new features with UI:**
+`competitive-analyst` (optional) -> `product-strategist` (build/kill) -> `ux-reviewer` FLOW DESIGN (flow spec) -> `premium-ui-designer` (feasibility check) -> `software-architect` (implementation plan) -> proceed.
+
+**Dependency chain for new features without UI:**
+`competitive-analyst` (optional) -> `product-strategist` (build/kill) -> `software-architect` (implementation plan) -> proceed.
+
+**Present all 8 answers + approved flow spec (if UI) to `software-architect` agent.** If DB changes: also run `db-optimizer`. Wait for approval.
 
 **Skip condition:** ONLY for trivially simple changes (typo, string literal, color value) where you have absolute confidence.
 
@@ -251,7 +260,7 @@ Say: `STEP 2 COMPLETE: CODE WRITTEN`
 Run the FULL diff through review agents. **Launch all applicable reviewers in parallel.**
 
 **Always:** `senior-code-reviewer` (bugs, security, logic, quality)
-**If UI changes (major):** `premium-ui-designer` + `ux-reviewer` (launched in parallel with code review)
+**If UI changes (major):** `premium-ui-designer` (polish review) + `ux-reviewer` in IMPLEMENTATION REVIEW mode (friction + flow spec compliance). Launched in parallel with code review.
 **If UI changes (minor):** `premium-ui-designer` only
 **If DB changes:** `db-optimizer` (parallel with code review)
 **If landing page:** `conversion-copywriter` (parallel with code review)
