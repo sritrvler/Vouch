@@ -1500,14 +1500,14 @@ export function Testimonials() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm"
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm transition-[backdrop-filter] duration-300"
             onClick={(e) => { if (e.target === e.currentTarget) setShowEmbedModal(false); }}
           >
             <motion.div
               initial={{ opacity: 0, scale: 0.95, y: 12 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 12 }}
-              className="bg-white rounded-2xl border border-border overflow-hidden w-full max-w-2xl max-h-[80vh] overflow-y-auto shadow-xl"
+              className="bg-white rounded-2xl border border-border overflow-hidden w-full max-w-3xl max-h-[80vh] overflow-y-auto shadow-xl"
             >
             {/* Modal header */}
             <div className="flex items-center justify-between px-5 py-4 border-b border-border sticky top-0 bg-white z-10 shadow-[0_1px_3px_0_rgb(0_0_0/0.04)]">
@@ -1552,8 +1552,8 @@ export function Testimonials() {
                       onClick={() => handleEmbedNav('link')}
                       className="flex flex-col items-start gap-2 rounded-xl border-2 border-border p-4 text-left hover:border-indigo-300 hover:bg-indigo-50/30 transition-all group focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:outline-none"
                     >
-                      <div className="size-9 rounded-lg bg-indigo-50 flex items-center justify-center group-hover:bg-indigo-100 transition-colors">
-                        <Link2 className="size-4 text-indigo-600" />
+                      <div className="size-9 rounded-lg bg-indigo-100 flex items-center justify-center group-hover:bg-indigo-200 transition-colors">
+                        <Link2 className="size-4 text-indigo-700" />
                       </div>
                       <div>
                         <p className="text-sm font-semibold text-foreground">Share a link</p>
@@ -1565,8 +1565,8 @@ export function Testimonials() {
                       onClick={() => handleEmbedNav('website')}
                       className="flex flex-col items-start gap-2 rounded-xl border-2 border-border p-4 text-left hover:border-indigo-300 hover:bg-indigo-50/30 transition-all group focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:outline-none"
                     >
-                      <div className="size-9 rounded-lg bg-indigo-50 flex items-center justify-center group-hover:bg-indigo-100 transition-colors">
-                        <Globe className="size-4 text-indigo-600" />
+                      <div className="size-9 rounded-lg bg-indigo-100 flex items-center justify-center group-hover:bg-indigo-200 transition-colors">
+                        <Globe className="size-4 text-indigo-700" />
                       </div>
                       <div>
                         <p className="text-sm font-semibold text-foreground">On my website</p>
@@ -1578,8 +1578,8 @@ export function Testimonials() {
                       onClick={() => handleEmbedNav('developer')}
                       className="flex flex-col items-start gap-2 rounded-xl border-2 border-border p-4 text-left hover:border-indigo-300 hover:bg-indigo-50/30 transition-all group focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:outline-none"
                     >
-                      <div className="size-9 rounded-lg bg-indigo-50 flex items-center justify-center group-hover:bg-indigo-100 transition-colors">
-                        <Code2 className="size-4 text-indigo-600" />
+                      <div className="size-9 rounded-lg bg-indigo-100 flex items-center justify-center group-hover:bg-indigo-200 transition-colors">
+                        <Code2 className="size-4 text-indigo-700" />
                       </div>
                       <div>
                         <p className="text-sm font-semibold text-foreground">Developer or AI tools</p>
@@ -1596,7 +1596,7 @@ export function Testimonials() {
                         handleEmbedNav('developer');
                       }
                     }}
-                    className="text-xs text-muted-foreground hover:text-indigo-600 transition-colors flex items-center gap-1.5 mx-auto"
+                    className="text-xs text-muted-foreground hover:text-indigo-600 transition-colors flex items-center gap-1.5 mx-auto border border-border/60 rounded-lg px-3 py-1.5 hover:border-indigo-200 hover:bg-indigo-50/30"
                   >
                     <Code2 className="size-3" />
                     React / Next.js component
@@ -1642,7 +1642,7 @@ export function Testimonials() {
                     </div>
                   )}
                   <div className="rounded-xl bg-indigo-50 border border-indigo-100 p-4 space-y-2">
-                    <p className="text-xs font-semibold text-indigo-800">Great places to share it:</p>
+                    <p className="text-xs font-semibold text-indigo-700">Great places to share it:</p>
                     <ul className="space-y-1.5 text-xs text-indigo-700">
                       <li className="flex items-start gap-2"><span className="mt-0.5">•</span><span>Email signature with a &ldquo;See what customers say&rdquo; link</span></li>
                       <li className="flex items-start gap-2"><span className="mt-0.5">•</span><span>WhatsApp message or Instagram bio</span></li>
