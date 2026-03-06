@@ -48,6 +48,7 @@ function getEmailDomain(email: string | null | undefined): string | null {
 }
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/client';
+import { useProject } from '@/context/ProjectContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -976,6 +977,7 @@ function TestimonialCard({ testimonial, onApprove, onReject, onToggleFeatured, o
 // ─── Page ─────────────────────────────────────────────────────────────────────
 export default function InboxPage() {
   const supabase = createClient();
+  const { selectedProjectId, showAllProjects } = useProject();
   const [testimonials, setTestimonials] = useState<Testimonial[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
@@ -997,13 +999,21 @@ export default function InboxPage() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
+      const scopeByProject = !showAllProjects && selectedProjectId;
+      let testimonialsQuery = supabase
+        .from('testimonials')
+        .select('*, project:projects(name)')
+        .order('created_at', { ascending: false })
+        .limit(PAGE_SIZE);
+
+      if (scopeByProject) {
+        testimonialsQuery = testimonialsQuery.eq('project_id', selectedProjectId);
+      } else {
+        testimonialsQuery = testimonialsQuery.eq('user_id', user.id);
+      }
+
       const [testimonialsRes, subRes] = await Promise.all([
-        supabase
-          .from('testimonials')
-          .select('*, project:projects(name)')
-          .eq('user_id', user.id)
-          .order('created_at', { ascending: false })
-          .limit(PAGE_SIZE),
+        testimonialsQuery,
         supabase
           .from('subscriptions')
           .select('plan')
@@ -1022,20 +1032,25 @@ export default function InboxPage() {
     } finally {
       setLoading(false);
     }
-  }, [supabase]);
+  }, [supabase, selectedProjectId, showAllProjects]);
 
   const loadMore = useCallback(async () => {
     if (loadingMore || testimonials.length === 0) return;
     setLoadingMore(true);
     try {
       const cursor = testimonials[testimonials.length - 1].created_at;
+      const scopeByProject = !showAllProjects && selectedProjectId;
       let query = supabase
         .from('testimonials')
         .select('*, project:projects(name)')
-        .eq('user_id', (await supabase.auth.getUser()).data.user?.id ?? '')
         .order('created_at', { ascending: false })
         .lt('created_at', cursor)
         .limit(PAGE_SIZE);
+      if (scopeByProject) {
+        query = query.eq('project_id', selectedProjectId);
+      } else {
+        query = query.eq('user_id', (await supabase.auth.getUser()).data.user?.id ?? '');
+      }
       if (activeTab !== 'all') {
         query = query.eq('status', activeTab);
       }
@@ -1050,7 +1065,7 @@ export default function InboxPage() {
     } finally {
       setLoadingMore(false);
     }
-  }, [supabase, testimonials, loadingMore, activeTab]);
+  }, [supabase, testimonials, loadingMore, activeTab, selectedProjectId, showAllProjects]);
 
   useEffect(() => {
     fetchTestimonials();
