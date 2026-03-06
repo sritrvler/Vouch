@@ -29,6 +29,7 @@ import {
   SlidersHorizontal,
   ArrowUpDown,
   Pencil,
+  ArrowLeft,
 } from 'lucide-react';
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/client';
@@ -44,6 +45,7 @@ import { format } from 'date-fns';
 import { useProject } from '@/context/ProjectContext';
 import { UpgradeModal } from '@/components/upgrade-modal';
 import { GOOGLE_FONTS, resolveFontUrl, sanitizeFontUrl } from '@/lib/fonts';
+import { PLATFORMS, type WebPlatform } from '@/lib/embed-platforms';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 type WidgetLayout = 'grid' | 'carousel' | 'wall' | 'list' | 'single';
@@ -318,7 +320,28 @@ export default function WidgetsPage() {
   const [orderedTestimonials, setOrderedTestimonials] = useState<Testimonial[]>([]);
   const [loadingTestimonials, setLoadingTestimonials] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [embedTab, setEmbedTab] = useState<'link' | 'builder' | 'dev' | 'react'>('builder');
+  // Guided embed flow state
+  type EmbedPath = 'choose' | 'link' | 'website' | 'developer';
+  const [embedPath, setEmbedPath] = useState<EmbedPath>('choose');
+  const [selectedPlatform, setSelectedPlatform] = useState<WebPlatform | null>(null);
+  const [slideDirection, setSlideDirection] = useState<1 | -1>(1);
+
+  const showBackButton = embedPath !== 'choose';
+
+  const handleBack = useCallback(() => {
+    setSlideDirection(-1);
+    if (embedPath === 'website' && selectedPlatform) {
+      setSelectedPlatform(null);
+    } else {
+      setEmbedPath('choose');
+      setSelectedPlatform(null);
+    }
+  }, [embedPath, selectedPlatform]);
+
+  const handleEmbedNav = useCallback((path: EmbedPath) => {
+    setSlideDirection(1);
+    setEmbedPath(path);
+  }, []);
 
   // Multi-widget state
   const [widgets, setWidgets] = useState<Widget[]>([]);
@@ -778,7 +801,7 @@ export function Testimonials() {
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => setShowEmbedModal(true)}
+                onClick={() => { setEmbedPath('choose'); setSelectedPlatform(null); setShowEmbedModal(true); }}
                 className="gap-1.5 rounded-xl"
               >
                 <Code2 className="size-3.5" />
@@ -1487,240 +1510,299 @@ export function Testimonials() {
               className="bg-white rounded-2xl border border-border overflow-hidden w-full max-w-2xl max-h-[80vh] overflow-y-auto shadow-xl"
             >
             {/* Modal header */}
-            <div className="flex items-center justify-between px-5 py-4 border-b border-border sticky top-0 bg-white z-10">
+            <div className="flex items-center justify-between px-5 py-4 border-b border-border sticky top-0 bg-white z-10 shadow-[0_1px_3px_0_rgb(0_0_0/0.04)]">
               <div className="flex items-center gap-2">
-                <Code2 className="size-4 text-indigo-500" />
-                <h3 className="text-sm font-semibold text-foreground">Add to your website</h3>
+                {showBackButton ? (
+                  <button onClick={handleBack} className="rounded-lg p-2 hover:bg-muted transition-colors focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:outline-none" aria-label="Go back">
+                    <ArrowLeft className="size-4 text-muted-foreground" />
+                  </button>
+                ) : (
+                  <Globe className="size-4 text-indigo-500" />
+                )}
+                <h3 className="text-sm font-semibold text-foreground">
+                  {embedPath === 'choose' && 'Add to your website'}
+                  {embedPath === 'link' && 'Share a link'}
+                  {embedPath === 'website' && !selectedPlatform && 'Choose your platform'}
+                  {embedPath === 'website' && selectedPlatform && (PLATFORMS.find(p => p.id === selectedPlatform)?.name ?? 'Instructions')}
+                  {embedPath === 'developer' && 'Developer & AI Tools'}
+                </h3>
               </div>
-              <button onClick={() => setShowEmbedModal(false)} className="rounded-lg p-2 hover:bg-muted transition-colors" aria-label="Close embed modal">
+              <button onClick={() => setShowEmbedModal(false)} className="rounded-lg p-2 hover:bg-muted transition-colors focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:outline-none" aria-label="Close">
                 <X className="size-4 text-muted-foreground" />
               </button>
             </div>
 
-            {/* Tabs */}
-            <div className="flex border-b border-border bg-muted/30 overflow-x-auto">
-              {([
-                { id: 'link' as const, label: 'Share link', icon: <Link2 className="size-3.5" /> },
-                { id: 'builder' as const, label: 'Website builder', icon: <Globe className="size-3.5" /> },
-                { id: 'dev' as const, label: 'Script tag', icon: <Code2 className="size-3.5" /> },
-                {
-                  id: 'react' as const,
-                  label: 'React',
-                  icon: userPlan === 'free'
-                    ? <Lock className="size-3.5 text-indigo-400" />
-                    : <Code2 className="size-3.5" />,
-                },
-              ]).map((tab) => (
-                <button
-                  key={tab.id}
-                  onClick={() => setEmbedTab(tab.id)}
-                  className={cn(
-                    'flex items-center gap-1.5 px-4 py-2.5 text-xs font-medium border-b-2 transition-colors',
-                    embedTab === tab.id
-                      ? 'border-indigo-500 text-indigo-700 bg-white'
-                      : 'border-transparent text-muted-foreground hover:text-foreground'
-                  )}
+            {/* Modal content */}
+            <div className="p-5 overflow-x-hidden">
+              <AnimatePresence mode="wait" initial={false}>
+                <motion.div
+                  key={`${embedPath}-${selectedPlatform ?? 'none'}`}
+                  initial={{ x: slideDirection * 60, opacity: 0 }}
+                  animate={{ x: 0, opacity: 1 }}
+                  exit={{ x: slideDirection * -60, opacity: 0 }}
+                  transition={{ duration: 0.25, ease: 'easeOut' }}
                 >
-                  {tab.icon}
-                  {tab.label}
-                </button>
-              ))}
-            </div>
 
-            {/* Tab content */}
-            <div className="p-5">
-              {/* ── Share link tab ── */}
-              {embedTab === 'link' && (
-                <div className="space-y-4">
-                  <div>
-                    <p className="text-sm font-medium text-foreground mb-1">Your public testimonials page</p>
-                    <p className="text-xs text-muted-foreground mb-3">
-                      No website needed. Share this link anywhere. Customers can see all your approved testimonials instantly.
-                    </p>
-                    {selectedProject?.slug ? (
-                      <div className="flex items-center gap-2">
-                        <div className="flex-1 flex items-center gap-2 rounded-xl border border-border bg-muted/30 px-3 py-2">
-                          <Globe className="size-3.5 text-muted-foreground shrink-0" />
-                          <span className="text-xs font-mono text-foreground truncate">
-                            {SITE_URL}/p/{selectedProject?.slug}
-                          </span>
-                        </div>
-                        <CopyCodeButton code={`${SITE_URL}/p/${selectedProject?.slug}`} />
-                        <a
-                          href={`/p/${selectedProject?.slug}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="rounded-lg border border-border bg-muted/40 p-1.5 text-muted-foreground hover:text-foreground hover:bg-muted transition-all"
-                        >
-                          <ExternalLink className="size-3.5" />
-                        </a>
+              {/* ── Step 1: Chooser ── */}
+              {embedPath === 'choose' && (
+                <div className="space-y-5">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    {/* Share a link */}
+                    <button
+                      onClick={() => handleEmbedNav('link')}
+                      className="flex flex-col items-start gap-2 rounded-xl border-2 border-border p-4 text-left hover:border-indigo-300 hover:bg-indigo-50/30 transition-all group focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:outline-none"
+                    >
+                      <div className="size-9 rounded-lg bg-indigo-50 flex items-center justify-center group-hover:bg-indigo-100 transition-colors">
+                        <Link2 className="size-4 text-indigo-600" />
                       </div>
-                    ) : (
-                      <p className="text-xs text-amber-600 bg-amber-50 border border-amber-200 rounded-xl px-3 py-2">
-                        Save your project settings first to get your public page URL.
-                      </p>
-                    )}
+                      <div>
+                        <p className="text-sm font-semibold text-foreground">Share a link</p>
+                        <p className="text-xs text-muted-foreground mt-0.5">No website needed. Share on WhatsApp, email, Instagram bio, or social media.</p>
+                      </div>
+                    </button>
+                    {/* On my website */}
+                    <button
+                      onClick={() => handleEmbedNav('website')}
+                      className="flex flex-col items-start gap-2 rounded-xl border-2 border-border p-4 text-left hover:border-indigo-300 hover:bg-indigo-50/30 transition-all group focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:outline-none"
+                    >
+                      <div className="size-9 rounded-lg bg-indigo-50 flex items-center justify-center group-hover:bg-indigo-100 transition-colors">
+                        <Globe className="size-4 text-indigo-600" />
+                      </div>
+                      <div>
+                        <p className="text-sm font-semibold text-foreground">On my website</p>
+                        <p className="text-xs text-muted-foreground mt-0.5">Wix, Squarespace, Webflow, WordPress, or any website builder.</p>
+                      </div>
+                    </button>
+                    {/* Developer / AI tools */}
+                    <button
+                      onClick={() => handleEmbedNav('developer')}
+                      className="flex flex-col items-start gap-2 rounded-xl border-2 border-border p-4 text-left hover:border-indigo-300 hover:bg-indigo-50/30 transition-all group focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:outline-none"
+                    >
+                      <div className="size-9 rounded-lg bg-indigo-50 flex items-center justify-center group-hover:bg-indigo-100 transition-colors">
+                        <Code2 className="size-4 text-indigo-600" />
+                      </div>
+                      <div>
+                        <p className="text-sm font-semibold text-foreground">Developer or AI tools</p>
+                        <p className="text-xs text-muted-foreground mt-0.5">Cursor, Bolt, Lovable, v0, or a custom-coded site.</p>
+                      </div>
+                    </button>
                   </div>
+                  {/* React Pro link */}
+                  <button
+                    onClick={() => {
+                      if (userPlan === 'free') {
+                        setShowUpgradePrompt(true);
+                      } else {
+                        handleEmbedNav('developer');
+                      }
+                    }}
+                    className="text-xs text-muted-foreground hover:text-indigo-600 transition-colors flex items-center gap-1.5 mx-auto"
+                  >
+                    <Code2 className="size-3" />
+                    React / Next.js component
+                    {userPlan === 'free' && <span className="text-[10px] bg-indigo-100 text-indigo-700 rounded-full px-1.5 py-0.5 font-medium">Pro</span>}
+                  </button>
+                </div>
+              )}
+
+              {/* ── Share a link ── */}
+              {embedPath === 'link' && (
+                <div className="space-y-4">
+                  <p className="text-xs text-muted-foreground">
+                    No website needed. Share this link anywhere and customers can see all your approved testimonials instantly.
+                  </p>
+                  {selectedProject?.slug ? (
+                    <div className="flex items-center gap-2">
+                      <div className="flex-1 flex items-center gap-2 rounded-xl border border-border bg-muted/30 px-3 py-2">
+                        <Globe className="size-3.5 text-muted-foreground shrink-0" />
+                        <span className="text-xs font-mono text-foreground truncate">
+                          {SITE_URL}/p/{selectedProject?.slug}
+                        </span>
+                      </div>
+                      <CopyCodeButton code={`${SITE_URL}/p/${selectedProject?.slug}`} />
+                      <a
+                        href={`/p/${selectedProject?.slug}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="rounded-lg border border-border bg-muted/40 p-1.5 text-muted-foreground hover:text-foreground hover:bg-muted transition-all"
+                      >
+                        <ExternalLink className="size-3.5" />
+                      </a>
+                    </div>
+                  ) : (
+                    <div className="text-xs text-amber-600 bg-amber-50 border border-amber-200 rounded-xl px-3 py-2 flex items-center justify-between gap-2">
+                      <span>Save your project settings first to get your public page URL.</span>
+                      <Link
+                        href="/dashboard/settings?tab=project"
+                        className="shrink-0 text-xs font-medium text-amber-700 underline hover:text-amber-900 transition-colors"
+                        onClick={() => setShowEmbedModal(false)}
+                      >
+                        Go to Settings
+                      </Link>
+                    </div>
+                  )}
                   <div className="rounded-xl bg-indigo-50 border border-indigo-100 p-4 space-y-2">
-                    <p className="text-xs font-semibold text-indigo-800">Where to share it:</p>
+                    <p className="text-xs font-semibold text-indigo-800">Great places to share it:</p>
                     <ul className="space-y-1.5 text-xs text-indigo-700">
                       <li className="flex items-start gap-2"><span className="mt-0.5">•</span><span>Email signature with a &ldquo;See what customers say&rdquo; link</span></li>
-                      <li className="flex items-start gap-2"><span className="mt-0.5">•</span><span>WhatsApp or Instagram bio</span></li>
+                      <li className="flex items-start gap-2"><span className="mt-0.5">•</span><span>WhatsApp message or Instagram bio</span></li>
                       <li className="flex items-start gap-2"><span className="mt-0.5">•</span><span>Google Business profile description</span></li>
-                      <li className="flex items-start gap-2"><span className="mt-0.5">•</span><span>Invoices or receipts as a review prompt</span></li>
+                      <li className="flex items-start gap-2"><span className="mt-0.5">•</span><span>Invoices, receipts, or booking confirmations</span></li>
                     </ul>
                   </div>
                 </div>
               )}
 
-              {/* ── Website builder tab ── */}
-              {embedTab === 'builder' && (
+              {/* ── On my website: Platform picker ── */}
+              {embedPath === 'website' && !selectedPlatform && (
                 <div className="space-y-4">
                   <p className="text-xs text-muted-foreground">
-                    Works with Webflow, Squarespace, Wix, Framer, and any builder that has an &ldquo;Embed&rdquo; block.
+                    Pick your website platform and we&apos;ll show you exactly how to add testimonials.
                   </p>
-                  {activeWidgetId ? (
-                    <>
-                      <div>
-                        <div className="flex items-center justify-between mb-1.5">
-                          <span className="text-xs font-medium text-foreground/70">Paste this code:</span>
-                          <CopyCodeButton code={scriptSnippet} />
-                        </div>
-                        <pre className="rounded-xl bg-gray-950 p-3 text-xs text-emerald-400 overflow-x-auto font-mono leading-relaxed">
-                          {scriptSnippet}
-                        </pre>
-                      </div>
-                      <p className="text-xs text-emerald-600 bg-emerald-50 border border-emerald-200 rounded-xl px-3 py-2">
-                        This embed is SEO-friendly. Google will index your testimonials as part of your page.
-                      </p>
-                      <ol className="space-y-2">
-                        {[
-                          'Open your page in the website builder',
-                          'Add an "Embed" or "Custom Code" block',
-                          'Paste the code above into the block',
-                          'Publish your page',
-                        ].map((step, i) => (
-                          <li key={i} className="flex items-start gap-3 text-xs text-foreground/80">
-                            <span className="size-5 rounded-full bg-indigo-100 text-indigo-700 font-bold text-xs flex items-center justify-center shrink-0 mt-0.5">
-                              {i + 1}
-                            </span>
-                            {step}
-                          </li>
-                        ))}
-                      </ol>
-                    </>
-                  ) : (
-                    <p className="text-xs text-amber-600 bg-amber-50 border border-amber-200 rounded-xl px-3 py-2">
-                      Click "Save Widget" above to generate your embed code.
-                    </p>
-                  )}
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
+                    {PLATFORMS.map((platform) => {
+                      const colors: Record<string, string> = {
+                        wix: 'bg-yellow-100 text-yellow-700',
+                        squarespace: 'bg-gray-900 text-white',
+                        webflow: 'bg-blue-100 text-blue-700',
+                        framer: 'bg-purple-100 text-purple-700',
+                        wordpress: 'bg-sky-100 text-sky-700',
+                        other: 'bg-gray-100 text-gray-600',
+                      };
+                      return (
+                        <button
+                          key={platform.id}
+                          onClick={() => { setSlideDirection(1); setSelectedPlatform(platform.id); }}
+                          className="flex items-center gap-2.5 rounded-xl border-2 border-border px-3.5 py-3 text-left hover:border-indigo-300 hover:bg-indigo-50/30 transition-all focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:outline-none"
+                        >
+                          <span className={`size-6 rounded-md flex items-center justify-center text-xs font-bold shrink-0 ${colors[platform.id] ?? 'bg-gray-100 text-gray-600'}`}>
+                            {platform.name.charAt(0)}
+                          </span>
+                          <span className="text-sm font-medium text-foreground">{platform.name}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
                 </div>
               )}
 
-              {/* ── Developer tab ── */}
-              {embedTab === 'dev' && (
+              {/* ── On my website: Platform-specific instructions ── */}
+              {embedPath === 'website' && selectedPlatform && (
                 <div className="space-y-4">
-                  <p className="text-xs text-muted-foreground">
-                    Add to any HTML page. Testimonials render directly in your page DOM so Google indexes them as your content. Zero style conflicts (Shadow DOM isolation).
-                  </p>
-                  {activeWidgetId ? (
-                    <>
-                      <div>
-                        <div className="flex items-center justify-between mb-1.5">
-                          <span className="text-xs font-medium text-foreground/70">Paste before <code className="bg-muted px-1 rounded">&lt;/body&gt;</code></span>
-                          <CopyCodeButton code={scriptSnippet} />
-                        </div>
-                        <pre className="rounded-xl bg-gray-950 p-3 text-xs text-emerald-400 overflow-x-auto font-mono leading-relaxed">
-                          {scriptSnippet}
-                        </pre>
-                      </div>
-                      <p className="text-xs text-muted-foreground">
-                        Updates automatically when you approve new testimonials. Also adds star rating schema markup to your page for Google rich snippets.
-                      </p>
-                    </>
-                  ) : (
-                    <p className="text-xs text-amber-600 bg-amber-50 border border-amber-200 rounded-xl px-3 py-2">
-                      Click "Save Widget" above to generate your embed code.
-                    </p>
-                  )}
-                </div>
-              )}
-
-              {/* ── React tab ── */}
-              {embedTab === 'react' && (
-                <div className="space-y-4">
-                  {userPlan === 'free' ? (
-                    /* Pro gate */
-                    <div className="rounded-2xl border border-indigo-100 bg-gradient-to-br from-indigo-50 to-violet-50 p-6 text-center">
-                      <div className="inline-flex items-center justify-center size-12 rounded-xl bg-indigo-100 mb-3">
-                        <Lock className="size-5 text-indigo-600" />
-                      </div>
-                      <p className="text-sm font-semibold text-foreground mb-1">React component is a paid feature</p>
-                      <p className="text-xs text-muted-foreground mb-4 max-w-xs mx-auto">
-                        Get a copy-paste React component that fetches your testimonials directly from
-                        the Vouch API. No npm install, no iframe, full control over styling.
-                      </p>
-                      <Button
-                        size="sm"
-                        className="bg-indigo-600 hover:bg-indigo-700 text-white gap-1.5"
-                        onClick={() => setShowUpgradePrompt(true)}
-                      >
-                        <Zap className="size-3.5" />
-                        View plans
-                      </Button>
-                    </div>
-                  ) : (
-                    /* Pro content */
-                    <>
-                      <div className="rounded-xl bg-indigo-50 border border-indigo-100 p-3 flex items-start gap-2.5">
-                        <Code2 className="size-4 text-indigo-600 shrink-0 mt-0.5" />
-                        <div>
-                          <p className="text-xs font-semibold text-indigo-800">No npm install needed</p>
-                          <p className="text-xs text-indigo-700/80 mt-0.5">
-                            Copy this component into your Next.js or React project. It fetches your
-                            approved testimonials directly from the Vouch API. Style it with your own
-                            Tailwind classes.
-                          </p>
-                        </div>
-                      </div>
-                      {activeWidgetId ? (
-                        <>
-                          <div>
-                            <div className="flex items-center justify-between mb-1.5">
-                              <span className="text-xs font-medium text-foreground/70">
-                                Paste into <code className="bg-muted px-1 rounded">components/Testimonials.tsx</code>
-                              </span>
-                              <CopyCodeButton code={reactSnippet} />
+                  <ol className="space-y-3">
+                    {PLATFORMS.find(p => p.id === selectedPlatform)?.steps.map((step, i) => (
+                      <li key={i} className="flex items-start gap-3 text-xs text-foreground/80">
+                        <span className="size-6 rounded-full bg-indigo-100 text-indigo-700 font-bold text-xs flex items-center justify-center shrink-0 mt-0.5">
+                          {i + 1}
+                        </span>
+                        <div className="flex-1 min-w-0">
+                          <span>{step.text}</span>
+                          {step.hasCode && (
+                            <div className="mt-2 relative">
+                              <span className="absolute top-2 left-3 text-[10px] text-gray-500 font-mono uppercase">HTML</span>
+                              <pre className="rounded-xl bg-gray-950 pt-7 pb-3 px-3 pr-16 text-xs text-emerald-400 overflow-x-auto font-mono leading-relaxed">
+                                {scriptSnippet}
+                              </pre>
+                              <div className="absolute top-2 right-2">
+                                <CopyCodeButton code={scriptSnippet} />
+                              </div>
                             </div>
-                            <pre className="rounded-xl bg-gray-950 p-3 text-xs text-emerald-400 overflow-x-auto font-mono leading-relaxed max-h-72">
-                              {reactSnippet}
-                            </pre>
-                          </div>
-                          <ol className="space-y-2">
-                            {[
-                              'Copy the component above into your project',
-                              'Import and render it: <Testimonials />',
-                              'Style the blockquote and grid with your own Tailwind classes',
-                              'Testimonials update automatically as you approve new ones',
-                            ].map((step, i) => (
-                              <li key={i} className="flex items-start gap-3 text-xs text-foreground/80">
-                                <span className="size-5 rounded-full bg-indigo-100 text-indigo-700 font-bold text-xs flex items-center justify-center shrink-0 mt-0.5">
-                                  {i + 1}
-                                </span>
-                                {step}
-                              </li>
-                            ))}
-                          </ol>
-                        </>
-                      ) : (
-                        <p className="text-xs text-amber-600 bg-amber-50 border border-amber-200 rounded-xl px-3 py-2">
-                          Save your widget first to get the component code.
-                        </p>
-                      )}
-                    </>
-                  )}
+                          )}
+                        </div>
+                      </li>
+                    ))}
+                  </ol>
+                  <p className="text-xs text-emerald-600 bg-emerald-50 border border-emerald-200 rounded-xl px-3 py-2">
+                    This loads your testimonials automatically. You don&apos;t need to understand the code. It&apos;s also SEO-friendly, so Google will index your testimonials.
+                  </p>
                 </div>
               )}
+
+              {/* ── Developer & AI Tools ── */}
+              {embedPath === 'developer' && (
+                <div className="space-y-5">
+                  {/* Section 1: Code for custom sites */}
+                  <div className="space-y-3">
+                    <h4 className="text-xs font-semibold text-foreground uppercase tracking-wide">Embed code</h4>
+                    <p className="text-xs text-muted-foreground">
+                      Add to any HTML page. Renders inside Shadow DOM so there are zero style conflicts. Google indexes your testimonials as part of your page.
+                    </p>
+                    <div className="relative">
+                      <span className="absolute top-2 left-3 text-[10px] text-gray-500 font-mono uppercase">HTML</span>
+                      <pre className="rounded-xl bg-gray-950 pt-7 pb-3 px-3 pr-16 text-xs text-emerald-400 overflow-x-auto font-mono leading-relaxed">
+                        {scriptSnippet}
+                      </pre>
+                      <div className="absolute top-2 right-2">
+                        <CopyCodeButton code={scriptSnippet} />
+                      </div>
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      Updates automatically when you approve new testimonials. Adds star rating schema markup for Google rich snippets.
+                    </p>
+                  </div>
+
+                  {/* Section 2: AI tools prompt */}
+                  <div className="space-y-3 border-t border-border pt-4">
+                    <h4 className="text-xs font-semibold text-foreground uppercase tracking-wide">Using AI tools?</h4>
+                    <p className="text-xs text-muted-foreground">
+                      Using Cursor, Bolt, Lovable, v0, or Replit? Copy this entire prompt and paste it into your AI tool.
+                    </p>
+                    <div className="relative">
+                      <pre className="rounded-xl bg-gray-950 p-3 pr-16 text-xs text-emerald-400 overflow-x-auto font-mono leading-relaxed whitespace-pre-wrap">
+{`Add a testimonials section to my page. Use this embed code exactly as-is, do not modify it:
+
+${scriptSnippet}
+
+Place it where I want customer testimonials to appear. The script handles all styling and layout automatically. Do not modify the code.`}
+                      </pre>
+                      <div className="absolute top-2 right-2">
+                        <CopyCodeButton code={`Add a testimonials section to my page. Use this embed code exactly as-is, do not modify it:\n\n${scriptSnippet}\n\nPlace it where I want customer testimonials to appear. The script handles all styling and layout automatically. Do not modify the code.`} />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Section 3: React component (Pro) */}
+                  <div className="space-y-3 border-t border-border pt-4">
+                    <h4 className="text-xs font-semibold text-foreground uppercase tracking-wide flex items-center gap-2">
+                      React / Next.js component
+                      {userPlan === 'free' && <span className="text-[10px] bg-indigo-100 text-indigo-700 rounded-full px-1.5 py-0.5 font-medium normal-case tracking-normal">Pro</span>}
+                    </h4>
+                    {userPlan === 'free' ? (
+                      <div className="rounded-xl border border-indigo-100 bg-gradient-to-br from-indigo-50 to-violet-50 p-4 flex items-center justify-between gap-3">
+                        <p className="text-xs text-muted-foreground">
+                          Get a copy-paste React component with full styling control. No npm install needed.
+                        </p>
+                        <Button
+                          size="sm"
+                          className="bg-indigo-600 hover:bg-indigo-700 text-white gap-1.5 shrink-0"
+                          onClick={() => setShowUpgradePrompt(true)}
+                        >
+                          <Zap className="size-3.5" />
+                          View plans
+                        </Button>
+                      </div>
+                    ) : (
+                      <>
+                        <p className="text-xs text-muted-foreground">
+                          Copy this component into your Next.js or React project. It fetches your approved testimonials directly from the Vouch API. Style it with your own Tailwind classes.
+                        </p>
+                        <div className="relative">
+                          <span className="absolute top-2 left-3 text-[10px] text-gray-500 font-mono uppercase">JSX</span>
+                          <pre className="rounded-xl bg-gray-950 pt-7 pb-3 px-3 pr-16 text-xs text-emerald-400 overflow-x-auto font-mono leading-relaxed max-h-72">
+                            {reactSnippet}
+                          </pre>
+                          <div className="absolute top-2 right-2">
+                            <CopyCodeButton code={reactSnippet} />
+                          </div>
+                        </div>
+                      </>
+                    )}
+                  </div>
+                </div>
+              )}
+
+                </motion.div>
+              </AnimatePresence>
             </div>
             </motion.div>
           </motion.div>
