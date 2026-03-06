@@ -1006,6 +1006,21 @@ function SettingsInner() {
                       placeholder="#6366F1"
                     />
                   </div>
+                  <details className="mt-3 group">
+                    <summary className="text-[11px] text-muted-foreground cursor-pointer hover:text-foreground transition-colors select-none list-none flex items-center gap-1">
+                      <span className="group-open:hidden">▸</span>
+                      <span className="hidden group-open:inline">▾</span>
+                      How do I find my brand color?
+                    </summary>
+                    <div className="mt-2 text-[11px] text-muted-foreground leading-relaxed space-y-1.5 pl-3 border-l-2 border-border">
+                      <p className="font-medium text-foreground">The easiest way:</p>
+                      <p>1. Go to <a href="https://imagecolorpicker.com" target="_blank" rel="noopener noreferrer" className="text-primary underline underline-offset-2">imagecolorpicker.com</a></p>
+                      <p>2. Upload your logo or a screenshot of your website</p>
+                      <p>3. Click on the color you want</p>
+                      <p>4. Copy the code that starts with # (like #6366F1)</p>
+                      <p>5. Paste it in the box above</p>
+                    </div>
+                  </details>
                 </div>
               </div>
             </Section>
