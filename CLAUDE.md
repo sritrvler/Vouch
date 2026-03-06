@@ -194,8 +194,10 @@ Use dedicated agents BY NAME. Do NOT use generic "general-purpose prompted as...
 
 | Agent | Type | Use For |
 |---|---|---|
+| `product-strategist` | Custom (Sonnet) | Step 1: build/kill/simplify/defer verdict for NEW features |
+| `competitive-analyst` | Custom (Opus) | Step 1: market intelligence when feature needs competitive context |
 | `software-architect` | Custom (Opus) | Step 1: plan/architecture review |
-| `senior-code-reviewer` | Custom (Opus) | Steps 3 and 6: code review |
+| `senior-code-reviewer` | Custom (Opus) | Steps 3 and 5: code review |
 | `test-suite-architect` | Custom (Sonnet) | Steps 4 and 5: test generation and verification |
 | `premium-ui-designer` | Custom (Sonnet) | Step 3: UI polish, animations, premium feel |
 | `ux-reviewer` | Custom (Sonnet) | Step 3: flow friction, pain points, simplification |
@@ -205,6 +207,8 @@ Use dedicated agents BY NAME. Do NOT use generic "general-purpose prompted as...
 | `refactoring-specialist` | Custom | Large refactors, code decomposition |
 | `interface-design` | Skill | App/dashboard UI design (NOT landing pages) |
 | `frontend-design` | Skill | Landing pages, marketing sites (NOT app UI) |
+
+**Strategic agent guide:** New feature = `competitive-analyst` (if market context needed) -> `product-strategist` (build/kill verdict) -> `software-architect` (implementation plan). Bug fixes and minor tweaks skip strategic agents entirely.
 
 **UI agent guide:** App UI = `interface-design` skill + `premium-ui-designer` + `ux-reviewer`. Landing pages = `frontend-design` skill + `premium-ui-designer` + `conversion-copywriter`. Minor UI tweaks = `premium-ui-designer` only.
 
@@ -221,6 +225,13 @@ Use dedicated agents BY NAME. Do NOT use generic "general-purpose prompted as...
 6. **UI design?** For UI changes: which design skill applies, persona intent stated.
 7. **Test scenarios?** Quick enumeration of scenarios to verify. The `test-suite-architect` in Step 4 will expand these into full test cases, so keep this list brief (scenario name + expected outcome).
 8. **Business impact?** For UI changes: how does this affect retention, conversion, time to value, churn risk?
+
+**Strategic agent triggers (before presenting to architect):**
+- **New feature or significant scope change?** Run `product-strategist` for build/kill/simplify/defer verdict. If it says KILL or DEFER, stop. Do not proceed to architect.
+- **Feature needs market context?** Run `competitive-analyst` first, feed output to `product-strategist`. Example triggers: "how does this compare to competitors?", pricing changes, positioning decisions, "should we match feature X?".
+- **Bug fix, minor tweak, or already-validated feature?** Skip strategic agents. Go straight to architect.
+
+**Dependency chain for new features:** `competitive-analyst` (optional, market context) -> `product-strategist` (build/kill verdict, mandatory for new features) -> `software-architect` (implementation plan) -> proceed.
 
 **Present all 8 answers to `software-architect` agent.** If DB changes: also run `db-optimizer`. Wait for approval.
 
