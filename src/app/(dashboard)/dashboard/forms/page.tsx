@@ -401,7 +401,7 @@ function EmptyState({ onCreateClick }: { onCreateClick: () => void }) {
 // ─── Page ─────────────────────────────────────────────────────────────────────
 export default function FormsPage() {
   const supabase = createClient();
-  const { selectedProjectId: activeProjectId, selectedProject: ctxProject } = useProject();
+  const { selectedProjectId: activeProjectId, selectedProject: ctxProject, showAllProjects } = useProject();
   const router = useRouter();
   const [forms, setForms] = useState<CollectionForm[]>([]);
   const [totalFormCount, setTotalFormCount] = useState(0);
@@ -440,7 +440,7 @@ export default function FormsPage() {
         .eq('user_id', user.id)
         .order('created_at', { ascending: false });
 
-      if (activeProjectId) {
+      if (!showAllProjects && activeProjectId) {
         formsQuery = formsQuery.eq('project_id', activeProjectId);
       }
 
@@ -496,7 +496,7 @@ export default function FormsPage() {
     } finally {
       setLoading(false);
     }
-  }, [supabase, activeProjectId]);
+  }, [supabase, activeProjectId, showAllProjects]);
 
   useEffect(() => {
     fetchData();
@@ -829,7 +829,7 @@ export default function FormsPage() {
           </DialogHeader>
 
           <div className="space-y-5">
-            {/* Project (read-only, always uses active project from sidebar) */}
+            {/* Project */}
             {!editingForm && (
             <div className="space-y-1.5">
               <Label>Project</Label>
@@ -837,10 +837,20 @@ export default function FormsPage() {
                 <p className="text-xs text-muted-foreground bg-muted rounded-lg p-3">
                   No projects found. Create a project in Settings first.
                 </p>
-              ) : (
+              ) : !showAllProjects && activeProjectId ? (
                 <div className="rounded-xl bg-muted/50 border border-border px-3 py-2 text-sm text-muted-foreground">
                   {projects.find((p) => p.id === selectedProjectId)?.name ?? 'Unknown project'}
                 </div>
+              ) : (
+                <select
+                  value={selectedProjectId}
+                  onChange={(e) => setSelectedProjectId(e.target.value)}
+                  className="w-full rounded-xl border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                >
+                  {projects.map((p) => (
+                    <option key={p.id} value={p.id}>{p.name}</option>
+                  ))}
+                </select>
               )}
             </div>
             )}

@@ -215,9 +215,13 @@ function SourceBadge({ url }: { url: string }) {
 function ImportDialog({
   onClose,
   onSuccess,
+  activeProjectId,
+  projectLocked,
 }: {
   onClose: () => void;
   onSuccess: (t: Testimonial) => void;
+  activeProjectId: string | null;
+  projectLocked: boolean;
 }) {
   const supabase = createClient();
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -277,7 +281,11 @@ function ImportDialog({
         .order('created_at', { ascending: true });
       if (projs && projs.length > 0) {
         setProjects(projs);
-        setProjectId(projs[0].id);
+        if (activeProjectId && projs.some((p) => p.id === activeProjectId)) {
+          setProjectId(activeProjectId);
+        } else {
+          setProjectId(projs[0].id);
+        }
       }
     }
     load();
@@ -344,18 +352,24 @@ function ImportDialog({
 
         <div className="space-y-4 mt-2">
           {/* Project select */}
-          {projects.length > 1 && (
+          {projects.length > 0 && (
             <div className="space-y-1.5">
               <label className="text-xs font-medium text-foreground">Project</label>
-              <select
-                value={projectId}
-                onChange={(e) => setProjectId(e.target.value)}
-                className="w-full rounded-xl border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500"
-              >
-                {projects.map((p) => (
-                  <option key={p.id} value={p.id}>{p.name}</option>
-                ))}
-              </select>
+              {projectLocked ? (
+                <div className="rounded-xl bg-muted/50 border border-border px-3 py-2 text-sm text-muted-foreground">
+                  {projects.find((p) => p.id === projectId)?.name ?? 'Unknown project'}
+                </div>
+              ) : (
+                <select
+                  value={projectId}
+                  onChange={(e) => setProjectId(e.target.value)}
+                  className="w-full rounded-xl border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                >
+                  {projects.map((p) => (
+                    <option key={p.id} value={p.id}>{p.name}</option>
+                  ))}
+                </select>
+              )}
             </div>
           )}
 
@@ -1357,6 +1371,8 @@ export default function InboxPage() {
         <ImportDialog
           onClose={() => setShowImportDialog(false)}
           onSuccess={handleImportSuccess}
+          activeProjectId={selectedProjectId}
+          projectLocked={!showAllProjects && !!selectedProjectId}
         />
       )}
 
