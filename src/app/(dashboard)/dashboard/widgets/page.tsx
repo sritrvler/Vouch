@@ -28,6 +28,7 @@ import {
   Palette,
   SlidersHorizontal,
   ArrowUpDown,
+  Pencil,
 } from 'lucide-react';
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/client';
@@ -143,11 +144,11 @@ const COLOR_PRESETS = [
 ];
 
 const LAYOUT_OPTIONS: { value: WidgetLayout; label: string; icon: React.ReactNode; desc: string }[] = [
-  { value: 'grid', label: 'Grid', icon: <LayoutGrid className="size-5" />, desc: '2-3 columns' },
-  { value: 'carousel', label: 'Carousel', icon: <Rows3 className="size-5" />, desc: 'Horizontal scroll' },
-  { value: 'wall', label: 'Wall of Love', icon: <Heart className="size-5" />, desc: 'Masonry layout' },
-  { value: 'list', label: 'List', icon: <List className="size-5" />, desc: 'Single column' },
-  { value: 'single', label: 'Single', icon: <Star className="size-5" />, desc: 'Featured card' },
+  { value: 'grid', label: 'Grid', icon: <LayoutGrid className="size-4" />, desc: '2-3 columns' },
+  { value: 'carousel', label: 'Carousel', icon: <Rows3 className="size-4" />, desc: 'Horizontal scroll' },
+  { value: 'wall', label: 'Wall of Love', icon: <Heart className="size-4" />, desc: 'Masonry layout' },
+  { value: 'list', label: 'List', icon: <List className="size-4" />, desc: 'Single column' },
+  { value: 'single', label: 'Single', icon: <Star className="size-4" />, desc: 'Featured card' },
 ];
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000';
@@ -283,13 +284,28 @@ function CollapsibleSection({
         {!isOpen && summary && (
           <span className="text-xs text-muted-foreground truncate max-w-[140px]">{summary}</span>
         )}
-        <ChevronDown className={cn('size-4 text-muted-foreground transition-transform', isOpen && 'rotate-180')} />
+        <motion.span
+          animate={{ rotate: isOpen ? 180 : 0 }}
+          transition={{ duration: 0.2 }}
+        >
+          <ChevronDown className="size-4 text-muted-foreground" />
+        </motion.span>
       </button>
-      {isOpen && (
-        <div className="px-5 pb-4 space-y-4">
-          {children}
-        </div>
-      )}
+      <AnimatePresence initial={false}>
+        {isOpen && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.2, ease: 'easeInOut' }}
+            className="overflow-hidden"
+          >
+            <div className="px-5 pb-4 space-y-4">
+              {children}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
@@ -326,6 +342,16 @@ export default function WidgetsPage() {
 
   // Embed modal state
   const [showEmbedModal, setShowEmbedModal] = useState(false);
+
+  // Close embed modal on Escape key
+  useEffect(() => {
+    if (!showEmbedModal) return;
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setShowEmbedModal(false);
+    };
+    document.addEventListener('keydown', handleEscape);
+    return () => document.removeEventListener('keydown', handleEscape);
+  }, [showEmbedModal]);
 
   const [settings, setSettings] = useState<WidgetSettings>({
     name: 'My Widget',
@@ -565,6 +591,7 @@ export default function WidgetsPage() {
       setActiveWidgetId(newWidget.id);
       setSettings({ ...DEFAULT_SETTINGS, name: newWidget.name });
       setOrderedTestimonials(testimonials);
+      setOpenSections(new Set(['layout', 'appearance']));
       toast.success('Widget created');
     } catch (err) {
       toast.error('Failed to create widget');
@@ -730,13 +757,14 @@ export function Testimonials() {
         <div className="flex-1 min-w-0">
           <h1 className="text-2xl font-bold tracking-tight text-foreground">Widget Builder</h1>
           {activeWidgetId ? (
-            <div className="mt-1 flex items-center gap-2">
+            <div className="mt-1 flex items-center gap-1.5 group/name">
               <input
                 value={settings.name}
                 onChange={(e) => update('name', e.target.value)}
-                className="text-sm text-muted-foreground bg-transparent border-b border-transparent hover:border-border focus:border-indigo-400 focus:outline-none transition-colors py-0.5 min-w-0 max-w-[240px]"
+                className="text-sm text-muted-foreground bg-transparent border-b border-border/50 hover:border-border focus:border-indigo-400 focus:outline-none transition-colors py-0.5 min-w-0 max-w-[240px]"
                 placeholder="Widget name"
               />
+              <Pencil className="size-3.5 text-muted-foreground/50 group-hover/name:text-muted-foreground transition-colors shrink-0" />
             </div>
           ) : (
             <p className="mt-0.5 text-sm text-muted-foreground">
@@ -834,7 +862,7 @@ export function Testimonials() {
                         'absolute -top-1.5 -right-1.5 size-5 rounded-full flex items-center justify-center transition-all',
                         confirmDeleteId === widget.id
                           ? 'bg-red-500 text-white'
-                          : 'bg-muted border border-border text-muted-foreground opacity-0 group-hover:opacity-100 hover:bg-red-50 hover:text-red-500 hover:border-red-200',
+                          : 'bg-muted border border-border text-muted-foreground xl:opacity-0 xl:group-hover:opacity-100 hover:bg-red-50 hover:text-red-500 hover:border-red-200',
                         deletingWidgetId === widget.id && 'opacity-50'
                       )}
                       title={confirmDeleteId === widget.id ? 'Click again to confirm' : 'Delete widget'}
@@ -1207,7 +1235,7 @@ export function Testimonials() {
           {/* Content & Filter (collapsible) */}
           <CollapsibleSection
             id="content"
-            title="Content & Filter"
+            title="Filter & Limits"
             icon={<SlidersHorizontal className="size-4" />}
             summary={`${settings.filterMode === 'all' ? 'All' : settings.filterMode} · max ${settings.maxItems}`}
             isOpen={openSections.has('content')}
@@ -1326,7 +1354,7 @@ export function Testimonials() {
         </div>
 
         {/* ── Right Panel: Preview ── */}
-        <div className="order-1 xl:order-2 space-y-5">
+        <div className="order-1 xl:order-2 space-y-5 xl:sticky xl:top-6 xl:self-start xl:max-h-[calc(100vh-3rem)] xl:overflow-y-auto" style={{ overscrollBehavior: 'contain' }}>
           <div className="bg-white rounded-2xl border border-border overflow-hidden">
             {/* Preview Header */}
             <div className="flex items-center justify-between px-5 py-3.5 border-b border-border bg-muted/30">
@@ -1355,7 +1383,7 @@ export function Testimonials() {
             <div
               className="p-5"
               style={{
-                backgroundColor: settings.theme.backgroundColor + '80',
+                backgroundColor: settings.theme.backgroundColor,
                 fontFamily: settings.theme.fontFamily !== 'inherit'
                   ? `"${settings.theme.fontFamily}", sans-serif`
                   : undefined,
@@ -1464,7 +1492,7 @@ export function Testimonials() {
                 <Code2 className="size-4 text-indigo-500" />
                 <h3 className="text-sm font-semibold text-foreground">Add to your website</h3>
               </div>
-              <button onClick={() => setShowEmbedModal(false)} className="rounded-lg p-1 hover:bg-muted transition-colors">
+              <button onClick={() => setShowEmbedModal(false)} className="rounded-lg p-2 hover:bg-muted transition-colors" aria-label="Close embed modal">
                 <X className="size-4 text-muted-foreground" />
               </button>
             </div>
