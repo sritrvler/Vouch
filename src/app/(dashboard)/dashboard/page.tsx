@@ -296,15 +296,12 @@ function GettingStarted({ stats }: { stats: Stats }) {
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 export default function DashboardPage() {
-  const { projects, selectedProjectId, loading: projectsLoading } = useProject();
+  const { projects, selectedProjectId, showAllProjects, loading: projectsLoading } = useProject();
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState<Stats>({ total: 0, pending: 0, approved: 0, widgetViews: 0, hasProject: false, hasForm: false, hasWidget: false });
   const [recentTestimonials, setRecentTestimonials] = useState<RecentTestimonial[]>([]);
-  const [filterMode, setFilterMode] = useState<'project' | 'all'>('project');
 
-  // Default to "project" filter. Show "all" option only when multiple projects exist.
-  const showAllOption = projects.length > 1;
-  const effectiveFilter = showAllOption ? filterMode : 'project';
+  const effectiveFilter = (showAllProjects && projects.length > 1) ? 'all' : 'project';
 
   useEffect(() => {
     if (projectsLoading) return;
@@ -398,70 +395,12 @@ export default function DashboardPage() {
         transition={{ duration: 0.3, ease: 'easeOut' }}
         className="space-y-3"
       >
-        <div className="flex items-center justify-between gap-4">
-          <div>
-            <h1 className="text-2xl font-bold text-foreground">Overview</h1>
-            <p className="text-sm text-muted-foreground mt-0.5">
-              {hasTestimonials ? "Here\u0027s what\u0027s happening with your testimonials." : "Let\u0027s get your first testimonial."}
-            </p>
-          </div>
-          {showAllOption && (
-            <div className="hidden sm:flex items-center rounded-lg border border-border bg-muted/40 p-0.5 shrink-0">
-              <button
-                type="button"
-                onClick={() => setFilterMode('project')}
-                className={cn(
-                  'px-3 py-1.5 rounded-md text-xs font-medium transition-colors',
-                  filterMode === 'project'
-                    ? 'bg-white text-foreground shadow-sm'
-                    : 'text-muted-foreground hover:text-foreground'
-                )}
-              >
-                {projects.find((p) => p.id === selectedProjectId)?.name ?? 'Project'}
-              </button>
-              <button
-                type="button"
-                onClick={() => setFilterMode('all')}
-                className={cn(
-                  'px-3 py-1.5 rounded-md text-xs font-medium transition-colors',
-                  filterMode === 'all'
-                    ? 'bg-white text-foreground shadow-sm'
-                    : 'text-muted-foreground hover:text-foreground'
-                )}
-              >
-                All projects
-              </button>
-            </div>
-          )}
+        <div>
+          <h1 className="text-2xl font-bold text-foreground">Overview</h1>
+          <p className="text-sm text-muted-foreground mt-0.5">
+            {hasTestimonials ? "Here\u0027s what\u0027s happening with your testimonials." : "Let\u0027s get your first testimonial."}
+          </p>
         </div>
-        {showAllOption && (
-          <div className="sm:hidden flex items-center rounded-lg border border-border bg-muted/40 p-0.5 w-fit">
-            <button
-              type="button"
-              onClick={() => setFilterMode('project')}
-              className={cn(
-                'px-3 py-1.5 rounded-md text-xs font-medium transition-colors',
-                filterMode === 'project'
-                  ? 'bg-white text-foreground shadow-sm'
-                  : 'text-muted-foreground hover:text-foreground'
-              )}
-            >
-              {projects.find((p) => p.id === selectedProjectId)?.name ?? 'Project'}
-            </button>
-            <button
-              type="button"
-              onClick={() => setFilterMode('all')}
-              className={cn(
-                'px-3 py-1.5 rounded-md text-xs font-medium transition-colors',
-                filterMode === 'all'
-                  ? 'bg-white text-foreground shadow-sm'
-                  : 'text-muted-foreground hover:text-foreground'
-              )}
-            >
-              All projects
-            </button>
-          </div>
-        )}
       </motion.div>
 
       {/* Pending banner, only shown when there are testimonials to review */}

@@ -122,7 +122,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 function DashboardLayoutInner({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
-  const { projects, selectedProjectId, selectedProject, plan, switchProject } = useProject();
+  const { projects, selectedProjectId, selectedProject, plan, switchProject, showAllProjects, setShowAllProjects } = useProject();
   const [user, setUser] = useState<User | null>(null);
   const [pendingCount, setPendingCount] = useState(0);
   const [isSigningOut, setIsSigningOut] = useState(false);
@@ -204,7 +204,7 @@ function DashboardLayoutInner({ children }: { children: React.ReactNode }) {
                 type="button"
                 aria-label="Select project"
               >
-                <span className="truncate">{selectedProject?.name ?? 'No projects'}</span>
+                <span className="truncate">{showAllProjects ? 'All projects' : (selectedProject?.name ?? 'No projects')}</span>
                 <ChevronDown className="size-3.5 shrink-0 text-muted-foreground" />
               </button>
             </PopoverTrigger>
@@ -223,24 +223,44 @@ function DashboardLayoutInner({ children }: { children: React.ReactNode }) {
                 </div>
               )}
               <div className="max-h-60 overflow-y-auto space-y-0.5">
+                {projects.length > 1 && !projectSearch && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowAllProjects(true);
+                      setProjectPopoverOpen(false);
+                      setProjectSearch('');
+                    }}
+                    className={cn(
+                      'w-full flex items-center gap-2 px-2.5 py-2 rounded-lg text-sm transition-colors text-left',
+                      showAllProjects
+                        ? 'bg-accent text-primary font-medium'
+                        : 'text-foreground hover:bg-muted/60'
+                    )}
+                  >
+                    <span className="flex-1 truncate">All projects</span>
+                    {showAllProjects && <Check className="size-3.5 shrink-0 text-primary" />}
+                  </button>
+                )}
                 {filteredProjects.map((p) => (
                   <button
                     key={p.id}
                     type="button"
                     onClick={() => {
+                      setShowAllProjects(false);
                       switchProject(p.id);
                       setProjectPopoverOpen(false);
                       setProjectSearch('');
                     }}
                     className={cn(
                       'w-full flex items-center gap-2 px-2.5 py-2 rounded-lg text-sm transition-colors text-left',
-                      p.id === selectedProjectId
+                      !showAllProjects && p.id === selectedProjectId
                         ? 'bg-accent text-primary font-medium'
                         : 'text-foreground hover:bg-muted/60'
                     )}
                   >
                     <span className="flex-1 truncate">{p.name}</span>
-                    {p.id === selectedProjectId && <Check className="size-3.5 shrink-0 text-primary" />}
+                    {!showAllProjects && p.id === selectedProjectId && <Check className="size-3.5 shrink-0 text-primary" />}
                   </button>
                 ))}
                 {filteredProjects.length === 0 && projectSearch && (
@@ -338,7 +358,7 @@ function DashboardLayoutInner({ children }: { children: React.ReactNode }) {
                   <div className="w-7 h-7 rounded-lg bg-primary flex items-center justify-center shrink-0">
                     <Zap className="w-3.5 h-3.5 text-white fill-white" />
                   </div>
-                  <span className="text-sm font-semibold text-foreground truncate">{selectedProject?.name ?? 'No projects'}</span>
+                  <span className="text-sm font-semibold text-foreground truncate">{showAllProjects ? 'All projects' : (selectedProject?.name ?? 'No projects')}</span>
                   <ChevronDown className="size-3.5 shrink-0 text-muted-foreground" />
                 </button>
               </PopoverTrigger>
@@ -357,17 +377,30 @@ function DashboardLayoutInner({ children }: { children: React.ReactNode }) {
                   </div>
                 )}
                 <div className="max-h-60 overflow-y-auto space-y-0.5">
+                  {projects.length > 1 && !projectSearch && (
+                    <button
+                      type="button"
+                      onClick={() => { setShowAllProjects(true); setMobileProjectPopoverOpen(false); }}
+                      className={cn(
+                        'w-full flex items-center gap-2 px-2.5 py-2 rounded-lg text-sm transition-colors',
+                        showAllProjects ? 'bg-primary/10 text-primary font-medium' : 'hover:bg-muted text-foreground'
+                      )}
+                    >
+                      <Check className={cn('size-3.5 shrink-0', showAllProjects ? 'opacity-100' : 'opacity-0')} />
+                      <span className="truncate">All projects</span>
+                    </button>
+                  )}
                   {filteredProjects.map((p) => (
                     <button
                       key={p.id}
                       type="button"
-                      onClick={() => { switchProject(p.id); setMobileProjectPopoverOpen(false); }}
+                      onClick={() => { setShowAllProjects(false); switchProject(p.id); setMobileProjectPopoverOpen(false); }}
                       className={cn(
                         'w-full flex items-center gap-2 px-2.5 py-2 rounded-lg text-sm transition-colors',
-                        selectedProjectId === p.id ? 'bg-primary/10 text-primary font-medium' : 'hover:bg-muted text-foreground'
+                        !showAllProjects && selectedProjectId === p.id ? 'bg-primary/10 text-primary font-medium' : 'hover:bg-muted text-foreground'
                       )}
                     >
-                      <Check className={cn('size-3.5 shrink-0', selectedProjectId === p.id ? 'opacity-100' : 'opacity-0')} />
+                      <Check className={cn('size-3.5 shrink-0', !showAllProjects && selectedProjectId === p.id ? 'opacity-100' : 'opacity-0')} />
                       <span className="truncate">{p.name}</span>
                     </button>
                   ))}

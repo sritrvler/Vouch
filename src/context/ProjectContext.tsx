@@ -37,7 +37,9 @@ interface ProjectContextValue {
   selectedProject: Project | null;
   plan: 'free' | 'pro' | 'studio';
   loading: boolean;
+  showAllProjects: boolean;
   switchProject: (id: string) => void;
+  setShowAllProjects: (val: boolean) => void;
   refetchProjects: () => Promise<void>;
 }
 
@@ -50,6 +52,7 @@ export function ProjectProvider({ children }: { children: ReactNode }) {
   const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
   const [plan, setPlan] = useState<'free' | 'pro' | 'studio'>('free');
   const [loading, setLoading] = useState(true);
+  const [showAllProjects, setShowAllProjects] = useState(false);
 
   const fetchProjects = useCallback(async () => {
     const supabase = createClient();
@@ -121,10 +124,12 @@ export function ProjectProvider({ children }: { children: ReactNode }) {
       selectedProject,
       plan,
       loading,
+      showAllProjects,
       switchProject,
+      setShowAllProjects,
       refetchProjects,
     }),
-    [projects, selectedProjectId, selectedProject, plan, loading, switchProject, refetchProjects]
+    [projects, selectedProjectId, selectedProject, plan, loading, showAllProjects, switchProject, refetchProjects]
   );
 
   return <ProjectContext.Provider value={value}>{children}</ProjectContext.Provider>;
