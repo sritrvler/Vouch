@@ -197,15 +197,96 @@ Before writing any code for a task, answer these questions explicitly. Do not sk
 
 If any answer is "no" or "skipped," pause and address it before writing code.
 
-### Senior Review Gate (Mandatory Before Implementation)
+**After answering all 8 questions, say exactly:** `I FOLLOWED PRE-IMPLEMENTATION RULES`
 
-**After completing the pre-implementation checklist, run your plan by a senior software developer/architect before writing any code.** Use a general-purpose agent prompted as a "senior software architect" to review your proposed approach. Present: (1) what you plan to change, (2) which files, (3) the approach, (4) alternatives you considered. Wait for the agent's verdict before proceeding.
+---
 
-**Skip condition:** You may skip this review ONLY for trivially simple changes where you have very high confidence (e.g., fixing a typo, updating a string literal, changing a color value). If there is any doubt, run the review.
+### Code Quality Pipeline (MANDATORY, NON-NEGOTIABLE, 7 STEPS)
 
-**After the review, say exactly:** `SENIOR REVIEW: APPROVED` or `SENIOR REVIEW: APPROVED WITH CHANGES` (listing what changed based on feedback). Do not proceed to implementation without one of these phrases.
+**This pipeline is the ONLY way code gets written and shipped. No shortcuts. No skipping steps. Every step has a confirmation phrase that must be said before proceeding to the next step. The user will check for these phrases. Missing a phrase = pipeline was violated.**
 
-**After answering all 8 pre-implementation questions AND passing the Senior Review Gate, say exactly:** `I FOLLOWED PRE-IMPLEMENTATION RULES` — this signals to the user that pre-implementation validation was completed. Do not say this phrase unless all 8 questions were explicitly answered and the senior review passed.
+**Why this exists:** The user has repeatedly requested this process and been frustrated by it not being followed. This is the highest-priority process rule in the entire codebase. It overrides any urge to "just quickly fix it." Even a one-line change goes through this pipeline (steps can be fast for simple changes, but they cannot be skipped).
+
+#### STEP 1: Plan Review (Senior Architect)
+**Before writing ANY code**, present your execution plan to a senior architect agent (general-purpose prompted as "senior software architect"). Include:
+1. What you plan to change and why
+2. Which files will be touched
+3. The approach and implementation strategy
+4. Alternatives you considered and why you rejected them
+5. If DB changes: flag for db-optimizer agent review
+6. If UI changes: flag for UI review agents later in the pipeline
+
+Wait for the architect's verdict. If they request changes, revise the plan and re-submit.
+
+**Skip condition:** ONLY for trivially simple changes (fixing a typo, changing a string literal, updating a color value) where you have absolute confidence. If there is ANY doubt, run the review.
+
+Say: `STEP 1 COMPLETE: ARCHITECT APPROVED` or `STEP 1 COMPLETE: ARCHITECT APPROVED WITH CHANGES: [list changes]`
+If skipped: `STEP 1 SKIPPED: [reason, must be trivially simple]`
+
+#### STEP 2: Write Code
+Implement the approved plan. Do not deviate from what the architect approved without going back to Step 1. If you discover mid-implementation that the plan needs to change, stop, get re-approval, then continue.
+
+Say: `STEP 2 COMPLETE: CODE WRITTEN`
+
+#### STEP 3: Senior Dev Code Review
+Run the FULL diff through a senior developer review agent (general-purpose prompted as "senior software developer reviewer"). The reviewer checks:
+1. Bugs and logic errors
+2. Security vulnerabilities (auth bypass, injection, data leakage)
+3. Edge cases not handled
+4. Code quality and patterns
+5. Performance concerns
+If UI changes were made: ALSO run a UI review agent (general-purpose prompted as "senior UI/UX reviewer") checking accessibility, responsiveness, design consistency, and interaction quality.
+If DB changes were made: ALSO run db-optimizer agent to review schema/query changes.
+
+Fix ALL issues rated HIGH or MEDIUM before proceeding. Re-run the review if significant changes were made during fixes.
+
+Say: `STEP 3 COMPLETE: CODE REVIEW PASSED` and list each reviewer agent, its verdict, and issues found/fixed.
+
+#### STEP 4: Test Case Generation
+Run a testing agent (general-purpose prompted as "senior QA engineer") to generate test cases for the change. The tester:
+1. Reads the diff and the affected files
+2. Produces a list of test scenarios covering: happy path, edge cases, error cases, security boundaries, and regression risks
+3. For each scenario: describes the setup, action, and expected result
+
+Say: `STEP 4 COMPLETE: TEST CASES GENERATED` and list the test scenarios.
+
+#### STEP 5: Execute Tests and Fix Bugs
+Trace every test scenario from Step 4 through the code. For scenarios that can be verified via build, API logic, or code path analysis, do so. For scenarios requiring runtime verification, describe what would happen based on code analysis.
+
+If any test scenario reveals a bug: fix it immediately. After fixing, go back to Step 3 (code review on the fix). This loop continues until all tests pass.
+
+Say: `STEP 5 COMPLETE: ALL TESTS PASS` and list each scenario with its result.
+
+#### STEP 6: Final Verification Review
+Run the senior dev review agent ONE MORE TIME on the final diff (including all bug fixes from Step 5). This is the "ship it?" review. The reviewer gives a final APPROVE or REQUEST CHANGES.
+
+If UI changes: run UI review agent again on the final state.
+If the reviewer requests changes: fix them and re-run this step.
+
+Say: `STEP 6 COMPLETE: FINAL REVIEW APPROVED`
+
+#### STEP 7: Tester Verification
+Run the testing agent one final time to confirm all previously identified issues from Steps 3-5 are resolved. The tester:
+1. Reviews the final diff
+2. Confirms each previously flagged issue is fixed
+3. Checks that fixes did not introduce new issues
+
+Only after tester confirmation: code is ready to commit/push.
+
+Say: `STEP 7 COMPLETE: TESTER VERIFIED, READY TO SHIP`
+
+**After ALL 7 steps, say:** `PIPELINE COMPLETE` — this is the ONLY signal that code is ready. Do not commit or suggest pushing without this phrase.
+
+#### Pipeline Efficiency Rules (no overlap, no waste)
+1. **I am the orchestrator.** I coordinate all agents. Quality and efficiency are my responsibility.
+2. **One agent, one job.** Review agents review. Test agents test. Architect agents design. Never mix roles.
+3. **No duplicate work.** If the architect reviewed the plan, I do not re-design inline. If the reviewer checked security, I do not re-check the same things. Trust agent output.
+4. **Parallelize where possible.** In Step 3, if both code review and UI review are needed, launch them in parallel. In Step 6, same.
+5. **Chain where dependent.** Step 4 (tests) depends on Step 3 (review fixes). Step 6 depends on Step 5 (bug fixes). Never run these in parallel.
+6. **Specialist agents for specialist work.** DB changes get db-optimizer. UI changes get UI reviewer. Performance-sensitive changes get perf-optimizer. Always use the right specialist.
+7. **Consolidate before acting.** When multiple agents return findings, deduplicate into one action list before writing any code.
+
+---
 
 ### Persona-Driven UI Selection (referenced by pre-implementation step 7)
 
@@ -280,17 +361,14 @@ For every feature, enumerate scenarios from ALL of these categories:
 
 ### Post-Implementation Checklist (Mandatory Before Marking Done)
 
-After completing code changes, before reporting completion:
+**The Code Quality Pipeline (7 steps above) IS the post-implementation process.** Do not mark a task done unless the pipeline reached `PIPELINE COMPLETE`.
 
-1. **Build passes?** `npx next build` exits 0.
-2. **All test scenarios verified?** Trace code paths for EVERY scenario listed in pre-implementation step 7. For each, name what you tested and the result. Any untested scenario is a potential shipped bug. If a scenario reveals a bug, fix it before proceeding.
-3. **End-to-end flow?** For features touching the customer journey: test the full flow (form > submit > approve > embed > verify).
-4. **Security spot check?** For new routes/APIs: test auth bypass, verify RLS, check error messages don't leak internals.
-5. **Run ALL agents listed in pre-implementation step 2.** At minimum: general-purpose as senior dev reviewer on the diff. Also run perf-optimizer if layout/component changes were made. Fix any HIGH/MEDIUM issues before proceeding.
-6. **Agent verification.** List each agent from pre-implementation step 2, confirm it ran, and note its verdict. If an agent was listed but not run, explain why. This step makes agent skipping visible.
-7. **Lessons captured?** Any new patterns, mistakes, or discoveries written to `tasks/lessons.md`.
+Additional checks after pipeline completion:
+1. **Build passes?** `npx next build` exits 0 (should already be verified in pipeline).
+2. **End-to-end flow?** For features touching the customer journey: test the full flow.
+3. **Lessons captured?** Any new patterns, mistakes, or discoveries written to `tasks/lessons.md`.
 
-**After completing all 7 checks, say exactly:** `I FOLLOWED POST-IMPLEMENTATION RULES` — this signals to the user that post-implementation validation was completed. Do not say this phrase unless all 7 checks were genuinely done.
+**After pipeline completion AND these checks, say exactly:** `I FOLLOWED POST-IMPLEMENTATION RULES`
 
 ### Response Style
 
