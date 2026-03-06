@@ -1749,13 +1749,23 @@ Place it where I want customer testimonials to appear. The script handles all st
                     </div>
                   </div>
 
-                  {/* Section 3: React component (Pro only, no upsell) */}
-                  {userPlan !== 'free' && (
-                    <div className="space-y-3 border-t border-border pt-4">
-                      <h4 className="text-xs font-semibold text-foreground uppercase tracking-wide">React / Next.js component</h4>
-                      <p className="text-xs text-muted-foreground">
-                        Copy this component into your React or Next.js project. Fetches testimonials from the Vouch API. Style with your own Tailwind classes.
-                      </p>
+                  {/* Section 3: React component */}
+                  <div className="space-y-3 border-t border-border pt-4">
+                    <h4 className="text-xs font-semibold text-foreground uppercase tracking-wide flex items-center gap-2">
+                      React / Next.js component
+                      {userPlan === 'free' && <span className="text-[10px] bg-indigo-100 text-indigo-700 rounded-full px-1.5 py-0.5 font-medium normal-case tracking-normal">Pro</span>}
+                    </h4>
+                    <p className="text-xs text-muted-foreground">
+                      Want full control over how testimonials look on your site? The React component lets you match your exact design, load faster with server-side rendering, and customize every detail with your own CSS. Great if you or your AI tool is building a custom site.
+                    </p>
+                    {userPlan === 'free' ? (
+                      <button
+                        onClick={() => setShowUpgradePrompt(true)}
+                        className="text-xs font-medium text-indigo-600 hover:text-indigo-700 transition-colors"
+                      >
+                        Available on Pro &rarr;
+                      </button>
+                    ) : (
                       <div className="relative">
                         <span className="absolute top-2 left-3 text-[10px] text-gray-500 font-mono uppercase">JSX</span>
                         <pre className="rounded-xl bg-gray-950 pt-7 pb-3 px-3 pr-16 text-xs text-emerald-400 overflow-x-auto font-mono leading-relaxed max-h-72">
@@ -1765,8 +1775,8 @@ Place it where I want customer testimonials to appear. The script handles all st
                           <CopyCodeButton code={reactSnippet} />
                         </div>
                       </div>
-                    </div>
-                  )}
+                    )}
+                  </div>
                 </div>
               )}
 
