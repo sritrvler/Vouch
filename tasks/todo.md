@@ -10,7 +10,35 @@
 
 # Active Work Queue
 
-## Session Handoff (March 6, 2026, session 18: Embed Modal Redesign + Widget UI Polish + Dashboard Subtexts)
+## Session Handoff (March 6, 2026, session 19: P1 Security Hardening Batch)
+
+**What was done this session:**
+
+1. **Password strength mismatch (T2):** Login schema aligned from min(6) to min(8) to match signup.
+2. **Font URL injection (T2):** Widget API now sanitizes font_url via shared sanitizeFontUrl() before returning in JSON response. Public page and collection form were already safe.
+3. **Admin impersonate leak (T2):** Magic link no longer returned in response body. Sent via Resend email to ADMIN_EMAIL. AdminClient UI updated to show "sent" confirmation instead of displaying the link.
+4. **Video MIME validation (T2):** Server now verifies file magic bytes (ftyp box for MP4, EBML header for WebM) in addition to client-provided MIME type. Rejects files that don't match.
+
+**Files changed:**
+1. `src/app/(auth)/login/page.tsx` (password min 6 -> 8)
+2. `src/app/api/testimonials/widget/[id]/route.ts` (import sanitizeFontUrl, use in response)
+3. `src/app/api/admin/impersonate/route.ts` (send link via email, HTML escape)
+4. `src/app/admin/AdminClient.tsx` (removed link display, show sent confirmation)
+5. `src/app/api/testimonials/upload-video/route.ts` (magic byte verification)
+
+**What's next:**
+1. P1 Security: Rate limiting on 8 endpoints (checkout, portal, upload-logo, 4 admin routes). 2 hours.
+2. P1 Conversion: Email onboarding, email notifications, post-signup warmth, test testimonial flow, checklist copy, /via page.
+3. P2+ items from prioritized backlog.
+
+**What to watch out for:**
+1. Admin impersonate now requires RESEND_API_KEY and ADMIN_EMAIL env vars to deliver the link. In dev without Resend key, the link is generated but silently not sent. The response still says "sent" to avoid leaking whether email was actually delivered.
+2. Video magic byte check: MP4 ftyp is at bytes 4-7 (not 0-3). WebM EBML header is at bytes 0-3. Files under 12 bytes are rejected (Uint8Array pads with 0s).
+3. Existing users with 6-7 char passwords can still log in (Supabase handles auth). The min(8) is client-side Zod validation only.
+
+---
+
+## Previous: Session Handoff (March 6, 2026, session 18: Embed Modal Redesign + Widget UI Polish + Dashboard Subtexts)
 
 **What was done this session:**
 
@@ -140,10 +168,10 @@ Items are grouped by priority. P1 = do before or soon after launch. P2 = first m
 ### P1: Security Hardening (attack surface gaps)
 
 - [ ] **8 endpoints have no rate limiting.** checkout, portal, upload-logo, all 4 admin routes. (2 hours)
-- [ ] **Video upload MIME validation is client-trust only.** Server should verify file magic bytes. (1 hour)
-- [ ] **Admin impersonate returns magic link in response body.** Leaks in DevTools/logs. Send via email instead. (1 hour)
-- [ ] **Font URL injection on public page.** `font_url` rendered as link href without validation on public page and collection form. `sanitizeFontUrl` exists but verify all render paths use it. (30 min)
-- [ ] **Password strength mismatch.** Signup requires 8 chars, login requires 6. Align to 8. (15 min)
+- [x] **Video upload MIME validation is client-trust only.** Done session 19: added magic byte verification (ftyp for MP4, EBML for WebM) in upload-video route.
+- [x] **Admin impersonate returns magic link in response body.** Done session 19: link now sent via Resend email to ADMIN_EMAIL instead of returned in response.
+- [x] **Font URL injection on public page.** Done session 19: widget API now uses sanitizeFontUrl(). Public page and collection form already used resolveFontUrl() which calls sanitizeFontUrl().
+- [x] **Password strength mismatch.** Done session 19: login schema aligned to min(8) to match signup.
 
 ### P2: Stability and Monitoring (catch problems before users report them)
 
