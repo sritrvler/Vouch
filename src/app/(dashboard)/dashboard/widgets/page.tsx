@@ -783,7 +783,10 @@ export function Testimonials() {
       <div className="flex items-center justify-between mb-6 gap-3">
         <div className="flex-1 min-w-0">
           <h1 className="text-2xl font-bold tracking-tight text-foreground">Widget Builder</h1>
-          {activeWidgetId ? (
+          <p className="mt-0.5 text-sm text-muted-foreground">
+            Customize how testimonials look on your site. Changes update automatically.
+          </p>
+          {activeWidgetId && (
             <div className="mt-1 flex items-center gap-1.5 group/name">
               <input
                 value={settings.name}
@@ -793,10 +796,6 @@ export function Testimonials() {
               />
               <Pencil className="size-3.5 text-muted-foreground/50 group-hover/name:text-muted-foreground transition-colors shrink-0" />
             </div>
-          ) : (
-            <p className="mt-0.5 text-sm text-muted-foreground">
-              Customize your testimonial widget and embed it on your website.
-            </p>
           )}
         </div>
         <div className="flex items-center gap-2 shrink-0">
@@ -1597,7 +1596,7 @@ export function Testimonials() {
                     </button>
                   </div>
                   <p className="text-xs text-emerald-600 bg-emerald-50 border border-emerald-200 rounded-xl px-3 py-2">
-                    Your testimonials load automatically and update whenever you approve new ones. Works with every option above.
+                    Your testimonials load automatically and update whenever you approve new ones.
                   </p>
                 </div>
               )}
