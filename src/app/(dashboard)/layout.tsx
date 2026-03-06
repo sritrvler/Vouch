@@ -130,6 +130,7 @@ function DashboardLayoutInner({ children }: { children: React.ReactNode }) {
   const [projectPopoverOpen, setProjectPopoverOpen] = useState(false);
   const [mobileProjectPopoverOpen, setMobileProjectPopoverOpen] = useState(false);
   const [projectSearch, setProjectSearch] = useState('');
+  const [mounted, setMounted] = useState(false);
 
   // Sort projects alphabetically, show search when > 5
   const sortedProjects = [...projects].sort((a, b) => a.name.localeCompare(b.name));
@@ -137,6 +138,8 @@ function DashboardLayoutInner({ children }: { children: React.ReactNode }) {
   const filteredProjects = projectSearch
     ? sortedProjects.filter((p) => p.name.toLowerCase().includes(projectSearch.toLowerCase()))
     : sortedProjects;
+
+  useEffect(() => { setMounted(true); }, []);
 
   useEffect(() => {
     const supabase = createClient();
@@ -197,6 +200,16 @@ function DashboardLayoutInner({ children }: { children: React.ReactNode }) {
           </Link>
 
           {/* Project selector */}
+          {!mounted ? (
+            <button
+              className="w-full flex items-center justify-between gap-2 px-3 py-2 rounded-xl bg-muted/60 text-sm font-medium text-foreground"
+              type="button"
+              aria-label="Select project"
+            >
+              <span className="truncate">{selectedProject?.name ?? 'No projects'}</span>
+              <ChevronDown className="size-3.5 shrink-0 text-muted-foreground" />
+            </button>
+          ) : (
           <Popover open={projectPopoverOpen} onOpenChange={(open) => { setProjectPopoverOpen(open); if (!open) setProjectSearch(''); }}>
             <PopoverTrigger asChild>
               <button
@@ -289,6 +302,7 @@ function DashboardLayoutInner({ children }: { children: React.ReactNode }) {
               </div>
             </PopoverContent>
           </Popover>
+          )}
         </div>
 
         {/* Nav items */}
@@ -348,6 +362,15 @@ function DashboardLayoutInner({ children }: { children: React.ReactNode }) {
           {/* Top bar: project selector left, avatar right */}
           <div className="flex items-center gap-3 px-4 py-2.5">
             {/* Project selector (takes available space) */}
+            {!mounted ? (
+              <button className="flex items-center gap-2 min-w-0 flex-1" type="button" aria-label="Select project">
+                <div className="w-7 h-7 rounded-lg bg-primary flex items-center justify-center shrink-0">
+                  <Zap className="w-3.5 h-3.5 text-white fill-white" />
+                </div>
+                <span className="text-sm font-semibold text-foreground truncate">{selectedProject?.name ?? 'No projects'}</span>
+                <ChevronDown className="size-3.5 shrink-0 text-muted-foreground" />
+              </button>
+            ) : (
             <Popover open={mobileProjectPopoverOpen} onOpenChange={(open) => { setMobileProjectPopoverOpen(open); if (!open) setProjectSearch(''); }}>
               <PopoverTrigger asChild>
                 <button
@@ -427,8 +450,16 @@ function DashboardLayoutInner({ children }: { children: React.ReactNode }) {
                 )}
               </PopoverContent>
             </Popover>
+            )}
 
             {/* Avatar menu */}
+            {!mounted ? (
+              <div className="size-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0" aria-label="Account menu">
+                <span className="text-xs font-semibold text-primary">
+                  {user?.email ? user.email[0].toUpperCase() : '?'}
+                </span>
+              </div>
+            ) : (
             <Popover>
               <PopoverTrigger asChild>
                 <button
@@ -466,6 +497,7 @@ function DashboardLayoutInner({ children }: { children: React.ReactNode }) {
                 </button>
               </PopoverContent>
             </Popover>
+            )}
           </div>
         </div>
 
