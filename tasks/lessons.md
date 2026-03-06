@@ -2,6 +2,12 @@
 
 Rules for myself. Read this at session start. Do not repeat these mistakes.
 
+## Production Schema Sync (Session 20)
+Production Supabase schema was missing columns added via ALTER TABLE in later sessions. The code queries all columns, so missing columns cause 400 errors. Before seeding or testing on prod, always verify the schema is fully up to date. The full list of ALTER TABLE statements is in `supabase/schema.sql` as comments.
+
+## SQL Copying from Chat (Session 20)
+Copying multi-line SQL from chat into Supabase SQL Editor introduces hidden carriage return characters (0x0d) that break JSON parsing. Fix: write SQL to a file and have user copy from the file instead.
+
 ## Session Persistence (CRITICAL)
 
 1. **Always update `tasks/todo.md` and `tasks/lessons.md` before suggesting /clear.** The user lost context between sessions because I did not write handoff notes. This is the #1 process failure.

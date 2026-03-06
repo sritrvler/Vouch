@@ -10,6 +10,74 @@
 
 # Active Work Queue
 
+## Session Handoff (March 6, 2026, session 20: Prod Setup + Lemon Squeezy Prep)
+
+**What was done this session:**
+1. Google OAuth consent screen: investigated "to continue to supabase.co" issue. Requires custom domain (paid) or brand verification. App name already set to "Vouch". Parked for now.
+2. Legal review (T&C + Privacy Policy): reviewed both documents, identified 11 gaps. Deferred until factual answers available (payment processor, analytics, video storage, Supabase region).
+3. Production database seeded: created Vouch project, 1 collection form, 2 widgets (wall + carousel), 8 testimonials (7 approved, 1 pending) for Lemon Squeezy demo video.
+4. Production schema sync: added missing columns to projects, testimonials, widgets, collection_forms tables. Dashboard now loads correctly.
+5. Confirmed Clearbit is actively used in public page and embed page (logo.clearbit.com).
+6. Added "Client-side caching" and "Legal review" as deferred tasks.
+
+**What's next:**
+1. User is recording a demo video for Lemon Squeezy store approval.
+2. After approval: P1 Security (rate limiting on 8 endpoints), P1 Conversion (email onboarding, notifications, post-signup warmth).
+3. Deferred: client-side caching (React Query), legal review, Google brand verification.
+
+**What to watch out for:**
+1. Prod Supabase is free tier (Nano, ap-south-1). HEAD/count requests sometimes return 503. Not a data issue, just throttling.
+2. Prod Supabase URL is `sxfjdkgopithetvmscdx.supabase.co` (different from local `itbgozgomunoiolkdajo`).
+3. Dummy testimonials use fake names/emails. Replace with real ones once customers submit.
+4. User's email: `sritrvler@gmail.com`, user_id: `981e00cb-ed3b-4b8a-a1c8-76656d059337` on prod.
+5. Seed file saved at `vouch/supabase/seed-demo.sql` (don't run again, data already inserted).
+
+---
+
+## Deferred: Client-Side Caching (React Query / SWR)
+
+**Context:** Every page navigation hits Supabase directly. On free tier (Nano), this causes slow loads and occasional 503s on count queries. Adding a client-side cache layer will make repeated navigations instant.
+
+**Scope:**
+1. Add React Query (or SWR) for all Supabase queries in the dashboard
+2. Cache projects, testimonials, forms, widgets, subscription data
+3. Stale-while-revalidate pattern so UI loads instantly from cache, then refreshes in background
+4. Invalidate cache on mutations (approve testimonial, create widget, etc.)
+
+**Files likely affected:** `ProjectContext.tsx`, all dashboard pages (`page.tsx`, `inbox/page.tsx`, `forms/page.tsx`, `widgets/page.tsx`, `settings/page.tsx`)
+
+**Priority:** After paying customers or Supabase Pro upgrade. Not blocking launch.
+
+---
+
+## Deferred: Legal Review (T&C + Privacy Policy)
+
+**Context:** Current T&C and Privacy Policy are live but have known gaps. Need factual answers before updating.
+
+**Known issues:**
+1. Privacy Policy says "Stripe" but actual payment processor is Lemon Squeezy (or needs confirmation)
+2. Privacy Policy lists Clearbit (needs confirmation if actually integrated)
+3. No governing law/jurisdiction clause in T&C
+4. No GDPR section (needed if EU users expected)
+5. No CCPA section (needed if California users expected)
+6. No children's privacy / age restriction clause
+7. No indemnification, severability, or entire agreement clauses in T&C
+8. No data breach notification policy in Privacy Policy
+9. No data processing info for testimonial submitters (non-account holders)
+10. Contact email is placeholder (`hello@example.com` fallback)
+11. Entity is sole proprietor (Srinath, Coimbatore, Tamil Nadu, India) until incorporation
+
+**Before starting, answer these:**
+1. Payment processor: Stripe or Lemon Squeezy?
+2. Is Clearbit actually integrated?
+3. Any analytics tools? (Google Analytics, PostHog, etc.)
+4. Where are videos stored? (Supabase storage, S3, etc.)
+5. Supabase region? (US, EU, Asia?)
+
+**Files:** `src/app/(marketing)/terms/page.tsx`, `src/app/(marketing)/privacy/page.tsx`
+
+---
+
 ## Session Handoff (March 6, 2026, session 19: P1 Security Hardening Batch)
 
 **What was done this session:**
