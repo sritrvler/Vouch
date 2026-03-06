@@ -1540,10 +1540,10 @@ export function Testimonials() {
               <AnimatePresence mode="wait" initial={false}>
                 <motion.div
                   key={`${embedPath}-${selectedPlatform ?? 'none'}`}
-                  initial={{ x: slideDirection * 60, opacity: 0 }}
+                  initial={{ x: slideDirection * 20, opacity: 0 }}
                   animate={{ x: 0, opacity: 1 }}
-                  exit={{ x: slideDirection * -60, opacity: 0 }}
-                  transition={{ duration: 0.25, ease: 'easeOut' }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.15, ease: 'easeOut' }}
                 >
 
               {/* ── Step 1: Chooser ── */}
