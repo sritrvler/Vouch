@@ -237,20 +237,25 @@ function TestimonialPreviewCard({
 }
 
 // ─── Copy Code Button ─────────────────────────────────────────────────────────
-function CopyCodeButton({ code }: { code: string }) {
+function CopyCodeButton({ code, variant = 'dark' }: { code: string; variant?: 'dark' | 'light' }) {
   const [copied, setCopied] = useState(false);
   const copy = async () => {
     await navigator.clipboard.writeText(code);
     setCopied(true);
-    toast.success('Code copied');
+    toast.success('Copied');
     setTimeout(() => setCopied(false), 2000);
   };
   return (
     <button
       onClick={copy}
-      className="rounded-lg border border-border bg-muted/40 px-2 py-1 text-xs font-medium text-muted-foreground hover:bg-muted hover:text-foreground transition-all flex items-center gap-1"
+      className={cn(
+        'rounded-lg px-2.5 py-1.5 text-xs font-medium transition-all flex items-center gap-1.5',
+        variant === 'dark'
+          ? 'border border-gray-600 bg-gray-800 text-gray-300 hover:bg-gray-700 hover:text-white'
+          : 'border border-border bg-muted/40 text-muted-foreground hover:bg-muted hover:text-foreground'
+      )}
     >
-      {copied ? <Check className="size-3 text-emerald-500" /> : <Copy className="size-3" />}
+      {copied ? <Check className={cn('size-3', variant === 'dark' ? 'text-emerald-400' : 'text-emerald-500')} /> : <Copy className="size-3" />}
       {copied ? 'Copied' : 'Copy'}
     </button>
   );
@@ -799,10 +804,9 @@ export function Testimonials() {
           {activeWidgetId && (
             <>
               <Button
-                variant="outline"
                 size="sm"
                 onClick={() => { setEmbedPath('choose'); setSelectedPlatform(null); setShowEmbedModal(true); }}
-                className="gap-1.5 rounded-xl"
+                className="gap-1.5 rounded-xl border-indigo-200 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 hover:border-indigo-300"
               >
                 <Code2 className="size-3.5" />
                 <span className="hidden sm:inline">Get Code</span>
@@ -1619,7 +1623,7 @@ export function Testimonials() {
                           {SITE_URL}/p/{selectedProject?.slug}
                         </span>
                       </div>
-                      <CopyCodeButton code={`${SITE_URL}/p/${selectedProject?.slug}`} />
+                      <CopyCodeButton code={`${SITE_URL}/p/${selectedProject?.slug}`} variant="light" />
                       <a
                         href={`/p/${selectedProject?.slug}`}
                         target="_blank"
@@ -1713,7 +1717,7 @@ export function Testimonials() {
                     ))}
                   </ol>
                   <p className="text-xs text-emerald-600 bg-emerald-50 border border-emerald-200 rounded-xl px-3 py-2">
-                    This loads your testimonials automatically. You don&apos;t need to understand the code. It&apos;s also SEO-friendly, so Google will index your testimonials.
+                    That&apos;s it! Your testimonials will load automatically and update whenever you approve new ones.
                   </p>
                 </div>
               )}
@@ -1725,7 +1729,7 @@ export function Testimonials() {
                   <div className="space-y-3">
                     <h4 className="text-xs font-semibold text-foreground uppercase tracking-wide">Embed code</h4>
                     <p className="text-xs text-muted-foreground">
-                      Add to any HTML page. Renders inside Shadow DOM so there are zero style conflicts. Google indexes your testimonials as part of your page.
+                      Add to any HTML page. Renders inside Shadow DOM so there are zero style conflicts with your site.
                     </p>
                     <div className="relative">
                       <span className="absolute top-2 left-3 text-[10px] text-gray-500 font-mono uppercase">HTML</span>
