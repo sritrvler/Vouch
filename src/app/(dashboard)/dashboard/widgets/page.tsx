@@ -1596,6 +1596,9 @@ export function Testimonials() {
                       </div>
                     </button>
                   </div>
+                  <p className="text-xs text-emerald-600 bg-emerald-50 border border-emerald-200 rounded-xl px-3 py-2">
+                    Your testimonials load automatically and update whenever you approve new ones. Works with every option above.
+                  </p>
                 </div>
               )}
 
@@ -1718,9 +1721,6 @@ export function Testimonials() {
                       </li>
                     ))}
                   </ol>
-                  <p className="text-xs text-emerald-600 bg-emerald-50 border border-emerald-200 rounded-xl px-3 py-2">
-                    That&apos;s it! Your testimonials will load automatically and update whenever you approve new ones.
-                  </p>
                 </div>
               )}
 
@@ -1763,10 +1763,6 @@ Place it where I want customer testimonials to appear. The script handles all st
                       </div>
                     </div>
                   </div>
-
-                  <p className="text-xs text-emerald-600 bg-emerald-50 border border-emerald-200 rounded-xl px-3 py-2">
-                    That&apos;s it! Your testimonials will load automatically and update whenever you approve new ones.
-                  </p>
 
                   {/* Section 3: React component */}
                   <div className="space-y-3 border-t border-border pt-4">
