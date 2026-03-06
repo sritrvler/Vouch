@@ -847,7 +847,7 @@ export default function FormsPage() {
                   <SelectTrigger className="w-full rounded-xl">
                     <SelectValue placeholder="Select a project" />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent position="popper" sideOffset={4}>
                     {projects.map((p) => (
                       <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>
                     ))}
