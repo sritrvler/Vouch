@@ -253,7 +253,7 @@ function CopyCodeButton({ code }: { code: string }) {
 // ─── Page ─────────────────────────────────────────────────────────────────────
 export default function WidgetsPage() {
   const supabase = createClient();
-  const { selectedProjectId, selectedProject, plan: userPlan, showAllProjects } = useProject();
+  const { selectedProjectId, selectedProject, plan: userPlan, showAllProjects, projects } = useProject();
   const [testimonials, setTestimonials] = useState<Testimonial[]>([]);
   const [orderedTestimonials, setOrderedTestimonials] = useState<Testimonial[]>([]);
   const [loadingTestimonials, setLoadingTestimonials] = useState(true);
@@ -729,7 +729,9 @@ export function Testimonials() {
                         'block text-[10px] leading-tight',
                         isActive ? 'text-indigo-500/70' : 'text-muted-foreground/60'
                       )}>
-                        {LAYOUT_OPTIONS.find((l) => l.value === widget.layout)?.label}
+                        {showAllProjects && projects.length > 1
+                          ? `${projects.find((p) => p.id === widget.project_id)?.name ?? 'Unknown'} · ${LAYOUT_OPTIONS.find((l) => l.value === widget.layout)?.label}`
+                          : LAYOUT_OPTIONS.find((l) => l.value === widget.layout)?.label}
                       </span>
                     </div>
                   </button>
