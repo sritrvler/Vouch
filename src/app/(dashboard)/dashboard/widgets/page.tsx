@@ -21,10 +21,13 @@ import {
   Link2,
   GripVertical,
   AlertTriangle,
-  Settings,
   Plus,
   Trash2,
   X,
+  ChevronDown,
+  Palette,
+  SlidersHorizontal,
+  ArrowUpDown,
 } from 'lucide-react';
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/client';
@@ -250,6 +253,47 @@ function CopyCodeButton({ code }: { code: string }) {
   );
 }
 
+// ─── Collapsible Section ──────────────────────────────────────────────────────
+function CollapsibleSection({
+  id,
+  title,
+  icon,
+  summary,
+  isOpen,
+  onToggle,
+  children,
+}: {
+  id: string;
+  title: string;
+  icon: React.ReactNode;
+  summary?: string;
+  isOpen: boolean;
+  onToggle: (id: string) => void;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="border-b border-border last:border-b-0">
+      <button
+        onClick={() => onToggle(id)}
+        aria-expanded={isOpen}
+        className="flex items-center gap-2.5 w-full px-5 py-3.5 text-left hover:bg-muted/30 transition-colors"
+      >
+        <span className="text-muted-foreground">{icon}</span>
+        <span className="text-sm font-semibold text-foreground flex-1">{title}</span>
+        {!isOpen && summary && (
+          <span className="text-xs text-muted-foreground truncate max-w-[140px]">{summary}</span>
+        )}
+        <ChevronDown className={cn('size-4 text-muted-foreground transition-transform', isOpen && 'rotate-180')} />
+      </button>
+      {isOpen && (
+        <div className="px-5 pb-4 space-y-4">
+          {children}
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ─── Page ─────────────────────────────────────────────────────────────────────
 export default function WidgetsPage() {
   const supabase = createClient();
@@ -268,6 +312,20 @@ export default function WidgetsPage() {
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
   const [totalWidgetCount, setTotalWidgetCount] = useState(0);
   const [showUpgradePrompt, setShowUpgradePrompt] = useState(false);
+
+  // Collapsible section state (multi-open allowed)
+  const [openSections, setOpenSections] = useState<Set<string>>(new Set(['layout']));
+  const toggleSection = useCallback((section: string) => {
+    setOpenSections(prev => {
+      const next = new Set(prev);
+      if (next.has(section)) next.delete(section);
+      else next.add(section);
+      return next;
+    });
+  }, []);
+
+  // Embed modal state
+  const [showEmbedModal, setShowEmbedModal] = useState(false);
 
   const [settings, setSettings] = useState<WidgetSettings>({
     name: 'My Widget',
@@ -668,23 +726,48 @@ export function Testimonials() {
       className="mx-auto max-w-7xl px-4 py-8 sm:px-6"
     >
       {/* ── Header ── */}
-      <div className="flex items-center justify-between mb-6">
-        <div>
+      <div className="flex items-center justify-between mb-6 gap-3">
+        <div className="flex-1 min-w-0">
           <h1 className="text-2xl font-bold tracking-tight text-foreground">Widget Builder</h1>
-          <p className="mt-0.5 text-sm text-muted-foreground">
-            Customize your testimonial widget and embed it on your website.
-          </p>
+          {activeWidgetId ? (
+            <div className="mt-1 flex items-center gap-2">
+              <input
+                value={settings.name}
+                onChange={(e) => update('name', e.target.value)}
+                className="text-sm text-muted-foreground bg-transparent border-b border-transparent hover:border-border focus:border-indigo-400 focus:outline-none transition-colors py-0.5 min-w-0 max-w-[240px]"
+                placeholder="Widget name"
+              />
+            </div>
+          ) : (
+            <p className="mt-0.5 text-sm text-muted-foreground">
+              Customize your testimonial widget and embed it on your website.
+            </p>
+          )}
         </div>
-        {activeWidgetId && (
-          <Button
-            onClick={handleSave}
-            disabled={saving}
-            className="gap-2 rounded-xl bg-indigo-600 hover:bg-indigo-700"
-          >
-            {saving ? <Loader2 className="size-4 animate-spin" /> : <Save className="size-4" />}
-            Save Changes
-          </Button>
-        )}
+        <div className="flex items-center gap-2 shrink-0">
+          {activeWidgetId && (
+            <>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setShowEmbedModal(true)}
+                className="gap-1.5 rounded-xl"
+              >
+                <Code2 className="size-3.5" />
+                <span className="hidden sm:inline">Get Code</span>
+              </Button>
+              <Button
+                onClick={handleSave}
+                disabled={saving}
+                size="sm"
+                className="gap-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-700"
+              >
+                {saving ? <Loader2 className="size-4 animate-spin" /> : <Save className="size-4" />}
+                Save
+              </Button>
+            </>
+          )}
+        </div>
       </div>
 
       {!selectedProjectId && !loadingTestimonials && (
@@ -817,22 +900,13 @@ export function Testimonials() {
       {/* ── Builder (only shown when a widget is selected) ── */}
       {activeWidgetId && <div className="grid grid-cols-1 xl:grid-cols-[380px_1fr] gap-6">
         {/* ── Left Panel: Settings ── */}
-        <div className="space-y-5">
-          {/* Widget Name */}
-          <div className="bg-white rounded-2xl border border-border p-5">
-            <h3 className="text-sm font-semibold text-foreground mb-3">Widget Name</h3>
-            <Input
-              value={settings.name}
-              onChange={(e) => update('name', e.target.value)}
-              placeholder="My Widget"
-              className="rounded-xl"
-            />
-          </div>
+        <div className="order-2 xl:order-1">
+          <div className="bg-white rounded-2xl border border-border overflow-hidden">
 
-          {/* Layout */}
-          <div className="bg-white rounded-2xl border border-border p-5">
+          {/* Layout (always visible, not collapsible) */}
+          <div className="px-5 pt-5 pb-4 border-b border-border">
             <h3 className="text-sm font-semibold text-foreground mb-3">Layout</h3>
-            <div className="grid grid-cols-2 gap-2">
+            <div className="flex gap-1.5 overflow-x-auto pb-1 scrollbar-none" style={{ scrollbarWidth: 'none' }}>
               {LAYOUT_OPTIONS.map((opt) => {
                 const isProLayout = opt.value !== 'grid';
                 const isLocked = isProLayout && userPlan === 'free';
@@ -847,7 +921,7 @@ export function Testimonials() {
                       update('layout', opt.value);
                     }}
                     className={cn(
-                      'relative flex flex-col items-center gap-2 rounded-xl border-2 p-3 text-center transition-all',
+                      'relative flex items-center gap-1.5 rounded-lg border px-2.5 py-2 text-xs font-medium transition-all shrink-0',
                       isLocked
                         ? 'border-border text-muted-foreground/50 cursor-not-allowed bg-muted/20'
                         : settings.layout === opt.value
@@ -855,28 +929,24 @@ export function Testimonials() {
                         : 'border-border text-muted-foreground hover:border-indigo-200 hover:bg-muted/30'
                     )}
                   >
-                    {opt.icon}
-                    <div>
-                      <p className="text-xs font-semibold">{opt.label}</p>
-                      <p className="text-xs opacity-70">{opt.desc}</p>
-                    </div>
-                    {isLocked && (
-                      <div className="absolute top-2 right-2">
-                        <Lock className="size-3 text-muted-foreground/50" />
-                      </div>
-                    )}
-                    {!isLocked && settings.layout === opt.value && (
-                      <div className="absolute top-2 right-2 size-2 rounded-full bg-indigo-500" />
-                    )}
+                    <span className="size-4">{opt.icon}</span>
+                    {opt.label}
+                    {isLocked && <Lock className="size-2.5 text-muted-foreground/50" />}
                   </button>
                 );
               })}
             </div>
           </div>
 
-          {/* Theme */}
-          <div className="bg-white rounded-2xl border border-border p-5 space-y-4">
-            <h3 className="text-sm font-semibold text-foreground">Theme</h3>
+          {/* Appearance (collapsible) */}
+          <CollapsibleSection
+            id="appearance"
+            title="Appearance"
+            icon={<Palette className="size-4" />}
+            summary={`${settings.theme.cardStyle} · ${settings.theme.primaryColor}`}
+            isOpen={openSections.has('appearance')}
+            onToggle={toggleSection}
+          >
 
             {/* Primary Color */}
             <div>
@@ -1113,12 +1183,36 @@ export function Testimonials() {
                 </div>
               ))}
             </div>
-          </div>
 
-          {/* Filter */}
-          <div className="bg-white rounded-2xl border border-border p-5 space-y-4">
-            <h3 className="text-sm font-semibold text-foreground">Filter Testimonials</h3>
+            {/* Branding (merged into Appearance) */}
+            <div className="flex items-center justify-between pt-2 border-t border-border">
+              <div>
+                <p className="text-sm text-foreground/80">Remove &quot;Powered by Vouch&quot;</p>
+              </div>
+              {userPlan !== 'free' ? (
+                <Switch
+                  checked={settings.hideBranding}
+                  onCheckedChange={(v) => update('hideBranding', v)}
+                  size="sm"
+                />
+              ) : (
+                <div className="flex items-center gap-1.5 text-xs text-amber-600 bg-amber-50 border border-amber-200 rounded-full px-2 py-1">
+                  <Lock className="size-3" />
+                  Pro
+                </div>
+              )}
+            </div>
+          </CollapsibleSection>
 
+          {/* Content & Filter (collapsible) */}
+          <CollapsibleSection
+            id="content"
+            title="Content & Filter"
+            icon={<SlidersHorizontal className="size-4" />}
+            summary={`${settings.filterMode === 'all' ? 'All' : settings.filterMode} · max ${settings.maxItems}`}
+            isOpen={openSections.has('content')}
+            onToggle={toggleSection}
+          >
             <div className="flex gap-2">
               {(['all', 'featured', 'rating'] as FilterMode[]).map((mode) => (
                 <button
@@ -1173,17 +1267,21 @@ export function Testimonials() {
                 <span>50</span>
               </div>
             </div>
-          </div>
+          </CollapsibleSection>
 
-          {/* Display Order */}
+          {/* Display Order (collapsible) */}
           {testimonials.length > 0 && (
-            <div className="bg-white rounded-2xl border border-border p-5 space-y-3">
-              <div>
-                <h3 className="text-sm font-semibold text-foreground">Display Order</h3>
-                <p className="text-xs text-muted-foreground mt-0.5">
-                  Drag to set the order. Filter and max items still apply.
-                </p>
-              </div>
+            <CollapsibleSection
+              id="order"
+              title="Display Order"
+              icon={<ArrowUpDown className="size-4" />}
+              summary={`${orderedTestimonials.length} items`}
+              isOpen={openSections.has('order')}
+              onToggle={toggleSection}
+            >
+              <p className="text-xs text-muted-foreground">
+                Drag to set the order. Filter and max items still apply.
+              </p>
               <Reorder.Group
                 axis="y"
                 values={orderedTestimonials}
@@ -1221,34 +1319,14 @@ export function Testimonials() {
                   </Reorder.Item>
                 ))}
               </Reorder.Group>
-            </div>
+            </CollapsibleSection>
           )}
 
-          {/* Branding */}
-          <div className="bg-white rounded-2xl border border-border p-5">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-foreground">Remove &quot;Powered by Vouch&quot;</p>
-                <p className="text-xs text-muted-foreground mt-0.5">Hide the Vouch branding from your widget</p>
-              </div>
-              {userPlan !== 'free' ? (
-                <Switch
-                  checked={settings.hideBranding}
-                  onCheckedChange={(v) => update('hideBranding', v)}
-                  size="sm"
-                />
-              ) : (
-                <div className="flex items-center gap-1.5 text-xs text-amber-600 bg-amber-50 border border-amber-200 rounded-full px-2 py-1">
-                  <Lock className="size-3" />
-                  Pro
-                </div>
-              )}
-            </div>
           </div>
         </div>
 
         {/* ── Right Panel: Preview ── */}
-        <div className="space-y-5">
+        <div className="order-1 xl:order-2 space-y-5">
           <div className="bg-white rounded-2xl border border-border overflow-hidden">
             {/* Preview Header */}
             <div className="flex items-center justify-between px-5 py-3.5 border-b border-border bg-muted/30">
@@ -1361,16 +1439,34 @@ export function Testimonials() {
             </div>
           </div>
 
-          {/* ── Add to your website ── */}
+        </div>
+      </div>}
+
+      {/* ── Embed Code Modal ── */}
+      <AnimatePresence>
+        {showEmbedModal && activeWidgetId && (
           <motion.div
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="bg-white rounded-2xl border border-border overflow-hidden"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm"
+            onClick={(e) => { if (e.target === e.currentTarget) setShowEmbedModal(false); }}
           >
-            {/* Section header */}
-            <div className="flex items-center gap-2 px-5 py-4 border-b border-border">
-              <Code2 className="size-4 text-indigo-500" />
-              <h3 className="text-sm font-semibold text-foreground">Add to your website</h3>
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 12 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 12 }}
+              className="bg-white rounded-2xl border border-border overflow-hidden w-full max-w-2xl max-h-[80vh] overflow-y-auto shadow-xl"
+            >
+            {/* Modal header */}
+            <div className="flex items-center justify-between px-5 py-4 border-b border-border sticky top-0 bg-white z-10">
+              <div className="flex items-center gap-2">
+                <Code2 className="size-4 text-indigo-500" />
+                <h3 className="text-sm font-semibold text-foreground">Add to your website</h3>
+              </div>
+              <button onClick={() => setShowEmbedModal(false)} className="rounded-lg p-1 hover:bg-muted transition-colors">
+                <X className="size-4 text-muted-foreground" />
+              </button>
             </div>
 
             {/* Tabs */}
@@ -1598,34 +1694,10 @@ export function Testimonials() {
                 </div>
               )}
             </div>
+            </motion.div>
           </motion.div>
-
-          {/* ── Upgrade banner for branding ── */}
-          {userPlan === 'free' && (
-            <div className="bg-gradient-to-r from-indigo-50 to-violet-50 rounded-2xl border border-indigo-100 p-5">
-              <div className="flex items-start gap-3">
-                <div className="rounded-xl bg-indigo-100 p-2 shrink-0">
-                  <Zap className="size-5 text-indigo-600" />
-                </div>
-                <div className="flex-1">
-                  <p className="text-sm font-semibold text-indigo-900">Unlock more</p>
-                  <p className="text-xs text-indigo-700/80 mt-0.5">
-                    Remove branding, get all layouts, and create unlimited widgets.
-                  </p>
-                  <Button
-                    size="sm"
-                    className="mt-3 gap-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-xs"
-                    onClick={() => setShowUpgradePrompt(true)}
-                  >
-                    <Zap className="size-3.5" />
-                    View plans
-                  </Button>
-                </div>
-              </div>
-            </div>
-          )}
-        </div>
-      </div>}
+        )}
+      </AnimatePresence>
 
       {/* ── Upgrade Prompt ── */}
       <UpgradeModal open={showUpgradePrompt} onOpenChange={setShowUpgradePrompt} />
