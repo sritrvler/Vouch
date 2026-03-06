@@ -1,9 +1,17 @@
 import { NextResponse } from 'next/server';
 import { createServerSupabaseClient } from '@/lib/supabase/server';
 import { getCustomerPortalUrl } from '@/lib/lemonsqueezy';
-import { createClient } from '@supabase/supabase-js';
 
 const PORTAL_URL_TTL_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
+
+function isValidPortalUrl(url: string): boolean {
+  try {
+    const parsed = new URL(url);
+    return parsed.hostname.endsWith('.lemonsqueezy.com');
+  } catch {
+    return false;
+  }
+}
 
 export async function POST() {
   try {
@@ -24,11 +32,13 @@ export async function POST() {
       return NextResponse.json({ error: 'No active subscription found' }, { status: 404 });
     }
 
-    // Use cached URL if it exists and is less than 7 days old
+    // Use cached URL if it exists, is valid, and is less than 7 days old
     const fetchedAt = subscription.customer_portal_url_fetched_at
       ? new Date(subscription.customer_portal_url_fetched_at).getTime()
       : 0;
-    const isFresh = subscription.customer_portal_url && (Date.now() - fetchedAt < PORTAL_URL_TTL_MS);
+    const isFresh = subscription.customer_portal_url
+      && isValidPortalUrl(subscription.customer_portal_url)
+      && (Date.now() - fetchedAt < PORTAL_URL_TTL_MS);
 
     if (isFresh) {
       return NextResponse.json({ url: subscription.customer_portal_url });
@@ -41,18 +51,18 @@ export async function POST() {
       return NextResponse.json({ error: 'Failed to get portal URL' }, { status: 500 });
     }
 
-    // Self-healing: cache the result back to DB using service role client
-    const adminSupabase = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.SUPABASE_SERVICE_ROLE_KEY!
-    );
-    await adminSupabase
+    // Self-healing: cache the result back to DB (RLS allows user to update own row)
+    const { error: cacheError } = await supabase
       .from('subscriptions')
       .update({
         customer_portal_url: url,
         customer_portal_url_fetched_at: new Date().toISOString(),
       })
       .eq('user_id', user.id);
+
+    if (cacheError) {
+      console.warn('Failed to cache portal URL:', cacheError.message);
+    }
 
     return NextResponse.json({ url });
   } catch (err) {
