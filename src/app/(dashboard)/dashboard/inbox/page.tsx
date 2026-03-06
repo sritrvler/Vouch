@@ -357,12 +357,12 @@ function ImportDialog({
             <div className="space-y-1.5">
               <label className="text-xs font-medium text-foreground">Project</label>
               {projectLocked ? (
-                <div className="rounded-xl bg-muted/50 border border-border px-3 py-2 text-sm text-muted-foreground">
+                <div className="rounded-xl bg-muted border border-border px-3 py-2 text-sm text-muted-foreground cursor-not-allowed">
                   {projects.find((p) => p.id === projectId)?.name ?? 'Unknown project'}
                 </div>
               ) : (
                 <Select value={projectId} onValueChange={setProjectId}>
-                  <SelectTrigger className="w-full rounded-xl">
+                  <SelectTrigger className="w-full rounded-xl bg-white border-border">
                     <SelectValue placeholder="Select a project" />
                   </SelectTrigger>
                   <SelectContent position="popper" sideOffset={4}>
@@ -407,7 +407,7 @@ function ImportDialog({
               onChange={(e) => setContent(e.target.value)}
               placeholder="Paste the tweet, LinkedIn comment, email, or message..."
               rows={4}
-              className="w-full rounded-xl border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500 resize-none"
+              className="w-full rounded-xl border border-border bg-white px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500 resize-none"
             />
             <p className="text-xs text-muted-foreground">{content.length} chars (min 10)</p>
           </div>
@@ -422,7 +422,7 @@ function ImportDialog({
                 value={authorName}
                 onChange={(e) => setAuthorName(e.target.value)}
                 placeholder="Jane Smith"
-                className="rounded-xl"
+                className="rounded-xl bg-white border-border"
               />
             </div>
             <div className="space-y-1.5">
@@ -431,7 +431,7 @@ function ImportDialog({
                 value={authorRole}
                 onChange={(e) => setAuthorRole(e.target.value)}
                 placeholder="Designer"
-                className="rounded-xl"
+                className="rounded-xl bg-white border-border"
               />
             </div>
           </div>
@@ -441,7 +441,7 @@ function ImportDialog({
               value={authorCompany}
               onChange={(e) => setAuthorCompany(e.target.value)}
               placeholder="Acme Inc."
-              className="rounded-xl"
+              className="rounded-xl bg-white border-border"
             />
           </div>
 
@@ -497,7 +497,7 @@ function ImportDialog({
                 value={sourceUrl}
                 onChange={(e) => setSourceUrl(e.target.value)}
                 placeholder="https://x.com/username/status/..."
-                className="rounded-xl flex-1"
+                className="rounded-xl flex-1 bg-white border-border"
               />
               {isTwitterUrl(sourceUrl) && (
                 <Button
@@ -1019,13 +1019,12 @@ export default function InboxPage() {
       let testimonialsQuery = supabase
         .from('testimonials')
         .select('*, project:projects(name)')
+        .eq('user_id', user.id)
         .order('created_at', { ascending: false })
         .limit(PAGE_SIZE);
 
       if (scopeByProject) {
         testimonialsQuery = testimonialsQuery.eq('project_id', selectedProjectId);
-      } else {
-        testimonialsQuery = testimonialsQuery.eq('user_id', user.id);
       }
 
       const [testimonialsRes, subRes] = await Promise.all([
@@ -1056,16 +1055,16 @@ export default function InboxPage() {
     try {
       const cursor = testimonials[testimonials.length - 1].created_at;
       const scopeByProject = !showAllProjects && selectedProjectId;
+      const userId = (await supabase.auth.getUser()).data.user?.id ?? '';
       let query = supabase
         .from('testimonials')
         .select('*, project:projects(name)')
+        .eq('user_id', userId)
         .order('created_at', { ascending: false })
         .lt('created_at', cursor)
         .limit(PAGE_SIZE);
       if (scopeByProject) {
         query = query.eq('project_id', selectedProjectId);
-      } else {
-        query = query.eq('user_id', (await supabase.auth.getUser()).data.user?.id ?? '');
       }
       if (activeTab !== 'all') {
         query = query.eq('status', activeTab);

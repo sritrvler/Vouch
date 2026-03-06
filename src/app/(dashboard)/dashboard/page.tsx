@@ -319,40 +319,30 @@ export default function DashboardPage() {
       }
 
       try {
-        // Scope key: filter by project_id when a specific project is selected, otherwise by user_id
-        const scopeKey = effectiveFilter === 'project' && selectedProjectId ? 'project_id' : 'user_id';
-        const scopeVal = effectiveFilter === 'project' && selectedProjectId ? selectedProjectId : user.id;
+        // Always filter by user_id for security, optionally narrow by project_id
+        const filterByProject = effectiveFilter === 'project' && selectedProjectId;
+
+        const userId = user.id;
+        function scoped(query: any) {
+          const q = query.eq('user_id', userId);
+          return filterByProject ? q.eq('project_id', selectedProjectId) : q;
+        }
 
         const [totalRes, pendingRes, approvedRes, recentRes, widgetsRes, projectsRes, formsRes] = await Promise.all([
-          supabase
-            .from('testimonials')
-            .select('id', { count: 'exact', head: true })
-            .eq(scopeKey, scopeVal),
-          supabase
-            .from('testimonials')
-            .select('id', { count: 'exact', head: true })
-            .eq(scopeKey, scopeVal)
-            .eq('status', 'pending'),
-          supabase
-            .from('testimonials')
-            .select('id', { count: 'exact', head: true })
-            .eq(scopeKey, scopeVal)
-            .eq('status', 'approved'),
-          supabase
-            .from('testimonials')
-            .select('id, author_name, rating, content, status, created_at')
-            .eq(scopeKey, scopeVal)
-            .order('created_at', { ascending: false })
-            .limit(5),
-          supabase.from('widgets').select('id').eq(scopeKey, scopeVal),
+          scoped(supabase.from('testimonials').select('id', { count: 'exact', head: true })),
+          scoped(supabase.from('testimonials').select('id', { count: 'exact', head: true })).eq('status', 'pending'),
+          scoped(supabase.from('testimonials').select('id', { count: 'exact', head: true })).eq('status', 'approved'),
+          scoped(supabase.from('testimonials').select('id, author_name, rating, content, status, created_at'))
+            .order('created_at', { ascending: false }).limit(5),
+          scoped(supabase.from('widgets').select('id')),
           supabase.from('projects').select('id', { count: 'exact', head: true }).eq('user_id', user.id),
-          supabase.from('collection_forms').select('id', { count: 'exact', head: true }).eq(scopeKey, scopeVal),
+          scoped(supabase.from('collection_forms').select('id', { count: 'exact', head: true })),
         ]);
 
         // Widget views: get widget ids from scoped query, then count views
         let widgetViews = 0;
         if (widgetsRes.data && widgetsRes.data.length > 0) {
-          const widgetIds = widgetsRes.data.map((w) => w.id);
+          const widgetIds = widgetsRes.data.map((w: { id: string }) => w.id);
           const { count } = await supabase
             .from('widget_views')
             .select('id', { count: 'exact', head: true })

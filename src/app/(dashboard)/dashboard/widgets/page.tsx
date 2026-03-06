@@ -253,7 +253,7 @@ function CopyCodeButton({ code }: { code: string }) {
 // ─── Page ─────────────────────────────────────────────────────────────────────
 export default function WidgetsPage() {
   const supabase = createClient();
-  const { selectedProjectId, selectedProject, plan: userPlan } = useProject();
+  const { selectedProjectId, selectedProject, plan: userPlan, showAllProjects } = useProject();
   const [testimonials, setTestimonials] = useState<Testimonial[]>([]);
   const [orderedTestimonials, setOrderedTestimonials] = useState<Testimonial[]>([]);
   const [loadingTestimonials, setLoadingTestimonials] = useState(true);
@@ -352,7 +352,7 @@ export default function WidgetsPage() {
 
   // ── Fetch approved testimonials and all widgets for project ─────────────
   const fetchData = useCallback(async () => {
-    if (!selectedProjectId) {
+    if (!selectedProjectId && !showAllProjects) {
       setLoadingTestimonials(false);
       return;
     }
@@ -366,26 +366,38 @@ export default function WidgetsPage() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
-      const testimonialsRes = await supabase
+      const scopeByProject = !showAllProjects && selectedProjectId;
+
+      let testimonialsQuery = supabase
         .from('testimonials')
         .select('id, author_name, author_role, author_company, author_avatar_url, rating, content, featured, created_at')
         .eq('user_id', user.id)
-        .eq('project_id', selectedProjectId)
         .eq('status', 'approved')
         .order('created_at', { ascending: false })
         .limit(50);
+
+      if (scopeByProject) {
+        testimonialsQuery = testimonialsQuery.eq('project_id', selectedProjectId);
+      }
+
+      const testimonialsRes = await testimonialsQuery;
 
       const fetchedTestimonials = (testimonialsRes.data as Testimonial[]) ?? [];
       setTestimonials(fetchedTestimonials);
       setOrderedTestimonials(fetchedTestimonials);
 
-      // Load ALL widgets for this project (not just one)
-      const { data: widgetsData } = await supabase
+      // Load widgets scoped by project or all
+      let widgetsQuery = supabase
         .from('widgets')
         .select('*')
         .eq('user_id', user.id)
-        .eq('project_id', selectedProjectId)
         .order('created_at', { ascending: true });
+
+      if (scopeByProject) {
+        widgetsQuery = widgetsQuery.eq('project_id', selectedProjectId);
+      }
+
+      const { data: widgetsData } = await widgetsQuery;
 
       const loadedWidgets = (widgetsData as Widget[]) ?? [];
       setWidgets(loadedWidgets);
@@ -407,7 +419,7 @@ export default function WidgetsPage() {
     } finally {
       setLoadingTestimonials(false);
     }
-  }, [supabase, selectedProjectId, DEFAULT_SETTINGS, loadWidgetIntoSettings]);
+  }, [supabase, selectedProjectId, showAllProjects, DEFAULT_SETTINGS, loadWidgetIntoSettings]);
 
   useEffect(() => {
     fetchData();

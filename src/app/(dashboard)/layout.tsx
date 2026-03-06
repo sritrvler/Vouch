@@ -403,7 +403,7 @@ function DashboardLayoutInner({ children }: { children: React.ReactNode }) {
                   {projects.length > 1 && !projectSearch && (
                     <button
                       type="button"
-                      onClick={() => { setShowAllProjects(true); setMobileProjectPopoverOpen(false); }}
+                      onClick={() => { setShowAllProjects(true); setMobileProjectPopoverOpen(false); setProjectSearch(''); }}
                       className={cn(
                         'w-full flex items-center gap-2 px-2.5 py-2 rounded-lg text-sm transition-colors',
                         showAllProjects ? 'bg-primary/10 text-primary font-medium' : 'hover:bg-muted text-foreground'

@@ -46,13 +46,14 @@ interface ProjectContextValue {
 const ProjectContext = createContext<ProjectContextValue | null>(null);
 
 const STORAGE_KEY = 'vouch_selected_project';
+const ALL_PROJECTS_KEY = 'vouch_show_all_projects';
 
 export function ProjectProvider({ children }: { children: ReactNode }) {
   const [projects, setProjects] = useState<Project[]>([]);
   const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
   const [plan, setPlan] = useState<'free' | 'pro' | 'studio'>('free');
   const [loading, setLoading] = useState(true);
-  const [showAllProjects, setShowAllProjects] = useState(false);
+  const [showAllProjects, setShowAllProjectsRaw] = useState(false);
 
   const fetchProjects = useCallback(async () => {
     const supabase = createClient();
@@ -96,6 +97,12 @@ export function ProjectProvider({ children }: { children: ReactNode }) {
       setSelectedProjectId(null);
     }
 
+    // Restore "All projects" preference (only valid with 2+ projects)
+    const storedAll = localStorage.getItem(ALL_PROJECTS_KEY);
+    if (storedAll === 'true' && fetched.length > 1) {
+      setShowAllProjectsRaw(true);
+    }
+
     setLoading(false);
   }, []);
 
@@ -106,6 +113,11 @@ export function ProjectProvider({ children }: { children: ReactNode }) {
   const switchProject = useCallback((id: string) => {
     setSelectedProjectId(id);
     localStorage.setItem(STORAGE_KEY, id);
+  }, []);
+
+  const setShowAllProjects = useCallback((val: boolean) => {
+    setShowAllProjectsRaw(val);
+    localStorage.setItem(ALL_PROJECTS_KEY, String(val));
   }, []);
 
   const refetchProjects = useCallback(async () => {

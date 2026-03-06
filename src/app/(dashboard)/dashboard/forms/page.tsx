@@ -839,12 +839,12 @@ export default function FormsPage() {
                   No projects found. Create a project in Settings first.
                 </p>
               ) : !showAllProjects && activeProjectId ? (
-                <div className="rounded-xl bg-muted/50 border border-border px-3 py-2 text-sm text-muted-foreground">
+                <div className="rounded-xl bg-muted border border-border px-3 py-2 text-sm text-muted-foreground cursor-not-allowed">
                   {projects.find((p) => p.id === selectedProjectId)?.name ?? 'Unknown project'}
                 </div>
               ) : (
                 <Select value={selectedProjectId} onValueChange={setSelectedProjectId}>
-                  <SelectTrigger className="w-full rounded-xl">
+                  <SelectTrigger className="w-full rounded-xl bg-white border-border">
                     <SelectValue placeholder="Select a project" />
                   </SelectTrigger>
                   <SelectContent position="popper" sideOffset={4}>
@@ -865,7 +865,7 @@ export default function FormsPage() {
                 value={formTitle}
                 onChange={(e) => setFormTitle(e.target.value)}
                 placeholder="Share your experience"
-                className="rounded-xl"
+                className="rounded-xl bg-white border-border"
               />
             </div>
 
@@ -877,7 +877,7 @@ export default function FormsPage() {
                 value={formDesc}
                 onChange={(e) => setFormDesc(e.target.value)}
                 placeholder="We'd love to hear what you think about our product…"
-                className="rounded-xl resize-none"
+                className="rounded-xl resize-none bg-white border-border"
                 rows={3}
               />
             </div>
@@ -891,7 +891,7 @@ export default function FormsPage() {
                 value={formPrompt}
                 onChange={(e) => setFormPrompt(e.target.value)}
                 placeholder="What did you love? What stood out?"
-                className="rounded-xl"
+                className="rounded-xl bg-white border-border"
                 maxLength={200}
               />
               <span className="text-[10px] text-muted-foreground">{formPrompt.length}/200</span>
@@ -918,7 +918,7 @@ export default function FormsPage() {
                       <Input
                         value={q}
                         onChange={(e) => updateQuestion(i, e.target.value)}
-                        className="rounded-xl text-sm flex-1"
+                        className="rounded-xl text-sm flex-1 bg-white border-border"
                         maxLength={200}
                       />
                       <button
@@ -943,7 +943,7 @@ export default function FormsPage() {
                     }}
                     onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), addQuestion())}
                     placeholder="Add another question..."
-                    className="rounded-xl text-sm"
+                    className="rounded-xl text-sm bg-white border-border"
                     maxLength={200}
                   />
                   <Button
