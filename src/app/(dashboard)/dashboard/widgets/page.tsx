@@ -15,7 +15,6 @@ import {
   Loader2,
   Code2,
   Lock,
-  Zap,
   Globe,
   ExternalLink,
   Link2,
@@ -1591,21 +1590,6 @@ export function Testimonials() {
                       </div>
                     </button>
                   </div>
-                  {/* React Pro link */}
-                  <button
-                    onClick={() => {
-                      if (userPlan === 'free') {
-                        setShowUpgradePrompt(true);
-                      } else {
-                        handleEmbedNav('developer');
-                      }
-                    }}
-                    className="text-xs text-muted-foreground hover:text-indigo-600 transition-colors flex items-center gap-1.5 mx-auto border border-border/60 rounded-lg px-3 py-1.5 hover:border-indigo-200 hover:bg-indigo-50/30"
-                  >
-                    <Code2 className="size-3" />
-                    React / Next.js component
-                    {userPlan === 'free' && <span className="text-[10px] bg-indigo-100 text-indigo-700 rounded-full px-1.5 py-0.5 font-medium">Pro</span>}
-                  </button>
                 </div>
               )}
 
@@ -1765,43 +1749,24 @@ Place it where I want customer testimonials to appear. The script handles all st
                     </div>
                   </div>
 
-                  {/* Section 3: React component (Pro) */}
-                  <div className="space-y-3 border-t border-border pt-4">
-                    <h4 className="text-xs font-semibold text-foreground uppercase tracking-wide flex items-center gap-2">
-                      React / Next.js component
-                      {userPlan === 'free' && <span className="text-[10px] bg-indigo-100 text-indigo-700 rounded-full px-1.5 py-0.5 font-medium normal-case tracking-normal">Pro</span>}
-                    </h4>
-                    {userPlan === 'free' ? (
-                      <div className="rounded-xl border border-indigo-100 bg-gradient-to-br from-indigo-50 to-violet-50 p-4 flex items-center justify-between gap-3">
-                        <p className="text-xs text-muted-foreground">
-                          Get a copy-paste React component with full styling control. No npm install needed.
-                        </p>
-                        <Button
-                          size="sm"
-                          className="bg-indigo-600 hover:bg-indigo-700 text-white gap-1.5 shrink-0"
-                          onClick={() => setShowUpgradePrompt(true)}
-                        >
-                          <Zap className="size-3.5" />
-                          View plans
-                        </Button>
-                      </div>
-                    ) : (
-                      <>
-                        <p className="text-xs text-muted-foreground">
-                          Copy this component into your Next.js or React project. It fetches your approved testimonials directly from the Vouch API. Style it with your own Tailwind classes.
-                        </p>
-                        <div className="relative">
-                          <span className="absolute top-2 left-3 text-[10px] text-gray-500 font-mono uppercase">JSX</span>
-                          <pre className="rounded-xl bg-gray-950 pt-7 pb-3 px-3 pr-16 text-xs text-emerald-400 overflow-x-auto font-mono leading-relaxed max-h-72">
-                            {reactSnippet}
-                          </pre>
-                          <div className="absolute top-2 right-2">
-                            <CopyCodeButton code={reactSnippet} />
-                          </div>
+                  {/* Section 3: React component (Pro only, no upsell) */}
+                  {userPlan !== 'free' && (
+                    <div className="space-y-3 border-t border-border pt-4">
+                      <h4 className="text-xs font-semibold text-foreground uppercase tracking-wide">React / Next.js component</h4>
+                      <p className="text-xs text-muted-foreground">
+                        Copy this component into your React or Next.js project. Fetches testimonials from the Vouch API. Style with your own Tailwind classes.
+                      </p>
+                      <div className="relative">
+                        <span className="absolute top-2 left-3 text-[10px] text-gray-500 font-mono uppercase">JSX</span>
+                        <pre className="rounded-xl bg-gray-950 pt-7 pb-3 px-3 pr-16 text-xs text-emerald-400 overflow-x-auto font-mono leading-relaxed max-h-72">
+                          {reactSnippet}
+                        </pre>
+                        <div className="absolute top-2 right-2">
+                          <CopyCodeButton code={reactSnippet} />
                         </div>
-                      </>
-                    )}
-                  </div>
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
 
