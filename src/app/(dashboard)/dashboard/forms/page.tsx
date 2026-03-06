@@ -451,7 +451,7 @@ export default function FormsPage() {
           .from('projects')
           .select('id, name')
           .eq('user_id', user.id)
-          .order('created_at', { ascending: true }),
+          .order('name', { ascending: true }),
         supabase
           .from('subscriptions')
           .select('plan')

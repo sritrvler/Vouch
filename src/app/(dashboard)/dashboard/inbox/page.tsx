@@ -279,7 +279,7 @@ function ImportDialog({
         .from('projects')
         .select('id, name')
         .eq('user_id', user.id)
-        .order('created_at', { ascending: true });
+        .order('name', { ascending: true });
       if (projs && projs.length > 0) {
         setProjects(projs);
         if (activeProjectId && projs.some((p) => p.id === activeProjectId)) {
