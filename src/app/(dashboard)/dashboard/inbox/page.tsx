@@ -1227,13 +1227,18 @@ export default function InboxPage() {
     >
       {/* ── Page Header ── */}
       <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center gap-3 min-w-0">
-          <h1 className="text-2xl font-bold tracking-tight text-foreground">Inbox</h1>
-          {pendingCount > 0 && (
-            <span className="inline-flex items-center rounded-full bg-amber-100 px-2.5 py-0.5 text-xs font-semibold text-amber-800 shrink-0">
-              {pendingCount} pending
-            </span>
-          )}
+        <div className="min-w-0">
+          <div className="flex items-center gap-3">
+            <h1 className="text-2xl font-bold tracking-tight text-foreground">Inbox</h1>
+            {pendingCount > 0 && (
+              <span className="inline-flex items-center rounded-full bg-amber-100 px-2.5 py-0.5 text-xs font-semibold text-amber-800 shrink-0">
+                {pendingCount} pending
+              </span>
+            )}
+          </div>
+          <p className="mt-0.5 text-sm text-muted-foreground">
+            Review, approve, or reject testimonials from your customers.
+          </p>
         </div>
         <div className="flex items-center gap-2 shrink-0">
           {isPro && (
