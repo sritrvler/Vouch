@@ -197,7 +197,15 @@ Before writing any code for a task, answer these questions explicitly. Do not sk
 
 If any answer is "no" or "skipped," pause and address it before writing code.
 
-**After answering all 8 questions, say exactly:** `I FOLLOWED PRE-IMPLEMENTATION RULES` — this signals to the user that pre-implementation validation was completed. Do not say this phrase unless all 8 questions were explicitly answered.
+### Senior Review Gate (Mandatory Before Implementation)
+
+**After completing the pre-implementation checklist, run your plan by a senior software developer/architect before writing any code.** Use a general-purpose agent prompted as a "senior software architect" to review your proposed approach. Present: (1) what you plan to change, (2) which files, (3) the approach, (4) alternatives you considered. Wait for the agent's verdict before proceeding.
+
+**Skip condition:** You may skip this review ONLY for trivially simple changes where you have very high confidence (e.g., fixing a typo, updating a string literal, changing a color value). If there is any doubt, run the review.
+
+**After the review, say exactly:** `SENIOR REVIEW: APPROVED` or `SENIOR REVIEW: APPROVED WITH CHANGES` (listing what changed based on feedback). Do not proceed to implementation without one of these phrases.
+
+**After answering all 8 pre-implementation questions AND passing the Senior Review Gate, say exactly:** `I FOLLOWED PRE-IMPLEMENTATION RULES` — this signals to the user that pre-implementation validation was completed. Do not say this phrase unless all 8 questions were explicitly answered and the senior review passed.
 
 ### Persona-Driven UI Selection (referenced by pre-implementation step 7)
 

@@ -17,6 +17,8 @@ create table public.subscriptions (
   plan text not null default 'free' check (plan in ('free', 'pro', 'studio')),
   status text not null default 'active' check (status in ('active', 'inactive', 'past_due', 'cancelled')),
   current_period_end timestamptz,
+  customer_portal_url text,
+  customer_portal_url_fetched_at timestamptz,
   is_banned boolean not null default false,
   created_at timestamptz default now() not null,
   updated_at timestamptz default now() not null
@@ -24,6 +26,10 @@ create table public.subscriptions (
 
 -- To add is_banned to an existing database run:
 -- ALTER TABLE public.subscriptions ADD COLUMN IF NOT EXISTS is_banned boolean not null default false;
+
+-- To add portal URL cache columns to an existing database run:
+-- ALTER TABLE public.subscriptions ADD COLUMN IF NOT EXISTS customer_portal_url text;
+-- ALTER TABLE public.subscriptions ADD COLUMN IF NOT EXISTS customer_portal_url_fetched_at timestamptz;
 
 -- ============================================================
 -- PROJECTS (a user can have multiple projects/businesses)

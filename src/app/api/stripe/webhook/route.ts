@@ -57,6 +57,8 @@ export async function POST(request: NextRequest) {
         plan = studioVariants.includes(variantId) ? 'studio' : 'pro';
       }
 
+      const portalUrl: string | null = attributes.urls?.customer_portal ?? null;
+
       await supabase
         .from('subscriptions')
         .update({
@@ -65,6 +67,7 @@ export async function POST(request: NextRequest) {
           plan,
           status: dbStatus,
           current_period_end: attributes.renews_at ?? null,
+          ...(portalUrl ? { customer_portal_url: portalUrl, customer_portal_url_fetched_at: new Date().toISOString() } : {}),
         })
         .eq('user_id', userId);
     }
