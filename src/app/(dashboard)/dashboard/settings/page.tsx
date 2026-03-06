@@ -582,7 +582,7 @@ function SettingsInner() {
           {/* ──────────────── GENERAL TAB ──────────────── */}
           <TabsContent value="general" className="space-y-5">
             {/* Profile */}
-            <Section title="Profile" description="Update your public display name.">
+            <Section title="Profile" description="This name appears on your collection forms and public pages.">
               <div className="space-y-4">
                 <div className="space-y-1.5">
                   <Label htmlFor="display-name">Display Name</Label>
