@@ -246,7 +246,20 @@ Use dedicated agents BY NAME. Do NOT use generic "general-purpose prompted as...
 
 **Skip condition:** ONLY for trivially simple changes (typo, string literal, color value) where you have absolute confidence.
 
-Say: `STEP 1 COMPLETE: PLAN APPROVED` or `STEP 1 COMPLETE: PLAN APPROVED WITH CHANGES: [list]`
+**Step 1 Completion Checklist (MUST fill out before saying the confirmation phrase):**
+```
+STEP 1 CHECKLIST:
+[ ] 8 required fields answered
+[ ] Strategic agents: [product-strategist verdict: BUILD/KILL/SIMPLIFY/DEFER] or [skipped: reason]
+[ ] Competitive context: [competitive-analyst ran] or [not needed: reason]
+[ ] UI flow design: [ux-reviewer FLOW DESIGN ran, flow spec produced] or [not a UI task] or [minor tweak, no new flow]
+[ ] Flow feasibility: [premium-ui-designer reviewed flow] or [not a UI task] or [minor tweak]
+[ ] Architect approval: [software-architect approved] or [approved with changes: list]
+[ ] DB review: [db-optimizer ran] or [no DB changes]
+```
+Every line must have a value. "Skipped" is acceptable only with a reason. Blank lines = gate violation.
+
+Say: `STEP 1 COMPLETE: PLAN APPROVED` and paste the filled checklist.
 If skipped: `STEP 1 SKIPPED: [reason]`
 
 #### STEP 2: Write Code
@@ -273,7 +286,21 @@ Run the FULL diff through review agents. **Launch all applicable reviewers in pa
 4. **Approve or loop:** If re-review is clean, Step 3 is done. If new issues are found, fix and re-review again. **Max 2 re-review iterations** to prevent infinite loops. If issues persist after 2 rounds, document them as known limitations and proceed.
 5. **Skip re-review if:** Fixes were trivial (typo, CSS value, copy change) and could not introduce new problems.
 
-Say: `STEP 3 COMPLETE: REVIEW PASSED` and list each agent, verdict, issues found/fixed, re-review rounds.
+**Step 3 Completion Checklist (MUST fill out before saying the confirmation phrase):**
+```
+STEP 3 CHECKLIST:
+[ ] senior-code-reviewer: [verdict, # issues found, # fixed]
+[ ] premium-ui-designer: [verdict] or [not applicable: reason]
+[ ] ux-reviewer IMPLEMENTATION REVIEW: [verdict, flow spec compliance: yes/no] or [not applicable: reason]
+[ ] db-optimizer: [verdict] or [not applicable]
+[ ] conversion-copywriter: [verdict] or [not applicable]
+[ ] perf-optimizer: [verdict] or [not applicable]
+[ ] All HIGH/MEDIUM issues fixed: [yes, list] or [no HIGH/MEDIUM found]
+[ ] Re-review after fixes: [ran on fix diff, clean] or [ran, found X, fixed] or [skipped: fixes were trivial] or [no fixes needed]
+[ ] Re-review rounds: [0/1/2]
+```
+
+Say: `STEP 3 COMPLETE: REVIEW PASSED` and paste the filled checklist.
 
 #### STEP 4: Test and Verify
 Run `test-suite-architect` to generate test cases, then trace every scenario through the code.
