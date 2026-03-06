@@ -10,7 +10,7 @@
 
 # Active Work Queue
 
-## Session Handoff (March 6, 2026, session 15: Process Optimization + Agent Integration)
+## Session Handoff (March 6, 2026, session 15: Process Optimization + Agent Integration + Guardrails)
 
 **What was done this session:**
 1. Portal URL caching: Cached Lemon Squeezy portal URLs in DB with 7-day TTL, self-healing fallback, and domain validation. Fixes slow "Manage Subscription" loading. Code written, reviewed, build passes. User ran ALTER TABLE queries on Supabase. Ready to deploy (not pushed yet).
@@ -35,7 +35,7 @@
 - `.claude/agents/premium-ui-designer.md` (added north star)
 - `.claude/agents/conversion-copywriter.md` (added north star)
 - `.claude/agents/refactoring-specialist.md` (added north star)
-- `.claude/agents/ux-reviewer.md` (new merged agent)
+- `.claude/agents/ux-reviewer.md` (merged agent, now has dual mode: FLOW DESIGN + IMPLEMENTATION REVIEW)
 - `.claude/skills/design-and-build/SKILL.md` (trimmed)
 - `.claude/skills/test-and-ship/SKILL.md` (trimmed)
 - `.claude/skills/validate-and-plan/SKILL.md` (updated personas)
@@ -51,7 +51,10 @@ Pick from the prioritized backlog below. Recommended: P1 items (conversion/growt
 1. Pipeline is now 5 steps, not 7. All references updated but watch for old habits.
 2. Strategic agents (product-strategist, competitive-analyst) only trigger for NEW features, not bug fixes. Don't over-call them.
 3. competitive-analyst MUST use WebSearch/WebFetch for live data. Never trust knowledge cutoff for competitor info.
-4. ux-reviewer is the merged agent. ux-simplifier and ux-pain-point-fixer are archived. Don't reference old names.
+4. ux-reviewer is the merged agent with dual mode: FLOW DESIGN (Step 1, before code) and IMPLEMENTATION REVIEW (Step 3, after code). Prompt must specify mode.
+5. Step 1 and Step 3 now have completion checklists that must be filled out and pasted alongside confirmation phrases. Every line needs a value. Blank = gate violation.
+6. Step 3 has a review-fix-verify loop: consolidate findings, fix, re-run affected agents on fix diff, max 2 rounds.
+7. UI tasks follow: ux-reviewer FLOW DESIGN -> premium-ui-designer feasibility check -> software-architect -> code -> reviews. Flow is designed BEFORE code, not after.
 
 ---
 
