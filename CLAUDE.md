@@ -266,9 +266,14 @@ Run the FULL diff through review agents. **Launch all applicable reviewers in pa
 **If landing page:** `conversion-copywriter` (parallel with code review)
 **If performance-sensitive:** `perf-optimizer` (parallel with code review)
 
-Fix ALL HIGH/MEDIUM issues. If fixes are significant, re-run the relevant reviewer.
+**Review-Fix-Verify loop (how feedback is handled):**
+1. **Consolidate:** Collect all findings from all agents into one prioritized list. Tag each with source agent and severity (HIGH/MEDIUM/LOW). Deduplicate if two agents flagged the same issue.
+2. **Fix:** I (the orchestrator) fix all HIGH and MEDIUM issues. LOW issues are fixed if trivial, otherwise noted and deferred. Agents do NOT fix code. They identify problems only.
+3. **Re-review:** Re-run ONLY the agents whose findings required code changes, and ONLY on the new diff (not the full codebase). Example: if `ux-reviewer` flagged 2 issues and `senior-code-reviewer` flagged 1, and I fixed all 3, re-run both but only on the fix diff.
+4. **Approve or loop:** If re-review is clean, Step 3 is done. If new issues are found, fix and re-review again. **Max 2 re-review iterations** to prevent infinite loops. If issues persist after 2 rounds, document them as known limitations and proceed.
+5. **Skip re-review if:** Fixes were trivial (typo, CSS value, copy change) and could not introduce new problems.
 
-Say: `STEP 3 COMPLETE: REVIEW PASSED` and list each agent, verdict, issues found/fixed.
+Say: `STEP 3 COMPLETE: REVIEW PASSED` and list each agent, verdict, issues found/fixed, re-review rounds.
 
 #### STEP 4: Test and Verify
 Run `test-suite-architect` to generate test cases, then trace every scenario through the code.
