@@ -1511,10 +1511,10 @@ export function Testimonials() {
               initial={{ opacity: 0, scale: 0.95, y: 12 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 12 }}
-              className="bg-white rounded-2xl border border-border overflow-hidden w-full max-w-3xl max-h-[80vh] overflow-y-auto shadow-xl"
+              className="bg-white rounded-2xl border border-border overflow-hidden w-full max-w-3xl h-[70vh] sm:h-[65vh] shadow-xl flex flex-col"
             >
             {/* Modal header */}
-            <div className="flex items-center justify-between px-5 py-4 border-b border-border sticky top-0 bg-white z-10 shadow-[0_1px_3px_0_rgb(0_0_0/0.04)]">
+            <div className="flex items-center justify-between px-5 py-4 border-b border-border bg-white shrink-0 shadow-[0_1px_3px_0_rgb(0_0_0/0.04)]">
               <div className="flex items-center gap-2">
                 {showBackButton ? (
                   <button onClick={handleBack} className="rounded-lg p-2 hover:bg-muted transition-colors focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:outline-none" aria-label="Go back">
@@ -1537,7 +1537,7 @@ export function Testimonials() {
             </div>
 
             {/* Modal content */}
-            <div className="p-5 overflow-x-hidden">
+            <div className="p-5 overflow-x-hidden flex-1 overflow-y-auto">
               <AnimatePresence mode="wait" initial={false}>
                 <motion.div
                   key={`${embedPath}-${selectedPlatform ?? 'none'}`}
