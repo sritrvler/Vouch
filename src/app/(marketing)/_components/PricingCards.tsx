@@ -39,48 +39,53 @@ export const PRO_FEATURES: string[] = [
 export const STUDIO_FEATURES = STUDIO_FEATURES_SOURCE;
 
 export function PricingCards() {
-  const [billing, setBilling] = useState<'monthly' | 'yearly'>('yearly');
+  const [billing, setBilling] = useState<'monthly' | 'yearly'>('monthly');
 
   return (
     <div className="max-w-5xl mx-auto">
       {/* Billing toggle */}
       <div className="flex justify-center mb-8">
-        <div className="relative flex items-center gap-1 bg-gray-100 rounded-full p-1" role="radiogroup" aria-label="Billing frequency">
-          <motion.div
-            className="absolute top-1 bottom-1 bg-white rounded-full shadow-sm"
-            aria-hidden="true"
-            animate={{
-              left: billing === 'monthly' ? 4 : '40%',
-              width: billing === 'monthly' ? 'calc(40% - 4px)' : 'calc(60% - 4px)',
-            }}
-            transition={{ type: 'spring', stiffness: 400, damping: 30 }}
-          />
+        <div className="relative flex items-center bg-gray-100 rounded-full p-1" role="radiogroup" aria-label="Billing frequency">
           <button
             role="radio"
             aria-checked={billing === 'monthly'}
             onClick={() => setBilling('monthly')}
             className={cn(
-              'relative z-10 px-4 py-1.5 rounded-full text-sm font-medium transition-colors',
+              'relative z-10 px-5 py-1.5 rounded-full text-sm font-medium transition-colors',
               billing === 'monthly'
                 ? 'text-gray-900'
-                : 'text-gray-700 hover:text-gray-900'
+                : 'text-gray-500 hover:text-gray-900'
             )}
           >
-            Monthly
+            {billing === 'monthly' && (
+              <motion.div
+                layoutId="billing-pill"
+                className="absolute inset-0 bg-white rounded-full shadow-sm"
+                transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+              />
+            )}
+            <span className="relative z-10">Monthly</span>
           </button>
           <button
             role="radio"
             aria-checked={billing === 'yearly'}
             onClick={() => setBilling('yearly')}
             className={cn(
-              'relative z-10 px-4 py-1.5 rounded-full text-sm font-medium transition-colors flex items-center gap-2',
+              'relative z-10 px-5 py-1.5 rounded-full text-sm font-medium transition-colors flex items-center gap-2',
               billing === 'yearly'
                 ? 'text-gray-900'
-                : 'text-gray-700 hover:text-gray-900'
+                : 'text-gray-500 hover:text-gray-900'
             )}
           >
-            Yearly
-            <span className="text-xs font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full">
+            {billing === 'yearly' && (
+              <motion.div
+                layoutId="billing-pill"
+                className="absolute inset-0 bg-white rounded-full shadow-sm"
+                transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+              />
+            )}
+            <span className="relative z-10">Yearly</span>
+            <span className="relative z-10 text-xs font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full">
               2 months free
             </span>
           </button>
