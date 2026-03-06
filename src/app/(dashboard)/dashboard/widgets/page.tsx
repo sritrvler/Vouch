@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { motion, AnimatePresence, Reorder } from 'framer-motion';
 import { toast } from 'sonner';
 import {
@@ -328,12 +328,12 @@ export default function WidgetsPage() {
   type EmbedPath = 'choose' | 'link' | 'website' | 'developer';
   const [embedPath, setEmbedPath] = useState<EmbedPath>('choose');
   const [selectedPlatform, setSelectedPlatform] = useState<WebPlatform | null>(null);
-  const [slideDirection, setSlideDirection] = useState<1 | -1>(1);
+  const slideDirection = useRef<1 | -1>(1);
 
   const showBackButton = embedPath !== 'choose';
 
   const handleBack = useCallback(() => {
-    setSlideDirection(-1);
+    slideDirection.current = -1;
     if (embedPath === 'website' && selectedPlatform) {
       setSelectedPlatform(null);
     } else {
@@ -343,7 +343,7 @@ export default function WidgetsPage() {
   }, [embedPath, selectedPlatform]);
 
   const handleEmbedNav = useCallback((path: EmbedPath) => {
-    setSlideDirection(1);
+    slideDirection.current = 1;
     setEmbedPath(path);
   }, []);
 
@@ -1537,12 +1537,18 @@ export function Testimonials() {
 
             {/* Modal content */}
             <div className="p-5 overflow-x-hidden flex-1 overflow-y-auto">
-              <AnimatePresence mode="wait" initial={false}>
+              <AnimatePresence mode="wait" initial={false} custom={slideDirection.current}>
                 <motion.div
                   key={`${embedPath}-${selectedPlatform ?? 'none'}`}
-                  initial={{ x: slideDirection * 20, opacity: 0 }}
-                  animate={{ x: 0, opacity: 1 }}
-                  exit={{ opacity: 0 }}
+                  custom={slideDirection.current}
+                  initial="enter"
+                  animate="center"
+                  exit="exit"
+                  variants={{
+                    enter: (dir: number) => ({ x: dir * 20, opacity: 0 }),
+                    center: { x: 0, opacity: 1 },
+                    exit: { opacity: 0 },
+                  }}
                   transition={{ duration: 0.15, ease: 'easeOut' }}
                 >
 
@@ -1660,7 +1666,7 @@ export function Testimonials() {
                       return (
                         <button
                           key={platform.id}
-                          onClick={() => { setSlideDirection(1); setSelectedPlatform(platform.id); }}
+                          onClick={() => { slideDirection.current = 1; setSelectedPlatform(platform.id); }}
                           className="flex items-center gap-2.5 rounded-xl border-2 border-border px-3.5 py-3 text-left hover:border-indigo-300 hover:bg-indigo-50/30 transition-all focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:outline-none"
                         >
                           <span className={`size-6 rounded-md flex items-center justify-center text-xs font-bold shrink-0 ${colors[platform.id] ?? 'bg-gray-100 text-gray-600'}`}>
