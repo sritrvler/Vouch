@@ -1655,13 +1655,25 @@ export function Testimonials() {
                   </p>
                   <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
                     {PLATFORMS.map((platform) => {
-                      const colors: Record<string, string> = {
-                        wix: 'bg-yellow-100 text-yellow-700',
-                        squarespace: 'bg-gray-900 text-white',
-                        webflow: 'bg-blue-100 text-blue-700',
-                        framer: 'bg-purple-100 text-purple-700',
-                        wordpress: 'bg-sky-100 text-sky-700',
-                        other: 'bg-gray-100 text-gray-600',
+                      const icons: Record<string, React.ReactNode> = {
+                        wix: (
+                          <svg className="size-5" viewBox="0 0 24 24" fill="none"><path d="M4.8 8.4l-2.4 7.2L0 8.4h2.4L4.8 8.4zm4.8 0l-2.4 7.2 2.4-7.2zm0 0l2.4 7.2-2.4-7.2zm4.8 0l2.4 7.2L21.6 8.4H24l-4.8 7.2L16.8 8.4h-2.4z" fill="#FBCE2C"/><path d="M2.4 8.4L4.8 15.6 7.2 8.4M9.6 8.4L12 15.6 14.4 8.4M16.8 8.4L19.2 15.6 21.6 8.4" stroke="#0C6EFC" strokeWidth="1.2" fill="none"/></svg>
+                        ),
+                        squarespace: (
+                          <svg className="size-5" viewBox="0 0 24 24" fill="currentColor" color="#222"><path d="M12.01 6.91c-.44-.44-1.16-.44-1.6 0L4.67 12.65c-.44.44-.44 1.16 0 1.6l.4.4c.44.44 1.16.44 1.6 0l5.74-5.74c.44-.44.44-1.16 0-1.6l-.4-.4zm2.4 1.2c-.44-.44-1.16-.44-1.6 0L7.07 13.85c-.44.44-.44 1.16 0 1.6l.4.4c.44.44 1.16.44 1.6 0l5.74-5.74c.44-.44.44-1.16 0-1.6l-.4-.4zm2.4 1.2c-.44-.44-1.16-.44-1.6 0l-5.74 5.74c-.44.44-.44 1.16 0 1.6l.4.4c.44.44 1.16.44 1.6 0l5.74-5.74c.44-.44.44-1.16 0-1.6l-.4-.4zm-7.2-1.2c-.44-.44-1.16-.44-1.6 0L2.27 13.85c-.44.44-.44 1.16 0 1.6l.4.4c.44.44 1.16.44 1.6 0l5.74-5.74c.44-.44.44-1.16 0-1.6l-.4-.4z"/></svg>
+                        ),
+                        webflow: (
+                          <svg className="size-5" viewBox="0 0 24 24" fill="#4353FF"><path d="M17.55 7.2s-2.1 6.47-2.27 7c-.05-.54-.98-7-0.98-7-1.88 0-2.88 1.3-3.45 2.6 0 0-1.4 3.64-1.52 3.95-.02-.44-.25-3.9-.25-3.9C8.93 8.14 7.23 7.2 6 7.2l1.47 9.6c1.98-.01 3.05-1.3 3.63-2.6 0 0 1.23-3.17 1.28-3.3.04.14.88 5.9.88 5.9 1.99 0 3.06-1.26 3.64-2.56L19.8 7.2h-2.25z"/></svg>
+                        ),
+                        framer: (
+                          <svg className="size-5" viewBox="0 0 24 24" fill="#05F"><path d="M6 6h12v6H12L6 6zm0 6h6l6 6H6v-6z"/><path d="M6 18h6v-6L6 18z" opacity=".5"/></svg>
+                        ),
+                        wordpress: (
+                          <svg className="size-5" viewBox="0 0 24 24" fill="#21759B"><path d="M12 2C6.486 2 2 6.486 2 12s4.486 10 10 10 10-4.486 10-10S17.514 2 12 2zm-4.8 14.4L3.6 12c0-1.44.36-2.8 1-4l4.6 12.4zm4.8 3.2c-.96 0-1.88-.16-2.74-.44L12 11.6l2.86 7.84c.02.04.04.08.06.1A8.36 8.36 0 0112 19.6zm1.34-14.16c.56-.03 1.06-.08 1.06-.08.5-.06.44-.8-.06-.76 0 0-1.5.12-2.46.12-.92 0-2.46-.12-2.46-.12-.5-.04-.56.72-.06.76 0 0 .48.06 1 .08l1.48 4.06-2.08 6.24-3.46-10.3c.56-.03 1.06-.08 1.06-.08.5-.06.44-.8-.06-.76 0 0-1.5.12-2.46.12-.18 0-.38 0-.58-.02A8.4 8.4 0 0112 3.6c2.28 0 4.36.88 5.92 2.32-.04 0-.08-.02-.12-.02-1.52 0-2.14 1.32-2.14 2.14s.74 2 1.52 3.1c.58.98.78 2.24.78 3.14 0 .98-.38 2.1-.88 3.68l-1.14 3.82L13.34 5.44zM17.6 17.78l2.24-6.46c.42-1.04.56-1.88.56-2.62 0-.28-.02-.52-.04-.76A8.38 8.38 0 0120.4 12c0 2.18-.84 4.18-2.2 5.68l-.6.1z"/></svg>
+                        ),
+                        other: (
+                          <Globe className="size-4 text-gray-500" />
+                        ),
                       };
                       return (
                         <button
@@ -1669,8 +1681,8 @@ export function Testimonials() {
                           onClick={() => { slideDirection.current = 1; setSelectedPlatform(platform.id); }}
                           className="flex items-center gap-2.5 rounded-xl border-2 border-border px-3.5 py-3 text-left hover:border-indigo-300 hover:bg-indigo-50/30 transition-all focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:outline-none"
                         >
-                          <span className={`size-6 rounded-md flex items-center justify-center text-xs font-bold shrink-0 ${colors[platform.id] ?? 'bg-gray-100 text-gray-600'}`}>
-                            {platform.name.charAt(0)}
+                          <span className="size-6 flex items-center justify-center shrink-0">
+                            {icons[platform.id] ?? <Globe className="size-4 text-gray-500" />}
                           </span>
                           <span className="text-sm font-medium text-foreground">{platform.name}</span>
                         </button>
