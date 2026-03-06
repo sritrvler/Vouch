@@ -10,7 +10,25 @@
 
 # Active Work Queue
 
-## Session Handoff (March 6, 2026, session 20: Prod Setup + Lemon Squeezy Prep)
+## Session Handoff (March 6, 2026, session 21: Pricing Toggle Fix)
+
+**What was done this session:**
+1. Changed pricing page default from yearly to monthly to avoid sticker shock ($190/$490 vs $19/$49).
+2. Fixed billing toggle pill alignment. Replaced absolute-positioned pill (broken left/width calc) with Framer Motion `layoutId` approach that auto-sizes to the active button.
+
+**What's next:**
+1. User is recording a demo video for Lemon Squeezy store approval.
+2. After approval: P1 Security (rate limiting on 8 endpoints), P1 Conversion (email onboarding, notifications, post-signup warmth).
+3. Deferred: client-side caching (React Query), legal review, Google brand verification.
+
+**What to watch out for:**
+1. Prod Supabase is free tier (Nano, ap-south-1). HEAD/count requests sometimes return 503.
+2. Prod Supabase URL is `sxfjdkgopithetvmscdx.supabase.co`.
+3. Dummy testimonials use fake names/emails. Replace with real ones once customers submit.
+
+---
+
+## Previous: Session Handoff (March 6, 2026, session 20: Prod Setup + Lemon Squeezy Prep)
 
 **What was done this session:**
 1. Google OAuth consent screen: investigated "to continue to supabase.co" issue. Requires custom domain (paid) or brand verification. App name already set to "Vouch". Parked for now.
