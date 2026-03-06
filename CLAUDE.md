@@ -207,14 +207,33 @@ If any answer is "no" or "skipped," pause and address it before writing code.
 
 **Why this exists:** The user has repeatedly requested this process and been frustrated by it not being followed. This is the highest-priority process rule in the entire codebase. It overrides any urge to "just quickly fix it." Even a one-line change goes through this pipeline (steps can be fast for simple changes, but they cannot be skipped).
 
-#### STEP 1: Plan Review (Senior Architect)
-**Before writing ANY code**, present your execution plan to a senior architect agent (general-purpose prompted as "senior software architect"). Include:
+#### Available Agent Roster
+
+These are the dedicated agents available. Use them BY NAME at the appropriate pipeline step. Do NOT use generic "general-purpose prompted as..." when a dedicated agent exists.
+
+| Agent | Type | Model | Use For |
+|---|---|---|---|
+| `software-architect` | Custom | Opus | Step 1: plan/architecture review |
+| `senior-code-reviewer` | Custom | Opus | Steps 3 and 6: code review |
+| `test-suite-architect` | Custom | Sonnet | Steps 4 and 7: test generation and verification |
+| `premium-ui-designer` | Custom | Sonnet | Steps 3 and 6: UI polish, animations, premium feel |
+| `ux-simplifier` | Custom | Sonnet | Steps 3 and 6: flow simplification, reducing clicks |
+| `ux-pain-point-fixer` | Custom | Sonnet | Steps 3 and 6: friction/rage-quit analysis |
+| `db-optimizer` | Built-in | | Steps 1 and 3: schema review, query optimization |
+| `perf-optimizer` | Built-in | | Step 3: bundle size, render performance |
+| `refactoring-specialist` | Custom | | Large refactors, code decomposition |
+| `conversion-copywriter` | Custom | | Landing page copy, CTA text, upgrade prompts |
+| `frontend-design` | Skill | | Landing pages, marketing sites (NOT app UI) |
+| `interface-design` | Skill | | Dashboard, app UI, settings (NOT landing pages) |
+
+#### STEP 1: Plan Review (Software Architect)
+**Before writing ANY code**, present your execution plan to the `software-architect` agent. Include:
 1. What you plan to change and why
 2. Which files will be touched
 3. The approach and implementation strategy
 4. Alternatives you considered and why you rejected them
-5. If DB changes: flag for db-optimizer agent review
-6. If UI changes: flag for UI review agents later in the pipeline
+5. If DB changes: also run `db-optimizer` agent on the schema/query plan
+6. If UI changes: flag which UI agents will be needed in Steps 3/6
 
 Wait for the architect's verdict. If they request changes, revise the plan and re-submit.
 
@@ -226,24 +245,35 @@ If skipped: `STEP 1 SKIPPED: [reason, must be trivially simple]`
 #### STEP 2: Write Code
 Implement the approved plan. Do not deviate from what the architect approved without going back to Step 1. If you discover mid-implementation that the plan needs to change, stop, get re-approval, then continue.
 
+If building UI: apply the `interface-design` skill (for app/dashboard UI) or `frontend-design` skill (for landing/marketing pages). These are skills, not agents. Apply their principles while writing code.
+
 Say: `STEP 2 COMPLETE: CODE WRITTEN`
 
-#### STEP 3: Senior Dev Code Review
-Run the FULL diff through a senior developer review agent (general-purpose prompted as "senior software developer reviewer"). The reviewer checks:
-1. Bugs and logic errors
-2. Security vulnerabilities (auth bypass, injection, data leakage)
-3. Edge cases not handled
-4. Code quality and patterns
-5. Performance concerns
-If UI changes were made: ALSO run a UI review agent (general-purpose prompted as "senior UI/UX reviewer") checking accessibility, responsiveness, design consistency, and interaction quality.
-If DB changes were made: ALSO run db-optimizer agent to review schema/query changes.
+#### STEP 3: Code Review (Multi-Agent)
+Run the FULL diff through the appropriate review agents. **Launch independent reviewers in parallel.**
 
-Fix ALL issues rated HIGH or MEDIUM before proceeding. Re-run the review if significant changes were made during fixes.
+**Always run:**
+1. `senior-code-reviewer` agent: bugs, security, logic errors, edge cases, code quality
 
-Say: `STEP 3 COMPLETE: CODE REVIEW PASSED` and list each reviewer agent, its verdict, and issues found/fixed.
+**Run if UI changes were made (parallel with code review):**
+2. `premium-ui-designer` agent: visual quality, animations, micro-interactions, premium feel
+3. `ux-simplifier` agent: unnecessary clicks, flow complexity, cognitive load
+4. `ux-pain-point-fixer` agent: friction points, rage-quit risks, dead ends
+
+**NOTE on UI agents:** Use ALL THREE UI agents for significant UI work (new pages, major redesigns). For minor UI tweaks (spacing, color, copy), use only `premium-ui-designer`. For flow changes, use `ux-simplifier` + `ux-pain-point-fixer`.
+
+**Run if DB changes were made (parallel with code review):**
+5. `db-optimizer` agent: schema design, query performance, indexes
+
+**Run if landing page changes were made:**
+6. `conversion-copywriter` agent: CTA effectiveness, copy quality, conversion optimization
+
+Fix ALL issues rated HIGH or MEDIUM before proceeding. Re-run the relevant reviewer if significant changes were made during fixes.
+
+Say: `STEP 3 COMPLETE: CODE REVIEW PASSED` and list each agent that ran, its verdict, and issues found/fixed.
 
 #### STEP 4: Test Case Generation
-Run a testing agent (general-purpose prompted as "senior QA engineer") to generate test cases for the change. The tester:
+Run the `test-suite-architect` agent to generate test cases for the change. The agent:
 1. Reads the diff and the affected files
 2. Produces a list of test scenarios covering: happy path, edge cases, error cases, security boundaries, and regression risks
 3. For each scenario: describes the setup, action, and expected result
@@ -258,15 +288,16 @@ If any test scenario reveals a bug: fix it immediately. After fixing, go back to
 Say: `STEP 5 COMPLETE: ALL TESTS PASS` and list each scenario with its result.
 
 #### STEP 6: Final Verification Review
-Run the senior dev review agent ONE MORE TIME on the final diff (including all bug fixes from Step 5). This is the "ship it?" review. The reviewer gives a final APPROVE or REQUEST CHANGES.
+Run `senior-code-reviewer` ONE MORE TIME on the final diff (including all bug fixes from Step 5). This is the "ship it?" review.
 
-If UI changes: run UI review agent again on the final state.
+If UI changes: also re-run `premium-ui-designer` on the final state.
+If landing page: also re-run `conversion-copywriter` on the final state.
 If the reviewer requests changes: fix them and re-run this step.
 
 Say: `STEP 6 COMPLETE: FINAL REVIEW APPROVED`
 
 #### STEP 7: Tester Verification
-Run the testing agent one final time to confirm all previously identified issues from Steps 3-5 are resolved. The tester:
+Run the `test-suite-architect` agent one final time to confirm all previously identified issues from Steps 3-5 are resolved. The agent:
 1. Reviews the final diff
 2. Confirms each previously flagged issue is fixed
 3. Checks that fixes did not introduce new issues
@@ -281,10 +312,11 @@ Say: `STEP 7 COMPLETE: TESTER VERIFIED, READY TO SHIP`
 1. **I am the orchestrator.** I coordinate all agents. Quality and efficiency are my responsibility.
 2. **One agent, one job.** Review agents review. Test agents test. Architect agents design. Never mix roles.
 3. **No duplicate work.** If the architect reviewed the plan, I do not re-design inline. If the reviewer checked security, I do not re-check the same things. Trust agent output.
-4. **Parallelize where possible.** In Step 3, if both code review and UI review are needed, launch them in parallel. In Step 6, same.
+4. **Parallelize where possible.** In Step 3, launch `senior-code-reviewer` + UI agents + `db-optimizer` all in parallel. In Step 6, same pattern.
 5. **Chain where dependent.** Step 4 (tests) depends on Step 3 (review fixes). Step 6 depends on Step 5 (bug fixes). Never run these in parallel.
-6. **Specialist agents for specialist work.** DB changes get db-optimizer. UI changes get UI reviewer. Performance-sensitive changes get perf-optimizer. Always use the right specialist.
+6. **Use dedicated agents, not generic prompts.** `senior-code-reviewer` not "general-purpose as senior dev." `software-architect` not "general-purpose as architect." `test-suite-architect` not "general-purpose as QA." The dedicated agents have persistent memory and specialized instructions.
 7. **Consolidate before acting.** When multiple agents return findings, deduplicate into one action list before writing any code.
+8. **UI agent selection guide:** Landing/marketing pages = `frontend-design` skill + `conversion-copywriter` agent. App/dashboard UI = `interface-design` skill + `premium-ui-designer` + `ux-simplifier` + `ux-pain-point-fixer` agents. Never apply landing page agents to app UI or vice versa.
 
 ---
 
