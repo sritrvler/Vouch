@@ -10,7 +10,44 @@
 
 # Active Work Queue
 
-## Session Handoff (March 6, 2026, session 16: Mobile Bug Fixes + Tiered Pipeline)
+## Session Handoff (March 6, 2026, session 17: All Projects + Inbox Scoping + Dialog Consistency)
+
+**What was done this session:**
+
+1. **"All projects" option in project selector:** Added to both desktop sidebar and mobile header dropdowns. Uses `showAllProjects` boolean in ProjectContext with localStorage persistence. Only appears when user has 2+ projects.
+2. **Hydration error fix:** Radix Popovers generate mismatched aria-controls IDs during SSR. Fixed by deferring Popover rendering with `mounted` state pattern (static placeholder buttons during SSR, Popovers after mount).
+3. **Inbox scoping by project:** Inbox now filters testimonials by selected project. When "All projects" active, shows all. Always includes `user_id` filter for security.
+4. **Consistent project selection in dialogs:** "Add past testimonial" (inbox) and "Create collection form" (forms) dialogs now: greyed out with project name when specific project selected, editable Radix Select dropdown when "All projects" active.
+5. **Replaced native `<select>` with shadcn Select:** Used `position="popper"` for correct dropdown direction. Projects sorted alphabetically.
+6. **Dialog input contrast fix:** All dialog inputs across the portal now use `bg-white border-border` instead of `bg-transparent`. Locked fields use `bg-muted cursor-not-allowed`.
+7. **Widget project identification:** When "All projects" selected, widget selector shows "Project Name . Layout Type" as subtitle.
+8. **"Powered by Vouch" clickable everywhere:** Changed from plain text/same-tab link to `<a href="/via" target="_blank">` on public page (`/p/[slug]`), report page (`/report/[token]`), and widget builder preview.
+9. **Senior code review:** Fixed security issue (queries filtering by project_id without user_id), TypeScript errors, and other review findings.
+
+**Files changed:**
+- `src/context/ProjectContext.tsx` (showAllProjects state, localStorage persistence)
+- `src/app/(dashboard)/layout.tsx` (All projects option, hydration fix with mounted state)
+- `src/app/(dashboard)/dashboard/page.tsx` (removed filterMode toggle, uses showAllProjects from context, added scoped() helper with user_id)
+- `src/app/(dashboard)/dashboard/inbox/page.tsx` (project scoping, ImportDialog with locked/unlocked project selector)
+- `src/app/(dashboard)/dashboard/forms/page.tsx` (project scoping, create dialog with locked/unlocked selector)
+- `src/app/(dashboard)/dashboard/widgets/page.tsx` (project scoping, project name in widget subtitle, Powered by Vouch link)
+- `src/app/p/[slug]/page.tsx` (Powered by Vouch as /via link in new tab)
+- `src/app/report/[token]/page.tsx` (Powered by Vouch as /via link in new tab)
+
+**What's next:**
+Pick from the prioritized backlog below. Recommended: P1 items (conversion/growth, then security hardening).
+
+**What to watch out for:**
+1. `showAllProjects` persists in localStorage key `vouch_show_all_projects`. Restored on mount only when 2+ projects exist.
+2. Hydration fix uses `mounted` state for all 3 Popovers in layout.tsx. SSR renders static placeholder buttons. Do not remove this pattern or hydration errors return.
+3. All Supabase queries now include `.eq('user_id', user.id)` alongside any `project_id` filter. This is a security requirement. Do not remove user_id filters.
+4. Radix Select needs `position="popper"` to drop down below trigger. Default `position="item-aligned"` aligns selected item with trigger (looks like going up).
+5. Dialog inputs use `bg-white border-border`. Locked project field uses `bg-muted cursor-not-allowed`. Maintain this contrast pattern for any new dialogs.
+6. Deferred from code review: SSR placeholder text flash for "All projects" (minor), create dialog pre-selects stale project in All mode, fetchTestimonials vs loadMore filter inconsistency (pre-existing), createClient() at component body level (pre-existing).
+
+---
+
+## Previous: Session Handoff (March 6, 2026, session 16: Mobile Bug Fixes + Tiered Pipeline)
 
 **What was done this session:**
 
