@@ -396,16 +396,46 @@ export default function DashboardPage() {
         initial={{ opacity: 0, y: 8 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.3, ease: 'easeOut' }}
-        className="flex items-start justify-between gap-4"
+        className="space-y-3"
       >
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">Overview</h1>
-          <p className="text-sm text-muted-foreground mt-0.5">
-            {hasTestimonials ? "Here\u0027s what\u0027s happening with your testimonials." : "Let\u0027s get your first testimonial."}
-          </p>
+        <div className="flex items-center justify-between gap-4">
+          <div>
+            <h1 className="text-2xl font-bold text-foreground">Overview</h1>
+            <p className="text-sm text-muted-foreground mt-0.5">
+              {hasTestimonials ? "Here\u0027s what\u0027s happening with your testimonials." : "Let\u0027s get your first testimonial."}
+            </p>
+          </div>
+          {showAllOption && (
+            <div className="hidden sm:flex items-center rounded-lg border border-border bg-muted/40 p-0.5 shrink-0">
+              <button
+                type="button"
+                onClick={() => setFilterMode('project')}
+                className={cn(
+                  'px-3 py-1.5 rounded-md text-xs font-medium transition-colors',
+                  filterMode === 'project'
+                    ? 'bg-white text-foreground shadow-sm'
+                    : 'text-muted-foreground hover:text-foreground'
+                )}
+              >
+                {projects.find((p) => p.id === selectedProjectId)?.name ?? 'Project'}
+              </button>
+              <button
+                type="button"
+                onClick={() => setFilterMode('all')}
+                className={cn(
+                  'px-3 py-1.5 rounded-md text-xs font-medium transition-colors',
+                  filterMode === 'all'
+                    ? 'bg-white text-foreground shadow-sm'
+                    : 'text-muted-foreground hover:text-foreground'
+                )}
+              >
+                All projects
+              </button>
+            </div>
+          )}
         </div>
         {showAllOption && (
-          <div className="flex items-center rounded-lg border border-border bg-muted/40 p-0.5 shrink-0">
+          <div className="sm:hidden flex items-center rounded-lg border border-border bg-muted/40 p-0.5 w-fit">
             <button
               type="button"
               onClick={() => setFilterMode('project')}
