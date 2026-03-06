@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServerSupabaseClient } from '@/lib/supabase/server';
 import { createRateLimiter, getClientIp } from '@/lib/ratelimit';
+import { sanitizeFontUrl } from '@/lib/fonts';
 
 const widgetLimiter = createRateLimiter({ windowMs: 60_000, max: 60 });
 
@@ -119,7 +120,7 @@ export async function GET(request: NextRequest, { params }: PageProps) {
           theme: widget.theme,
           hideBranding: widget.hide_branding,
         },
-        project: project ? { name: project.name, logoUrl: project.logo_url, fontFamily: project.font_family, fontUrl: project.font_url } : null,
+        project: project ? { name: project.name, logoUrl: project.logo_url, fontFamily: project.font_family, fontUrl: sanitizeFontUrl(project.font_url) } : null,
         testimonials,
         isPro,
         totalApproved,

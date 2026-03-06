@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
-import { Search, Loader2, User, Check, ShieldOff, Shield, LogIn, Copy, CopyCheck } from 'lucide-react';
+import { Search, Loader2, User, Check, ShieldOff, Shield, LogIn } from 'lucide-react';
 
 interface UserData {
   id: string;
@@ -38,8 +38,7 @@ export default function AdminClient() {
   const [savingPlan, setSavingPlan] = useState(false);
   const [isBanning, setIsBanning] = useState(false);
   const [impersonating, setImpersonating] = useState(false);
-  const [impersonateLink, setImpersonateLink] = useState<string | null>(null);
-  const [copiedLink, setCopiedLink] = useState(false);
+  const [impersonateSent, setImpersonateSent] = useState(false);
 
   async function handleSearch(e: React.FormEvent) {
     e.preventDefault();
@@ -47,7 +46,7 @@ export default function AdminClient() {
     setLoading(true);
     setUserData(null);
     setNotFound(false);
-    setImpersonateLink(null);
+    setImpersonateSent(false);
     try {
       const res = await fetch(`/api/admin/lookup?email=${encodeURIComponent(email.trim())}`);
       if (res.status === 404) {
@@ -107,7 +106,7 @@ export default function AdminClient() {
   async function handleImpersonate() {
     if (!userData) return;
     setImpersonating(true);
-    setImpersonateLink(null);
+    setImpersonateSent(false);
     try {
       const res = await fetch('/api/admin/impersonate', {
         method: 'POST',
@@ -115,20 +114,13 @@ export default function AdminClient() {
         body: JSON.stringify({ email: userData.email }),
       });
       if (!res.ok) throw new Error('Failed to generate link');
-      const data = await res.json();
-      setImpersonateLink(data.link ?? null);
+      setImpersonateSent(true);
+      toast.success('Impersonate link sent to your admin email.');
     } catch {
       toast.error('Failed to generate login link');
     } finally {
       setImpersonating(false);
     }
-  }
-
-  async function copyLink() {
-    if (!impersonateLink) return;
-    await navigator.clipboard.writeText(impersonateLink);
-    setCopiedLink(true);
-    setTimeout(() => setCopiedLink(false), 2000);
   }
 
   return (
@@ -267,25 +259,12 @@ export default function AdminClient() {
               className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-slate-700 text-white text-sm font-medium hover:bg-slate-800 disabled:opacity-50 transition-colors"
             >
               {impersonating ? <Loader2 className="size-3.5 animate-spin" /> : <LogIn className="size-3.5" />}
-              {impersonating ? 'Generating...' : 'Generate login link'}
+              {impersonating ? 'Sending...' : 'Send login link to admin email'}
             </button>
-            {impersonateLink && (
-              <div className="mt-3 space-y-2">
-                <p className="text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2">
-                  One-time magic link. Open in an incognito window to log in as this user.
-                </p>
-                <div className="flex items-center gap-2">
-                  <code className="flex-1 text-[11px] font-mono bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 break-all text-gray-600">
-                    {impersonateLink}
-                  </code>
-                  <button
-                    onClick={copyLink}
-                    className="shrink-0 p-2 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors"
-                  >
-                    {copiedLink ? <CopyCheck className="size-4 text-emerald-600" /> : <Copy className="size-4 text-gray-500" />}
-                  </button>
-                </div>
-              </div>
+            {impersonateSent && (
+              <p className="mt-3 text-xs text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-lg px-3 py-2">
+                One-time magic link sent to your admin email. Open it in an incognito window.
+              </p>
             )}
           </div>
 

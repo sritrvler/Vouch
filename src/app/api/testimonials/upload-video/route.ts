@@ -33,10 +33,10 @@ export async function POST(request: NextRequest) {
     const supabase = await createServerSupabaseClient();
     const adminClient = createAdminClient();
 
-    // Fetch form and start reading video buffer in parallel
     const ext = video.type.includes('mp4') ? 'mp4' : 'webm';
     const path = `${formId}/${crypto.randomUUID()}.${ext}`;
 
+    // Fetch form and read video buffer in parallel
     const [formRes, videoBuffer] = await Promise.all([
       supabase
         .from('collection_forms')
@@ -45,6 +45,14 @@ export async function POST(request: NextRequest) {
         .single(),
       video.arrayBuffer(),
     ]);
+
+    // Verify file magic bytes match a real video format (not just client-provided MIME)
+    const header = new Uint8Array(videoBuffer.slice(0, 12));
+    const isMp4 = header[4] === 0x66 && header[5] === 0x74 && header[6] === 0x79 && header[7] === 0x70; // ftyp box
+    const isWebm = header[0] === 0x1A && header[1] === 0x45 && header[2] === 0xDF && header[3] === 0xA3; // EBML header
+    if (!isMp4 && !isWebm) {
+      return NextResponse.json({ error: 'Invalid video file' }, { status: 400 });
+    }
 
     if (formRes.error || !formRes.data) {
       return NextResponse.json({ error: 'Form not found' }, { status: 404 });
