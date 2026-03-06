@@ -101,6 +101,7 @@ Items are grouped by priority. P1 = do before or soon after launch. P2 = first m
 - [ ] **No "send yourself a test testimonial" flow.** Let new users preview the experience from the submitter side. (2 hours)
 - [ ] **Social proof on landing page.** Use own product to display testimonials about Vouch. Needs real customers first. (2 hours once content exists)
 - [ ] **Getting-started checklist copy is procedural, not motivational.** Rewrite to emphasize outcomes. (1 hour)
+- [ ] **Custom /via conversion page.** Currently redirects to landing page with `?ref=powered-by`. Build a purpose-built conversion page that leverages context ("you just saw this working on a real site") with live demo, showcase of widget layouts, and a tighter CTA. Should convert better than generic landing page for this specific audience. Track `/via` conversion rate first to establish baseline. (half day)
 
 ### P1: Security Hardening (attack surface gaps)
 
