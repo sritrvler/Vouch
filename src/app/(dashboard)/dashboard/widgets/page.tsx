@@ -808,8 +808,8 @@ export function Testimonials() {
                 onClick={() => { setEmbedPath('choose'); setSelectedPlatform(null); setShowEmbedModal(true); }}
                 className="gap-1.5 rounded-xl border-indigo-200 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 hover:border-indigo-300"
               >
-                <Code2 className="size-3.5" />
-                <span className="hidden sm:inline">Get Code</span>
+                <Globe className="size-3.5" />
+                <span className="hidden sm:inline">Add to Website</span>
               </Button>
               <Button
                 onClick={handleSave}
@@ -1587,7 +1587,7 @@ export function Testimonials() {
                       </div>
                       <div>
                         <p className="text-sm font-semibold text-foreground">Developer or AI tools</p>
-                        <p className="text-xs text-muted-foreground mt-0.5">Cursor, Bolt, Lovable, v0, or a custom-coded site.</p>
+                        <p className="text-xs text-muted-foreground mt-0.5">Using something like Cursor, Claude Code, Bolt, Lovable, or a custom-coded site.</p>
                       </div>
                     </button>
                   </div>
@@ -1749,7 +1749,7 @@ export function Testimonials() {
                   <div className="space-y-3 border-t border-border pt-4">
                     <h4 className="text-xs font-semibold text-foreground uppercase tracking-wide">Using AI tools?</h4>
                     <p className="text-xs text-muted-foreground">
-                      Using Cursor, Bolt, Lovable, v0, or Replit? Copy this entire prompt and paste it into your AI tool.
+                      Using something like Cursor, Claude Code, Bolt, Lovable, v0, Codex, Anti Gravity, or Replit? Copy this prompt and paste it into your AI tool.
                     </p>
                     <div className="relative">
                       <pre className="rounded-xl bg-gray-950 p-3 pr-16 text-xs text-emerald-400 overflow-x-auto font-mono leading-relaxed whitespace-pre-wrap">
