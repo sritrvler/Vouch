@@ -220,7 +220,7 @@ function ProblemSection() {
           </p>
         </div>
 
-        <div className="grid md:grid-cols-3 gap-10">
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-10">
           {PAIN_POINTS.map((pt) => (
             <div key={pt.number} className="relative pl-16">
               <div className="absolute left-0 top-0 text-5xl font-black bg-gradient-to-br from-indigo-200 to-violet-200 bg-clip-text text-transparent leading-none select-none">
@@ -389,7 +389,7 @@ function HowItWorksSection() {
           </p>
         </div>
 
-        <div className="grid md:grid-cols-3 gap-10">
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-10">
           {steps.map((step) => (
             <div key={step.number}>
               <div className="text-[64px] font-black leading-none mb-5 select-none bg-gradient-to-br from-indigo-400 to-violet-500 bg-clip-text text-transparent">

@@ -128,6 +128,7 @@ function DashboardLayoutInner({ children }: { children: React.ReactNode }) {
   const [isSigningOut, setIsSigningOut] = useState(false);
   const [upgradeModalOpen, setUpgradeModalOpen] = useState(false);
   const [projectPopoverOpen, setProjectPopoverOpen] = useState(false);
+  const [mobileProjectPopoverOpen, setMobileProjectPopoverOpen] = useState(false);
   const [projectSearch, setProjectSearch] = useState('');
 
   // Sort projects alphabetically, show search when > 5
@@ -322,6 +323,73 @@ function DashboardLayoutInner({ children }: { children: React.ReactNode }) {
 
       {/* Main content */}
       <main className="flex-1 flex flex-col min-w-0 overflow-hidden">
+        {/* Mobile Project Selector */}
+        <div className="md:hidden border-b border-border bg-white px-4 py-2.5 shrink-0">
+          <Popover open={mobileProjectPopoverOpen} onOpenChange={(open) => { setMobileProjectPopoverOpen(open); if (!open) setProjectSearch(''); }}>
+            <PopoverTrigger asChild>
+              <button
+                className="w-full flex items-center justify-between gap-2 px-3 py-2 rounded-xl bg-muted/60 hover:bg-muted text-sm font-medium text-foreground transition-colors"
+                type="button"
+                aria-label="Select project"
+              >
+                <span className="truncate">{selectedProject?.name ?? 'No projects'}</span>
+                <ChevronDown className="size-3.5 shrink-0 text-muted-foreground" />
+              </button>
+            </PopoverTrigger>
+            <PopoverContent side="bottom" align="start" sideOffset={4} collisionPadding={16} className="w-[calc(100vw-2rem)] max-w-sm p-1.5">
+              {showProjectSearch && (
+                <div className="relative mb-1.5">
+                  <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 size-3.5 text-muted-foreground pointer-events-none" />
+                  <input
+                    type="text"
+                    placeholder="Search projects..."
+                    value={projectSearch}
+                    onChange={(e) => setProjectSearch(e.target.value)}
+                    className="w-full pl-8 pr-3 py-2 rounded-lg text-sm bg-muted/40 border border-border placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary"
+                    autoFocus
+                  />
+                </div>
+              )}
+              <div className="max-h-60 overflow-y-auto space-y-0.5">
+                {filteredProjects.map((p) => (
+                  <button
+                    key={p.id}
+                    type="button"
+                    onClick={() => { switchProject(p.id); setMobileProjectPopoverOpen(false); }}
+                    className={cn(
+                      'w-full flex items-center gap-2 px-2.5 py-2 rounded-lg text-sm transition-colors',
+                      selectedProjectId === p.id ? 'bg-primary/10 text-primary font-medium' : 'hover:bg-muted text-foreground'
+                    )}
+                  >
+                    <Check className={cn('size-3.5 shrink-0', selectedProjectId === p.id ? 'opacity-100' : 'opacity-0')} />
+                    <span className="truncate">{p.name}</span>
+                  </button>
+                ))}
+              </div>
+              {plan !== 'free' && (
+                <button
+                  type="button"
+                  onClick={() => { setMobileProjectPopoverOpen(false); router.push('/dashboard/settings?tab=project&new=true'); }}
+                  className="w-full flex items-center gap-2 px-2.5 py-2 mt-1 rounded-lg text-sm text-muted-foreground hover:bg-muted hover:text-foreground transition-colors border-t border-border pt-2"
+                >
+                  <Plus className="size-3.5" />
+                  New project
+                </button>
+              )}
+              {plan === 'free' && projects.length >= 1 && (
+                <button
+                  type="button"
+                  onClick={() => { setMobileProjectPopoverOpen(false); setUpgradeModalOpen(true); }}
+                  className="w-full flex items-center gap-2 px-2.5 py-2 mt-1 rounded-lg text-sm text-primary hover:bg-primary/10 transition-colors border-t border-border pt-2"
+                >
+                  <Sparkles className="size-3.5" />
+                  Upgrade for more projects
+                </button>
+              )}
+            </PopoverContent>
+          </Popover>
+        </div>
+
         <div className="flex-1 overflow-y-auto">
           <motion.div
             key={pathname}

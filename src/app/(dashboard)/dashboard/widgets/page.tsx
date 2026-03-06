@@ -883,13 +883,26 @@ export function Testimonials() {
                   />
                 ))}
                 <div className="flex items-center gap-1.5">
-                  <input
-                    type="color"
-                    value={settings.theme.primaryColor}
-                    onChange={(e) => updateTheme('primaryColor', e.target.value)}
-                    className="size-7 rounded-full cursor-pointer border-2 border-border"
+                  <div
+                    className="size-7 rounded-full border-2 border-border shrink-0"
+                    style={{ backgroundColor: settings.theme.primaryColor }}
                   />
-                  <span className="text-xs text-muted-foreground font-mono">{settings.theme.primaryColor}</span>
+                  <input
+                    type="text"
+                    value={settings.theme.primaryColor}
+                    onChange={(e) => {
+                      let v = e.target.value;
+                      if (!v.startsWith('#')) v = '#' + v;
+                      if (/^#[0-9A-Fa-f]{0,6}$/.test(v)) updateTheme('primaryColor', v);
+                    }}
+                    onBlur={() => {
+                      if (!/^#[0-9A-Fa-f]{6}$/.test(settings.theme.primaryColor)) updateTheme('primaryColor', '#6366F1');
+                    }}
+                    maxLength={7}
+                    aria-label="Primary color hex value"
+                    className="w-20 text-xs font-mono px-2 py-1 rounded border border-border bg-muted/50 focus:outline-none focus:ring-1 focus:ring-ring"
+                    placeholder="#6366F1"
+                  />
                 </div>
               </div>
             </div>
@@ -897,7 +910,7 @@ export function Testimonials() {
             {/* Background Color */}
             <div>
               <Label className="text-xs text-muted-foreground mb-2 block">Background Color</Label>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 flex-wrap">
                 {['#ffffff', '#f8fafc', '#f1f5f9', '#fafafa', '#fffbeb'].map((c) => (
                   <button
                     key={c}
@@ -913,11 +926,25 @@ export function Testimonials() {
                   />
                 ))}
                 <div className="flex items-center gap-1.5">
+                  <div
+                    className="size-7 rounded-full border-2 border-border shrink-0"
+                    style={{ backgroundColor: settings.theme.backgroundColor }}
+                  />
                   <input
-                    type="color"
+                    type="text"
                     value={settings.theme.backgroundColor}
-                    onChange={(e) => updateTheme('backgroundColor', e.target.value)}
-                    className="size-7 rounded-full cursor-pointer border-2 border-border"
+                    onChange={(e) => {
+                      let v = e.target.value;
+                      if (!v.startsWith('#')) v = '#' + v;
+                      if (/^#[0-9A-Fa-f]{0,6}$/.test(v)) updateTheme('backgroundColor', v);
+                    }}
+                    onBlur={() => {
+                      if (!/^#[0-9A-Fa-f]{6}$/.test(settings.theme.backgroundColor)) updateTheme('backgroundColor', '#ffffff');
+                    }}
+                    maxLength={7}
+                    aria-label="Background color hex value"
+                    className="w-20 text-xs font-mono px-2 py-1 rounded border border-border bg-muted/50 focus:outline-none focus:ring-1 focus:ring-ring"
+                    placeholder="#ffffff"
                   />
                 </div>
               </div>
@@ -926,7 +953,7 @@ export function Testimonials() {
             {/* Text Color */}
             <div>
               <Label className="text-xs text-muted-foreground mb-2 block">Text Color</Label>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 flex-wrap">
                 {['#0f172a', '#1e293b', '#374151', '#4b5563', '#ffffff'].map((c) => (
                   <button
                     key={c}
@@ -942,13 +969,26 @@ export function Testimonials() {
                   />
                 ))}
                 <div className="flex items-center gap-1.5">
-                  <input
-                    type="color"
-                    value={settings.theme.textColor}
-                    onChange={(e) => updateTheme('textColor', e.target.value)}
-                    className="size-7 rounded-full cursor-pointer border-2 border-border"
+                  <div
+                    className="size-7 rounded-full border-2 border-border shrink-0"
+                    style={{ backgroundColor: settings.theme.textColor }}
                   />
-                  <span className="text-xs text-muted-foreground font-mono">{settings.theme.textColor}</span>
+                  <input
+                    type="text"
+                    value={settings.theme.textColor}
+                    onChange={(e) => {
+                      let v = e.target.value;
+                      if (!v.startsWith('#')) v = '#' + v;
+                      if (/^#[0-9A-Fa-f]{0,6}$/.test(v)) updateTheme('textColor', v);
+                    }}
+                    onBlur={() => {
+                      if (!/^#[0-9A-Fa-f]{6}$/.test(settings.theme.textColor)) updateTheme('textColor', '#0f172a');
+                    }}
+                    maxLength={7}
+                    aria-label="Text color hex value"
+                    className="w-20 text-xs font-mono px-2 py-1 rounded border border-border bg-muted/50 focus:outline-none focus:ring-1 focus:ring-ring"
+                    placeholder="#0f172a"
+                  />
                 </div>
               </div>
             </div>

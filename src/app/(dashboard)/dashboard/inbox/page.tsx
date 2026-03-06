@@ -1197,24 +1197,25 @@ export default function InboxPage() {
     >
       {/* ── Page Header ── */}
       <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 min-w-0">
           <h1 className="text-2xl font-bold tracking-tight text-foreground">Inbox</h1>
           {pendingCount > 0 && (
-            <span className="inline-flex items-center rounded-full bg-amber-100 px-2.5 py-0.5 text-xs font-semibold text-amber-800">
+            <span className="inline-flex items-center rounded-full bg-amber-100 px-2.5 py-0.5 text-xs font-semibold text-amber-800 shrink-0">
               {pendingCount} pending
             </span>
           )}
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 shrink-0">
           {isPro && (
             <Button
               variant="outline"
               size="sm"
               onClick={handleExportCSV}
               className="gap-1.5 rounded-xl"
+              title="Export CSV"
             >
               <Download className="size-3.5" />
-              Export CSV
+              <span className="hidden sm:inline">Export CSV</span>
             </Button>
           )}
           <Button
@@ -1222,9 +1223,10 @@ export default function InboxPage() {
             size="sm"
             onClick={() => setShowImportDialog(true)}
             className="gap-1.5 rounded-xl"
+            title="Add past testimonial"
           >
             <PlusCircle className="size-3.5" />
-            Add past testimonial
+            <span className="hidden sm:inline">Add past testimonial</span>
           </Button>
           <Button
             variant="outline"
@@ -1232,9 +1234,10 @@ export default function InboxPage() {
             onClick={fetchTestimonials}
             disabled={loading}
             className="gap-1.5 rounded-xl"
+            title="Refresh"
           >
             <RefreshCw className={cn('size-3.5', loading && 'animate-spin')} />
-            Refresh
+            <span className="hidden sm:inline">Refresh</span>
           </Button>
         </div>
       </div>

@@ -979,14 +979,10 @@ function SettingsInner() {
                     ))}
                   </div>
                   <div className="flex items-center gap-2">
-                    <div className="relative">
-                      <input
-                        type="color"
-                        value={buttonColor || accentColor}
-                        onChange={(e) => setButtonColor(e.target.value)}
-                        className="size-7 rounded-full cursor-pointer border-2 border-dashed border-muted-foreground/50 bg-[conic-gradient(red,yellow,lime,aqua,blue,magenta,red)]"
-                      />
-                    </div>
+                    <div
+                      className="size-7 rounded-full border-2 border-dashed border-muted-foreground/50 shrink-0"
+                      style={{ backgroundColor: buttonColor || accentColor }}
+                    />
                     <input
                       type="text"
                       value={buttonColor || accentColor}
