@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Check, Zap, Loader2, Crown } from 'lucide-react';
@@ -24,8 +24,14 @@ interface UpgradeModalProps {
 }
 
 export function UpgradeModal({ open, onOpenChange }: UpgradeModalProps) {
-  const [billing, setBilling] = useState<'monthly' | 'yearly'>('yearly');
+  const [billing, setBilling] = useState<'monthly' | 'yearly'>('monthly');
   const [loadingPlan, setLoadingPlan] = useState<'pro' | 'studio' | null>(null);
+
+  useEffect(() => {
+    const reset = () => setLoadingPlan(null);
+    window.addEventListener('pageshow', reset);
+    return () => window.removeEventListener('pageshow', reset);
+  }, []);
 
   async function handleUpgrade(plan: 'pro' | 'studio') {
     setLoadingPlan(plan);
