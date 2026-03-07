@@ -28,12 +28,12 @@ export async function POST(request: NextRequest) {
     const url = await createCheckoutUrl(user.email!, user.id, billing, plan);
 
     if (!url) {
-      return NextResponse.json({ error: 'Failed to create checkout', debug: { plan, billing, storeId: process.env.LEMONSQUEEZY_STORE_ID, studioVariant: process.env.LEMONSQUEEZY_STUDIO_VARIANT_ID, studioYearlyVariant: process.env.LEMONSQUEEZY_STUDIO_YEARLY_VARIANT_ID } }, { status: 500 });
+      return NextResponse.json({ error: 'Failed to create checkout' }, { status: 500 });
     }
 
     return NextResponse.json({ url });
   } catch (err) {
     console.error('Checkout error:', err);
-    return NextResponse.json({ error: 'Internal server error', debug: String(err) }, { status: 500 });
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

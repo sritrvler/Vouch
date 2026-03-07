@@ -57,7 +57,6 @@ export async function createCheckoutUrl(
   const json = await res.json();
   if (!res.ok) {
     console.error('Lemon Squeezy checkout error:', JSON.stringify(json, null, 2), { variantId, plan, billing });
-    throw new Error(`LS API ${res.status}: ${JSON.stringify(json?.errors ?? json)}`);
   }
   return json?.data?.attributes?.url ?? null;
 }
