@@ -24,6 +24,12 @@ Copying multi-line SQL from chat into Supabase SQL Editor introduces hidden carr
 9. **Tailwind classes are static at build time.** Cannot use dynamic accent colors in Tailwind gradient classes. Use inline `style` with CSS `linear-gradient()` instead.
 10. **embed.js is vanilla JS, not React.** Changes to embed.js are manual DOM string building. Test changes carefully since there's no type checking.
 
+## Vercel Environment Variables (Session 22)
+13. **Vercel team-level vs project-level env vars:** Project-level takes precedence over team-level. If an env var exists at both levels, the project-level value is used. Always add env vars at the project level for the specific project. Team-level is only for vars shared across ALL projects.
+14. **Env var changes require redeployment.** Saving env vars in Vercel does not apply them to the running deployment. You must redeploy (new deployment, not just "Redeploy" button on old one) for changes to take effect.
+15. **Debug undefined env vars in JSON:** `JSON.stringify` strips `undefined` values. If a field is missing from a JSON API response, the env var is not set. This is a reliable way to confirm env var availability without needing server logs.
+16. **Lemon Squeezy test vs live mode:** API keys, variant IDs, and store IDs are separate between test and live mode. Store ID happens to be the same, but API keys and variants are different. Always keep test keys in `.env.local` and live keys in Vercel project settings.
+
 ## Product Decisions
 
 11. **"Copy must match reality."** If the pricing page lists a feature, the code must support it. We discovered 6 broken promises during the usability audit. Never add features to marketing copy without implementing them first.

@@ -10,7 +10,39 @@
 
 # Active Work Queue
 
-## Session Handoff (March 6, 2026, session 21: Pricing Toggle Fix)
+## Session Handoff (March 7, 2026, session 22: Lemon Squeezy Live Setup)
+
+**What was done this session:**
+1. Lemon Squeezy store approved and live. 4 products created (Pro Monthly/Yearly, Studio Monthly/Yearly).
+2. Fixed upgrade modal default from yearly to monthly billing.
+3. Fixed "Starting checkout" button stuck after browser back navigation (added `pageshow` event listener).
+4. Debugged Studio checkout 500 error. Root cause: Vercel project-level `LEMONSQUEEZY_API_KEY` was still the test mode key. Team-level had the live key but project-level overrides team-level. Fixed by adding live API key at project level.
+5. Cleaned up debug code from checkout route and lemonsqueezy.ts.
+6. Reverted `.env.local` back to test mode keys for safe local development.
+
+**Vercel env var lessons:**
+1. Vercel has two levels: team-level (`/~/settings/environment-variables`) and project-level (`/vouch-xa3m/settings/environment-variables`). Project-level takes precedence.
+2. All Lemon Squeezy env vars must be at project level (vouch-xa3m). Team-level vars should be cleaned up.
+3. Two Vercel projects exist: `vouch` (unused) and `vouch-xa3m` (active). `vouch` should be deleted.
+
+**What's next:**
+1. Buy domain (considering `vouching.app` on Cloudflare at $14.34/year). Connect to Vercel.
+2. Clean up team-level env vars in Vercel (delete duplicates).
+3. Delete unused `vouch` project from Vercel.
+4. Clear test subscription data from prod Supabase (SQL provided in session).
+5. Set up Lemon Squeezy webhook for live mode (URL: `https://[domain]/api/stripe/webhook`).
+6. P1 Security (rate limiting on 8 endpoints), P1 Conversion (email onboarding, notifications).
+7. Deferred: client-side caching (React Query), legal review, Google brand verification, custom domains, rename Agency to Studio.
+
+**What to watch out for:**
+1. Prod Supabase is free tier (Nano, ap-south-1). HEAD/count requests sometimes return 503.
+2. `.env.local` has test mode keys. Vercel project-level has live keys. Do not mix.
+3. Webhook on Vercel needs to be created for live mode in Lemon Squeezy dashboard.
+4. Old test subscription data may still be in prod DB. Run the reset SQL before real users sign up.
+
+---
+
+## Previous: Session Handoff (March 6, 2026, session 21: Pricing Toggle Fix)
 
 **What was done this session:**
 1. Changed pricing page default from yearly to monthly to avoid sticker shock ($190/$490 vs $19/$49).
