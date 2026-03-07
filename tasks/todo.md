@@ -1,28 +1,24 @@
 ## Session Handoff (March 7, 2026)
 
-**What was done:** Complete strategic research session. No code written. All findings documented below in sections A through K.
+**What was done:**
+1. Complete strategic research session across two sub-sessions. No code written.
+2. Validated competitive landscape, pricing, buyer journeys, feature gaps (sections A through K).
+3. "Native vs. Distinct" widget design research (section L): real pain point is "limited customization," not "looks out of place."
+4. Removed 749 lines of stale content from todo.md.
+5. **Built the MASTER EXECUTION ROADMAP** (91 items, see section immediately below). This is the sole execution reference. All items from sections A through L and audit report items 24 through 35 are mapped. Cross-reference table at bottom proves completeness.
 
-1. Validated competitive landscape against 8+ competitors using live pricing page data (Senja, Testimonial.to, Shapo, Famewall, WiserReview, Endorsal, Trustmary, VideoAsk)
-2. Confirmed Porter's "stuck in the middle" problem: $19/mo sits between budget cluster ($9 to 10) and premium cluster ($29). Decision: reprice to $29 Pro, $49 Studio
-3. Complete pricing strategy rebuilt from scratch (section B4): 3 tiers, annual discount rationale, free tier gating model, founder rate tactic, pricing page psychology
-4. 7 detailed persona role-plays simulating buyer journeys (section B4): first-time discoverer, competitor switcher, established business buyer, budget-conscious, agency owner, technical founder, non-technical creator
-5. Feature gap analysis: Vouch Pro $29 vs all competitors at similar price points (section B4). Verdict: zero deal-breaker gaps IF we ship Editorial layout, Minimal layout, and CSV import before launch
-6. Added sections I (Onboarding/Retention), J (Infrastructure/Operational Survival), K (Referral/Affiliate)
-7. Identified existential infrastructure risks: Supabase free tier (503 errors already happening), embed.js (no versioning, one bad push breaks all customers), "Powered by Vouch" growth loop (currently broken)
-8. "Native vs. Distinct" widget design research (section L): Validated that "widgets look out of place" is NOT a documented user complaint. Real pain point is "limited customization." Discovered the Testimonial Design Spectrum (Fully Foreign to Sweet Spot to Fully Native). Corrected positioning from "looks like you built it" to "looks like it belongs." Planned educational guide page for SEO/thought leadership.
-
-**What's next (execution mode):** Phase 1 from section I5:
-1. Editorial layout (premium widget layout, the #1 visual differentiator at $29)
-2. Minimal layout (clean alternative to grid)
-3. Existing layout quality upgrade (spacing, typography, animations)
-4. Free tier cap at 10 testimonials (DB check in submission API)
-5. CSV import for testimonials (must-have gap vs competitors)
+**What's next:** Phase 1 BUILD from the Master Roadmap:
+1. Item #7: Editorial layout (the #1 visual differentiator, justifies $29 pricing)
+2. Item #8: Minimal layout (the anti-widget, appeals to design-conscious users)
+3. Item #9: Upgrade existing layouts (text size, spacing, transitions)
+4. Item #10: Cap free tier at 10 testimonials
+5. Item #11: Reprice to $29/mo (AFTER Editorial + Minimal ship)
 
 **What to watch out for:**
-1. todo.md is now very large (~90KB). Use offset/limit when reading specific sections. Section index: A (line ~17), B (line ~33), I (search for "Section I"), J (search for "Section J"), K (search for "Section K"), L (search for "Section L" or "Widget Design Philosophy")
-2. Pricing change ($19 to $29) is NOT implemented yet. It happens AFTER premium widgets ship (Editorial + Minimal layouts). The current live product still shows $19.
-3. The feature gap analysis assumes Editorial and Minimal layouts exist. Without them, $29 is harder to justify.
-4. Supabase free tier upgrade ($25/mo) should happen before first paying customer, not before launch prep.
+1. todo.md is large. The Master Roadmap is at the top (after this handoff). Sections A through L are context/rationale below. Use offset/limit.
+2. Pricing change ($19 to $29) is NOT implemented yet. Happens after premium widgets ship.
+3. Pre-Launch Checklist items (domain, Supabase Pro, support email) are done by user right before go-live, not during Phase 1 build.
+4. Phase 1 DISCOVERY (#14 showcase page, #15 live demo) runs in parallel with build work.
 
 ---
 
