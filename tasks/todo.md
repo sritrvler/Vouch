@@ -9,6 +9,7 @@
 5. Feature gap analysis: Vouch Pro $29 vs all competitors at similar price points (section B4). Verdict: zero deal-breaker gaps IF we ship Editorial layout, Minimal layout, and CSV import before launch
 6. Added sections I (Onboarding/Retention), J (Infrastructure/Operational Survival), K (Referral/Affiliate)
 7. Identified existential infrastructure risks: Supabase free tier (503 errors already happening), embed.js (no versioning, one bad push breaks all customers), "Powered by Vouch" growth loop (currently broken)
+8. "Native vs. Distinct" widget design research (section L): Validated that "widgets look out of place" is NOT a documented user complaint. Real pain point is "limited customization." Discovered the Testimonial Design Spectrum (Fully Foreign to Sweet Spot to Fully Native). Corrected positioning from "looks like you built it" to "looks like it belongs." Planned educational guide page for SEO/thought leadership.
 
 **What's next (execution mode):** Phase 1 from section I5:
 1. Editorial layout (premium widget layout, the #1 visual differentiator at $29)
@@ -18,7 +19,7 @@
 5. CSV import for testimonials (must-have gap vs competitors)
 
 **What to watch out for:**
-1. todo.md is now very large (~85KB). Use offset/limit when reading specific sections. Section index: A (line ~17), B (line ~33), C (not present, merged), D (not present), E (not present), F (not present), G (not present), H (not present), I (search for "Section I"), J (search for "Section J"), K (search for "Section K")
+1. todo.md is now very large (~90KB). Use offset/limit when reading specific sections. Section index: A (line ~17), B (line ~33), I (search for "Section I"), J (search for "Section J"), K (search for "Section K"), L (search for "Section L" or "Widget Design Philosophy")
 2. Pricing change ($19 to $29) is NOT implemented yet. It happens AFTER premium widgets ship (Editorial + Minimal layouts). The current live product still shows $19.
 3. The feature gap analysis assumes Editorial and Minimal layouts exist. Without them, $29 is harder to justify.
 4. Supabase free tier upgrade ($25/mo) should happen before first paying customer, not before launch prep.
@@ -1669,6 +1670,134 @@ Adding a referral link to these organic conversations can actually make them wor
 * Site-wide sales ("Black Friday 50% off"). At $19/mo, the margin is already thin. A 50% discount = $9.50/mo, which is Famewall's full price. We're positioning as premium, not budget.
 * Discount codes for anyone who asks. Trains users to negotiate before paying.
 * Discounts to prevent churn. If someone is cancelling, a discount doesn't fix the reason they're leaving. Fix the product instead.
+
+### L. Widget Design Philosophy: "Native vs. Distinct" Research (March 7, 2026)
+
+**Origin:** We assumed our core differentiator was "widgets that look native to your site." This section documents live research that challenges and refines that assumption.
+
+#### L1. The Research Question
+
+"Do customers actually complain that testimonial widgets look out of place? If so, why haven't competitors (who've been in market for years) fixed it? Is 'looking distinct' intentionally beneficial?"
+
+#### L2. Evidence: What Users Actually Complain About
+
+**Source: G2 reviews, Senja feedback board (feedback.senja.io), Product Hunt reviews, web searches.**
+
+Users complain about:
+1. **Limited customization** ("can't change element sizes, especially profile pictures," "not enough font/color options," "layouts are fixed"). This is the #1 design complaint across all platforms.
+2. **Responsive/mobile issues** ("odd photo sizes on tablet," "not responsive," "gaps in layout")
+3. **Performance** ("slow loading, ruined my website")
+4. **Accessibility** ("widgets don't meet WCAG")
+
+Users are NOT saying: "This testimonial section looks like an embedded widget and it ruins my site's design." The closest is Senja's feedback board: "can't use the widgets because they don't look as beautiful and professional on their website as desired." That's about QUALITY, not about native vs. foreign appearance.
+
+**Verdict: "Widgets look out of place" is NOT a documented customer pain point. We assumed it. The real pain point is "I can't customize the widget enough to match my brand."**
+
+#### L3. Why Competitors Haven't Made Widgets "Look Native"
+
+**Primary reason: TECHNICAL, not strategic.**
+
+Senja, Testimonial.to, Shapo, Famewall all use **iframes** as their primary embed method. An iframe is a sandboxed mini-page. By architectural design:
+1. It CANNOT read the host page's CSS, fonts, or colors
+2. It CANNOT inherit the host page's layout rhythm or spacing
+3. It renders in its own isolated visual context
+
+Making an iframe "look native" to the host site is **architecturally impossible** without the user manually configuring every style. Competitors didn't CHOOSE to make widgets look foreign. They're STUCK with it because of their architecture.
+
+Our Shadow DOM approach (embed.js) is genuinely different. Shadow DOM sits IN the page's DOM tree, can accept configuration (fonts, colors, accent), and doesn't create the visual "box inside a page" that iframes do.
+
+**Secondary reason:** "Powered by X" branding is more visible when the widget has its own visual identity. This is a growth loop for the tool maker.
+
+#### L4. The Critical Tension: Native vs. Distinct
+
+**Evidence FOR blending in (looking native):**
+1. **Banner blindness** (Nielsen Norman Group, 30 years of eye-tracking): Users skip content that looks like a third-party embed. 86% of users show banner blindness. Content that "looks like a native site component" gets significantly more attention.
+2. **Native content gets 53% more views** and 18% higher purchase intent than distinct/banner-like content.
+3. Senja users DO ask for more customization, meaning they WANT widgets to match their site better.
+
+**Evidence AGAINST blending in (looking distinct):**
+1. **Third-party credibility signal:** 80% of consumers suspect companies polish or fabricate testimonials. Reviews on third-party platforms are more trusted. A widget that looks too native might look like the company wrote it.
+2. **If testimonials blend completely into the page, visitors might think it's marketing copy, not real customers.** The slight visual distinction signals "this came from somewhere else, these are real people."
+3. **"Powered by Senja" visibility** is a growth loop. Branding is more noticeable when the widget has its own visual identity.
+
+#### L5. The Spectrum Model (our design philosophy)
+
+```
+FULLY FOREIGN                    SWEET SPOT                    FULLY NATIVE
+(iframe, clashing fonts,    (matches site's fonts/colors     (indistinguishable from
+ different colors, obvious    but retains credibility          site content, no third-
+ "widget box" feel)           signals: photos, names,          party signals, looks
+                              star ratings, verification       like company wrote it)
+                              badges, subtle branding)
+```
+
+1. **Fully foreign** (where competitors are): Gets skipped (banner blindness). Looks unprofessional. Clashes. Users complain about customization limits.
+2. **Sweet spot** (where Vouch aims): Fonts, colors, spacing match the host site. But testimonials clearly contain real human elements (photos, names, companies, star ratings, verification badges, golden sentence highlights). Visitor thinks "real people's words, styled to match this site."
+3. **Fully native** (danger zone): Indistinguishable from site content. Visitors don't recognize it as social proof. Trust signal gone. Looks like company wrote it.
+
+**Vouch's credibility signals that keep us in the sweet spot even with high customization:**
+1. Golden sentence highlighting (unique visual marker)
+2. Email domain verification badges (shield icon + domain)
+3. Real photos, names, company names
+4. Star ratings
+5. Video thumbnails (obviously not company-written)
+6. Subtle "Powered by Vouch" branding
+
+These signals ensure that even when fonts/colors match perfectly, the testimonials are clearly from real people, not marketing copy.
+
+#### L6. Corrected Positioning
+
+**OLD pitch:** "Social proof that looks like you built it" (implies fully native, could reduce trust)
+
+**NEW pitch options (to evaluate):**
+1. "Social proof that looks like it belongs" (visual harmony, not invisibility)
+2. "Testimonials that match your brand, not fight it" (customization focus)
+3. "Beautiful testimonials. Your fonts. Your colors. Real people." (specificity)
+
+**What this means for our product:**
+1. Editorial and Minimal layouts are still worth building. They're about visual QUALITY and VARIETY, not about "looking native."
+2. Customization (fonts, colors, accent, spacing) IS the real differentiator users want. Keep investing here.
+3. Our credibility signals (verification badges, golden sentence) are MORE important than we thought. They're what keep us in the sweet spot.
+4. Don't remove or minimize "Powered by Vouch." It serves dual purpose: growth loop for us AND trust signal for visitors ("this was collected by a third-party tool").
+
+#### L7. Educational Content: "The Testimonial Design Spectrum" Guide
+
+[ ] **Build a standalone guide page** at `/blog/testimonial-design-guide` or `/guide/testimonial-design-spectrum`.
+
+**Why this content matters for the business:**
+1. SEO: Ranks for "how to display testimonials on website," "testimonial widget design," "testimonial section best practices." Top-of-funnel, high intent.
+2. Thought leadership: Positions Vouch as the expert who researched this. Senja doesn't have this content. Testimonial.to doesn't. We'd be first.
+3. Natural product positioning: Guide teaches the spectrum, explains the sweet spot, reader arrives at "Vouch is built for this" themselves. Zero hard sell.
+4. Shareable: Blog posts get shared on X, Indie Hackers, Reddit. Landing page sections don't.
+5. Comparison page fuel: Our future `/compare/senja` and `/compare/testimonial-to` pages link to this guide as evidence.
+
+**Content outline:**
+
+1. **The problem nobody talks about:** Your testimonials are either invisible or ugly. (Hook)
+2. **The research:** Banner blindness (NN/g data), third-party credibility (trust statistics), the 53%/18% native content numbers.
+3. **The spectrum:** Fully Foreign to Fully Native, with visual examples showing each.
+4. **Why most tools are stuck on "Fully Foreign":** Iframe architecture explanation in plain English. Not a dig at competitors, just education.
+5. **The sweet spot:** What it looks like, why it works. Visual harmony + credibility signals.
+6. **How to evaluate your current testimonials:** Checklist readers can apply (do fonts match? do colors match? are there real photos? is it clearly from real people?).
+7. **How Vouch is designed for the sweet spot:** Golden sentence, verification badges, Shadow DOM (explained simply as "our widgets live inside your page, not in a box on top of it"), custom fonts/colors.
+8. **CTA:** "See it on your site. Try Vouch free." Link to signup.
+
+**When to build:** Phase 3 (after premium layouts ship, so we have visual examples to show). This is content marketing, not product. Needs real screenshots of Editorial/Minimal layouts in the sweet spot to be credible.
+
+**Format considerations:**
+1. Standalone page, not a landing page section (too long, would distract from conversion).
+2. Clean, readable design (like a Stripe blog post or Linear changelog). No sidebar clutter.
+3. Include real data points with sources (NN/g, HubSpot, etc.). This is research-backed content, not opinion.
+4. Mobile-friendly (our target audience browses on phones too).
+
+#### L8. Action Items from This Research
+
+1. [ ] **Revise landing page copy.** Replace any "looks like you built it" messaging with "matches your brand" or "looks like it belongs." (Phase 2, with landing page refresh)
+2. [ ] **Keep and enhance credibility signals.** Verification badges, golden sentence, star ratings, real photos are MORE important than we thought. They're the sweet spot differentiator. (Ongoing)
+3. [ ] **Don't remove "Powered by Vouch" on free tier.** It's both a growth loop AND a trust signal. On Pro/Studio, make it removable (already planned). (Already correct)
+4. [ ] **Build "Testimonial Design Spectrum" guide page.** (Phase 3, after premium layouts ship)
+5. [ ] **Use this research in comparison pages.** When we build `/compare/senja` or `/compare/testimonial-to`, cite the iframe limitation and our Shadow DOM advantage. Frame it as education, not attack. (Phase 4, with SEO content)
+6. [ ] **Customize widget builder messaging.** In the dashboard where users customize their widget, add subtle education: "Matching your site's fonts and colors increases engagement by 53% (NN/g research)." Reinforces our value prop at the moment they're configuring. (Phase 2)
 
 ---
 
