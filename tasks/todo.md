@@ -1,16 +1,28 @@
+## Session Handoff (March 8, 2026, session 8)
+
+**What was done:**
+1. **Item #9: Upgrade existing layouts COMPLETE.** 5 improvements across page.tsx and embed.js:
+   a. `textSize` theme option (compact/default/large) with variable font sizes in renderCard + renderSingle. Existing widgets default to 'compact' (unchanged), new widgets get 'default' (15px).
+   b. Whitespace increase: card padding 20->24px, internal gap 14->16px, container gaps 16->20px (grid/wall/carousel), list gap 12->16px, carousel card width 300->320px.
+   c. Carousel fade-in animation (vouch-fadein 200ms ease).
+   d. `showMetric` toggle: existing widgets show badge (backwards compat), new widgets hide it.
+   e. Video play button redesign: circle->rounded rect with blur backdrop. 44px touch target maintained. Applied to renderCard + Minimal layout.
+   f. New widget defaults: showDate=false, showMetric=false.
+   g. 3-button Text Size selector + Show metric badge toggle added to widget builder Appearance section.
+
+**What's next:** Phase 1 BUILD continues:
+1. Item #10: Cap free tier at 25 testimonials (display limit now 25 in code, but need collection form + inbox enforcement)
+2. Item #13e-13h: Remaining audit Phase 1 items
+3. **Run the editorial migration SQL** on production Supabase before deploying.
+4. **Update Lemon Squeezy dashboard:** Pro variant price $19->$29/mo, $190->$290/yr. UI now shows $29 but checkout still charges $19 until LS dashboard updated.
+5. **Add UPSTASH_REDIS_REST_URL and UPSTASH_REDIS_REST_TOKEN to Vercel project env vars** before deploying.
+
+---
+
 ## Session Handoff (March 8, 2026, session 7)
 
 **What was done:**
 1. **Item #13d: Replaced in-memory rate limiter with Upstash Redis (CRITICAL).** Installed `@upstash/ratelimit` and `@upstash/redis`. Rewrote `src/lib/ratelimit.ts` to use sliding window via Upstash. `check()` is now async. Lazy Redis construction avoids build-time env var errors. Graceful fallback (missing env vars or Redis errors = allow through). Each limiter gets a unique prefix (`vouch:rl:submit`, `vouch:rl:video`, `vouch:rl:widget`, `vouch:rl:oembed`) to prevent key collisions. Updated all 4 consumer routes to `await` the check. Added Upstash env vars to `.env.local`. Build passes.
-
-**What's next:** Phase 1 BUILD continues:
-1. Item #8: Minimal layout
-2. Item #9: Upgrade existing layouts
-3. Item #10: Cap free tier at 25 testimonials (display limit now 25 in code, but need collection form + inbox enforcement)
-4. Item #13e-13h: Remaining audit Phase 1 items
-5. **Run the editorial migration SQL** on production Supabase before deploying.
-6. **Update Lemon Squeezy dashboard:** Pro variant price $19->$29/mo, $190->$290/yr. UI now shows $29 but checkout still charges $19 until LS dashboard updated.
-7. **Add UPSTASH_REDIS_REST_URL and UPSTASH_REDIS_REST_TOKEN to Vercel project env vars** before deploying.
 
 **What to watch out for:**
 1. **Lemon Squeezy price mismatch:** Code shows $29 Pro but LS checkout still charges $19. Must update LS dashboard variant prices before deploying.
@@ -134,7 +146,7 @@ These are operational prerequisites. No code to write (except the Privacy Policy
 
 7. [x] **Editorial layout** (D1). DONE (session March 8). Full-width, magazine-style, one testimonial at a time, large pull-quote with golden sentence, large author photo, company logo. NO competitor has this.
 8. [ ] **Minimal layout** (D2). The anti-widget. Quote and attribution only. No stars, borders, shadows, card background. Inherits host site typography. PRIORITY: HIGH.
-9. [ ] **Upgrade existing layouts** (D4). Larger text option (textSize theme: compact/default/large), more whitespace (24px padding, 16-20px gaps), smoother carousel transitions (300ms cubic-bezier), reduce default clutter (hide date and metric badge by default on new widgets), better video thumbnails. PRIORITY: HIGH.
+9. [x] **Upgrade existing layouts** (D4). DONE session 8. textSize theme (compact/default/large), whitespace increase (24px padding, 20px gaps), carousel fade-in (200ms), showMetric toggle, video play button redesign (rounded rect + blur), new widget defaults (showDate=false, showMetric=false).
 10. [ ] **Cap free tier at 25 testimonials** (B1, revised). Add count check in testimonial submission API. When free user's approved + pending testimonials exceed 25, show branded upgrade message on collection form. PRIORITY: HIGH.
 11. [ ] **Reprice to $29/mo Pro, $49/mo Studio** (B4). Update Lemon Squeezy variants, pricing page, upgrade modals, all hardcoded price references. Do this AFTER Editorial + Minimal ship (they justify the price). PRIORITY: HIGH.
 12. [ ] **Embed.js version hash** (J2.1). Add version parameter to embed code: `embed.js?v=2.1.0`. Bump manually on breaking changes. PRIORITY: HIGH.
