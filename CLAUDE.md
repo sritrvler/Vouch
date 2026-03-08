@@ -60,7 +60,7 @@ After all steps: `PIPELINE COMPLETE`
 
 **Self-review runs at ALL tiers T2+.** 9-point checklist: bugs, edge cases, responsive, a11y, state, security, consistency, missed files, regression. Assume at least 1 bug exists.
 
-**Agent rules:** Pass code snippets in prompts, never file paths. One job per agent. Parallelize independent agents.
+**Agent rules:** Let agents read files themselves (separate context). Only paste small diffs (<50 lines). One job per agent. Request concise summaries back. Parallelize independent agents.
 
 ## Product Decision Gate (details in `.claude/rules/product-decisions.md`)
 

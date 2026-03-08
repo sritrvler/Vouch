@@ -38,7 +38,7 @@ SELF-REVIEW CHECKLIST:
 
 ### T3/T4: Agent Review
 
-Pass diffs and code snippets in agent prompts. NEVER ask agents to read files.
+Let agents read files themselves (they have their own context windows). Only paste small diffs (<50 lines) directly. Always tell agents to return concise summaries, not raw dumps.
 
 T3: `software-architect` (plan) + `senior-code-reviewer` (review) + self-review
 T4: Full roster. See agent routing below.
