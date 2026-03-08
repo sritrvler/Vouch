@@ -57,11 +57,13 @@ interface WidgetTheme {
   backgroundColor: string;
   textColor: string;
   cardStyle: 'shadow' | 'border' | 'flat';
+  textSize: 'compact' | 'default' | 'large';
   fontFamily: string;
   fontUrl: string | null;
   showRating: boolean;
   showAvatar: boolean;
   showDate: boolean;
+  showMetric: boolean;
 }
 
 interface WidgetSettings {
@@ -655,11 +657,13 @@ export default function WidgetsPage() {
       backgroundColor: '#ffffff',
       textColor: '#0f172a',
       cardStyle: 'shadow',
+      textSize: 'default',
       fontFamily: 'inherit',
       fontUrl: null,
       showRating: true,
       showAvatar: true,
-      showDate: true,
+      showDate: false,
+      showMetric: false,
     },
     filterMode: 'all',
     minRating: 4,
@@ -677,11 +681,13 @@ export default function WidgetsPage() {
       backgroundColor: '#ffffff',
       textColor: '#0f172a',
       cardStyle: 'shadow' as const,
+      textSize: 'default' as const,
       fontFamily: 'inherit',
       fontUrl: null,
       showRating: true,
       showAvatar: true,
-      showDate: true,
+      showDate: false,
+      showMetric: false,
     },
     filterMode: 'all' as FilterMode,
     minRating: 4,
@@ -714,11 +720,13 @@ export default function WidgetsPage() {
         backgroundColor: loadedTheme.backgroundColor ?? '#ffffff',
         textColor: loadedTheme.textColor ?? '#0f172a',
         cardStyle: loadedTheme.cardStyle ?? 'shadow',
+        textSize: loadedTheme.textSize ?? 'compact',
         fontFamily: loadedTheme.fontFamily ?? 'inherit',
         fontUrl: loadedTheme.fontUrl ?? null,
         showRating: loadedTheme.showRating ?? true,
         showAvatar: loadedTheme.showAvatar ?? true,
         showDate: loadedTheme.showDate ?? true,
+        showMetric: loadedTheme.showMetric ?? true,
       },
       filterMode: widget.filter_mode,
       minRating: widget.min_rating,
@@ -1449,6 +1457,31 @@ export function Testimonials() {
               </div>
             </div>
 
+            {/* Text Size */}
+            <div>
+              <Label className="text-xs text-muted-foreground mb-2 block">Text Size</Label>
+              <div className="flex gap-2">
+                {([
+                  { value: 'compact' as const, label: 'Compact' },
+                  { value: 'default' as const, label: 'Default' },
+                  { value: 'large' as const, label: 'Large' },
+                ]).map(({ value, label }) => (
+                  <button
+                    key={value}
+                    onClick={() => updateTheme('textSize', value)}
+                    className={cn(
+                      'flex-1 px-3 py-2 rounded-xl text-xs font-medium transition-all border',
+                      settings.theme.textSize === value
+                        ? 'border-indigo-300 bg-indigo-50 text-indigo-700'
+                        : 'border-border text-muted-foreground hover:bg-muted/50'
+                    )}
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
             {/* Font */}
             <div>
               <Label className="text-xs text-muted-foreground mb-2 block">Font</Label>
@@ -1496,6 +1529,7 @@ export function Testimonials() {
                   { key: 'showRating' as const, label: 'Show star rating' },
                   { key: 'showAvatar' as const, label: 'Show author avatar' },
                   { key: 'showDate' as const, label: 'Show date' },
+                  { key: 'showMetric' as const, label: 'Show metric badge' },
                 ] as const
               ).map(({ key, label }) => (
                 <div key={key} className="flex items-center justify-between">

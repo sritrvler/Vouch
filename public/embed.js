@@ -190,8 +190,12 @@
     var cs = theme.cardStyle || 'shadow';
     var border = cs === 'border' ? '1px solid #e2e8f0' : 'none';
     var shadow = cs === 'shadow' ? '0 1px 3px rgba(0,0,0,0.08),0 1px 2px rgba(0,0,0,0.04)' : 'none';
-    var pad = compact ? '14px 16px' : '20px';
-    var gap = compact ? '10' : '14';
+    var pad = compact ? '14px 16px' : '24px';
+    var gap = compact ? '10' : '16';
+    var ts = theme.textSize || 'compact';
+    var quoteSize = ts === 'large' ? '17' : ts === 'default' ? '15' : (compact ? '13' : '14');
+    var nameSize = ts === 'large' ? '14' : ts === 'default' ? '14' : '13';
+    var roleSize = ts === 'large' ? '12' : ts === 'default' ? '12' : '11';
     var authorLine = [t.author_role, t.author_company].filter(Boolean).join(', ');
 
     // Golden sentence
@@ -246,9 +250,9 @@
       html += '<div style="display:flex;align-items:center;gap:10px;min-width:0;flex:1">';
       html += avatarHtml(t.author_name, t.author_avatar_url, t.author_company, pc);
       html += '<div style="min-width:0">';
-      html += '<div style="font-weight:700;font-size:13px;color:' + tc + ';overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + esc(t.author_name) + '</div>';
+      html += '<div style="font-weight:700;font-size:' + nameSize + 'px;color:' + tc + ';overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + esc(t.author_name) + '</div>';
       if (authorLine) {
-        html += '<div style="font-size:11px;color:#6b7280;line-height:1.4">' + esc(authorLine) + '</div>';
+        html += '<div style="font-size:' + roleSize + 'px;color:#6b7280;line-height:1.4">' + esc(authorLine) + '</div>';
       }
       if (t.email_domain) {
         html += '<div style="display:flex;align-items:center;gap:3px;margin-top:2px;font-size:10px;font-weight:600;color:#059669">' + shieldIcon + esc(t.email_domain) + '</div>';
@@ -261,7 +265,7 @@
     // Quote (hidden when show_text is false and testimonial has video)
     if (t.show_text !== false || !t.video_url) {
       html +=
-        '<blockquote style="margin:0;padding:0"><p style="font-size:' + (compact ? '13' : '14') +
+        '<blockquote style="margin:0;padding:0"><p style="font-size:' + quoteSize +
         'px;line-height:1.65;margin:0;overflow:hidden;display:-webkit-box;-webkit-line-clamp:6;-webkit-box-orient:vertical">' +
         '&ldquo;' + quoteHtml + '&rdquo;</p></blockquote>';
     }
@@ -269,7 +273,7 @@
     // Proof
     html += '<div style="display:flex;align-items:center;flex-wrap:wrap;gap:8px">';
     if (theme.showRating !== false) html += stars(t.rating, pc);
-    if (t.metric_label) {
+    if (t.metric_label && theme.showMetric !== false) {
       html +=
         '<span style="font-size:10px;font-weight:600;color:' + pc + ';background:' + pc +
         '15;border:1px solid ' + pc + '30;border-radius:999px;padding:2px 8px;white-space:nowrap">' +
@@ -292,9 +296,9 @@
         (t.video_thumbnail_url
           ? '<img src="' + esc(t.video_thumbnail_url) + '" alt="" style="width:100%;display:block;aspect-ratio:16/9;object-fit:cover" />'
           : '<div style="width:100%;aspect-ratio:16/9"></div>') +
-        '<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center">' +
-        '<div style="width:56px;height:56px;border-radius:50%;background:rgba(0,0,0,0.6);display:flex;align-items:center;justify-content:center">' +
-        '<svg width="24" height="24" viewBox="0 0 24 24" fill="white"><polygon points="8,5 20,12 8,19"/></svg>' +
+        '<div style="position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,0.25) 0%,transparent 60%);display:flex;align-items:center;justify-content:center">' +
+        '<div style="padding:14px 18px;border-radius:10px;background:rgba(0,0,0,0.55);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center">' +
+        '<svg width="16" height="16" viewBox="0 0 24 24" fill="white"><polygon points="8,5 20,12 8,19"/></svg>' +
         '</div></div></div>';
     }
 
@@ -316,6 +320,10 @@
     var tc = safeColor(theme.textColor, '#0f172a');
     var bg = safeColor(theme.backgroundColor, '#ffffff');
     var authorLine = [t.author_role, t.author_company].filter(Boolean).join(', ');
+    var ts = theme.textSize || 'default';
+    var sqSize = ts === 'large' ? '20' : ts === 'default' ? '18' : '16';
+    var snSize = ts === 'large' ? '15' : ts === 'default' ? '14' : '13';
+    var srSize = ts === 'large' ? '13' : ts === 'default' ? '12' : '11';
 
     var content = t.content || '';
     var golden = t.golden_sentence;
@@ -342,7 +350,7 @@
     }
     if (t.show_text !== false || !t.video_url) {
       html +=
-        '<blockquote style="margin:0 0 24px"><p style="font-size:18px;line-height:1.7;font-style:italic;margin:0;color:' + tc + '">&ldquo;' +
+        '<blockquote style="margin:0 0 24px"><p style="font-size:' + sqSize + 'px;line-height:1.7;font-style:italic;margin:0;color:' + tc + '">&ldquo;' +
         quoteHtml + '&rdquo;</p></blockquote>';
     }
     html += '<div style="display:flex;align-items:center;justify-content:center;gap:12px">';
@@ -350,9 +358,9 @@
       html += avatarHtml(t.author_name, t.author_avatar_url, t.author_company, pc);
     }
     html += '<div style="text-align:left">';
-    html += '<div style="font-weight:700;font-size:14px;color:' + tc + '">' + esc(t.author_name) + '</div>';
-    if (authorLine) html += '<div style="font-size:12px;color:#6b7280">' + esc(authorLine) + '</div>';
-    if (t.metric_label) {
+    html += '<div style="font-weight:700;font-size:' + snSize + 'px;color:' + tc + '">' + esc(t.author_name) + '</div>';
+    if (authorLine) html += '<div style="font-size:' + srSize + 'px;color:#6b7280">' + esc(authorLine) + '</div>';
+    if (t.metric_label && theme.showMetric !== false) {
       html +=
         '<span style="font-size:10px;font-weight:600;color:' + pc + ';background:' + pc +
         '15;border-radius:999px;padding:2px 8px;display:inline-block;margin-top:4px">' + esc(t.metric_label) + '</span>';
@@ -370,9 +378,9 @@
   // ── Layouts ──────────────────────────────────────────────────────────────────
 
   function renderGrid(testimonials, theme) {
-    var html = '<div style="columns:280px;column-gap:16px;padding:4px">';
+    var html = '<div style="columns:280px;column-gap:20px;padding:4px">';
     for (var i = 0; i < testimonials.length; i++) {
-      html += '<div style="break-inside:avoid;margin-bottom:16px">' + renderCard(testimonials[i], theme, false) + '</div>';
+      html += '<div style="break-inside:avoid;margin-bottom:20px">' + renderCard(testimonials[i], theme, false) + '</div>';
     }
     html += '</div>';
     return html;
@@ -384,29 +392,31 @@
     var doubled = testimonials.concat(testimonials);
     var html =
       '<style>' +
+      '@keyframes vouch-fadein{from{opacity:0}to{opacity:1}}' +
       '@keyframes vouch-scroll{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}' +
+      '.vouch-carousel-wrap{animation:vouch-fadein 200ms ease both}' +
       '.vouch-track{animation:vouch-scroll 30s linear infinite}' +
       '.vouch-track:hover{animation-play-state:paused}' +
       '</style>' +
-      '<div style="overflow:hidden;padding:4px 0"><div class="vouch-track" style="display:flex;gap:16px;width:max-content">';
+      '<div class="vouch-carousel-wrap" style="overflow:hidden;padding:4px 0"><div class="vouch-track" style="display:flex;gap:20px;width:max-content">';
     for (var i = 0; i < doubled.length; i++) {
-      html += '<div style="width:300px;flex-shrink:0">' + renderCard(doubled[i], theme, false) + '</div>';
+      html += '<div style="width:320px;flex-shrink:0">' + renderCard(doubled[i], theme, false) + '</div>';
     }
     html += '</div></div>';
     return html;
   }
 
   function renderWall(testimonials, theme) {
-    var html = '<div style="columns:280px;column-gap:16px;padding:4px">';
+    var html = '<div style="columns:280px;column-gap:20px;padding:4px">';
     for (var i = 0; i < testimonials.length; i++) {
-      html += '<div style="break-inside:avoid;margin-bottom:16px">' + renderCard(testimonials[i], theme, true) + '</div>';
+      html += '<div style="break-inside:avoid;margin-bottom:20px">' + renderCard(testimonials[i], theme, true) + '</div>';
     }
     html += '</div>';
     return html;
   }
 
   function renderList(testimonials, theme) {
-    var html = '<div style="display:flex;flex-direction:column;gap:12px;padding:4px">';
+    var html = '<div style="display:flex;flex-direction:column;gap:16px;padding:4px">';
     for (var i = 0; i < testimonials.length; i++) {
       html += renderCard(testimonials[i], theme, true);
     }
@@ -443,8 +453,8 @@
       '.mn-video{margin-top:16px;position:relative;border-radius:8px;overflow:hidden;cursor:pointer;' +
         'aspect-ratio:16/9;background:#000;display:flex;align-items:center;justify-content:center}' +
       '.mn-video img{width:100%;height:100%;object-fit:cover}' +
-      '.mn-video-play{position:absolute;width:44px;height:44px;border-radius:50%;' +
-        'background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center}' +
+      '.mn-video-play{position:absolute;padding:14px 18px;border-radius:10px;' +
+        'background:rgba(0,0,0,0.55);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center}' +
       '@media(max-width:1023px){' +
         '.mn-threeup{grid-template-columns:1fr 1px 1fr}' +
         '.mn-threeup .mn-item:nth-child(5),.mn-threeup .mn-divider:nth-child(4){display:none}' +
