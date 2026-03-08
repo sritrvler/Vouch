@@ -1,25 +1,32 @@
-## Session Handoff (March 8, 2026)
+## Session Handoff (March 8, 2026, session 2)
 
 **What was done:**
-1. **Editorial layout (Item #7) COMPLETE.** Full T4 pipeline. embed.js: editorial CSS + render + mount with navigation/swipe/auto-rotate/keyboard. Dashboard: EditorialPreview component, layout option, golden_sentence support. Schema + migration updated.
-2. **Review fixes applied:** rgb() color parsing for light/dark detection, directional slide animation (ed-exit-up/ed-enter-below), 44px touch targets, theme-aware Clearbit fallback, tabindex for keyboard nav, dashboard preview colors matching embed rgba logic, index reset on testimonials change.
-3. **Preview-all-layouts gating.** Free users can now preview ALL layouts (Editorial, Carousel, Wall, List, Single) with their real testimonials. Gate moved from layout button click to Save/Add to Website. PRO badges on premium layouts (amber sparkle for Editorial flagship, subtle indigo for others). Upgrade banner in preview panel.
-4. **Preview panel header fix.** Removed macOS traffic light dots. Replaced with "Preview: how it looks on your site" label.
+1. **Deep Senja competitive analysis (live, in-browser).** Explored every section of Senja's product: forms, widgets, integrations, AI, automations, pricing. Documented the full feature gap.
+2. **Strategic options analysis.** Researched 8+ sources covering Senja complaints, freemium models (Tally), vertical SaaS, counter-positioning, penetration pricing. Produced 4 strategic options. Selected Option 1+3: generous free tier + anti-Senja simplicity positioning.
+3. **Gap analysis against existing todo.md strategy.** Found 5 conflicts between existing plan and new findings. Existing strategy is ~70% correct; design differentiation, persona analysis, niche strategy, and $29 pricing are sound. What's wrong: understating Senja's feature depth, misidentifying the customer pain point (lesson #106), deferring "Powered by Vouch" to Phase 5, and comparison messaging leading with feature count instead of simplicity.
+4. **80/20 widget research.** Mapped Senja's 22 templates to 7 distinct paradigms. Found that 5 structural layouts (grid, carousel, wall, single, list) cover ~95% of real-world usage. Vouch already has all 5. Editorial + Minimal add premium visual treatments. Two low-effort additions worth considering: marquee/ticker and rating badge.
+5. **80/20 applied across entire product.** Identified the 20% of features that cover 80% of value in every category: forms, integrations, AI, output types, dashboard.
+6. **New features identified:** Slack/email notifications (Phase 2, dopamine retention), Business Insights (Phase 4, aggregate testimonial intelligence).
 
 **What's next:** Phase 1 BUILD continues:
 1. Item #8: Minimal layout (the anti-widget, clean quote + attribution only)
 2. Item #9: Upgrade existing layouts (text size, spacing, transitions)
-3. Item #10: Cap free tier at 10 testimonials
+3. Item #10: Cap free tier at 25 testimonials (revised from 10, see strategic update below)
 4. Item #11: Reprice to $29/mo (AFTER layouts ship)
-5. **Run the editorial migration SQL** (`supabase/migrations/add_editorial_layout.sql`) on production Supabase before deploying.
+5. Item #12a (NEW): "Powered by Vouch" badge optimization (moved from Phase 5)
+6. Item #12b (NEW): Badge landing page conversion (moved from Phase 5)
+7. **Run the editorial migration SQL** (`supabase/migrations/add_editorial_layout.sql`) on production Supabase before deploying.
 
 **What to watch out for:**
 1. Editorial gating: free users can preview but Save/Add to Website triggers upgrade modal for any non-grid layout.
 2. The `renderEditorial` function in embed.js returns `{html, mount}` (not just HTML string like other layouts). The mount wiring is in `renderWidget()` after shadow DOM assembly.
 3. `parseColorBrightness()` is a new shared helper in embed.js. Reuse it if Minimal layout also needs light/dark detection.
 4. Editorial preview in dashboard is scaled down (640px max, 64px avatar, 16px text) so it looks like an embedded widget, not a full-page takeover.
-5. todo.md is large. Use offset/limit. Master Roadmap starts at line ~25.
+5. todo.md is large. Use offset/limit. Master Roadmap starts at line ~55.
 6. Pricing change ($19 to $29) is NOT implemented yet. Happens after premium widgets ship.
+7. **Free tier cap changed from 10 to 25.** See Section B1 revision and 80/20 strategy section.
+8. **Comparison page messaging must lead with SIMPLICITY + DESIGN QUALITY, not feature count.** We lose on feature count vs Senja. We win on output quality and ease of use.
+9. **The validated customer pain point is "limited customization options" (lesson #106), NOT "widgets look generic."** Marketing copy and comparison pages must use the validated framing.
 
 ---
 
@@ -57,10 +64,12 @@ These are operational prerequisites. No code to write (except the Privacy Policy
 7. [x] **Editorial layout** (D1). DONE (session March 8). Full-width, magazine-style, one testimonial at a time, large pull-quote with golden sentence, large author photo, company logo. NO competitor has this.
 8. [ ] **Minimal layout** (D2). The anti-widget. Quote and attribution only. No stars, borders, shadows, card background. Inherits host site typography. PRIORITY: HIGH.
 9. [ ] **Upgrade existing layouts** (D4). Larger text option (textSize theme: compact/default/large), more whitespace (24px padding, 16-20px gaps), smoother carousel transitions (300ms cubic-bezier), reduce default clutter (hide date and metric badge by default on new widgets), better video thumbnails. PRIORITY: HIGH.
-10. [ ] **Cap free tier at 10 testimonials** (B1). Add count check in testimonial submission API. When free user's approved + pending testimonials exceed 10, show branded upgrade message on collection form. PRIORITY: HIGH.
+10. [ ] **Cap free tier at 25 testimonials** (B1, revised). Add count check in testimonial submission API. When free user's approved + pending testimonials exceed 25, show branded upgrade message on collection form. PRIORITY: HIGH.
 11. [ ] **Reprice to $29/mo Pro, $49/mo Studio** (B4). Update Lemon Squeezy variants, pricing page, upgrade modals, all hardcoded price references. Do this AFTER Editorial + Minimal ship (they justify the price). PRIORITY: HIGH.
 12. [ ] **Embed.js version hash** (J2.1). Add version parameter to embed code: `embed.js?v=2.1.0`. Bump manually on breaking changes. PRIORITY: HIGH.
 13. [ ] **Pre-deployment embed.js testing** (J2.3). Before any deploy touching embed.js, test on own landing page with a real widget. Manual for now. PRIORITY: HIGH.
+13a. [ ] **"Powered by Vouch" badge optimization** (moved from Phase 5, item #69-70). The badge IS the growth engine for freemium. Ensure badge is visible, clickable, and styled well on all free-tier widgets. The landing page (`/?ref=powered-by`) must convert visitors, not just redirect. Show targeted hero: "You just saw social proof powered by Vouch. Create yours in 5 minutes." Track badge click-throughs in Supabase. PRIORITY: HIGH.
+13b. [ ] **"Powered by Vouch" conversion page** (moved from Phase 5, item #71). The /via page should be a real conversion funnel, not a redirect. Show the widget they just saw, explain what Vouch does, CTA to sign up free. PRIORITY: HIGH.
 
 ### Phase 1 DISCOVERY (run in parallel with build)
 
@@ -87,6 +96,10 @@ These are operational prerequisites. No code to write (except the Privacy Policy
 23. [ ] **Enhance credibility signals** (L8.2). Verification badges, golden sentence, star ratings, real photos. These are the sweet spot differentiator per research. Ongoing quality investment. PRIORITY: MEDIUM.
 24. [ ] **Sidebar active state indicator** (audit #29). Left-border accent on active nav item. PRIORITY: MEDIUM.
 25. [ ] **FAQ accordion animation** (audit #28). Replace native details with Framer Motion accordion on pricing page FAQ. PRIORITY: MEDIUM.
+25a. [ ] **Slack/email notifications for new testimonials** (new, March 8). When a testimonial is submitted: (1) email notification via Resend to the project owner, (2) optional Slack webhook integration (user pastes their Slack webhook URL in settings). The dopamine hit of "New 5-star testimonial from Sarah Chen!" keeps users engaged and reinforces the tool is working. High-impact retention feature, low effort (Resend already integrated, Slack webhook is ~50 lines). PRIORITY: HIGH.
+25b. [ ] **Negative feedback routing on collection form** (new, March 8, 80/20 principle). This is the ONE smart form feature that covers 80% of Senja's 10-page form builder value. When a submitter gives 1-3 stars: route to a "What could we improve?" private feedback page (not published as a testimonial). When 4-5 stars: proceed to the public testimonial submission. This prevents bad reviews from becoming public testimonials while still collecting valuable feedback. Senja's biggest form advantage distilled to its core. PRIORITY: HIGH.
+25c. [ ] **Marquee/ticker layout** (new, March 8, 80/20 widget research). Auto-scrolling horizontal strip of testimonial cards. Popular on SaaS landing pages for continuous social proof. ~15-20 lines of CSS+JS in embed.js. Low effort, high perceived variety. PRIORITY: MEDIUM.
+25d. [ ] **Rating badge widget** (new, March 8, 80/20 widget research). Compact "4.9 from X reviews" badge, designed to be placed near CTAs. Research shows testimonials near CTAs increase conversions by 62%. ~50 lines of code. PRIORITY: MEDIUM.
 
 ### Phase 2 INFRASTRUCTURE (weave in during build)
 
@@ -117,10 +130,11 @@ These are operational prerequisites. No code to write (except the Privacy Policy
 36. [ ] **One-click import from competitor Wall of Love URLs** (F2). Paste a Senja or Testimonial.to public wall URL, scrape testimonials, import into Vouch. The magic trick that eliminates migration effort. PRIORITY: HIGH.
 37. [ ] **Competitor-specific migration guides** (F3). Step-by-step "How to switch from Senja to Vouch" pages at `/migrate/senja`, `/migrate/testimonial-to`, etc. Include export instructions for each competitor + import into Vouch. PRIORITY: HIGH.
 38. [ ] **Extract shared types** (audit #34). Single Project interface, Widget interface, etc. in src/types/. PRIORITY: MEDIUM.
+38a. [ ] **Zapier integration** (new, March 8, 80/20 integration strategy). ONE integration that covers 80%+ of automation needs. Users build their own connections to Slack, HubSpot, Stripe, email, etc. Triggers: new testimonial submitted, testimonial approved, testimonial rejected. Actions: create testimonial (for import). This single integration replaces the need for 21 native import sources and 15 trigger integrations. Senja built all of those. We build Zapier and let users connect to everything themselves. PRIORITY: HIGH.
 
 ### Phase 3 DISCOVERY (run in parallel)
 
-39. [ ] **Comparison page: Vouch vs Senja** at `/compare/senja` (H1.3). Feature table, pricing comparison, visual widget comparison (screenshot ours vs theirs), iframe vs Shadow DOM education, migration CTA. PRIORITY: HIGH.
+39. [ ] **Comparison page: Vouch vs Senja** at `/compare/senja` (H1.3). **MESSAGING UPDATE (March 8):** Do NOT lead with feature count (we lose). Lead with: (1) visual widget comparison (screenshot Editorial vs Senja's best template, side by side), (2) simplicity ("Set up in 5 minutes, not 50"), (3) output quality ("Your testimonials have never looked this good"), (4) honest acknowledgment ("Senja has more integrations. We have better output. Choose what matters to you."). Include pricing comparison and migration CTA. PRIORITY: HIGH.
 40. [ ] **Comparison page: Vouch vs Testimonial.to** at `/compare/testimonial-to` (H1.3). Same format. Highlight their $21 Starter Plus tier limitations (2 video total, no API, no Zapier). PRIORITY: HIGH.
 41. [ ] **Comparison page: Vouch vs Famewall** at `/compare/famewall` (H1.3). Position against budget option. Our premium quality vs their low price. PRIORITY: HIGH.
 42. [ ] **Comparison page: Vouch vs Shapo** at `/compare/shapo` (H1.3). Same format. PRIORITY: MEDIUM.
@@ -147,6 +161,7 @@ These are operational prerequisites. No code to write (except the Privacy Policy
 52. [ ] **FTC compliance as a feature** (G3). Educational content + built-in disclosure tools. Blog post: "Fake Testimonials Are Illegal (and Your Customers Can Tell)." Dashboard: easy FTC disclosure toggle for widgets. PRIORITY: MEDIUM.
 53. [ ] **Cinematic Video layout** (D3). Hero-sized video panels (16:9, 400px+ tall), face-forward poster, quote overlay, hover auto-play muted 3-5 sec preview, click for full playback. Intersection Observer for hover. PRIORITY: MEDIUM.
 54. [ ] **AI golden sentence auto-extraction** (audit #27). LLM call on testimonial submit to auto-populate golden_sentence field. User can edit/override. PRIORITY: MEDIUM.
+54a. [ ] **Business Insights dashboard** (new, March 8). Aggregate intelligence from collected testimonials. Pro/Studio exclusive. Features: (1) Common themes extraction ("Customers mention 'fast support' 12 times, 'easy to use' 8 times"), (2) Sentiment trends over time ("Average rating dropped from 4.9 to 4.6 this month"), (3) Weak spots identification ("3 testimonials mention 'pricing confusion'"), (4) Actionable nudges ("You have 0 video testimonials. Video testimonials convert 80% better than text"), (5) Benchmark comparison ("Your average rating is 4.8, above the 4.5 category average"). Requires 15-20+ testimonials to be meaningful, so only valuable for active paying users. Positioned as: "Your testimonials aren't just social proof, they're customer research you already collected." Creates retention value: canceling Vouch means losing this intelligence. Requires LLM call per testimonial for theme extraction (cost consideration). PRIORITY: MEDIUM.
 
 ### Phase 4 DISCOVERY (run in parallel)
 
@@ -175,9 +190,9 @@ These are operational prerequisites. No code to write (except the Privacy Policy
 66. [ ] **Referral link generation in dashboard** (K1.1). Unique link per user. PRIORITY: LOWER.
 67. [ ] **Referral tracking** (K1.2). Link click, signup, conversion tracking. PRIORITY: LOWER.
 68. [ ] **Free month credit on referral** (K1.3). Both referrer and new user get one month free on paid conversion. Cap 12/year. PRIORITY: LOWER.
-69. [ ] **"Powered by Vouch" click tracking** (J5.1). Log `?ref=powered-by` landings. Counter in Supabase. PRIORITY: MEDIUM.
-70. [ ] **Optimize landing page for badge visitors** (J5.2). When `?ref=powered-by`, show targeted hero: "You just saw a testimonial powered by Vouch. Create yours in 5 minutes." PRIORITY: MEDIUM.
-71. [ ] **"Powered by Vouch" conversion page** (J3.3). The /via page should convert, not just redirect. PRIORITY: MEDIUM.
+69. [MOVED] **"Powered by Vouch" click tracking** >> moved to Phase 1 item #13a (March 8, freemium growth strategy).
+70. [MOVED] **Optimize landing page for badge visitors** >> moved to Phase 1 item #13a (March 8, freemium growth strategy).
+71. [MOVED] **"Powered by Vouch" conversion page** >> moved to Phase 1 item #13b (March 8, freemium growth strategy).
 
 ### Phase 5 DISCOVERY (run in parallel)
 
@@ -332,17 +347,41 @@ Based on live market research of 8+ competitors, visual audit of Senja/Testimoni
 
 **Key insight:** Vouch's free tier is the most generous in the entire market. Every competitor caps at 10 to 15 testimonials on free. People pay 2 to 3x more for Senja/Testimonial.to over cheaper tools because of: (1) integrations/Zapier/auto-import, (2) brand trust and SEO discovery, (3) AI features, (4) UX polish, (5) team/agency features. Price alone does not win.
 
+**IMPORTANT UPDATE (March 8, 2026, live Senja analysis):** The table above understates Senja's feature depth at $29. Their Starter tier includes: 21 auto-import platforms with sync, 15+ trigger integrations (Stripe, Kit, Gumroad), AI search/sentiment/transcription, sizzle reels + social video generation, gamification (Spin the Wheel), social posting automation (Typefully/Buffer/Hootsuite), gift cards (Tremendous), CRM export (HubSpot), 10-page form builder with conditional logic and negative feedback routing, 15+ widget templates across 7 output categories (widgets, popups, images, videos, walls). The "unlimited forms/projects" advantage Vouch has at $29 is real but not sufficient. Our comparison messaging must lead with SIMPLICITY + DESIGN QUALITY, not feature count. See Section M (80/20 Strategy) below.
+
+### A2. 80/20 Strategic Principle (added March 8, 2026)
+
+**"We have what works. Nothing you'll never use."**
+
+This is our counter-positioning against Senja's feature sprawl. Senja has 22 widget templates, 21 import sources, 15 trigger integrations, 7 output categories, AI everything. Most users use 3 layouts, 1 import method, 0 integrations. We build the 20% of features that cover 80% of real usage, and we make those features the best in the market.
+
+**Evidence:**
+1. Senja's 22 widget templates map to only 7 distinct layout paradigms. 5 of their "carousel" templates are cosmetic variations of the same layout. Vouch's 5 layouts + Editorial + Minimal = 7 layouts covering ~95% of real-world deployments.
+2. Grid, carousel, wall/masonry, single quote, and list cover ~95% of how people actually display testimonials (every platform leads with these, they're in every "best testimonial page" example collection).
+3. Popups/toasts, image generators, sizzle reels, avatar grids, dual sliders are niche/vanity features. No conversion data supports them as purchase drivers.
+4. For integrations: CSV import + Zapier covers 80%+ of integration needs. Building 21 native import sources is a maintenance nightmare for a solo founder. One Zapier integration lets users connect to all 21 platforms themselves.
+5. For AI: golden sentence auto-extraction (the ONE AI feature that improves output quality) covers 80% of AI value. Sentiment analysis, AI search, and custom prompts are demo features, not daily-use features.
+6. For forms: a clean 3-step flow (intro, write/record, thank you) with ONE smart feature (negative feedback routing: 1-3 stars go private, 4-5 stars go public) covers 80% of Senja's 10-page form builder value.
+
+**The 80/20 rule applies to every feature decision. Before building anything, ask: "Does 20%+ of our target audience use this daily?" If no, it's junk. Keep it out.**
+
+**Two low-effort widget additions worth building (identified from research):**
+1. **Marquee/ticker**: auto-scrolling horizontal strip of testimonials. ~15-20 lines of CSS+JS. Adds visual variety, popular on SaaS landing pages.
+2. **Rating badge**: compact "4.9 from X reviews" widget placed near CTAs. ~50 lines of code. Testimonials near CTAs increase conversions by 62%.
+
+These bring Vouch to 9 layout options (grid, carousel, wall, list, single, editorial, minimal, marquee, rating badge), covering every real use case with zero bloat.
+
 ### B. Strategic Decisions (revisit before next feature work)
 
-1. [ ] **Cap free tier at 10 testimonials.**
+1. [ ] **Cap free tier at 25 testimonials.** *(revised from 10, March 8 2026)*
 
-   **Why this matters:** A freelancer with one brand (our core target persona) can currently collect 500 testimonials, display them in one widget, and never pay us anything. Every competitor caps free at 10 to 15 because the upgrade trigger needs to come from SUCCESS ("I have too many testimonials, I need more capacity") not from WANTING ("I want a second form"). Success-based triggers convert better because the user has already proven the tool works for them. Want-based triggers feel punishing ("I like your tool but you won't let me use it").
+   **Why 25 instead of 10:** The shift to a freemium growth model (Option 1+3 strategy) means free users are our distribution engine. Every free user's widget displays "Powered by Vouch," which is organic marketing. At 10 testimonials, users hit the wall before their widget has enough content to look impressive on their site, which means the "Powered by Vouch" badge is next to a mediocre-looking widget. At 25, the widget has enough testimonials to look genuinely useful, the badge gets more impressions, and the upgrade trigger comes from success ("I'm collecting so many testimonials I need premium layouts to display them better") not scarcity. Tally (bootstrapped to $150K MRR) proved that generous free tiers with product-led growth outperform tight caps for solo founders.
 
-   **What wrong looks like:** Capping at 3 (too aggressive, users can't see value before hitting the wall). Capping testimonials but leaving widgets/forms unlimited on free (the current model, which means users never hit a meaningful limit). Capping at 50 (too generous, same problem as unlimited for 95% of users).
+   **Why not unlimited or 50:** 25 is enough for the widget to look complete (research shows 10-30 testimonials is the sweet spot for a testimonial page). 50 would mean 90%+ of users never upgrade. 25 means active users hit the wall within 2-3 months of regular collection, which is perfect timing for an upgrade prompt.
 
-   **The right move:** Cap at 10 testimonials (matches Shapo, Famewall, and Testimonial.to's text limit). After 10, show a friendly "You're getting traction! Upgrade to keep collecting." This means users have enough to see the widget working on their site, feel the value, and THEN hit the upgrade wall at a moment of motivation. Also cap widgets at 1 on free (already done) and forms at 1 (already done). The testimonial cap is the missing piece.
+   **The upgrade triggers at 25:** (1) Hit the 25 testimonial cap ("You're growing! Upgrade for unlimited"), (2) Want premium layouts (Editorial, Minimal, Cinematic), (3) Want golden sentence highlighting, (4) Want branding removal, (5) Want CSV import. Multiple triggers, all success-based.
 
-   **DB impact:** Need to add a count check in the testimonial submission API route. When a free user's approved + pending testimonials exceed 10, block new submissions with a branded upgrade message on the collection form.
+   **DB impact:** Same as before. Count check in testimonial submission API. Threshold changed from 10 to 25.
 
 2. [ ] **Pick and own a niche.**
 
@@ -391,13 +430,22 @@ Based on live market research of 8+ competitors, visual audit of Senja/Testimoni
    | Golden sentence | No | No | YES |
    | Verification badges | No | No | YES |
    | JSON-LD rich snippets | No | Yes ($59!) | YES (already built) |
+   | **Senja advantages at $29 (honest view)** | | | |
+   | Auto-import (21 platforms) | YES | YES | No (CSV import planned) |
+   | Zapier/Make integration | YES | YES | No (planned Phase 3) |
+   | AI search/sentiment/transcription | YES | YES | No (golden sentence only) |
+   | Trigger integrations (Stripe, Kit) | YES | YES | No |
+   | Social video generation | YES | YES | No |
+   | Gamification (Spin the Wheel) | YES | YES | No |
+   | 10-page form builder | YES | YES | No (simple form + negative routing planned) |
+   | 15+ widget templates | YES | YES | 9 layouts (covers 95% of use cases, 80/20) |
 
-   At $29/mo, Vouch Pro offers what Senja charges $59/mo for (unlimited everything) PLUS features Senja doesn't have at any price. The comparison page writes itself.
+   **Honest assessment:** At $29/mo, Senja offers dramatically more features. Vouch's advantage is NOT feature count. Our advantage is: (1) output quality (Editorial layout is visually in a different league), (2) simplicity (set up in 5 minutes, not 50), (3) unlimited forms/projects/widgets at $29 (Senja caps these). The comparison page must lead with visual quality and simplicity, not with a feature checklist we can't win.
 
    #### Complete Pricing Table
 
    **FREE ($0/mo):**
-   * 10 testimonials (matches Famewall, Shapo, Testimonial.to)
+   * 25 testimonials (more generous than Famewall 10, Shapo 10, Testimonial.to 10; less than Senja 15 but with better output quality. Revised from 10 on March 8 for freemium growth strategy. "Powered by Vouch" badge on widget = free marketing.)
    * 1 collection form, 1 widget, 1 project
    * 5 basic layouts (grid, carousel, wall, list, single)
    * Video testimonials included
@@ -429,11 +477,12 @@ Based on live market research of 8+ competitors, visual audit of Senja/Testimoni
 
    #### Free Tier Design Rationale
 
-   The free tier uses the "full workflow free, premium output paid" model:
+   The free tier uses the "full workflow free, premium output paid, badge = growth engine" model:
    * 80% of functionality is free (collect, manage, display). The complete workflow works.
    * 20% of high-value features are gated (premium layouts, golden sentence highlight, verification, branding removal)
    * Upgrade trigger is SUCCESS-based ("I have too many testimonials, I want my widget to look better") not FRUSTRATION-based ("I can't even test this tool")
    * The golden sentence is settable on free but only visually highlighted on Pro. Free users see the feature exists but Pro users get the premium presentation. This is "show them what they're missing" gating.
+   * **NEW (March 8): Free users are the distribution engine.** Every free widget displays "Powered by Vouch" badge. At 25 testimonials, the widget looks genuinely impressive, which means the badge is next to a high-quality display. This is the Tally model: generous free tier creates product-led growth through visible usage. The badge landing page must convert visitors (moved to Phase 1).
 
    **Why no $9 or $15 tier:** Adding a cheap tier would (a) signal we're not confident in premium positioning, (b) cannibalize Pro signups (someone who'd pay $29 settles for $15), (c) compete with Famewall on price which is unwinnable for a solo founder. The free tier IS the cheap option. One clear upgrade path reduces decision friction.
 

@@ -22,7 +22,8 @@
       "Bash(git branch -D*)",
       "Bash(git stash drop*)",
       "Bash(git stash clear*)",
-      "Bash(git filter-branch*)"
+      "Bash(git filter-branch*)",
+      "Bash(git reset --hard*)"
     ]
   },
 
@@ -34,8 +35,34 @@
         "hooks": [
           {
             "type": "command",
-            "command": "echo '=== SESSION START ==='; echo ''; echo '>>> CONFIRMATION RULE: Say the gate-specific phrase after each gate:'; echo '  Session start -> \"I FOLLOWED SESSION START RULES\"'; echo '  Pre-implementation -> \"I FOLLOWED PRE-IMPLEMENTATION RULES\"'; echo '  Post-implementation -> \"I FOLLOWED POST-IMPLEMENTATION RULES\"'; echo '  Session end -> \"I FOLLOWED SESSION END RULES\"'; echo ''; echo '>>> HARD GATE: Do NOT write any code until you complete these 5 steps:'; echo '1. Read tasks/todo.md (work queue + previous session handoff)'; echo '2. Read tasks/lessons.md (mistakes to avoid)'; echo '3. Read ALL matching .claude/skills/ files. LIST which ones you read.'; echo '4. Understand the WHY before writing code'; echo '5. Create git checkpoint: git add -A && git commit -m \"checkpoint: before [task]\"'; echo ''; echo '>>> HARD GATE reminder for /clear: Do NOT suggest /clear until you:'; echo '1. Update tasks/todo.md with Session Handoff section'; echo '2. Update tasks/lessons.md with new patterns/mistakes'; echo '3. Commit all changes'; echo '4. Output Handoff Protocol block'; echo '5. Self-check: Could a fresh session continue from just the files?'; echo ''; echo 'Rules: grep before cat | finish tasks before stopping | never delete (archive instead) | never push without instruction'; echo ''; if git rev-parse --git-dir > /dev/null 2>&1; then echo '--- Recent checkpoints ---'; git log --oneline -5 2>/dev/null; fi; if [ -f 'tasks/lessons.md' ]; then echo '--- Lessons (read these) ---'; cat tasks/lessons.md; fi",
+            "command": "bash .claude/hooks/session-start.sh",
             "timeout": 10
+          }
+        ]
+      }
+    ],
+
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash .claude/hooks/block-dangerous.sh",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo 'File modified. Remember: build check before marking done.'",
+            "timeout": 3
           }
         ]
       }
@@ -47,7 +74,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "if git rev-parse --git-dir > /dev/null 2>&1; then CHANGES=$(git status --porcelain 2>/dev/null); if [ -n \"$CHANGES\" ]; then git add -A && git commit -m \"auto-checkpoint: session end $(date '+%Y-%m-%d %H:%M')\" --quiet && echo 'Checkpoint saved.'; else echo 'Clean — nothing to checkpoint.'; fi; else echo 'No git repo. Changes not checkpointed.'; fi; echo 'Next task? Run /clear first.'",
+            "command": "if git rev-parse --git-dir > /dev/null 2>&1; then CHANGES=$(git status --porcelain 2>/dev/null); if [ -n \"$CHANGES\" ]; then git add -A && git commit -m \"auto-checkpoint: $(date '+%Y-%m-%d %H:%M')\" --quiet && echo 'Auto-checkpoint saved.'; else echo 'Clean state.'; fi; fi",
             "timeout": 30
           }
         ]
