@@ -150,14 +150,14 @@ const COLOR_PRESETS = [
   { label: 'Sky', value: '#0EA5E9' },
 ];
 
-const LAYOUT_OPTIONS: { value: WidgetLayout; label: string; icon: React.ReactNode; desc: string }[] = [
-  { value: 'editorial', label: 'Editorial', icon: <Newspaper className="size-4" />, desc: 'Magazine style' },
-  { value: 'minimal', label: 'Minimal', icon: <Minus className="size-4" />, desc: 'Clean typography' },
-  { value: 'grid', label: 'Grid', icon: <LayoutGrid className="size-4" />, desc: '2-3 columns' },
-  { value: 'carousel', label: 'Carousel', icon: <Rows3 className="size-4" />, desc: 'Horizontal scroll' },
-  { value: 'wall', label: 'Wall of Love', icon: <Heart className="size-4" />, desc: 'Masonry layout' },
-  { value: 'list', label: 'List', icon: <List className="size-4" />, desc: 'Single column' },
-  { value: 'single', label: 'Single', icon: <Star className="size-4" />, desc: 'Featured card' },
+const LAYOUT_OPTIONS: { value: WidgetLayout; label: string; icon: React.ReactNode; desc: string; group: 'multi' | 'spotlight' }[] = [
+  { value: 'grid',      label: 'Grid',         icon: <LayoutGrid className="size-4" />, desc: '2-3 columns',      group: 'multi' },
+  { value: 'wall',      label: 'Wall of Love',  icon: <Heart className="size-4" />,     desc: 'Masonry layout',    group: 'multi' },
+  { value: 'carousel',  label: 'Carousel',      icon: <Rows3 className="size-4" />,     desc: 'Horizontal scroll', group: 'multi' },
+  { value: 'list',      label: 'List',          icon: <List className="size-4" />,      desc: 'Single column',     group: 'multi' },
+  { value: 'editorial', label: 'Editorial',     icon: <Newspaper className="size-4" />, desc: 'Magazine style',    group: 'spotlight' },
+  { value: 'single',    label: 'Single',        icon: <Star className="size-4" />,      desc: 'Featured card',     group: 'spotlight' },
+  { value: 'minimal',   label: 'Minimal',       icon: <Minus className="size-4" />,     desc: 'Clean typography',  group: 'spotlight' },
 ];
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000';
@@ -1227,33 +1227,40 @@ export function Testimonials() {
           {/* Layout (always visible, not collapsible) */}
           <div className="px-5 pt-5 pb-4 border-b border-border">
             <h3 className="text-sm font-semibold text-foreground mb-3">Layout</h3>
-            <div className="flex gap-1.5 overflow-x-auto pb-1 scrollbar-none" style={{ scrollbarWidth: 'none' }}>
-              {LAYOUT_OPTIONS.map((opt) => {
-                const isProLayout = opt.value !== 'grid';
-                const isFlagship = opt.value === 'editorial';
-                const isSelected = settings.layout === opt.value;
-                return (
-                  <button
-                    key={opt.value}
-                    onClick={() => update('layout', opt.value)}
-                    className={cn(
-                      'relative flex items-center gap-1.5 rounded-lg border px-2.5 py-2 text-xs font-medium transition-all shrink-0',
-                      isSelected
-                        ? 'border-indigo-500 bg-indigo-50/60 text-indigo-700'
-                        : 'border-border text-muted-foreground hover:border-indigo-200 hover:bg-muted/30'
-                    )}
-                  >
-                    <span className="size-4">{opt.icon}</span>
-                    {opt.label}
-                    {isProLayout && userPlan === 'free' && (
-                      isFlagship
-                        ? <span className="flex items-center gap-0.5 text-[10px] font-semibold text-amber-600 bg-amber-50 border border-amber-200/60 rounded px-1 py-px leading-tight"><Sparkles className="size-2.5" />PRO</span>
-                        : <span className="text-[10px] font-semibold text-indigo-500/70 bg-indigo-50 rounded px-1 py-px leading-tight">PRO</span>
-                    )}
-                  </button>
-                );
-              })}
-            </div>
+            {(['multi', 'spotlight'] as const).map((group) => (
+              <div key={group} className={group === 'spotlight' ? 'mt-3' : ''}>
+                <p className="text-[11px] font-medium text-muted-foreground/70 uppercase tracking-wider mb-1.5">
+                  {group === 'multi' ? 'Multi' : 'Spotlight'}
+                </p>
+                <div className="grid grid-cols-2 gap-1.5">
+                  {LAYOUT_OPTIONS.filter(opt => opt.group === group).map((opt) => {
+                    const isProLayout = opt.value !== 'grid';
+                    const isFlagship = opt.value === 'editorial';
+                    const isSelected = settings.layout === opt.value;
+                    return (
+                      <button
+                        key={opt.value}
+                        onClick={() => update('layout', opt.value)}
+                        className={cn(
+                          'relative flex items-center gap-1.5 rounded-lg border px-2.5 py-2 text-xs font-medium transition-all',
+                          isSelected
+                            ? 'border-indigo-500 bg-indigo-50/60 text-indigo-700'
+                            : 'border-border text-muted-foreground hover:border-indigo-200 hover:bg-muted/30'
+                        )}
+                      >
+                        <span className="size-4">{opt.icon}</span>
+                        {opt.label}
+                        {isProLayout && userPlan === 'free' && (
+                          isFlagship
+                            ? <span className="ml-auto flex items-center gap-0.5 text-[10px] font-semibold text-amber-600 bg-amber-50 border border-amber-200/60 rounded px-1 py-px leading-tight"><Sparkles className="size-2.5" />PRO</span>
+                            : <span className="ml-auto text-[10px] font-semibold text-indigo-500/70 bg-indigo-50 rounded px-1 py-px leading-tight">PRO</span>
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            ))}
           </div>
 
           {/* Appearance (collapsible) */}
