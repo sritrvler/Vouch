@@ -1,21 +1,24 @@
-## Session Handoff (March 8, 2026, session 8)
+## Session Handoff (March 8, 2026, session 9)
 
 **What was done:**
-1. **Item #9: Upgrade existing layouts COMPLETE.** 5 improvements across page.tsx and embed.js:
-   a. `textSize` theme option (compact/default/large) with variable font sizes in renderCard + renderSingle. Existing widgets default to 'compact' (unchanged), new widgets get 'default' (15px).
-   b. Whitespace increase: card padding 20->24px, internal gap 14->16px, container gaps 16->20px (grid/wall/carousel), list gap 12->16px, carousel card width 300->320px.
-   c. Carousel fade-in animation (vouch-fadein 200ms ease).
-   d. `showMetric` toggle: existing widgets show badge (backwards compat), new widgets hide it.
-   e. Video play button redesign: circle->rounded rect with blur backdrop. 44px touch target maintained. Applied to renderCard + Minimal layout.
-   f. New widget defaults: showDate=false, showMetric=false.
-   g. 3-button Text Size selector + Show metric badge toggle added to widget builder Appearance section.
+1. **Item #10: Cap free tier at 25 testimonials COMPLETE.** 6 files changed:
+   a. `lemonsqueezy.ts`: `testimonialLimit: Infinity` → `25` (single source of truth).
+   b. `submit/route.ts`: Added cap enforcement using adminClient. Parallel query for subscription plan + active count (pending+approved, user-wide). Returns 403 with `limitReached` flag. Follows upload-video pattern exactly.
+   c. `CollectFormClient.tsx`: Fixed 429 message (was leaking business limits). Added 403/limitReached handler showing neutral "Not accepting testimonials right now" card. No mention of plans/pricing.
+   d. `dashboard/page.tsx`: Added `FreeUsageBanner` with 3 visual states (gray <20, amber 20-24, red 25+). Uses separate user-wide count query (not project-scoped). Opens UpgradeModal.
+   e. `pricing/page.tsx`: Free tier "Testimonials collected" changed from "Unlimited" to "25".
+   f. `plans.test.ts`: Updated expectation from `Infinity` to `25`.
 
 **What's next:** Phase 1 BUILD continues:
-1. Item #10: Cap free tier at 25 testimonials (display limit now 25 in code, but need collection form + inbox enforcement)
-2. Item #13e-13h: Remaining audit Phase 1 items
-3. **Run the editorial migration SQL** on production Supabase before deploying.
-4. **Update Lemon Squeezy dashboard:** Pro variant price $19->$29/mo, $190->$290/yr. UI now shows $29 but checkout still charges $19 until LS dashboard updated.
-5. **Add UPSTASH_REDIS_REST_URL and UPSTASH_REDIS_REST_TOKEN to Vercel project env vars** before deploying.
+1. Item #13e-13h: Remaining audit Phase 1 items
+2. **Run the editorial migration SQL** on production Supabase before deploying.
+3. **Update Lemon Squeezy dashboard:** Pro variant price $19->$29/mo, $190->$290/yr. UI now shows $29 but checkout still charges $19 until LS dashboard updated.
+4. **Add UPSTASH_REDIS_REST_URL and UPSTASH_REDIS_REST_TOKEN to Vercel project env vars** before deploying.
+
+**What to watch out for:**
+1. Existing users with >25 testimonials are grandfathered. They can't add new ones until they upgrade or reject enough to drop below 25.
+2. Race condition on concurrent submissions (TOCTOU) is accepted as soft cap. Worst case: 26 testimonials.
+3. All previous session watch-outs still apply (LS price mismatch, Upstash env vars, embed.js hardcoded 25).
 
 ---
 
@@ -147,7 +150,7 @@ These are operational prerequisites. No code to write (except the Privacy Policy
 7. [x] **Editorial layout** (D1). DONE (session March 8). Full-width, magazine-style, one testimonial at a time, large pull-quote with golden sentence, large author photo, company logo. NO competitor has this.
 8. [ ] **Minimal layout** (D2). The anti-widget. Quote and attribution only. No stars, borders, shadows, card background. Inherits host site typography. PRIORITY: HIGH.
 9. [x] **Upgrade existing layouts** (D4). DONE session 8. textSize theme (compact/default/large), whitespace increase (24px padding, 20px gaps), carousel fade-in (200ms), showMetric toggle, video play button redesign (rounded rect + blur), new widget defaults (showDate=false, showMetric=false).
-10. [ ] **Cap free tier at 25 testimonials** (B1, revised). PRIORITY: HIGH. PLAN READY (skip planning, go straight to implementation):
+10. [x] **Cap free tier at 25 testimonials** (B1, revised). DONE session 9. PRIORITY: HIGH. PLAN READY (skip planning, go straight to implementation):
 
     **Why 25:** Grid/Wall need ~9 items to look impressive. 25 collected yields ~17-20 approved (after rejections/pending), enough for every layout. More generous than all competitors (Senja 15, Famewall 10, Testimonial.to 10). "Powered by Vouch" badge sits next to impressive widgets = better organic marketing.
 
@@ -505,7 +508,7 @@ These bring Vouch to 9 layout options (grid, carousel, wall, list, single, edito
 
 ### B. Strategic Decisions (revisit before next feature work)
 
-1. [ ] **Cap free tier at 25 testimonials.** *(revised from 10, March 8 2026)*
+1. [x] **Cap free tier at 25 testimonials.** *(revised from 10, March 8 2026)* DONE session 9.
 
    **Why 25 instead of 10:** The shift to a freemium growth model (Option 1+3 strategy) means free users are our distribution engine. Every free user's widget displays "Powered by Vouch," which is organic marketing. At 10 testimonials, users hit the wall before their widget has enough content to look impressive on their site, which means the "Powered by Vouch" badge is next to a mediocre-looking widget. At 25, the widget has enough testimonials to look genuinely useful, the badge gets more impressions, and the upgrade trigger comes from success ("I'm collecting so many testimonials I need premium layouts to display them better") not scarcity. Tally (bootstrapped to $150K MRR) proved that generous free tiers with product-led growth outperform tight caps for solo founders.
 
