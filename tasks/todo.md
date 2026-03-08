@@ -1,9 +1,10 @@
 ## Session Handoff (March 8, 2026)
 
 **What was done:**
-1. **Editorial layout (Item #7) COMPLETE.** Full T4 pipeline: plan, architect review, UX/UI agent reviews, code, senior code review + premium UI review + adversarial self-review, all HIGH/MEDIUM fixes applied, build verified, browser tested.
-2. Files changed: `public/embed.js` (editorial CSS + render + mount with navigation/swipe/auto-rotate/keyboard), `src/app/(dashboard)/dashboard/widgets/page.tsx` (EditorialPreview component, layout option, golden_sentence support), `src/app/embed/[id]/page.tsx` (type update), `supabase/schema.sql` (CHECK constraint), `supabase/migrations/add_editorial_layout.sql` (new migration).
-3. Key fixes applied during review: rgb() color parsing for light/dark detection, directional slide animation (ed-exit-up/ed-enter-below), 44px touch targets, theme-aware Clearbit fallback, tabindex for keyboard nav, dashboard preview colors matching embed rgba logic, index reset on testimonials change.
+1. **Editorial layout (Item #7) COMPLETE.** Full T4 pipeline. embed.js: editorial CSS + render + mount with navigation/swipe/auto-rotate/keyboard. Dashboard: EditorialPreview component, layout option, golden_sentence support. Schema + migration updated.
+2. **Review fixes applied:** rgb() color parsing for light/dark detection, directional slide animation (ed-exit-up/ed-enter-below), 44px touch targets, theme-aware Clearbit fallback, tabindex for keyboard nav, dashboard preview colors matching embed rgba logic, index reset on testimonials change.
+3. **Preview-all-layouts gating.** Free users can now preview ALL layouts (Editorial, Carousel, Wall, List, Single) with their real testimonials. Gate moved from layout button click to Save/Add to Website. PRO badges on premium layouts (amber sparkle for Editorial flagship, subtle indigo for others). Upgrade banner in preview panel.
+4. **Preview panel header fix.** Removed macOS traffic light dots. Replaced with "Preview: how it looks on your site" label.
 
 **What's next:** Phase 1 BUILD continues:
 1. Item #8: Minimal layout (the anti-widget, clean quote + attribution only)
@@ -13,11 +14,12 @@
 5. **Run the editorial migration SQL** (`supabase/migrations/add_editorial_layout.sql`) on production Supabase before deploying.
 
 **What to watch out for:**
-1. Editorial is gated as Pro layout (`isProLayout = opt.value !== 'grid'`). Free users see a lock icon and upgrade prompt.
+1. Editorial gating: free users can preview but Save/Add to Website triggers upgrade modal for any non-grid layout.
 2. The `renderEditorial` function in embed.js returns `{html, mount}` (not just HTML string like other layouts). The mount wiring is in `renderWidget()` after shadow DOM assembly.
 3. `parseColorBrightness()` is a new shared helper in embed.js. Reuse it if Minimal layout also needs light/dark detection.
-4. todo.md is large. Use offset/limit. Master Roadmap starts at line ~25.
-5. Pricing change ($19 to $29) is NOT implemented yet. Happens after premium widgets ship.
+4. Editorial preview in dashboard is scaled down (640px max, 64px avatar, 16px text) so it looks like an embedded widget, not a full-page takeover.
+5. todo.md is large. Use offset/limit. Master Roadmap starts at line ~25.
+6. Pricing change ($19 to $29) is NOT implemented yet. Happens after premium widgets ship.
 
 ---
 
