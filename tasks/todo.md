@@ -1,3 +1,26 @@
+## Session Handoff (March 8, 2026, session 4)
+
+**What was done:**
+1. **Widget builder layout selector redesign.** Replaced horizontal scrolling pill strip with 2-column grouped grid. Two groups: "Multi" (Grid, Wall of Love, Carousel, List) and "Spotlight" (Editorial, Single, Minimal). Grid (free) is now first. PRO badges right-aligned with `ml-auto`. Removed `overflow-x-auto`, `scrollbar-none`, `shrink-0`. Build passes.
+
+**What's next:** Phase 1 BUILD continues:
+1. Item #8: Minimal layout
+2. Item #9: Upgrade existing layouts
+3. Item #10: Cap free tier at 25 testimonials
+4. Item #11: Reprice to $29/mo (AFTER layouts ship)
+5. Item #12a: "Powered by Vouch" badge optimization
+6. Item #12b: Badge landing page conversion
+7. **Run the editorial migration SQL** on production Supabase before deploying.
+
+**What to watch out for:**
+1. Layout selector panel is 380px fixed width. If that changes below ~300px, 2-col grid cards could get tight.
+2. Hooks use bash via Git Bash on Windows. If Git path changes, hooks break.
+3. notify.ps1 needs Windows notifications enabled (Settings > System > Notifications).
+4. CLAUDE_CODE_SUBAGENT_MODEL env var needs terminal restart to take effect.
+5. All previous session 2 watch-outs still apply (see below).
+
+---
+
 ## Session Handoff (March 8, 2026, session 3)
 
 **What was done:**
@@ -8,21 +31,6 @@
 5. **Set up Windows toast notifications** on task completion (.claude/hooks/notify.ps1).
 6. **Tested all hooks** on Windows (session-start and block-dangerous both verified working).
 7. **Cost optimization.** User set CLAUDE_CODE_SUBAGENT_MODEL=claude-sonnet-4-6 env var for cheaper subagent execution.
-
-**What's next:** Phase 1 BUILD continues (same as session 2 handoff):
-1. Item #8: Minimal layout
-2. Item #9: Upgrade existing layouts
-3. Item #10: Cap free tier at 25 testimonials
-4. Item #11: Reprice to $29/mo (AFTER layouts ship)
-5. Item #12a: "Powered by Vouch" badge optimization
-6. Item #12b: Badge landing page conversion
-7. **Run the editorial migration SQL** on production Supabase before deploying.
-
-**What to watch out for:**
-1. Hooks use bash via Git Bash on Windows. If Git path changes, hooks break.
-2. notify.ps1 needs Windows notifications enabled (Settings > System > Notifications).
-3. CLAUDE_CODE_SUBAGENT_MODEL env var needs terminal restart to take effect.
-4. All previous session 2 watch-outs still apply (see below).
 
 ---
 
