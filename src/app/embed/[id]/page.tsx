@@ -26,7 +26,7 @@ interface WidgetTheme {
 interface Widget {
   id: string;
   name: string;
-  layout: 'grid' | 'carousel' | 'wall' | 'list' | 'single';
+  layout: 'grid' | 'carousel' | 'wall' | 'list' | 'single' | 'editorial';
   theme: WidgetTheme;
   hide_branding: boolean;
 }

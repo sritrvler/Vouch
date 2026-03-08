@@ -414,6 +414,330 @@
     return html;
   }
 
+  // ── Editorial layout ─────────────────────────────────────────────────────────
+
+  function parseColorBrightness(color) {
+    // Returns 0-255 red channel value, or -1 if unparseable
+    if (!color) return -1;
+    var hexMatch = color.match(/^#([0-9a-fA-F]{2})/);
+    if (hexMatch) return parseInt(hexMatch[1], 16);
+    var rgbMatch = color.match(/^rgba?\(\s*(\d+)/);
+    if (rgbMatch) return parseInt(rgbMatch[1], 10);
+    return -1;
+  }
+
+  function editorialStyles(tc, pc) {
+    // Compute muted context color from text color
+    var isLightText = false;
+    var brightness = parseColorBrightness(tc);
+    if (brightness >= 0) {
+      isLightText = brightness > 160;
+    }
+    var contextColor = isLightText ? 'rgba(255,255,255,0.42)' : 'rgba(0,0,0,0.42)';
+    var goldenColor = tc || (isLightText ? 'rgba(255,255,255,0.92)' : 'rgba(0,0,0,0.88)');
+    var mutedColor = isLightText ? 'rgba(255,255,255,0.45)' : 'rgba(0,0,0,0.45)';
+    var ruleColor = isLightText ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.12)';
+    var quoteMarkColor = isLightText ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)';
+    var navColor = isLightText ? 'rgba(255,255,255,0.35)' : 'rgba(0,0,0,0.35)';
+    var navHoverColor = isLightText ? 'rgba(255,255,255,0.75)' : 'rgba(0,0,0,0.7)';
+
+    return (
+      '.ed-wrapper{position:relative;max-width:960px;margin:0 auto;padding:48px 0 32px}' +
+      '.ed-rule{width:48px;height:1px;background:' + ruleColor + ';margin-bottom:40px}' +
+      '.ed-slides{position:relative;overflow:hidden;min-height:120px}' +
+      '.ed-slide{position:absolute;inset:0;opacity:0;visibility:hidden;' +
+        'transition:opacity 500ms cubic-bezier(0.16,1,0.3,1),visibility 500ms cubic-bezier(0.16,1,0.3,1),' +
+        'transform 500ms cubic-bezier(0.16,1,0.3,1)}' +
+      '.ed-slide.ed-active{opacity:1;visibility:visible;position:relative;transform:translateY(0)}' +
+      '.ed-slide.ed-exit-up{opacity:0;transform:translateY(-8px)}' +
+      '.ed-slide.ed-enter-below{opacity:0;transform:translateY(12px)}' +
+      '.ed-layout{display:grid;grid-template-columns:200px 1fr;gap:48px;align-items:center}' +
+      '.ed-media{display:flex;flex-direction:column;align-items:center;gap:16px}' +
+      '.ed-photo{width:88px;height:88px;border-radius:50%;object-fit:cover;flex-shrink:0}' +
+      '.ed-initials{width:88px;height:88px;border-radius:50%;display:flex;align-items:center;' +
+        'justify-content:center;font-size:28px;font-weight:600;color:#fff;flex-shrink:0}' +
+      '.ed-media-name{font-size:15px;font-weight:600;color:' + goldenColor + ';text-align:center;line-height:1.3}' +
+      '.ed-media-role{font-size:13px;font-weight:400;color:' + mutedColor + ';text-align:center;line-height:1.3;margin-top:2px;letter-spacing:0.02em}' +
+      '.ed-media-logo{max-height:24px;width:auto;opacity:0.45;margin-top:4px;filter:grayscale(100%)}' +
+      '.ed-content{position:relative}' +
+      '.ed-qmark{position:absolute;top:-16px;left:-6px;font-size:72px;line-height:1;font-weight:300;' +
+        'color:' + quoteMarkColor + ';pointer-events:none;user-select:none;font-family:Georgia,serif}' +
+      '.ed-quote{font-size:22px;line-height:1.55;margin:0 0 0 0;letter-spacing:-0.01em;position:relative;z-index:1}' +
+      '.ed-quote .ed-context{color:' + contextColor + ';font-weight:400}' +
+      '.ed-quote .ed-golden{color:' + goldenColor + ';font-weight:500}' +
+      '.ed-quote .ed-plain{color:' + goldenColor + ';font-weight:400}' +
+      '.ed-nav{display:flex;align-items:center;gap:12px;margin-top:32px;justify-content:flex-end}' +
+      '.ed-counter{font-size:13px;font-weight:400;letter-spacing:0.05em;color:' + navColor + ';' +
+        'font-variant-numeric:tabular-nums}' +
+      '.ed-arrow{width:44px;height:44px;border:none;background:none;cursor:pointer;display:flex;' +
+        'align-items:center;justify-content:center;font-size:18px;color:' + navColor + ';' +
+        'transition:color 200ms;padding:0;border-radius:50%}' +
+      '.ed-arrow:hover{color:' + navHoverColor + '}' +
+      '.ed-arrow:focus-visible{outline:2px solid ' + (pc || '#6366f1') + ';outline-offset:2px}' +
+      '.ed-video-badge{position:absolute;bottom:8px;right:8px;width:32px;height:32px;border-radius:50%;' +
+        'background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;cursor:pointer}' +
+      '@media(max-width:640px){' +
+        '.ed-wrapper{padding:32px 16px 24px}' +
+        '.ed-layout{grid-template-columns:1fr;gap:24px;text-align:center}' +
+        '.ed-media{flex-direction:row;align-items:center;gap:14px;justify-content:center}' +
+        '.ed-photo,.ed-initials{width:56px;height:56px;font-size:20px}' +
+        '.ed-media-info{text-align:left}' +
+        '.ed-media-logo{display:none}' +
+        '.ed-qmark{font-size:48px;top:-12px;left:-4px}' +
+        '.ed-quote{font-size:19px;line-height:1.5}' +
+        '.ed-nav{justify-content:center;margin-top:24px}' +
+        '.ed-rule{margin:0 auto 28px}' +
+        '.ed-content{text-align:left}' +
+      '}' +
+      '@media(max-width:480px){' +
+        '.ed-photo,.ed-initials{width:48px;height:48px;font-size:18px}' +
+        '.ed-quote{font-size:17px}' +
+      '}'
+    );
+  }
+
+  function renderEditorial(testimonials, theme) {
+    if (!testimonials.length) return { html: '', mount: function () {} };
+
+    var tc = safeColor(theme.textColor, '#0f172a');
+    var pc = safeColor(theme.primaryColor, '#6366F1');
+    var single = testimonials.length === 1;
+    var isLight = parseColorBrightness(tc) > 160;
+    var borderColor = isLight ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.12)';
+
+    // Build slides HTML
+    var slidesHtml = '';
+    for (var i = 0; i < testimonials.length; i++) {
+      var t = testimonials[i];
+      var authorLine = [t.author_role, t.author_company].filter(Boolean).join(', ');
+
+      // Golden sentence handling: dim context, golden at full contrast
+      var content = t.content || '';
+      var golden = t.golden_sentence;
+      var hasGolden = !!(golden && content && content.indexOf(golden) !== -1);
+      var quoteHtml = '';
+      if (hasGolden) {
+        var idx = content.indexOf(golden);
+        var before = content.slice(0, idx);
+        var after = content.slice(idx + golden.length);
+        quoteHtml =
+          (before ? '<span class="ed-context">' + esc(before) + '</span>' : '') +
+          '<span class="ed-golden">' + esc(golden) + '</span>' +
+          (after ? '<span class="ed-context">' + esc(after) + '</span>' : '');
+      } else {
+        quoteHtml = '<span class="ed-plain">' + esc(content) + '</span>';
+      }
+
+      // Author photo: avatar, Clearbit logo fallback, or initials
+      var photoHtml = '';
+      if (t.author_avatar_url) {
+        photoHtml = '<img class="ed-photo" src="' + esc(t.author_avatar_url) + '" alt="' + esc(t.author_name) + '">';
+      } else if (t.author_company) {
+        var domain = companyDomain(t.author_company);
+        var init = esc(initials(t.author_name));
+        photoHtml =
+          '<span style="position:relative;width:88px;height:88px;display:inline-block;flex-shrink:0">' +
+          '<img class="ed-photo" src="https://logo.clearbit.com/' + esc(domain) +
+          '" alt="" data-vouch-fallback style="object-fit:contain;padding:16px;border:1px solid ' + borderColor + '">' +
+          '<span class="ed-initials" style="display:none;position:absolute;inset:0;background:' +
+          pc + '20;color:' + pc + '">' + init + '</span></span>';
+      } else {
+        var init2 = esc(initials(t.author_name));
+        photoHtml = '<span class="ed-initials" style="background:' + pc + '20;color:' + pc + '">' + init2 + '</span>';
+      }
+
+      // Company logo (from project logo or Clearbit)
+      var logoHtml = '';
+      if (t.author_company) {
+        var logoDomain = companyDomain(t.author_company);
+        logoHtml = '<img class="ed-media-logo" src="https://logo.clearbit.com/' + esc(logoDomain) +
+          '" alt="' + esc(t.author_company) + '" data-vouch-fallback>';
+      }
+
+      // Video play badge on photo
+      var videoBadgeHtml = '';
+      if (t.video_url && t.show_video !== false) {
+        videoBadgeHtml =
+          '<div class="ed-video-badge" data-vouch-video data-src="' + esc(t.video_url) + '"' +
+          (t.video_thumbnail_url ? ' data-poster="' + esc(t.video_thumbnail_url) + '"' : '') + '>' +
+          '<svg width="14" height="14" viewBox="0 0 24 24" fill="white"><polygon points="8,5 20,12 8,19"/></svg>' +
+          '</div>';
+      }
+
+      slidesHtml +=
+        '<div class="ed-slide' + (i === 0 ? ' ed-active' : '') + '"' +
+        ' role="group" aria-roledescription="slide"' +
+        ' aria-label="Testimonial ' + (i + 1) + ' of ' + testimonials.length + '"' +
+        (i !== 0 ? ' aria-hidden="true"' : '') + '>' +
+        '<div class="ed-layout">' +
+          '<div class="ed-media">' +
+            '<div style="position:relative">' + photoHtml + videoBadgeHtml + '</div>' +
+            '<div class="ed-media-info">' +
+              '<div class="ed-media-name">' + esc(t.author_name) + '</div>' +
+              (authorLine ? '<div class="ed-media-role">' + esc(authorLine) + '</div>' : '') +
+            '</div>' +
+            logoHtml +
+          '</div>' +
+          '<div class="ed-content">' +
+            '<span class="ed-qmark" aria-hidden="true">\u201C</span>' +
+            '<blockquote class="ed-quote"><p style="margin:0">' + quoteHtml + '</p></blockquote>' +
+          '</div>' +
+        '</div>' +
+        '</div>';
+    }
+
+    // Navigation
+    var navHtml = '';
+    if (!single) {
+      navHtml =
+        '<div class="ed-nav">' +
+        '<button class="ed-arrow ed-prev" aria-label="Previous testimonial">' +
+        '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M15 18l-6-6 6-6"/></svg>' +
+        '</button>' +
+        '<span class="ed-counter">1 / ' + testimonials.length + '</span>' +
+        '<button class="ed-arrow ed-next" aria-label="Next testimonial">' +
+        '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 18l6-6-6-6"/></svg>' +
+        '</button>' +
+        '</div>';
+    }
+
+    var css = editorialStyles(tc, pc);
+    var html =
+      '<style>' + css + '</style>' +
+      '<div class="ed-wrapper"' +
+      (!single ? ' tabindex="0" aria-roledescription="carousel" aria-label="Testimonials"' : '') + '>' +
+      '<div class="ed-rule" aria-hidden="true"></div>' +
+      '<div class="ed-slides">' + slidesHtml + '</div>' +
+      navHtml +
+      '</div>';
+
+    function mount(rootContainer) {
+      if (single) return;
+
+      var shadowRoot = rootContainer.getRootNode();
+      var slides = shadowRoot.querySelectorAll('.ed-slide');
+      var counter = shadowRoot.querySelector('.ed-counter');
+      var prevBtn = shadowRoot.querySelector('.ed-prev');
+      var nextBtn = shadowRoot.querySelector('.ed-next');
+      var wrapper = shadowRoot.querySelector('.ed-wrapper');
+      var total = slides.length;
+      var current = 0;
+      var interval = null;
+      var ROTATE_MS = 8000;
+
+      function goTo(index) {
+        var prev = current;
+        var next = ((index % total) + total) % total;
+        if (next === prev) return;
+        var goingForward = (index > current);
+
+        // Exit old slide
+        slides[prev].classList.remove('ed-active');
+        slides[prev].classList.add(goingForward ? 'ed-exit-up' : 'ed-enter-below');
+        slides[prev].setAttribute('aria-hidden', 'true');
+
+        // Enter new slide
+        slides[next].classList.remove('ed-exit-up', 'ed-enter-below');
+        slides[next].classList.add('ed-active');
+        slides[next].removeAttribute('aria-hidden');
+
+        current = next;
+
+        // Clean exit class after transition
+        setTimeout(function () {
+          slides[prev].classList.remove('ed-exit-up', 'ed-enter-below');
+        }, 520);
+
+        // Update counter
+        if (counter) counter.textContent = (current + 1) + ' / ' + total;
+      }
+
+      function startAutoRotate() {
+        stopAutoRotate();
+        interval = setInterval(function () {
+          // Orphaned timer check
+          if (!document.contains(rootContainer)) {
+            clearInterval(interval);
+            return;
+          }
+          goTo(current + 1);
+        }, ROTATE_MS);
+      }
+
+      function stopAutoRotate() {
+        if (interval) {
+          clearInterval(interval);
+          interval = null;
+        }
+      }
+
+      // Arrow click handlers
+      if (prevBtn) {
+        prevBtn.addEventListener('click', function () {
+          goTo(current - 1);
+          stopAutoRotate();
+          startAutoRotate();
+        });
+      }
+      if (nextBtn) {
+        nextBtn.addEventListener('click', function () {
+          goTo(current + 1);
+          stopAutoRotate();
+          startAutoRotate();
+        });
+      }
+
+      // Keyboard navigation
+      if (wrapper) {
+        wrapper.addEventListener('keydown', function (e) {
+          if (e.key === 'ArrowLeft') {
+            e.preventDefault();
+            goTo(current - 1);
+            stopAutoRotate();
+            startAutoRotate();
+          } else if (e.key === 'ArrowRight') {
+            e.preventDefault();
+            goTo(current + 1);
+            stopAutoRotate();
+            startAutoRotate();
+          }
+        });
+      }
+
+      // Pause on hover
+      if (wrapper) {
+        wrapper.addEventListener('mouseenter', stopAutoRotate);
+        wrapper.addEventListener('mouseleave', startAutoRotate);
+      }
+
+      // Touch/swipe support
+      var touchStartX = 0;
+      var touchStartY = 0;
+      if (wrapper) {
+        wrapper.addEventListener('touchstart', function (e) {
+          touchStartX = e.touches[0].clientX;
+          touchStartY = e.touches[0].clientY;
+        }, { passive: true });
+
+        wrapper.addEventListener('touchend', function (e) {
+          var dx = e.changedTouches[0].clientX - touchStartX;
+          var dy = e.changedTouches[0].clientY - touchStartY;
+          // Only trigger if horizontal swipe is dominant and long enough
+          if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy) * 1.5) {
+            goTo(dx > 0 ? current - 1 : current + 1);
+            stopAutoRotate();
+            startAutoRotate();
+          }
+        }, { passive: true });
+      }
+
+      // Start auto-rotate
+      startAutoRotate();
+    }
+
+    return { html: html, mount: mount };
+  }
+
   // ── Schema markup ────────────────────────────────────────────────────────────
 
   function injectSchema(testimonials, widgetName) {
@@ -586,11 +910,16 @@
       container.appendChild(logoWrap);
     }
 
+    var editorialMount = null;
     if (!testimonials.length) {
       container.innerHTML = '<p style="color:#94a3b8;font-size:14px;text-align:center;padding:32px 16px">No testimonials yet.</p>';
     } else {
       var layout = w.layout || 'grid';
-      if (layout === 'carousel') container.innerHTML = renderCarousel(testimonials, theme);
+      if (layout === 'editorial') {
+        var editorial = renderEditorial(testimonials, theme);
+        container.innerHTML = editorial.html;
+        editorialMount = editorial.mount;
+      } else if (layout === 'carousel') container.innerHTML = renderCarousel(testimonials, theme);
       else if (layout === 'wall') container.innerHTML = renderWall(testimonials, theme);
       else if (layout === 'list') container.innerHTML = renderList(testimonials, theme);
       else if (layout === 'single') container.innerHTML = renderSingle(testimonials, theme);
@@ -623,6 +952,9 @@
 
     // Post-render: avatar fallbacks and read-more buttons (after layout)
     postRenderFixups(shadow, theme);
+
+    // Mount editorial interactivity (after DOM is in shadow)
+    if (editorialMount) editorialMount(container);
 
     // Inject JSON-LD schema into host page
     injectSchema(testimonials, w.name);

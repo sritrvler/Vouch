@@ -1,24 +1,23 @@
-## Session Handoff (March 7, 2026)
+## Session Handoff (March 8, 2026)
 
 **What was done:**
-1. Complete strategic research session across two sub-sessions. No code written.
-2. Validated competitive landscape, pricing, buyer journeys, feature gaps (sections A through K).
-3. "Native vs. Distinct" widget design research (section L): real pain point is "limited customization," not "looks out of place."
-4. Removed 749 lines of stale content from todo.md.
-5. **Built the MASTER EXECUTION ROADMAP** (91 items, see section immediately below). This is the sole execution reference. All items from sections A through L and audit report items 24 through 35 are mapped. Cross-reference table at bottom proves completeness.
+1. **Editorial layout (Item #7) COMPLETE.** Full T4 pipeline: plan, architect review, UX/UI agent reviews, code, senior code review + premium UI review + adversarial self-review, all HIGH/MEDIUM fixes applied, build verified, browser tested.
+2. Files changed: `public/embed.js` (editorial CSS + render + mount with navigation/swipe/auto-rotate/keyboard), `src/app/(dashboard)/dashboard/widgets/page.tsx` (EditorialPreview component, layout option, golden_sentence support), `src/app/embed/[id]/page.tsx` (type update), `supabase/schema.sql` (CHECK constraint), `supabase/migrations/add_editorial_layout.sql` (new migration).
+3. Key fixes applied during review: rgb() color parsing for light/dark detection, directional slide animation (ed-exit-up/ed-enter-below), 44px touch targets, theme-aware Clearbit fallback, tabindex for keyboard nav, dashboard preview colors matching embed rgba logic, index reset on testimonials change.
 
-**What's next:** Phase 1 BUILD from the Master Roadmap:
-1. Item #7: Editorial layout (the #1 visual differentiator, justifies $29 pricing)
-2. Item #8: Minimal layout (the anti-widget, appeals to design-conscious users)
-3. Item #9: Upgrade existing layouts (text size, spacing, transitions)
-4. Item #10: Cap free tier at 10 testimonials
-5. Item #11: Reprice to $29/mo (AFTER Editorial + Minimal ship)
+**What's next:** Phase 1 BUILD continues:
+1. Item #8: Minimal layout (the anti-widget, clean quote + attribution only)
+2. Item #9: Upgrade existing layouts (text size, spacing, transitions)
+3. Item #10: Cap free tier at 10 testimonials
+4. Item #11: Reprice to $29/mo (AFTER layouts ship)
+5. **Run the editorial migration SQL** (`supabase/migrations/add_editorial_layout.sql`) on production Supabase before deploying.
 
 **What to watch out for:**
-1. todo.md is large. The Master Roadmap is at the top (after this handoff). Sections A through L are context/rationale below. Use offset/limit.
-2. Pricing change ($19 to $29) is NOT implemented yet. Happens after premium widgets ship.
-3. Pre-Launch Checklist items (domain, Supabase Pro, support email) are done by user right before go-live, not during Phase 1 build.
-4. Phase 1 DISCOVERY (#14 showcase page, #15 live demo) runs in parallel with build work.
+1. Editorial is gated as Pro layout (`isProLayout = opt.value !== 'grid'`). Free users see a lock icon and upgrade prompt.
+2. The `renderEditorial` function in embed.js returns `{html, mount}` (not just HTML string like other layouts). The mount wiring is in `renderWidget()` after shadow DOM assembly.
+3. `parseColorBrightness()` is a new shared helper in embed.js. Reuse it if Minimal layout also needs light/dark detection.
+4. todo.md is large. Use offset/limit. Master Roadmap starts at line ~25.
+5. Pricing change ($19 to $29) is NOT implemented yet. Happens after premium widgets ship.
 
 ---
 
@@ -53,7 +52,7 @@ These are operational prerequisites. No code to write (except the Privacy Policy
 
 ### Phase 1 BUILD
 
-7. [ ] **Editorial layout** (D1). Full-width, magazine-style, one testimonial at a time, large pull-quote with golden sentence, large author photo, company logo. NO competitor has this. PRIORITY: HIGHEST.
+7. [x] **Editorial layout** (D1). DONE (session March 8). Full-width, magazine-style, one testimonial at a time, large pull-quote with golden sentence, large author photo, company logo. NO competitor has this.
 8. [ ] **Minimal layout** (D2). The anti-widget. Quote and attribution only. No stars, borders, shadows, card background. Inherits host site typography. PRIORITY: HIGH.
 9. [ ] **Upgrade existing layouts** (D4). Larger text option (textSize theme: compact/default/large), more whitespace (24px padding, 16-20px gaps), smoother carousel transitions (300ms cubic-bezier), reduce default clutter (hide date and metric badge by default on new widgets), better video thumbnails. PRIORITY: HIGH.
 10. [ ] **Cap free tier at 10 testimonials** (B1). Add count check in testimonial submission API. When free user's approved + pending testimonials exceed 10, show branded upgrade message on collection form. PRIORITY: HIGH.

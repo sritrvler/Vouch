@@ -121,7 +121,7 @@ create table public.widgets (
   project_id uuid references public.projects(id) on delete cascade not null,
   user_id uuid references auth.users(id) on delete cascade not null,
   name text not null default 'My Widget',
-  layout text not null default 'grid' check (layout in ('grid', 'carousel', 'wall', 'list', 'single')),
+  layout text not null default 'grid' check (layout in ('grid', 'carousel', 'wall', 'list', 'single', 'editorial')),
   theme jsonb default '{
     "primaryColor": "#6366F1",
     "backgroundColor": "#ffffff",

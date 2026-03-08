@@ -28,6 +28,7 @@ import {
   SlidersHorizontal,
   ArrowUpDown,
   ArrowLeft,
+  Newspaper,
 } from 'lucide-react';
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/client';
@@ -46,7 +47,7 @@ import { GOOGLE_FONTS, resolveFontUrl, sanitizeFontUrl } from '@/lib/fonts';
 import { PLATFORMS, type WebPlatform } from '@/lib/embed-platforms';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
-type WidgetLayout = 'grid' | 'carousel' | 'wall' | 'list' | 'single';
+type WidgetLayout = 'grid' | 'carousel' | 'wall' | 'list' | 'single' | 'editorial';
 type FilterMode = 'all' | 'featured' | 'rating';
 
 interface WidgetTheme {
@@ -80,6 +81,7 @@ interface Testimonial {
   author_avatar_url: string | null;
   rating: number;
   content: string;
+  golden_sentence: string | null;
   featured: boolean;
   created_at: string;
 }
@@ -107,6 +109,7 @@ const SAMPLE_TESTIMONIALS: Testimonial[] = [
     author_avatar_url: null,
     rating: 5,
     content: 'This tool completely transformed how we collect customer feedback. The setup took minutes and the results have been incredible. Highly recommend to any business owner.',
+    golden_sentence: 'The setup took minutes and the results have been incredible.',
     featured: true,
     created_at: new Date(Date.now() - 7 * 86400000).toISOString(),
   },
@@ -118,6 +121,7 @@ const SAMPLE_TESTIMONIALS: Testimonial[] = [
     author_avatar_url: null,
     rating: 5,
     content: 'The widget looks beautiful on our website and we\'ve seen a 30% increase in conversions since adding social proof. Worth every penny.',
+    golden_sentence: 'we\'ve seen a 30% increase in conversions since adding social proof.',
     featured: true,
     created_at: new Date(Date.now() - 14 * 86400000).toISOString(),
   },
@@ -129,6 +133,7 @@ const SAMPLE_TESTIMONIALS: Testimonial[] = [
     author_avatar_url: null,
     rating: 4,
     content: 'Clean, simple, and effective. I love the automated Google review nudge. It has doubled our review count in just two months.',
+    golden_sentence: 'It has doubled our review count in just two months.',
     featured: false,
     created_at: new Date(Date.now() - 21 * 86400000).toISOString(),
   },
@@ -144,6 +149,7 @@ const COLOR_PRESETS = [
 ];
 
 const LAYOUT_OPTIONS: { value: WidgetLayout; label: string; icon: React.ReactNode; desc: string }[] = [
+  { value: 'editorial', label: 'Editorial', icon: <Newspaper className="size-4" />, desc: 'Magazine style' },
   { value: 'grid', label: 'Grid', icon: <LayoutGrid className="size-4" />, desc: '2-3 columns' },
   { value: 'carousel', label: 'Carousel', icon: <Rows3 className="size-4" />, desc: 'Horizontal scroll' },
   { value: 'wall', label: 'Wall of Love', icon: <Heart className="size-4" />, desc: 'Masonry layout' },
@@ -228,6 +234,158 @@ function TestimonialPreviewCard({
           <span className="ml-auto text-xs" style={{ color: theme.textColor + '60' }}>
             {format(new Date(testimonial.created_at), 'MMM yyyy')}
           </span>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ─── Editorial Preview ───────────────────────────────────────────────────────
+function EditorialPreview({
+  testimonials,
+  theme,
+}: {
+  testimonials: Testimonial[];
+  theme: WidgetTheme;
+}) {
+  const [current, setCurrent] = useState(0);
+  const total = testimonials.length;
+
+  // Reset index if testimonials array shrinks
+  useEffect(() => {
+    if (current >= total) setCurrent(0);
+  }, [total, current]);
+
+  const t = testimonials[current];
+  if (!t) return null;
+
+  const roleCompany = [t.author_role, t.author_company].filter(Boolean).join(', ');
+  const initials2 = t.author_name
+    .split(' ')
+    .map((w) => w[0])
+    .join('')
+    .toUpperCase()
+    .slice(0, 2);
+
+  // Golden sentence rendering
+  const content = t.content || '';
+  const golden = t.golden_sentence;
+  const hasGolden = !!(golden && content.includes(golden));
+
+  // Match embed.js: use rgba for consistent rendering across hex/rgb/hsl text colors
+  const tc = theme.textColor || '#0f172a';
+  const r = parseInt((tc.match(/^#([0-9a-fA-F]{2})/) || ['', '0f'])[1], 16);
+  const rgbMatch = tc.match(/^rgba?\(\s*(\d+)/);
+  const red = rgbMatch ? parseInt(rgbMatch[1], 10) : r;
+  const isLightText = red > 160;
+  const contextColor = isLightText ? 'rgba(255,255,255,0.42)' : 'rgba(0,0,0,0.42)';
+  const goldenColor = isLightText ? 'rgba(255,255,255,0.92)' : 'rgba(0,0,0,0.88)';
+
+  const goTo = (index: number) => {
+    setCurrent(((index % total) + total) % total);
+  };
+
+  return (
+    <div style={{ maxWidth: 960, margin: '0 auto', padding: '48px 0 32px' }}>
+      <div style={{ width: 48, height: 1, background: theme.textColor + '1a', marginBottom: 40 }} />
+      <div style={{ position: 'relative', overflow: 'hidden' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: '200px 1fr', gap: 48, alignItems: 'center' }}>
+          {/* Media column */}
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 16 }}>
+            <div style={{ position: 'relative' }}>
+              {t.author_avatar_url ? (
+                <img
+                  src={t.author_avatar_url}
+                  alt={t.author_name}
+                  style={{ width: 88, height: 88, borderRadius: '50%', objectFit: 'cover' }}
+                />
+              ) : (
+                <div
+                  style={{
+                    width: 88, height: 88, borderRadius: '50%',
+                    background: theme.primaryColor + '20', color: theme.primaryColor,
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    fontSize: 28, fontWeight: 600,
+                  }}
+                >
+                  {initials2}
+                </div>
+              )}
+            </div>
+            <div style={{ textAlign: 'center' }}>
+              <div style={{ fontSize: 15, fontWeight: 600, color: goldenColor, lineHeight: 1.3 }}>{t.author_name}</div>
+              {roleCompany && (
+                <div style={{ fontSize: 13, color: contextColor, lineHeight: 1.3, marginTop: 2 }}>{roleCompany}</div>
+              )}
+            </div>
+          </div>
+
+          {/* Content column */}
+          <div style={{ position: 'relative' }}>
+            <span
+              aria-hidden="true"
+              style={{
+                position: 'absolute', top: -16, left: -6,
+                fontSize: 72, lineHeight: 1, fontWeight: 300,
+                color: theme.textColor + '0f', pointerEvents: 'none',
+                fontFamily: 'Georgia, serif',
+              }}
+            >
+              {'\u201C'}
+            </span>
+            <blockquote style={{ margin: 0, position: 'relative', zIndex: 1 }}>
+              <p style={{ fontSize: 22, lineHeight: 1.55, letterSpacing: '-0.01em', margin: 0 }}>
+                {hasGolden ? (
+                  <>
+                    {content.slice(0, content.indexOf(golden!)) && (
+                      <span style={{ color: contextColor, fontWeight: 400 }}>
+                        {content.slice(0, content.indexOf(golden!))}
+                      </span>
+                    )}
+                    <span style={{ color: goldenColor, fontWeight: 500 }}>{golden}</span>
+                    {content.slice(content.indexOf(golden!) + golden!.length) && (
+                      <span style={{ color: contextColor, fontWeight: 400 }}>
+                        {content.slice(content.indexOf(golden!) + golden!.length)}
+                      </span>
+                    )}
+                  </>
+                ) : (
+                  <span style={{ color: goldenColor, fontWeight: 400 }}>{content}</span>
+                )}
+              </p>
+            </blockquote>
+          </div>
+        </div>
+
+        {/* Navigation */}
+        {total > 1 && (
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginTop: 32, justifyContent: 'flex-end' }}>
+            <button
+              onClick={() => goTo(current - 1)}
+              style={{
+                width: 44, height: 44, border: 'none', background: 'none',
+                cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                color: isLightText ? 'rgba(255,255,255,0.35)' : 'rgba(0,0,0,0.35)', borderRadius: '50%', padding: 0,
+              }}
+              aria-label="Previous testimonial"
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M15 18l-6-6 6-6"/></svg>
+            </button>
+            <span style={{ fontSize: 13, fontWeight: 400, letterSpacing: '0.05em', color: isLightText ? 'rgba(255,255,255,0.35)' : 'rgba(0,0,0,0.35)', fontVariantNumeric: 'tabular-nums' }}>
+              {current + 1} / {total}
+            </span>
+            <button
+              onClick={() => goTo(current + 1)}
+              style={{
+                width: 44, height: 44, border: 'none', background: 'none',
+                cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                color: isLightText ? 'rgba(255,255,255,0.35)' : 'rgba(0,0,0,0.35)', borderRadius: '50%', padding: 0,
+              }}
+              aria-label="Next testimonial"
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M9 18l6-6-6-6"/></svg>
+            </button>
+          </div>
         )}
       </div>
     </div>
@@ -480,7 +638,7 @@ export default function WidgetsPage() {
 
       let testimonialsQuery = supabase
         .from('testimonials')
-        .select('id, author_name, author_role, author_company, author_avatar_url, rating, content, featured, created_at')
+        .select('id, author_name, author_role, author_company, author_avatar_url, rating, content, golden_sentence, featured, created_at')
         .eq('user_id', user.id)
         .eq('status', 'approved')
         .order('created_at', { ascending: false })
@@ -1420,6 +1578,12 @@ export function Testimonials() {
                     exit={{ opacity: 0 }}
                     transition={{ duration: 0.2 }}
                   >
+                    {settings.layout === 'editorial' && (
+                      <EditorialPreview
+                        testimonials={previewTestimonials}
+                        theme={settings.theme}
+                      />
+                    )}
                     {settings.layout === 'grid' && (
                       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                         {previewTestimonials.slice(0, 6).map((t) => (
