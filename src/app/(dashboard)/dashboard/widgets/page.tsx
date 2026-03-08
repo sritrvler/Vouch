@@ -29,6 +29,7 @@ import {
   ArrowUpDown,
   ArrowLeft,
   Newspaper,
+  Sparkles,
 } from 'lucide-react';
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/client';
@@ -286,10 +287,10 @@ function EditorialPreview({
   };
 
   return (
-    <div style={{ maxWidth: 960, margin: '0 auto', padding: '48px 0 32px' }}>
-      <div style={{ width: 48, height: 1, background: theme.textColor + '1a', marginBottom: 40 }} />
+    <div style={{ maxWidth: 640, margin: '0 auto', padding: '32px 16px 24px' }}>
+      <div style={{ width: 48, height: 1, background: theme.textColor + '1a', marginBottom: 28 }} />
       <div style={{ position: 'relative', overflow: 'hidden' }}>
-        <div style={{ display: 'grid', gridTemplateColumns: '200px 1fr', gap: 48, alignItems: 'center' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: '140px 1fr', gap: 32, alignItems: 'center' }}>
           {/* Media column */}
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 16 }}>
             <div style={{ position: 'relative' }}>
@@ -297,15 +298,15 @@ function EditorialPreview({
                 <img
                   src={t.author_avatar_url}
                   alt={t.author_name}
-                  style={{ width: 88, height: 88, borderRadius: '50%', objectFit: 'cover' }}
+                  style={{ width: 64, height: 64, borderRadius: '50%', objectFit: 'cover' }}
                 />
               ) : (
                 <div
                   style={{
-                    width: 88, height: 88, borderRadius: '50%',
+                    width: 64, height: 64, borderRadius: '50%',
                     background: theme.primaryColor + '20', color: theme.primaryColor,
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    fontSize: 28, fontWeight: 600,
+                    fontSize: 22, fontWeight: 600,
                   }}
                 >
                   {initials2}
@@ -325,8 +326,8 @@ function EditorialPreview({
             <span
               aria-hidden="true"
               style={{
-                position: 'absolute', top: -16, left: -6,
-                fontSize: 72, lineHeight: 1, fontWeight: 300,
+                position: 'absolute', top: -12, left: -4,
+                fontSize: 48, lineHeight: 1, fontWeight: 300,
                 color: theme.textColor + '0f', pointerEvents: 'none',
                 fontFamily: 'Georgia, serif',
               }}
@@ -334,7 +335,7 @@ function EditorialPreview({
               {'\u201C'}
             </span>
             <blockquote style={{ margin: 0, position: 'relative', zIndex: 1 }}>
-              <p style={{ fontSize: 22, lineHeight: 1.55, letterSpacing: '-0.01em', margin: 0 }}>
+              <p style={{ fontSize: 16, lineHeight: 1.55, letterSpacing: '-0.01em', margin: 0 }}>
                 {hasGolden ? (
                   <>
                     {content.slice(0, content.indexOf(golden!)) && (
@@ -359,31 +360,31 @@ function EditorialPreview({
 
         {/* Navigation */}
         {total > 1 && (
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginTop: 32, justifyContent: 'flex-end' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginTop: 24, justifyContent: 'flex-end' }}>
             <button
               onClick={() => goTo(current - 1)}
               style={{
-                width: 44, height: 44, border: 'none', background: 'none',
+                width: 32, height: 32, border: 'none', background: 'none',
                 cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
                 color: isLightText ? 'rgba(255,255,255,0.35)' : 'rgba(0,0,0,0.35)', borderRadius: '50%', padding: 0,
               }}
               aria-label="Previous testimonial"
             >
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M15 18l-6-6 6-6"/></svg>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M15 18l-6-6 6-6"/></svg>
             </button>
-            <span style={{ fontSize: 13, fontWeight: 400, letterSpacing: '0.05em', color: isLightText ? 'rgba(255,255,255,0.35)' : 'rgba(0,0,0,0.35)', fontVariantNumeric: 'tabular-nums' }}>
+            <span style={{ fontSize: 12, fontWeight: 400, letterSpacing: '0.05em', color: isLightText ? 'rgba(255,255,255,0.35)' : 'rgba(0,0,0,0.35)', fontVariantNumeric: 'tabular-nums' }}>
               {current + 1} / {total}
             </span>
             <button
               onClick={() => goTo(current + 1)}
               style={{
-                width: 44, height: 44, border: 'none', background: 'none',
+                width: 32, height: 32, border: 'none', background: 'none',
                 cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
                 color: isLightText ? 'rgba(255,255,255,0.35)' : 'rgba(0,0,0,0.35)', borderRadius: '50%', padding: 0,
               }}
               aria-label="Next testimonial"
             >
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M9 18l6-6-6-6"/></svg>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M9 18l6-6-6-6"/></svg>
             </button>
           </div>
         )}
@@ -949,14 +950,26 @@ export function Testimonials() {
             <>
               <Button
                 size="sm"
-                onClick={() => { setEmbedPath('choose'); setSelectedPlatform(null); setShowEmbedModal(true); }}
+                onClick={() => {
+                  if (userPlan === 'free' && settings.layout !== 'grid') {
+                    setShowUpgradePrompt(true);
+                    return;
+                  }
+                  setEmbedPath('choose'); setSelectedPlatform(null); setShowEmbedModal(true);
+                }}
                 className="gap-1.5 rounded-xl border-indigo-200 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 hover:border-indigo-300"
               >
                 <Globe className="size-3.5" />
                 <span className="hidden sm:inline">Add to Website</span>
               </Button>
               <Button
-                onClick={handleSave}
+                onClick={() => {
+                  if (userPlan === 'free' && settings.layout !== 'grid') {
+                    setShowUpgradePrompt(true);
+                    return;
+                  }
+                  handleSave();
+                }}
                 disabled={saving}
                 size="sm"
                 className="gap-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-700"
@@ -1108,29 +1121,26 @@ export function Testimonials() {
             <div className="flex gap-1.5 overflow-x-auto pb-1 scrollbar-none" style={{ scrollbarWidth: 'none' }}>
               {LAYOUT_OPTIONS.map((opt) => {
                 const isProLayout = opt.value !== 'grid';
-                const isLocked = isProLayout && userPlan === 'free';
+                const isFlagship = opt.value === 'editorial';
+                const isSelected = settings.layout === opt.value;
                 return (
                   <button
                     key={opt.value}
-                    onClick={() => {
-                      if (isLocked) {
-                        setShowUpgradePrompt(true);
-                        return;
-                      }
-                      update('layout', opt.value);
-                    }}
+                    onClick={() => update('layout', opt.value)}
                     className={cn(
                       'relative flex items-center gap-1.5 rounded-lg border px-2.5 py-2 text-xs font-medium transition-all shrink-0',
-                      isLocked
-                        ? 'border-border text-muted-foreground/50 cursor-not-allowed bg-muted/20'
-                        : settings.layout === opt.value
+                      isSelected
                         ? 'border-indigo-500 bg-indigo-50/60 text-indigo-700'
                         : 'border-border text-muted-foreground hover:border-indigo-200 hover:bg-muted/30'
                     )}
                   >
                     <span className="size-4">{opt.icon}</span>
                     {opt.label}
-                    {isLocked && <Lock className="size-2.5 text-muted-foreground/50" />}
+                    {isProLayout && userPlan === 'free' && (
+                      isFlagship
+                        ? <span className="flex items-center gap-0.5 text-[10px] font-semibold text-amber-600 bg-amber-50 border border-amber-200/60 rounded px-1 py-px leading-tight"><Sparkles className="size-2.5" />PRO</span>
+                        : <span className="text-[10px] font-semibold text-indigo-500/70 bg-indigo-50 rounded px-1 py-px leading-tight">PRO</span>
+                    )}
                   </button>
                 );
               })}
@@ -1543,6 +1553,24 @@ export function Testimonials() {
                 </span>
               )}
             </div>
+
+            {/* Pro layout upgrade banner */}
+            {userPlan === 'free' && settings.layout !== 'grid' && (
+              <div className="mx-5 mt-4 flex items-center gap-3 rounded-xl border border-indigo-200 bg-indigo-50/80 px-4 py-3">
+                <Sparkles className="size-4 text-indigo-500 shrink-0" />
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs font-medium text-indigo-900">
+                    This is a Pro layout. Upgrade to use it on your website.
+                  </p>
+                </div>
+                <button
+                  onClick={() => setShowUpgradePrompt(true)}
+                  className="text-xs font-semibold text-indigo-600 hover:text-indigo-800 whitespace-nowrap transition-colors"
+                >
+                  Upgrade
+                </button>
+              </div>
+            )}
 
             {/* Font loading for preview */}
             {settings.theme.fontFamily !== 'inherit' && resolveFontUrl(settings.theme.fontFamily, settings.theme.fontUrl) && (
