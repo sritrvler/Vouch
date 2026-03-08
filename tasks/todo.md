@@ -1,3 +1,31 @@
+## Session Handoff (March 8, 2026, session 3)
+
+**What was done:**
+1. **Claude Code infrastructure improvements.** Restructured CLAUDE.md from 640 to 98 lines. Created 8 rule files in .claude/rules/ (4 global, 4 path-specific). Created hooks: session-start, block-dangerous, post-edit reminder, auto-checkpoint + Windows notification on Stop.
+2. **Installed Prettier** in vouch project for code formatting.
+3. **Installed Sequential Thinking MCP** server for complex reasoning tasks.
+4. **Fixed subagent strategy.** Flipped from "paste code in agent prompts" to "let agents read files themselves" (saves main context). Added "request concise summaries" rule.
+5. **Set up Windows toast notifications** on task completion (.claude/hooks/notify.ps1).
+6. **Tested all hooks** on Windows (session-start and block-dangerous both verified working).
+7. **Cost optimization.** User set CLAUDE_CODE_SUBAGENT_MODEL=claude-sonnet-4-6 env var for cheaper subagent execution.
+
+**What's next:** Phase 1 BUILD continues (same as session 2 handoff):
+1. Item #8: Minimal layout
+2. Item #9: Upgrade existing layouts
+3. Item #10: Cap free tier at 25 testimonials
+4. Item #11: Reprice to $29/mo (AFTER layouts ship)
+5. Item #12a: "Powered by Vouch" badge optimization
+6. Item #12b: Badge landing page conversion
+7. **Run the editorial migration SQL** on production Supabase before deploying.
+
+**What to watch out for:**
+1. Hooks use bash via Git Bash on Windows. If Git path changes, hooks break.
+2. notify.ps1 needs Windows notifications enabled (Settings > System > Notifications).
+3. CLAUDE_CODE_SUBAGENT_MODEL env var needs terminal restart to take effect.
+4. All previous session 2 watch-outs still apply (see below).
+
+---
+
 ## Session Handoff (March 8, 2026, session 2)
 
 **What was done:**
