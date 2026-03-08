@@ -1539,13 +1539,9 @@ export function Testimonials() {
           <div className="bg-white rounded-2xl border border-border overflow-hidden">
             {/* Preview Header */}
             <div className="flex items-center justify-between px-5 py-3.5 border-b border-border bg-muted/30">
-              <div className="flex items-center gap-2">
-                <div className="flex gap-1.5">
-                  <div className="size-3 rounded-full bg-red-400/60" />
-                  <div className="size-3 rounded-full bg-amber-400/60" />
-                  <div className="size-3 rounded-full bg-emerald-400/60" />
-                </div>
-                <span className="text-xs text-muted-foreground font-medium">Live Preview</span>
+              <div className="flex items-center gap-1.5">
+                <span className="text-xs text-muted-foreground font-medium">Preview</span>
+                <span className="text-[10px] text-muted-foreground/60">how it looks on your site</span>
               </div>
               {usingSampleData && (
                 <span className="text-xs bg-amber-50 text-amber-700 border border-amber-200 rounded-full px-2 py-0.5 font-medium">
