@@ -29,6 +29,7 @@ import {
   ArrowUpDown,
   ArrowLeft,
   Newspaper,
+  Minus,
   Sparkles,
 } from 'lucide-react';
 import Link from 'next/link';
@@ -48,7 +49,7 @@ import { GOOGLE_FONTS, resolveFontUrl, sanitizeFontUrl } from '@/lib/fonts';
 import { PLATFORMS, type WebPlatform } from '@/lib/embed-platforms';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
-type WidgetLayout = 'grid' | 'carousel' | 'wall' | 'list' | 'single' | 'editorial';
+type WidgetLayout = 'grid' | 'carousel' | 'wall' | 'list' | 'single' | 'editorial' | 'minimal';
 type FilterMode = 'all' | 'featured' | 'rating';
 
 interface WidgetTheme {
@@ -151,6 +152,7 @@ const COLOR_PRESETS = [
 
 const LAYOUT_OPTIONS: { value: WidgetLayout; label: string; icon: React.ReactNode; desc: string }[] = [
   { value: 'editorial', label: 'Editorial', icon: <Newspaper className="size-4" />, desc: 'Magazine style' },
+  { value: 'minimal', label: 'Minimal', icon: <Minus className="size-4" />, desc: 'Clean typography' },
   { value: 'grid', label: 'Grid', icon: <LayoutGrid className="size-4" />, desc: '2-3 columns' },
   { value: 'carousel', label: 'Carousel', icon: <Rows3 className="size-4" />, desc: 'Horizontal scroll' },
   { value: 'wall', label: 'Wall of Love', icon: <Heart className="size-4" />, desc: 'Masonry layout' },
@@ -389,6 +391,113 @@ function EditorialPreview({
           </div>
         )}
       </div>
+    </div>
+  );
+}
+
+// ─── Minimal Preview ──────────────────────────────────────────────────────────
+function MinimalPreview({
+  testimonials,
+  theme,
+}: {
+  testimonials: Testimonial[];
+  theme: WidgetTheme;
+}) {
+  const count = Math.min(testimonials.length, 3);
+  const items = testimonials.slice(0, count);
+
+  const tc = theme.textColor || '#0f172a';
+  const r = parseInt((tc.match(/^#([0-9a-fA-F]{2})/) || ['', '0f'])[1], 16);
+  const rgbMatch = tc.match(/^rgba?\(\s*(\d+)/);
+  const red = rgbMatch ? parseInt(rgbMatch[1], 10) : r;
+  const isLightText = red > 160;
+  const contextColor = isLightText ? 'rgba(255,255,255,0.42)' : 'rgba(0,0,0,0.42)';
+  const goldenColor = isLightText ? 'rgba(255,255,255,0.92)' : 'rgba(0,0,0,0.88)';
+  const dividerColor = isLightText ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.10)';
+  const attrMuted = isLightText ? 'rgba(255,255,255,0.45)' : 'rgba(0,0,0,0.45)';
+
+  const renderItem = (t: Testimonial) => {
+    const content = t.content || '';
+    const golden = t.golden_sentence;
+    const hasGolden = !!(golden && content.includes(golden));
+    const authorLine = [t.author_role, t.author_company].filter(Boolean).join(', ');
+
+    return (
+      <div key={t.id}>
+        <blockquote style={{ fontSize: count >= 3 ? 15 : 16, lineHeight: 1.6, letterSpacing: '-0.01em', margin: '0 0 14px' }}>
+          <p style={{ margin: 0 }}>
+            {hasGolden ? (
+              <>
+                {content.slice(0, content.indexOf(golden!)) && (
+                  <span style={{ color: contextColor, fontWeight: 400 }}>
+                    {content.slice(0, content.indexOf(golden!))}
+                  </span>
+                )}
+                <span style={{
+                  color: goldenColor,
+                  fontWeight: 500,
+                  background: theme.primaryColor + '12',
+                  borderRadius: 3,
+                  padding: '0 3px',
+                }}>
+                  {golden}
+                </span>
+                {content.slice(content.indexOf(golden!) + golden!.length) && (
+                  <span style={{ color: contextColor, fontWeight: 400 }}>
+                    {content.slice(content.indexOf(golden!) + golden!.length)}
+                  </span>
+                )}
+              </>
+            ) : (
+              <span style={{ color: goldenColor, fontWeight: 400 }}>{content}</span>
+            )}
+          </p>
+        </blockquote>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <div>
+            <div style={{ fontSize: 12, fontWeight: 600, color: goldenColor }}>{t.author_name}</div>
+            {authorLine && <div style={{ fontSize: 11, color: attrMuted }}>{authorLine}</div>}
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  if (count === 1) {
+    return (
+      <div style={{ maxWidth: 520, margin: '0 auto', textAlign: 'center', padding: '24px 16px' }}>
+        {renderItem(items[0])}
+      </div>
+    );
+  }
+
+  const gridCols = items.map((t, i) => {
+    const elements: React.ReactNode[] = [];
+    if (i > 0) {
+      elements.push(
+        <div key={`d-${i}`} style={{ background: dividerColor, alignSelf: 'stretch' }} />
+      );
+    }
+    elements.push(
+      <div key={t.id} style={{ padding: '0 24px' }}>
+        {renderItem(t)}
+      </div>
+    );
+    return elements;
+  }).flat();
+
+  const colTemplate = count === 2 ? '1fr 1px 1fr' : '1fr 1px 1fr 1px 1fr';
+
+  return (
+    <div style={{
+      display: 'grid',
+      gridTemplateColumns: colTemplate,
+      maxWidth: 640,
+      margin: '0 auto',
+      padding: '24px 0',
+      alignItems: 'start',
+    }}>
+      {gridCols}
     </div>
   );
 }
@@ -1604,6 +1713,12 @@ export function Testimonials() {
                   >
                     {settings.layout === 'editorial' && (
                       <EditorialPreview
+                        testimonials={previewTestimonials}
+                        theme={settings.theme}
+                      />
+                    )}
+                    {settings.layout === 'minimal' && (
+                      <MinimalPreview
                         testimonials={previewTestimonials}
                         theme={settings.theme}
                       />

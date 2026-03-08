@@ -414,6 +414,124 @@
     return html;
   }
 
+  // ── Minimal layout ──────────────────────────────────────────────────────────
+
+  function minimalStyles(tc, pc, isLightText) {
+    var contextColor = isLightText ? 'rgba(255,255,255,0.42)' : 'rgba(0,0,0,0.42)';
+    var goldenColor = tc || (isLightText ? 'rgba(255,255,255,0.92)' : 'rgba(0,0,0,0.88)');
+    var dividerColor = isLightText ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.10)';
+    var attrMuted = isLightText ? 'rgba(255,255,255,0.45)' : 'rgba(0,0,0,0.45)';
+
+    return (
+      '.mn-wrapper{max-width:960px;margin:0 auto;padding:40px 0 24px;display:grid;gap:0;align-items:start}' +
+      '.mn-wrapper.mn-single{max-width:680px;text-align:center}' +
+      '.mn-wrapper.mn-twoup{grid-template-columns:1fr 1px 1fr}' +
+      '.mn-wrapper.mn-threeup{grid-template-columns:1fr 1px 1fr 1px 1fr}' +
+      '.mn-item{padding:0 48px}' +
+      '.mn-divider{background:' + dividerColor + ';align-self:stretch}' +
+      '.mn-quote{font-size:20px;line-height:1.6;letter-spacing:-0.01em;font-style:normal;quotes:none;margin:0 0 20px}' +
+      '.mn-quote p{margin:0}' +
+      '.mn-threeup .mn-quote{font-size:18px}' +
+      '.mn-context{color:' + contextColor + ';font-weight:400}' +
+      '.mn-golden{color:' + goldenColor + ';font-weight:500;background:' + pc + '12;border-radius:3px;padding:0 3px}' +
+      '.mn-plain{color:' + goldenColor + ';font-weight:400}' +
+      '.mn-attr{display:flex;align-items:center;gap:10px}' +
+      '.mn-single .mn-attr{justify-content:center}' +
+      '.mn-name{font-size:13px;font-weight:600;color:' + goldenColor + '}' +
+      '.mn-role{font-size:12px;color:' + attrMuted + '}' +
+      '.mn-logo{max-height:18px;width:auto;opacity:0.35;filter:grayscale(100%)}' +
+      '.mn-video{margin-top:16px;position:relative;border-radius:8px;overflow:hidden;cursor:pointer;' +
+        'aspect-ratio:16/9;background:#000;display:flex;align-items:center;justify-content:center}' +
+      '.mn-video img{width:100%;height:100%;object-fit:cover}' +
+      '.mn-video-play{position:absolute;width:44px;height:44px;border-radius:50%;' +
+        'background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center}' +
+      '@media(max-width:1023px){' +
+        '.mn-threeup{grid-template-columns:1fr 1px 1fr}' +
+        '.mn-threeup .mn-item:nth-child(5),.mn-threeup .mn-divider:nth-child(4){display:none}' +
+      '}' +
+      '@media(max-width:639px){' +
+        '.mn-wrapper{grid-template-columns:1fr!important;gap:0;padding:24px 16px 16px}' +
+        '.mn-divider{display:none}' +
+        '.mn-item{padding:0 0 24px;margin-bottom:24px;border-bottom:1px solid ' + dividerColor + '}' +
+        '.mn-item:last-child{border-bottom:none;margin-bottom:0;padding-bottom:0}' +
+        '.mn-quote{font-size:18px}' +
+      '}'
+    );
+  }
+
+  function renderMinimalItem(t, tc, pc, contextColor) {
+    var content = t.content || '';
+    var golden = t.golden_sentence;
+    var hasGolden = !!(golden && content && content.indexOf(golden) !== -1);
+    var quoteHtml = '';
+    if (hasGolden) {
+      var idx = content.indexOf(golden);
+      var before = content.slice(0, idx);
+      var after = content.slice(idx + golden.length);
+      quoteHtml =
+        (before ? '<span class="mn-context">' + esc(before) + '</span>' : '') +
+        '<span class="mn-golden">' + esc(golden) + '</span>' +
+        (after ? '<span class="mn-context">' + esc(after) + '</span>' : '');
+    } else {
+      quoteHtml = '<span class="mn-plain">' + esc(content) + '</span>';
+    }
+
+    var authorLine = [t.author_role, t.author_company].filter(Boolean).join(', ');
+
+    var logoHtml = '';
+    if (t.author_company) {
+      var logoDomain = companyDomain(t.author_company);
+      logoHtml = '<img class="mn-logo" src="https://logo.clearbit.com/' + esc(logoDomain) +
+        '" alt="' + esc(t.author_company) + '" data-vouch-fallback>';
+    }
+
+    var videoHtml = '';
+    if (t.video_url && t.show_video !== false) {
+      var posterAttr = t.video_thumbnail_url ? '<img src="' + esc(t.video_thumbnail_url) + '" alt="">' : '';
+      videoHtml =
+        '<div class="mn-video" data-vouch-video data-src="' + esc(t.video_url) + '"' +
+        (t.video_thumbnail_url ? ' data-poster="' + esc(t.video_thumbnail_url) + '"' : '') + '>' +
+        posterAttr +
+        '<div class="mn-video-play"><svg width="16" height="16" viewBox="0 0 24 24" fill="white"><polygon points="8,5 20,12 8,19"/></svg></div>' +
+        '</div>';
+    }
+
+    return (
+      '<div class="mn-item">' +
+        '<blockquote class="mn-quote"><p style="margin:0">' + quoteHtml + '</p></blockquote>' +
+        '<div class="mn-attr">' +
+          '<div>' +
+            '<div class="mn-name">' + esc(t.author_name) + '</div>' +
+            (authorLine ? '<div class="mn-role">' + esc(authorLine) + '</div>' : '') +
+          '</div>' +
+          logoHtml +
+        '</div>' +
+        videoHtml +
+      '</div>'
+    );
+  }
+
+  function renderMinimal(testimonials, theme) {
+    var tc = safeColor(theme.textColor, '#0f172a');
+    var pc = safeColor(theme.primaryColor, '#6366F1');
+    var brightness = parseColorBrightness(tc);
+    var isLightText = brightness >= 0 ? brightness > 160 : false;
+    var contextColor = isLightText ? 'rgba(255,255,255,0.42)' : 'rgba(0,0,0,0.42)';
+
+    var count = Math.min(testimonials.length, 3);
+    var mode = count === 1 ? 'single' : count === 2 ? 'twoup' : 'threeup';
+
+    var css = minimalStyles(tc, pc, isLightText);
+    var items = '';
+    for (var i = 0; i < count; i++) {
+      if (i > 0) items += '<div class="mn-divider"></div>';
+      items += renderMinimalItem(testimonials[i], tc, pc, contextColor);
+    }
+
+    return '<style>' + css + '</style>' +
+      '<div class="mn-wrapper mn-' + mode + '">' + items + '</div>';
+  }
+
   // ── Editorial layout ─────────────────────────────────────────────────────────
 
   function parseColorBrightness(color) {
@@ -919,6 +1037,8 @@
         var editorial = renderEditorial(testimonials, theme);
         container.innerHTML = editorial.html;
         editorialMount = editorial.mount;
+      } else if (layout === 'minimal') {
+        container.innerHTML = renderMinimal(testimonials, theme);
       } else if (layout === 'carousel') container.innerHTML = renderCarousel(testimonials, theme);
       else if (layout === 'wall') container.innerHTML = renderWall(testimonials, theme);
       else if (layout === 'list') container.innerHTML = renderList(testimonials, theme);
