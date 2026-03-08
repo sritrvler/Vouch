@@ -147,7 +147,30 @@ These are operational prerequisites. No code to write (except the Privacy Policy
 7. [x] **Editorial layout** (D1). DONE (session March 8). Full-width, magazine-style, one testimonial at a time, large pull-quote with golden sentence, large author photo, company logo. NO competitor has this.
 8. [ ] **Minimal layout** (D2). The anti-widget. Quote and attribution only. No stars, borders, shadows, card background. Inherits host site typography. PRIORITY: HIGH.
 9. [x] **Upgrade existing layouts** (D4). DONE session 8. textSize theme (compact/default/large), whitespace increase (24px padding, 20px gaps), carousel fade-in (200ms), showMetric toggle, video play button redesign (rounded rect + blur), new widget defaults (showDate=false, showMetric=false).
-10. [ ] **Cap free tier at 25 testimonials** (B1, revised). Add count check in testimonial submission API. When free user's approved + pending testimonials exceed 25, show branded upgrade message on collection form. PRIORITY: HIGH.
+10. [ ] **Cap free tier at 25 testimonials** (B1, revised). PRIORITY: HIGH. PLAN READY (skip planning, go straight to implementation):
+
+    **Why 25:** Grid/Wall need ~9 items to look impressive. 25 collected yields ~17-20 approved (after rejections/pending), enough for every layout. More generous than all competitors (Senja 15, Famewall 10, Testimonial.to 10). "Powered by Vouch" badge sits next to impressive widgets = better organic marketing.
+
+    **TIER: T3** (API change + UI in 3 files + state logic)
+
+    **5 files to change:**
+
+    (a) `src/lib/lemonsqueezy.ts` line 81: Change `testimonialLimit: Infinity` to `testimonialLimit: 25`. Single source of truth.
+
+    (b) `src/app/api/testimonials/submit/route.ts`: After form fetch + is_active check (line 119), before insert (line 122):
+        Import PLANS from @/lib/lemonsqueezy. Parallel query: fetch subscription (plan) + count testimonials where user_id=form.user_id AND status IN ('pending','approved'). If free AND count >= 25, return 403 with { error: 'This form is not currently accepting new testimonials.', limitReached: true }. Follow upload-video/route.ts pattern exactly. Check if createServerSupabaseClient has access to subscriptions table or if admin client needed.
+
+    (c) `src/components/collect/CollectFormClient.tsx`:
+        Fix 1 (line 692-693): 429 handler says "reached its testimonial limit" but that's the rate limiter. Change to: 'Too many requests. Please wait a moment and try again.'
+        Fix 2: Add else if (res.status === 403) handler checking data.limitReached. Set isCapReached state, render "not accepting" card: neutral icon, "Not accepting testimonials right now", "{project.name} is not collecting new testimonials at this time." Visitor-safe, no mention of plans/upgrades (lesson #12).
+
+    (d) `src/app/(dashboard)/dashboard/page.tsx`: Add subscription query to existing Promise.all. Render FreeUsageBanner (inline component) between PendingBanner and metric cards. Only when isFree && activeCount > 0. Three states: under 20 = neutral gray bar, 20-24 = amber bar, 25+ = red/full + prominent Upgrade button. Opens existing UpgradeModal.
+
+    (e) `src/app/(marketing)/pricing/page.tsx` line 19: Change free: "Unlimited" to free: "25" on "Testimonials collected" row.
+
+    **NOT changing:** Public page /p/[slug] (free users can't exceed 25 approved anyway), inbox (dashboard is the right place), embed.js (already handled by API), existing users >25 (grandfathered, can't add new until upgrade or reject below 25).
+    **Update test:** `plans.test.ts` change toBe(Infinity) to toBe(25).
+    **Also update 13c** after this ships: pricing page "Typeform model" note is now wrong (collection IS capped, not just display).
 11. [ ] **Reprice to $29/mo Pro, $49/mo Studio** (B4). Update Lemon Squeezy variants, pricing page, upgrade modals, all hardcoded price references. Do this AFTER Editorial + Minimal ship (they justify the price). PRIORITY: HIGH.
 12. [ ] **Embed.js version hash** (J2.1). Add version parameter to embed code: `embed.js?v=2.1.0`. Bump manually on breaking changes. PRIORITY: HIGH.
 13. [ ] **Pre-deployment embed.js testing** (J2.3). Before any deploy touching embed.js, test on own landing page with a real widget. Manual for now. PRIORITY: HIGH.
