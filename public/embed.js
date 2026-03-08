@@ -1047,10 +1047,10 @@
     }
 
     // Free-tier note
-    if (!data.isPro && data.totalApproved > 5) {
+    if (!data.isPro && data.totalApproved > 25) {
       var note = document.createElement('div');
       note.style.cssText = 'text-align:center;margin-top:16px;padding-top:12px;border-top:1px solid #f1f5f9;font-size:11px;color:#94a3b8';
-      note.textContent = 'Showing 5 of ' + data.totalApproved + ' reviews';
+      note.textContent = 'Showing 25 of ' + data.totalApproved + ' reviews';
       container.appendChild(note);
     }
 

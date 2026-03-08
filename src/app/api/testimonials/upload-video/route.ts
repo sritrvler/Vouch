@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createServerSupabaseClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { createRateLimiter, getClientIp } from '@/lib/ratelimit';
+import { PLANS } from '@/lib/lemonsqueezy';
 
 const videoLimiter = createRateLimiter({ windowMs: 60 * 60_000, max: 5 });
 
@@ -74,7 +75,7 @@ export async function POST(request: NextRequest) {
     ]);
 
     const isFree = !subRes.data || subRes.data.plan === 'free';
-    if (isFree && (countRes.count ?? 0) >= 3) {
+    if (isFree && (countRes.count ?? 0) >= PLANS.free.videoLimit) {
       return NextResponse.json(
         { error: 'Video limit reached', limitReached: true },
         { status: 403 }

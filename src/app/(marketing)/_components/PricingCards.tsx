@@ -6,12 +6,12 @@ import { Check, Minus } from "lucide-react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { STUDIO_FEATURES as STUDIO_FEATURES_SOURCE } from "@/lib/lemonsqueezy";
+import { PRO_FEATURES as PRO_FEATURES_SOURCE, STUDIO_FEATURES as STUDIO_FEATURES_SOURCE, PRICING } from "@/lib/lemonsqueezy";
 
 export type FeatureItem = { text: string; limitation?: true };
 
 export const FREE_FEATURES: FeatureItem[] = [
-  { text: "Unlimited testimonials" },
+  { text: "25 testimonials displayed" },
   { text: "1 collection form" },
   { text: "1 embed widget" },
   { text: "Grid layout" },
@@ -22,19 +22,7 @@ export const FREE_FEATURES: FeatureItem[] = [
   { text: "Contains Vouch branding", limitation: true },
 ];
 
-export const PRO_FEATURES: string[] = [
-  "Everything in Free",
-  "Unlimited forms and embed widgets",
-  "Unlimited video testimonials",
-  "Google Review and LinkedIn nudges",
-  "Image cards for social sharing",
-  "Carousel, wall of love, and list layouts",
-  "React component embed",
-  "CSV export of testimonials",
-  "Form cloning",
-  "Custom public page address",
-  "Remove Vouch branding",
-];
+export const PRO_FEATURES: string[] = ["Everything in Free", ...PRO_FEATURES_SOURCE];
 
 export const STUDIO_FEATURES = STUDIO_FEATURES_SOURCE;
 
@@ -86,7 +74,7 @@ export function PricingCards() {
             )}
             <span className="relative z-10">Yearly</span>
             <span className="relative z-10 text-xs font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full">
-              2 months free
+              {PRICING.yearlyBadgeText}
             </span>
           </button>
         </div>
@@ -145,14 +133,14 @@ export function PricingCards() {
             <p className="text-sm font-semibold text-indigo-600 mb-1">Pro</p>
             <div className="flex items-end gap-1.5 mb-1">
               <span className="text-4xl font-bold text-gray-900">
-                {billing === 'yearly' ? '$190' : '$19'}
+                {billing === 'yearly' ? `$${PRICING.pro.yearly}` : `$${PRICING.pro.monthly}`}
               </span>
               <span className="text-gray-500 mb-1">
                 {billing === 'yearly' ? '/year' : '/month'}
               </span>
             </div>
             <p className="text-sm text-gray-500">
-              {billing === 'yearly' ? '$15.83/mo, billed annually.' : 'Billed monthly.'}
+              {billing === 'yearly' ? `$${PRICING.pro.monthlyEffective}/mo, billed annually.` : 'Billed monthly.'}
             </p>
           </div>
           <ul className="space-y-3 flex-1 mb-7">
@@ -187,14 +175,14 @@ export function PricingCards() {
             <p className="text-sm font-semibold text-slate-400 mb-1">Studio</p>
             <div className="flex items-end gap-1.5 mb-1">
               <span className="text-4xl font-bold text-white">
-                {billing === 'yearly' ? '$490' : '$49'}
+                {billing === 'yearly' ? `$${PRICING.studio.yearly}` : `$${PRICING.studio.monthly}`}
               </span>
               <span className="text-slate-400 mb-1">
                 {billing === 'yearly' ? '/year' : '/month'}
               </span>
             </div>
             <p className="text-sm text-slate-400">
-              {billing === 'yearly' ? '$40.83/mo, billed annually.' : 'For teams managing multiple client accounts.'}
+              {billing === 'yearly' ? `$${PRICING.studio.monthlyEffective}/mo, billed annually.` : 'For teams managing multiple client accounts.'}
             </p>
           </div>
           <ul className="space-y-3 flex-1 mb-7">

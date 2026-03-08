@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Check, Zap, Loader2, Crown } from 'lucide-react';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
-import { STUDIO_FEATURES } from '@/lib/lemonsqueezy';
+import { STUDIO_FEATURES, PRICING } from '@/lib/lemonsqueezy';
 
 // Shorter list for the modal. Full list lives on the pricing page.
 const MODAL_PRO_HIGHLIGHTS = [
@@ -80,7 +80,7 @@ export function UpgradeModal({ open, onOpenChange }: UpgradeModalProps) {
             >
               Yearly
               <span className="text-[10px] font-semibold text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded-full">
-                Save 17%
+                {PRICING.yearlyBadgeText}
               </span>
             </button>
           </div>
@@ -96,14 +96,14 @@ export function UpgradeModal({ open, onOpenChange }: UpgradeModalProps) {
             </div>
             <div className="flex items-end gap-1">
               <span className="text-2xl font-bold text-foreground leading-none">
-                {billing === 'yearly' ? '$190' : '$19'}
+                {billing === 'yearly' ? `$${PRICING.pro.yearly}` : `$${PRICING.pro.monthly}`}
               </span>
               <span className="text-sm text-muted-foreground mb-0.5">
                 /{billing === 'yearly' ? 'year' : 'mo'}
               </span>
             </div>
             <p className="text-xs text-muted-foreground mt-0.5 mb-3">
-              {billing === 'yearly' ? '$15.83/mo, billed annually' : 'For freelancers and solo founders'}
+              {billing === 'yearly' ? `$${PRICING.pro.monthlyEffective}/mo, billed annually` : 'For freelancers and solo founders'}
             </p>
 
             <div className="space-y-2 flex-1 mb-4">
@@ -145,14 +145,14 @@ export function UpgradeModal({ open, onOpenChange }: UpgradeModalProps) {
             </div>
             <div className="flex items-end gap-1">
               <span className="text-2xl font-bold text-foreground leading-none">
-                {billing === 'yearly' ? '$490' : '$49'}
+                {billing === 'yearly' ? `$${PRICING.studio.yearly}` : `$${PRICING.studio.monthly}`}
               </span>
               <span className="text-sm text-muted-foreground mb-0.5">
                 /{billing === 'yearly' ? 'year' : 'mo'}
               </span>
             </div>
             <p className="text-xs text-muted-foreground mt-0.5 mb-3">
-              {billing === 'yearly' ? '$40.83/mo, billed annually' : 'For teams managing client accounts'}
+              {billing === 'yearly' ? `$${PRICING.studio.monthlyEffective}/mo, billed annually` : 'For teams managing client accounts'}
             </p>
 
             <div className="space-y-2 flex-1 mb-4">

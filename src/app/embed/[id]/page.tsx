@@ -1,6 +1,7 @@
 import { createServerSupabaseClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { formatDistanceToNow } from 'date-fns';
+import { PLANS } from '@/lib/lemonsqueezy';
 
 export const revalidate = 10;
 
@@ -622,7 +623,7 @@ export default async function EmbedPage({ params }: PageProps) {
   }
 
   const isPro = sub?.plan === 'pro' || sub?.plan === 'studio';
-  const hardLimit = isPro ? (widget.max_items ?? 12) : Math.min(widget.max_items ?? 12, 5);
+  const hardLimit = isPro ? (widget.max_items ?? 12) : Math.min(widget.max_items ?? 12, PLANS.free.widgetDisplayLimit);
 
   const typedWidget = widget as Widget;
   const theme = (typedWidget.theme || {}) as WidgetTheme;
@@ -669,7 +670,7 @@ export default async function EmbedPage({ params }: PageProps) {
 
   // Fetch project slug for "See all" link (free tier only)
   let projectSlug: string | null = null;
-  if (!isPro && totalApproved > 5) {
+  if (!isPro && totalApproved > PLANS.free.widgetDisplayLimit) {
     const { data: proj } = await supabase
       .from('projects')
       .select('slug')
@@ -767,7 +768,7 @@ export default async function EmbedPage({ params }: PageProps) {
         )}
 
         {/* Free-tier truncation note */}
-        {!isPro && totalApproved > 5 && (
+        {!isPro && totalApproved > PLANS.free.widgetDisplayLimit && (
           <div
             style={{
               textAlign: 'center',
@@ -778,7 +779,7 @@ export default async function EmbedPage({ params }: PageProps) {
               color: '#94a3b8',
             }}
           >
-            Showing 5 of {totalApproved} reviews
+            Showing {PLANS.free.widgetDisplayLimit} of {totalApproved} reviews
             {projectSlug && (
               <>
                 {' '}

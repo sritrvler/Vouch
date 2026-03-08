@@ -69,10 +69,18 @@ export async function getCustomerPortalUrl(subscriptionId: string): Promise<stri
   return json?.data?.attributes?.urls?.customer_portal ?? null;
 }
 
+export const PRICING = {
+  pro: { monthly: 29, yearly: 290, monthlyEffective: 24.17 },
+  studio: { monthly: 49, yearly: 490, monthlyEffective: 40.83 },
+  yearlyBadgeText: '2 months free',
+} as const;
+
 export const PLANS = {
   free: {
     name: 'Free',
     testimonialLimit: Infinity,
+    videoLimit: 3,
+    widgetDisplayLimit: 25,
     widgetLimit: 1,
     formLimit: 1,
     projectLimit: 1,
@@ -84,6 +92,8 @@ export const PLANS = {
   pro: {
     name: 'Pro',
     testimonialLimit: Infinity,
+    videoLimit: Infinity,
+    widgetDisplayLimit: Infinity,
     widgetLimit: Infinity,
     formLimit: Infinity,
     projectLimit: Infinity,
@@ -95,6 +105,8 @@ export const PLANS = {
   studio: {
     name: 'Studio',
     testimonialLimit: Infinity,
+    videoLimit: Infinity,
+    widgetDisplayLimit: Infinity,
     widgetLimit: Infinity,
     formLimit: Infinity,
     projectLimit: Infinity,
