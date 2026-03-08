@@ -73,6 +73,7 @@
 **How to read this:** Each phase has BUILD items (product work) and DISCOVERY items (SEO, content, pages). They run in parallel within each phase. Complete a phase before moving to the next. Infrastructure items are woven into the phase where they matter most.
 
 **Audit report items 1 through 23:** ALL COMPLETE (sessions 10 through 11). Items 24 through 35 are integrated below. Item #30 (billing toggle) already done in session 21.
+**External audit (March 8, 2026):** 127 findings triaged. 26 items integrated (13c-13h, 15a, 25e-25h, 31a-31f, 92-100). See bottom of file for full reference.
 
 ---
 
@@ -93,7 +94,7 @@ These are operational prerequisites. No code to write (except the Privacy Policy
 
 **Goal:** Ship the premium widget layouts that justify $29/mo pricing. Without these, we're just another testimonial tool. This is the screenshot, the Product Hunt hero image, the thing that makes someone say "that looks different."
 
-**Exit criteria:** Editorial and Minimal layouts live, existing layouts upgraded, free tier capped at 10, price changed to $29.
+**Exit criteria:** Editorial and Minimal layouts live, existing layouts upgraded, free tier capped at 25, price changed to $29, pricing surfaces consistent (13c), rate limiting functional (13d), avatar storage migrated (13e).
 
 ### Phase 1 BUILD
 
@@ -106,11 +107,18 @@ These are operational prerequisites. No code to write (except the Privacy Policy
 13. [ ] **Pre-deployment embed.js testing** (J2.3). Before any deploy touching embed.js, test on own landing page with a real widget. Manual for now. PRIORITY: HIGH.
 13a. [ ] **"Powered by Vouch" badge optimization** (moved from Phase 5, item #69-70). The badge IS the growth engine for freemium. Ensure badge is visible, clickable, and styled well on all free-tier widgets. The landing page (`/?ref=powered-by`) must convert visitors, not just redirect. Show targeted hero: "You just saw social proof powered by Vouch. Create yours in 5 minutes." Track badge click-throughs in Supabase. PRIORITY: HIGH.
 13b. [ ] **"Powered by Vouch" conversion page** (moved from Phase 5, item #71). The /via page should be a real conversion funnel, not a redirect. Show the widget they just saw, explain what Vouch does, CTA to sign up free. PRIORITY: HIGH.
+13c. [ ] **Fix pricing inconsistencies across all surfaces** (audit UX P1, UX U1, codebase SC10/SC11). Three things must match: (1) Pricing page: free = 25 testimonials displayed (Typeform model: unlimited collection, 25 display), Pro = unlimited, (2) Upgrade modal: $29 Pro / $49 Studio (update from $19), (3) Code: PLANS object in lemonsqueezy.ts must reflect actual limits. Also update any hardcoded "$19" references. PRIORITY: CRITICAL.
+13d. [ ] **Replace in-memory rate limiter with Upstash Redis** (audit codebase D1). Current rate limiter resets on every Vercel function invocation (useless in serverless). Use Upstash Redis free tier (10K requests/day) or Vercel KV. Apply to: submit, upload-video, upload-logo, OG card generation. PRIORITY: CRITICAL.
+13e. [ ] **Move avatar storage from base64 DB columns to Supabase Storage** (audit codebase S23/P9). Currently 500KB avatars stored as ~700KB base64 in Postgres rows. At 50 testimonials, widget API returns 35MB+ of avatar data. Migration: upload existing base64 to Storage bucket, update column to URL, change submit route to upload to Storage. PRIORITY: HIGH.
+13f. [ ] **Fix submit route admin API call** (audit codebase Q6). The submit route calls supabase.auth.admin.getUserById() using anon-key server client. This silently fails (no email notifications sent). Must use admin client (service role key). PRIORITY: HIGH.
+13g. [ ] **Add rate limiting to logo upload and OG card routes** (audit codebase S3/S4). OG card route (/api/testimonials/card/[id]) runs ImageResponse on Edge, expensive and unprotected. Logo upload has no rate limit. Both are DDoS vectors. PRIORITY: HIGH.
+13h. [ ] **Add runtime env var checks** (audit codebase Q9). Replace non-null assertions (!) on env vars with explicit runtime checks that fail fast with clear error messages. Critical paths: webhook secret, checkout URLs, Supabase keys. PRIORITY: MEDIUM.
 
 ### Phase 1 DISCOVERY (run in parallel with build)
 
 14. [ ] **Widget Showcase page** at `/showcase` (H1.1). Live interactive demos of every layout (Editorial, Minimal, grid, carousel, wall, list, single). Visitors can toggle between layouts, switch light/dark, see the same testimonials rendered differently. This IS the sales pitch. PRIORITY: HIGHEST.
 15. [ ] **Live widget demo on landing page** (H3.1). Embed our own widget (Editorial layout) on the landing page between features and pricing. Live, interactive, not a screenshot. PRIORITY: HIGHEST.
+15a. [ ] **Widget layout preview thumbnails in builder** (audit UX W4). When hovering or selecting a layout in the widget builder, show a wireframe/thumbnail preview of what that layout looks like. Our layouts are better than competitors, show them. PRIORITY: HIGH.
 16. [ ] **Widget builder education messaging** (L8.6). In the dashboard widget customization panel, add subtle copy: "Matching your site's fonts and colors increases engagement by 53% (NN/g research)." PRIORITY: MEDIUM.
 
 ---
@@ -136,6 +144,10 @@ These are operational prerequisites. No code to write (except the Privacy Policy
 25b. [ ] **Negative feedback routing on collection form** (new, March 8, 80/20 principle). This is the ONE smart form feature that covers 80% of Senja's 10-page form builder value. When a submitter gives 1-3 stars: route to a "What could we improve?" private feedback page (not published as a testimonial). When 4-5 stars: proceed to the public testimonial submission. This prevents bad reviews from becoming public testimonials while still collecting valuable feedback. Senja's biggest form advantage distilled to its core. PRIORITY: HIGH.
 25c. [ ] **Marquee/ticker layout** (new, March 8, 80/20 widget research). Auto-scrolling horizontal strip of testimonial cards. Popular on SaaS landing pages for continuous social proof. ~15-20 lines of CSS+JS in embed.js. Low effort, high perceived variety. PRIORITY: MEDIUM.
 25d. [ ] **Rating badge widget** (new, March 8, 80/20 widget research). Compact "4.9 from X reviews" badge, designed to be placed near CTAs. Research shows testimonials near CTAs increase conversions by 62%. ~50 lines of code. PRIORITY: MEDIUM.
+25e. [ ] **Collection form success celebration** (audit UX F14). Add confetti (canvas-confetti, ~3kb) + "Thank you, [firstName]!" with star rating shown. Prominently surface ShareElsewhere with animated entrance. This is the virality moment. PRIORITY: HIGH.
+25f. [ ] **Sidebar upgrade CTA redesign** (audit UX N2). Replace plain text "Upgrade" link with mini-card: gradient background, sparkle icon, "Upgrade to Pro, Unlock all layouts". Subtle pulse animation. Primary monetization surface. PRIORITY: HIGH.
+25g. [ ] **Golden sentence onboarding tooltip** (audit UX I5). First-time explainer when user encounters golden sentence: "Highlight the most impactful sentence. It'll stand out in your widget." Our differentiator needs discovery. PRIORITY: MEDIUM.
+25h. [ ] **Widget builder polish batch** (audit UX W6/W7/W10/F2/F17). Group of small polish items: (1) Replace native color pickers with react-colorful popover (~3kb), (2) Font selector renders each name in its own typeface, (3) Add GripVertical drag handles on reorder list, (4) Read-only project field gets muted styling, (5) Color presets surfaced more prominently in settings. PRIORITY: MEDIUM.
 
 ### Phase 2 INFRASTRUCTURE (weave in during build)
 
@@ -145,6 +157,12 @@ These are operational prerequisites. No code to write (except the Privacy Policy
 29. [ ] **Webhook idempotency** (audit #33). Store processed event IDs to prevent duplicate processing. PRIORITY: MEDIUM.
 30. [ ] **CDN for embed.js** (J2.2). Serve through CDN with proper cache headers. Cache-Control: public, max-age=86400, s-maxage=604800. PRIORITY: MEDIUM.
 31. [ ] **Supabase database backups** (J1.2). Set up and test a restore on Pro plan. PRIORITY: HIGH.
+31a. [ ] **Export RLS policies to version control** (audit codebase S12). Run supabase db dump or manually export all RLS policies. Store in supabase/policies/. If project is deleted, policies are unrecoverable without this. PRIORITY: HIGH.
+31b. [ ] **Create .env.example** (audit codebase SC9/D2). Document all 16+ required env vars with descriptions. New contributor setup guide. PRIORITY: MEDIUM.
+31c. [ ] **Database migration files** (audit codebase SC1/D4). Set up supabase/migrations/ directory. Export current schema. All future changes via migration files. PRIORITY: MEDIUM.
+31d. [ ] **Minify embed.js for production** (audit codebase P3). Currently 50KB unminified vanilla JS served from /public, bypasses Next.js bundling. Add build step or manual minification. PRIORITY: MEDIUM.
+31e. [ ] **Fix admin lookup to use server-side filter** (audit codebase S6/SC2). Replace listUsers({perPage: 1000}) + client-side find() with Supabase admin API email filter. Will timeout at 10K+ users. PRIORITY: MEDIUM.
+31f. [ ] **Deduplicate sanitization functions** (audit codebase S26/Q15/Q16). Font sanitization exists in both lib/fonts.ts and embed.js. htmlEscape in 3 files. Single source of truth where possible (embed.js needs its own copy but should be synced). PRIORITY: LOW.
 
 ### Phase 2 DISCOVERY (run in parallel)
 
@@ -269,6 +287,15 @@ These are decisions that inform execution across phases. Revisit periodically.
 89. [ ] **Team seats.** Deferred feature.
 90. [ ] **"Powered by Vouch" badge strategy refinement** (H3.3). Ongoing optimization of badge visibility, placement, and growth loop. See J5 for details.
 91. [ ] **Dark mode / theme-awareness auto-detection** (C6). Auto-detect host page background/text color. Shadow DOM advantage. Lower priority until core layouts ship.
+92. [ ] **Login page left panel contrast fix** (audit UX A1). Increase text opacity, add text-shadow.
+93. [ ] **Server components migration** (audit codebase P5/P6/A5/A9). Convert dashboard from full client-side to server components + Suspense streaming. Massive refactor (T4). Post-launch, when performance matters.
+94. [ ] **Client-side caching** (audit codebase P15/A11). SWR or React Query. Already covered by item #85 but cross-referenced here for audit traceability.
+95. [ ] **Component decomposition** (audit codebase 3.1). Break 6 monolith files (1000+ lines each) into focused components. When it causes real development friction, not before.
+96. [ ] **Structured logging** (audit codebase SC17). Request IDs, user correlation, structured JSON. After Sentry is in place.
+97. [ ] **API route integration tests** (audit codebase T1/T2). Test submit endpoint edge cases. After API surface stabilizes.
+98. [ ] **Accessibility pass** (audit UX AC1-AC4). Star rating keyboard nav, color contrast audit, ARIA landmarks, toast announcements. Important, schedule dedicated session.
+99. [ ] **Widget dark mode preview toggle** (audit UX W8). Light/dark background switch in preview panel.
+100. [ ] **Image optimization on upload** (audit codebase P10). Resize/compress logos and avatars on upload.
 
 ---
 
@@ -2205,3 +2232,20 @@ These signals ensure that even when fonts/colors match perfectly, the testimonia
 ## Archive Note
 
 Sessions 3 through 22 handoff notes, completed implementation plans (multi-project, custom fonts, agency overhaul, video optimization), and usability audit checklist (21 items) were removed on March 7, 2026 to reduce file size. All work is committed in git. Run `git log --oneline` to see session history.
+
+---
+
+## EXTERNAL AUDIT REFERENCE (March 8, 2026)
+
+Full reports: `docs/vouch_ui_ux_audit.md` and `docs/vouch_codebase_audit.md`
+
+67 UX findings + 60 codebase findings reviewed. Disposition:
+1. 10 items already covered in existing roadmap
+2. 6 items added to Phase 1 (trust/safety critical): 13c through 13h
+3. 1 item added to Phase 1 Discovery: 15a
+4. 4 items added to Phase 2 Build (polish): 25e through 25h
+5. 6 items added to Phase 2 Infrastructure: 31a through 31f
+6. 9 items added to Deferred (correct but not urgent pre-launch): 92 through 100
+7. ~30 items acknowledged but not actionable at current stage (animation variety, dark mode, form wizard, dashboard personalization, CI/CD, bundle analyzer, etc.)
+
+Key auditor quote: "The single highest-ROI change: put a live, interactive widget demo on the landing page." (Already item #15 in our roadmap.)
