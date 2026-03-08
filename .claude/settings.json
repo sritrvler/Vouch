@@ -76,6 +76,11 @@
             "type": "command",
             "command": "if git rev-parse --git-dir > /dev/null 2>&1; then CHANGES=$(git status --porcelain 2>/dev/null); if [ -n \"$CHANGES\" ]; then git add -A && git commit -m \"auto-checkpoint: $(date '+%Y-%m-%d %H:%M')\" --quiet && echo 'Auto-checkpoint saved.'; else echo 'Clean state.'; fi; fi",
             "timeout": 30
+          },
+          {
+            "type": "command",
+            "command": "powershell.exe -NoProfile -Command \"Add-Type -AssemblyName System.Windows.Forms; $n = New-Object System.Windows.Forms.NotifyIcon; $n.Icon = [System.Drawing.SystemIcons]::Information; $n.BalloonTipTitle = 'Claude Code'; $n.BalloonTipText = 'Task complete. Ready for input.'; $n.Visible = $true; $n.ShowBalloonTip(5000); Start-Sleep -Seconds 6; $n.Dispose()\"",
+            "timeout": 15
           }
         ]
       }
