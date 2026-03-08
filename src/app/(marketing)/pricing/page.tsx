@@ -16,7 +16,7 @@ type FeatureRow =
 
 const TABLE_ROWS: FeatureRow[] = [
   { type: "category", label: "Collecting Testimonials" },
-  { type: "feature", label: "Testimonials collected", free: "Unlimited", pro: "Unlimited", studio: "Unlimited" },
+  { type: "feature", label: "Testimonials collected", free: "25", pro: "Unlimited", studio: "Unlimited" },
   { type: "feature", label: "Testimonials shown in widget", free: "25", pro: "Unlimited", studio: "Unlimited" },
   { type: "feature", label: "Collection forms", free: "1", pro: "Unlimited", studio: "Unlimited" },
   { type: "feature", label: "Projects", free: "1", pro: "Unlimited", studio: "Unlimited" },

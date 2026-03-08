@@ -78,7 +78,7 @@ export const PRICING = {
 export const PLANS = {
   free: {
     name: 'Free',
-    testimonialLimit: Infinity,
+    testimonialLimit: 25,
     videoLimit: 3,
     widgetDisplayLimit: 25,
     widgetLimit: 1,

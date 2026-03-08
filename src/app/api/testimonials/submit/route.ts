@@ -1,7 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServerSupabaseClient } from '@/lib/supabase/server';
+import { createAdminClient } from '@/lib/supabase/admin';
 import { sendNewTestimonialNotification } from '@/lib/email';
 import { createRateLimiter, getClientIp } from '@/lib/ratelimit';
+import { PLANS } from '@/lib/lemonsqueezy';
 
 const submitLimiter = createRateLimiter({ windowMs: 60_000, max: 10, prefix: 'vouch:rl:submit' });
 
@@ -116,6 +118,29 @@ export async function POST(request: NextRequest) {
     }
     if (!form.is_active) {
       return NextResponse.json({ error: 'This form is no longer accepting submissions' }, { status: 404 });
+    }
+
+    // ── Check free tier testimonial cap ───────────────────────────────────────
+    const adminClient = createAdminClient();
+    const [subRes, countRes] = await Promise.all([
+      adminClient
+        .from('subscriptions')
+        .select('plan')
+        .eq('user_id', form.user_id)
+        .single(),
+      adminClient
+        .from('testimonials')
+        .select('id', { count: 'exact', head: true })
+        .eq('user_id', form.user_id)
+        .in('status', ['pending', 'approved']),
+    ]);
+
+    const isFree = !subRes.data || subRes.data.plan === 'free';
+    if (isFree && (countRes.count ?? 0) >= PLANS.free.testimonialLimit) {
+      return NextResponse.json(
+        { error: 'This form is not currently accepting new testimonials.', limitReached: true },
+        { status: 403 }
+      );
     }
 
     // ── Insert testimonial ───────────────────────────────────────────────────

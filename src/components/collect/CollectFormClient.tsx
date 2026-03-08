@@ -3,7 +3,7 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
-import { Loader2, Star, ChevronRight, Check, ExternalLink, Upload, X, Linkedin, Camera, Video, Square, Pause, Play } from 'lucide-react';
+import { Loader2, Star, ChevronRight, Check, ExternalLink, Upload, X, Linkedin, Camera, Video, Square, Pause, Play, MessageSquare } from 'lucide-react';
 import { resolveFontUrl, sanitizeFontFamily } from '@/lib/fonts';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
@@ -420,6 +420,7 @@ export default function CollectFormClient({
   const [isCameraInitializing, setIsCameraInitializing] = useState(false);
   const [isCameraActive, setIsCameraActive] = useState(false);
   const [isCameraVisible, setIsCameraVisible] = useState(false);
+  const [isCapReached, setIsCapReached] = useState(false);
   const [wantsVideo, setWantsVideo] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
   const [thumbnailFrames, setThumbnailFrames] = useState<string[]>([]);
@@ -688,9 +689,13 @@ export default function CollectFormClient({
       const data: unknown = await res.json();
 
       if (!res.ok) {
-        const errData = data as { error?: string };
-        if (res.status === 429) {
-          toast.error("This business has reached its testimonial limit. Please contact them directly.", { duration: 8000 });
+        const errData = data as { error?: string; limitReached?: boolean };
+        if (res.status === 403 && errData?.limitReached) {
+          setIsCapReached(true);
+          setIsSubmitting(false);
+          return;
+        } else if (res.status === 429) {
+          toast.error('Too many requests. Please wait a moment and try again.', { duration: 8000 });
         } else {
           toast.error(errData?.error || 'Something went wrong. Your answers are still here. Please try submitting again.', { duration: 8000 });
         }
@@ -736,6 +741,36 @@ export default function CollectFormClient({
 
   const enterVariant = direction === 'forward' ? 'enterFromRight' : 'enterFromLeft';
   const exitVariant = direction === 'forward' ? 'exitToLeft' : 'exitToRight';
+
+  if (isCapReached) {
+    return (
+      <div
+        className="min-h-screen flex flex-col items-center justify-start py-8 px-4"
+        style={{
+          background: `linear-gradient(to bottom right, ${formBgColor}, ${formBgColor}, ${buttonColor}12)`,
+          color: textColor,
+          ...(fontFamily ? { fontFamily: `"${fontFamily}", sans-serif` } : {}),
+        } as React.CSSProperties}
+      >
+        <div className="w-full max-w-md">
+          <div className="mb-6 flex justify-center">
+            <BusinessHeader project={project} buttonColor={buttonColor} />
+          </div>
+          <div className="bg-white rounded-3xl shadow-xl border border-border/40 p-8 text-center">
+            <div className="size-12 rounded-full bg-gray-100 flex items-center justify-center mx-auto mb-4">
+              <MessageSquare className="size-6 text-gray-400" />
+            </div>
+            <h2 className="text-lg font-semibold text-gray-900 mb-2">
+              Not accepting testimonials right now
+            </h2>
+            <p className="text-sm text-gray-500 leading-relaxed">
+              {project.name} is not collecting new testimonials at this time. Thank you for taking the time.
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div

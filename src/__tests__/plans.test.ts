@@ -6,7 +6,7 @@ describe('Plan definitions', () => {
     expect(PLANS.free.widgetLimit).toBe(1);
     expect(PLANS.free.formLimit).toBe(1);
     expect(PLANS.free.projectLimit).toBe(1);
-    expect(PLANS.free.testimonialLimit).toBe(Infinity);
+    expect(PLANS.free.testimonialLimit).toBe(25);
     expect(PLANS.free.removeBranding).toBe(false);
     expect(PLANS.free.customSlug).toBe(false);
   });

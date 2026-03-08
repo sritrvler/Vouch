@@ -16,12 +16,15 @@ import {
   TrendingUp,
   Star,
   MessageSquare,
+  Zap,
 } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useProject } from '@/context/ProjectContext';
+import { PLANS } from '@/lib/lemonsqueezy';
+import { UpgradeModal } from '@/components/upgrade-modal';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -293,13 +296,61 @@ function GettingStarted({ stats }: { stats: Stats }) {
   );
 }
 
+// ─── Free Usage Banner ───────────────────────────────────────────────────────
+
+function FreeUsageBanner({ activeCount, onUpgrade }: { activeCount: number; onUpgrade: () => void }) {
+  const limit = PLANS.free.testimonialLimit;
+  const pct = Math.min((activeCount / limit) * 100, 100);
+  const remaining = Math.max(limit - activeCount, 0);
+  const atLimit = activeCount >= limit;
+  const nearLimit = activeCount >= 20 && !atLimit;
+
+  const barColor = atLimit ? 'bg-red-500' : nearLimit ? 'bg-amber-500' : 'bg-gray-400';
+  const borderColor = atLimit ? 'border-red-200 bg-red-50' : nearLimit ? 'border-amber-200 bg-amber-50' : 'border-border bg-white';
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3, ease: 'easeOut' }}
+      className={cn('rounded-2xl border px-5 py-4', borderColor)}
+    >
+      <div className="flex items-center justify-between gap-4">
+        <div className="flex-1 min-w-0">
+          <p className="text-sm font-medium text-foreground">
+            {atLimit
+              ? "You've reached the free plan limit"
+              : nearLimit
+                ? `${remaining} ${remaining === 1 ? 'slot' : 'slots'} remaining`
+                : `${activeCount} of ${limit} testimonial slots used`}
+          </p>
+          <div className="mt-2 h-2 w-full max-w-xs rounded-full bg-muted overflow-hidden">
+            <div
+              className={cn('h-full rounded-full transition-all duration-500', barColor)}
+              style={{ width: `${pct}%` }}
+            />
+          </div>
+        </div>
+        {atLimit && (
+          <Button size="sm" onClick={onUpgrade} className="shrink-0 gap-1.5">
+            <Zap className="size-3.5" />
+            Upgrade
+          </Button>
+        )}
+      </div>
+    </motion.div>
+  );
+}
+
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 export default function DashboardPage() {
-  const { projects, selectedProjectId, showAllProjects, loading: projectsLoading } = useProject();
+  const { projects, selectedProjectId, showAllProjects, loading: projectsLoading, plan } = useProject();
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState<Stats>({ total: 0, pending: 0, approved: 0, widgetViews: 0, hasProject: false, hasForm: false, hasWidget: false });
   const [recentTestimonials, setRecentTestimonials] = useState<RecentTestimonial[]>([]);
+  const [userActiveCount, setUserActiveCount] = useState(0);
+  const [upgradeOpen, setUpgradeOpen] = useState(false);
 
   const effectiveFilter = (showAllProjects && projects.length > 1) ? 'all' : 'project';
 
@@ -328,7 +379,7 @@ export default function DashboardPage() {
           return filterByProject ? q.eq('project_id', selectedProjectId) : q;
         }
 
-        const [totalRes, pendingRes, approvedRes, recentRes, widgetsRes, projectsRes, formsRes] = await Promise.all([
+        const [totalRes, pendingRes, approvedRes, recentRes, widgetsRes, projectsRes, formsRes, userActiveRes] = await Promise.all([
           scoped(supabase.from('testimonials').select('id', { count: 'exact', head: true })),
           scoped(supabase.from('testimonials').select('id', { count: 'exact', head: true })).eq('status', 'pending'),
           scoped(supabase.from('testimonials').select('id', { count: 'exact', head: true })).eq('status', 'approved'),
@@ -337,6 +388,9 @@ export default function DashboardPage() {
           scoped(supabase.from('widgets').select('id')),
           supabase.from('projects').select('id', { count: 'exact', head: true }).eq('user_id', user.id),
           scoped(supabase.from('collection_forms').select('id', { count: 'exact', head: true })),
+          // User-wide active count for free tier banner (not project-scoped)
+          supabase.from('testimonials').select('id', { count: 'exact', head: true })
+            .eq('user_id', userId).in('status', ['pending', 'approved']),
         ]);
 
         // Widget views: get widget ids from scoped query, then count views
@@ -360,6 +414,7 @@ export default function DashboardPage() {
           hasWidget: (widgetsRes.data?.length ?? 0) > 0,
         });
 
+        setUserActiveCount(userActiveRes.count ?? 0);
         setRecentTestimonials((recentRes.data as RecentTestimonial[]) ?? []);
       } catch {
         toast.error('Failed to load dashboard data.');
@@ -392,6 +447,14 @@ export default function DashboardPage() {
           </p>
         </div>
       </motion.div>
+
+      {/* Free usage banner */}
+      {plan === 'free' && userActiveCount > 0 && (
+        <FreeUsageBanner
+          activeCount={userActiveCount}
+          onUpgrade={() => setUpgradeOpen(true)}
+        />
+      )}
 
       {/* Pending banner, only shown when there are testimonials to review */}
       <PendingBanner count={stats.pending} />
@@ -517,6 +580,8 @@ export default function DashboardPage() {
           </div>
         </div>
       </motion.section>
+
+      <UpgradeModal open={upgradeOpen} onOpenChange={setUpgradeOpen} />
     </div>
   );
 }
