@@ -1,21 +1,21 @@
-## Session Handoff (March 8, 2026, session 6)
+## Session Handoff (March 8, 2026, session 7)
 
 **What was done:**
-1. **Item #13c: Fixed pricing inconsistencies (CRITICAL).** Centralized all pricing constants into `PRICING` object in `lemonsqueezy.ts`. Updated Pro from $19 to $29/mo, $190 to $290/yr. Added `videoLimit`, `widgetDisplayLimit` to `PLANS`. Updated all 3 pricing surfaces (PricingCards, upgrade modal, pricing comparison table) to use shared constants. Replaced hardcoded free tier limits in widget API (5->25), embed page (5->25), upload-video route (3->PLANS constant), and embed.js (5->25). Build passes.
+1. **Item #13d: Replaced in-memory rate limiter with Upstash Redis (CRITICAL).** Installed `@upstash/ratelimit` and `@upstash/redis`. Rewrote `src/lib/ratelimit.ts` to use sliding window via Upstash. `check()` is now async. Lazy Redis construction avoids build-time env var errors. Graceful fallback (missing env vars or Redis errors = allow through). Each limiter gets a unique prefix (`vouch:rl:submit`, `vouch:rl:video`, `vouch:rl:widget`, `vouch:rl:oembed`) to prevent key collisions. Updated all 4 consumer routes to `await` the check. Added Upstash env vars to `.env.local`. Build passes.
 
 **What's next:** Phase 1 BUILD continues:
-1. Item #13d: **Replace in-memory rate limiter** (CRITICAL)
-2. Item #8: Minimal layout
-3. Item #9: Upgrade existing layouts
-4. Item #10: Cap free tier at 25 testimonials (display limit now 25 in code, but need collection form + inbox enforcement)
-5. Item #13e-13h: Remaining audit Phase 1 items
-6. **Run the editorial migration SQL** on production Supabase before deploying.
-7. **Update Lemon Squeezy dashboard:** Pro variant price $19->$29/mo, $190->$290/yr. UI now shows $29 but checkout still charges $19 until LS dashboard updated.
+1. Item #8: Minimal layout
+2. Item #9: Upgrade existing layouts
+3. Item #10: Cap free tier at 25 testimonials (display limit now 25 in code, but need collection form + inbox enforcement)
+4. Item #13e-13h: Remaining audit Phase 1 items
+5. **Run the editorial migration SQL** on production Supabase before deploying.
+6. **Update Lemon Squeezy dashboard:** Pro variant price $19->$29/mo, $190->$290/yr. UI now shows $29 but checkout still charges $19 until LS dashboard updated.
+7. **Add UPSTASH_REDIS_REST_URL and UPSTASH_REDIS_REST_TOKEN to Vercel project env vars** before deploying.
 
 **What to watch out for:**
 1. **Lemon Squeezy price mismatch:** Code shows $29 Pro but LS checkout still charges $19. Must update LS dashboard variant prices before deploying.
 2. embed.js has hardcoded `25` for free tier display limit (can't import from TS). If `PLANS.free.widgetDisplayLimit` changes, must also update embed.js manually.
-3. 13d (rate limiter) requires signing up for Upstash Redis or Vercel KV. Need an account/API key.
+3. **Upstash env vars must be added to Vercel** project settings before deploying. Without them, rate limiting silently falls back to "allow all" (safe but unprotected).
 4. 13e (avatar migration) is a data migration. Needs a script to convert existing base64 rows to Storage URLs. Test on staging first.
 5. Layout selector panel is 380px fixed width. If that changes below ~300px, 2-col grid cards could get tight.
 6. All previous session 2 watch-outs still apply (see below).
