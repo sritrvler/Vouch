@@ -4,11 +4,11 @@ import { createAdminClient } from '@/lib/supabase/admin';
 import { createRateLimiter, getClientIp } from '@/lib/ratelimit';
 import { PLANS } from '@/lib/lemonsqueezy';
 
-const videoLimiter = createRateLimiter({ windowMs: 60 * 60_000, max: 5 });
+const videoLimiter = createRateLimiter({ windowMs: 60 * 60_000, max: 5, prefix: 'vouch:rl:video' });
 
 export async function POST(request: NextRequest) {
   const ip = getClientIp(request.headers);
-  if (!videoLimiter.check(ip)) {
+  if (!(await videoLimiter.check(ip))) {
     return NextResponse.json({ error: 'Too many video uploads. Please try again later.' }, { status: 429 });
   }
 

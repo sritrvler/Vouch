@@ -1,13 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createRateLimiter, getClientIp } from '@/lib/ratelimit';
 
-const oembedLimiter = createRateLimiter({ windowMs: 60_000, max: 20 });
+const oembedLimiter = createRateLimiter({ windowMs: 60_000, max: 20, prefix: 'vouch:rl:oembed' });
 
 // Proxy Twitter/X oEmbed to avoid CORS issues in the browser.
 // No API key required — https://publish.twitter.com/oembed is a public endpoint.
 export async function GET(request: NextRequest) {
   const ip = getClientIp(request.headers);
-  if (!oembedLimiter.check(ip)) {
+  if (!(await oembedLimiter.check(ip))) {
     return NextResponse.json({ error: 'Too many requests.' }, { status: 429 });
   }
   const url = request.nextUrl.searchParams.get('url');

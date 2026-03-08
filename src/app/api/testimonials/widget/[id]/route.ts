@@ -4,7 +4,7 @@ import { createRateLimiter, getClientIp } from '@/lib/ratelimit';
 import { sanitizeFontUrl } from '@/lib/fonts';
 import { PLANS } from '@/lib/lemonsqueezy';
 
-const widgetLimiter = createRateLimiter({ windowMs: 60_000, max: 60 });
+const widgetLimiter = createRateLimiter({ windowMs: 60_000, max: 60, prefix: 'vouch:rl:widget' });
 
 const CORS_HEADERS = {
   'Access-Control-Allow-Origin': '*',
@@ -23,7 +23,7 @@ export async function OPTIONS() {
 
 export async function GET(request: NextRequest, { params }: PageProps) {
   const ip = getClientIp(request.headers);
-  if (!widgetLimiter.check(ip)) {
+  if (!(await widgetLimiter.check(ip))) {
     return NextResponse.json({ error: 'Too many requests' }, { status: 429, headers: CORS_HEADERS });
   }
 

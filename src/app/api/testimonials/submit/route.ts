@@ -3,7 +3,7 @@ import { createServerSupabaseClient } from '@/lib/supabase/server';
 import { sendNewTestimonialNotification } from '@/lib/email';
 import { createRateLimiter, getClientIp } from '@/lib/ratelimit';
 
-const submitLimiter = createRateLimiter({ windowMs: 60_000, max: 10 });
+const submitLimiter = createRateLimiter({ windowMs: 60_000, max: 10, prefix: 'vouch:rl:submit' });
 
 const PERSONAL_EMAIL_DOMAINS = new Set([
   'gmail.com', 'googlemail.com', 'yahoo.com', 'yahoo.co.uk', 'yahoo.co.in',
@@ -49,7 +49,7 @@ function isSubmitBody(v: unknown): v is SubmitBody {
 
 export async function POST(request: NextRequest) {
   const ip = getClientIp(request.headers);
-  if (!submitLimiter.check(ip)) {
+  if (!(await submitLimiter.check(ip))) {
     return NextResponse.json({ error: 'Too many requests. Please wait a moment.' }, { status: 429 });
   }
 
