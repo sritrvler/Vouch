@@ -1,3 +1,27 @@
+## Session Handoff (March 8, 2026, session 6)
+
+**What was done:**
+1. **Item #13c: Fixed pricing inconsistencies (CRITICAL).** Centralized all pricing constants into `PRICING` object in `lemonsqueezy.ts`. Updated Pro from $19 to $29/mo, $190 to $290/yr. Added `videoLimit`, `widgetDisplayLimit` to `PLANS`. Updated all 3 pricing surfaces (PricingCards, upgrade modal, pricing comparison table) to use shared constants. Replaced hardcoded free tier limits in widget API (5->25), embed page (5->25), upload-video route (3->PLANS constant), and embed.js (5->25). Build passes.
+
+**What's next:** Phase 1 BUILD continues:
+1. Item #13d: **Replace in-memory rate limiter** (CRITICAL)
+2. Item #8: Minimal layout
+3. Item #9: Upgrade existing layouts
+4. Item #10: Cap free tier at 25 testimonials (display limit now 25 in code, but need collection form + inbox enforcement)
+5. Item #13e-13h: Remaining audit Phase 1 items
+6. **Run the editorial migration SQL** on production Supabase before deploying.
+7. **Update Lemon Squeezy dashboard:** Pro variant price $19->$29/mo, $190->$290/yr. UI now shows $29 but checkout still charges $19 until LS dashboard updated.
+
+**What to watch out for:**
+1. **Lemon Squeezy price mismatch:** Code shows $29 Pro but LS checkout still charges $19. Must update LS dashboard variant prices before deploying.
+2. embed.js has hardcoded `25` for free tier display limit (can't import from TS). If `PLANS.free.widgetDisplayLimit` changes, must also update embed.js manually.
+3. 13d (rate limiter) requires signing up for Upstash Redis or Vercel KV. Need an account/API key.
+4. 13e (avatar migration) is a data migration. Needs a script to convert existing base64 rows to Storage URLs. Test on staging first.
+5. Layout selector panel is 380px fixed width. If that changes below ~300px, 2-col grid cards could get tight.
+6. All previous session 2 watch-outs still apply (see below).
+
+---
+
 ## Session Handoff (March 8, 2026, session 5)
 
 **What was done:**
@@ -5,21 +29,13 @@
 2. **Phase 1 got 6 new items (13c-13h).** Two CRITICAL: pricing inconsistencies (three surfaces showing different things) and in-memory rate limiter (useless on Vercel serverless). Four HIGH: avatar base64 storage, broken admin API call in submit route, unprotected OG card route, env var non-null assertions.
 3. **Phase 1 exit criteria updated** to include pricing consistency, rate limiting, and avatar storage migration.
 
-**What's next:** Phase 1 BUILD continues:
-1. Item #13c: **Fix pricing inconsistencies** (CRITICAL, do first)
-2. Item #13d: **Replace in-memory rate limiter** (CRITICAL)
-3. Item #8: Minimal layout
-4. Item #9: Upgrade existing layouts
-5. Item #10: Cap free tier at 25 testimonials
-6. Item #13e-13h: Remaining audit Phase 1 items
-7. **Run the editorial migration SQL** on production Supabase before deploying.
+**What's next:** Phase 1 BUILD continues (see session 6 handoff for updated list).
 
 **What to watch out for:**
-1. 13c (pricing fix) touches lemonsqueezy.ts PLANS object, pricing page, AND upgrade modals. All three must be updated together.
-2. 13d (rate limiter) requires signing up for Upstash Redis or Vercel KV. Need an account/API key.
-3. 13e (avatar migration) is a data migration. Needs a script to convert existing base64 rows to Storage URLs. Test on staging first.
-4. Layout selector panel is 380px fixed width. If that changes below ~300px, 2-col grid cards could get tight.
-5. All previous session 2 watch-outs still apply (see below).
+1. 13d (rate limiter) requires signing up for Upstash Redis or Vercel KV. Need an account/API key.
+2. 13e (avatar migration) is a data migration. Needs a script to convert existing base64 rows to Storage URLs. Test on staging first.
+3. Layout selector panel is 380px fixed width. If that changes below ~300px, 2-col grid cards could get tight.
+4. All previous session 2 watch-outs still apply (see below).
 
 ---
 
