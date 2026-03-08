@@ -1,16 +1,34 @@
+## Session Handoff (March 8, 2026, session 5)
+
+**What was done:**
+1. **External audit findings integrated into todo.md.** Triaged 127 findings (67 UX + 60 codebase) from two audit reports. Added 26 net-new items across all phases. 10 findings already covered by existing roadmap, ~30 acknowledged but deferred as not actionable pre-launch.
+2. **Phase 1 got 6 new items (13c-13h).** Two CRITICAL: pricing inconsistencies (three surfaces showing different things) and in-memory rate limiter (useless on Vercel serverless). Four HIGH: avatar base64 storage, broken admin API call in submit route, unprotected OG card route, env var non-null assertions.
+3. **Phase 1 exit criteria updated** to include pricing consistency, rate limiting, and avatar storage migration.
+
+**What's next:** Phase 1 BUILD continues:
+1. Item #13c: **Fix pricing inconsistencies** (CRITICAL, do first)
+2. Item #13d: **Replace in-memory rate limiter** (CRITICAL)
+3. Item #8: Minimal layout
+4. Item #9: Upgrade existing layouts
+5. Item #10: Cap free tier at 25 testimonials
+6. Item #13e-13h: Remaining audit Phase 1 items
+7. **Run the editorial migration SQL** on production Supabase before deploying.
+
+**What to watch out for:**
+1. 13c (pricing fix) touches lemonsqueezy.ts PLANS object, pricing page, AND upgrade modals. All three must be updated together.
+2. 13d (rate limiter) requires signing up for Upstash Redis or Vercel KV. Need an account/API key.
+3. 13e (avatar migration) is a data migration. Needs a script to convert existing base64 rows to Storage URLs. Test on staging first.
+4. Layout selector panel is 380px fixed width. If that changes below ~300px, 2-col grid cards could get tight.
+5. All previous session 2 watch-outs still apply (see below).
+
+---
+
 ## Session Handoff (March 8, 2026, session 4)
 
 **What was done:**
 1. **Widget builder layout selector redesign.** Replaced horizontal scrolling pill strip with 2-column grouped grid. Two groups: "Multi" (Grid, Wall of Love, Carousel, List) and "Spotlight" (Editorial, Single, Minimal). Grid (free) is now first. PRO badges right-aligned with `ml-auto`. Removed `overflow-x-auto`, `scrollbar-none`, `shrink-0`. Build passes.
 
-**What's next:** Phase 1 BUILD continues:
-1. Item #8: Minimal layout
-2. Item #9: Upgrade existing layouts
-3. Item #10: Cap free tier at 25 testimonials
-4. Item #11: Reprice to $29/mo (AFTER layouts ship)
-5. Item #12a: "Powered by Vouch" badge optimization
-6. Item #12b: Badge landing page conversion
-7. **Run the editorial migration SQL** on production Supabase before deploying.
+**What's next:** Phase 1 BUILD continues (see session 5 handoff for updated priority order).
 
 **What to watch out for:**
 1. Layout selector panel is 380px fixed width. If that changes below ~300px, 2-col grid cards could get tight.
