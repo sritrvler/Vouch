@@ -1,6 +1,5 @@
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
-import Script from 'next/script';
 import { Star, ArrowRight, Check, Zap, MessageSquare, Code2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 // Dynamic imports for client components with Framer Motion (code-split for smaller main bundle)
@@ -426,8 +425,8 @@ function TestimonialsSection() {
             Real feedback from real users. Displayed with Vouch.
           </p>
         </div>
-        <div data-vouch="6f08c057-3906-4f90-9346-f2fff0a0a440" style={{ minHeight: '1px' }}></div>
-        <Script src="/embed.js" strategy="lazyOnload" />
+        <div data-vouch="6f08c057-3906-4f90-9346-f2fff0a0a440"></div>
+        <script src="/embed.js" async defer></script>
       </div>
     </section>
   );
