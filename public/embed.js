@@ -242,8 +242,8 @@
         '&ldquo;' + quoteHtml + '&rdquo;</p></blockquote>';
     }
 
-    // Identity (BOTTOM)
-    html += '<div style="display:flex;align-items:center;justify-content:space-between;gap:8px">';
+    // Identity (BOTTOM, pushed to card bottom via margin-top:auto)
+    html += '<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:auto">';
     if (theme.showAvatar !== false) {
       html += '<div style="display:flex;align-items:center;gap:10px;min-width:0;flex:1">';
       html += avatarHtml(t.author_name, t.author_avatar_url, t.author_company, pc);
