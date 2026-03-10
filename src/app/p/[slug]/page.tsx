@@ -119,7 +119,6 @@ export default async function PublicTestimonialsPage({ params }: PageProps) {
     .select('id, author_name, author_role, author_company, author_avatar_url, content, rating, featured, golden_sentence, metric_label, source_url, video_url, video_thumbnail_url, email_domain, created_at')
     .eq('project_id', project.id)
     .eq('status', 'approved')
-    .order('featured', { ascending: false })
     .order('created_at', { ascending: false })
     .limit(50);
 
