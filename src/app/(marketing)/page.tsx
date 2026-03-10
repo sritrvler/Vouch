@@ -11,6 +11,7 @@ const MotionCTA = dynamic(() => import('./_components/MotionCTA').then(m => ({ d
 // Regular imports for other client components (below fold, no urgency)
 import EmbedVisual from './_components/EmbedVisual';
 import PricingCards from './_components/PricingCards';
+import VouchWidget from './_components/VouchWidget';
 
 /* ---------------------------------------------------------
    Data constants
@@ -425,8 +426,7 @@ function TestimonialsSection() {
             Real feedback from real users. Displayed with Vouch.
           </p>
         </div>
-        <div data-vouch="6f08c057-3906-4f90-9346-f2fff0a0a440"></div>
-        <script src="/embed.js" async defer></script>
+        <VouchWidget widgetId="6f08c057-3906-4f90-9346-f2fff0a0a440" />
       </div>
     </section>
   );

@@ -1,11 +1,12 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { Check, X, Zap, ArrowRight, Lock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { PricingCards } from "../_components/PricingCards";
+import VouchWidget from "../_components/VouchWidget";
 
 /* ─────────────────────────────────────────────────
    Feature comparison table data
@@ -207,17 +208,6 @@ function ChevronDownIcon({ className }: { className?: string }) {
   );
 }
 
-function VouchEmbed() {
-  useEffect(() => {
-    const s = document.createElement("script");
-    s.src = "/embed.js";
-    s.async = true;
-    document.body.appendChild(s);
-    return () => { s.remove(); };
-  }, []);
-  return null;
-}
-
 /* ─────────────────────────────────────────────────
    Page
 ───────────────────────────────────────────────── */
@@ -249,8 +239,7 @@ export default function PricingPage() {
           <h2 className="text-2xl font-bold text-gray-900 mb-8 text-center">
             Trusted by teams who care about design
           </h2>
-          <div data-vouch="7b693bf1-613a-424b-96b3-bf0de049fe58" style={{ minHeight: '1px' }}></div>
-          <VouchEmbed />
+          <VouchWidget widgetId="7b693bf1-613a-424b-96b3-bf0de049fe58" />
         </section>
       </div>
 
