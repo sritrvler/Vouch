@@ -77,14 +77,6 @@
     return { family: safeName, url: null };
   }
 
-  function timeAgo(dateStr) {
-    if (!dateStr) return '';
-    var d = new Date(dateStr);
-    if (isNaN(d.getTime())) return '';
-    var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-    return months[d.getMonth()] + ' ' + d.getFullYear();
-  }
-
   function esc(s) {
     if (!s) return '';
     var d = document.createElement('div');
@@ -222,7 +214,7 @@
       verifyHtml =
         '<a href="' + esc(src) + '" target="_blank" rel="noopener noreferrer" style="flex-shrink:0;color:#9ca3af;text-decoration:none">' +
         (isX ? xIcon : linkedInIcon) + '</a>';
-    } else if (vDate) {
+    } else if (vDate && theme.showDate !== false) {
       verifyHtml =
         '<span style="font-size:10px;color:#9ca3af;flex-shrink:0;white-space:nowrap">&#10003; ' + esc(vDate) + '</span>';
     }
@@ -264,12 +256,6 @@
         html += '<div style="display:flex;align-items:center;gap:3px;margin-top:2px;font-size:10px;font-weight:600;color:#059669">' + shieldIcon + esc(t.email_domain) + '</div>';
       }
       html += '</div></div>';
-    }
-    if (theme.showDate !== false) {
-      var ago = timeAgo(t.created_at);
-      if (ago) {
-        html += '<span style="font-size:10px;color:#9ca3af;margin-left:auto">' + ago + '</span>';
-      }
     }
     html += verifyHtml;
     html += '</div>';
