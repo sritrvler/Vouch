@@ -1541,41 +1541,63 @@ export function Testimonials() {
             {/* Font */}
             <div>
               <Label className="text-xs text-muted-foreground mb-2 block">Font</Label>
-              <Select
-                value={settings.theme.fontFamily}
-                onValueChange={(val) => {
-                  if (val === 'inherit') {
-                    updateTheme('fontFamily', 'inherit');
-                    updateTheme('fontUrl', null);
-                  } else if (val === '__custom__') {
-                    updateTheme('fontFamily', 'inherit');
-                  } else {
-                    updateTheme('fontFamily', val);
-                    updateTheme('fontUrl', null);
-                  }
-                }}
-              >
-                <SelectTrigger className="rounded-xl text-sm">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="inherit">Inherit from page</SelectItem>
-                  {GOOGLE_FONTS.map((f) => (
-                    <SelectItem key={f.value} value={f.value}>{f.label}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              {settings.theme.fontFamily !== 'inherit' && (
-                <div className="mt-2 space-y-1.5">
-                  <Label className="text-xs text-muted-foreground">Custom CSS URL (optional)</Label>
-                  <Input
-                    value={settings.theme.fontUrl ?? ''}
-                    onChange={(e) => updateTheme('fontUrl', e.target.value || null)}
-                    placeholder="https://fonts.adobe.com/..."
-                    className="rounded-xl text-sm"
-                  />
-                </div>
-              )}
+              {(() => {
+                const isCustom = settings.theme.fontFamily !== 'inherit'
+                  && !GOOGLE_FONTS.some((f) => f.value === settings.theme.fontFamily);
+                const selectValue = isCustom ? '__custom__' : settings.theme.fontFamily;
+                return (
+                  <>
+                    <Select
+                      value={selectValue}
+                      onValueChange={(val) => {
+                        if (val === 'inherit') {
+                          updateTheme('fontFamily', 'inherit');
+                          updateTheme('fontUrl', null);
+                        } else if (val === '__custom__') {
+                          updateTheme('fontFamily', '');
+                          updateTheme('fontUrl', null);
+                        } else {
+                          updateTheme('fontFamily', val);
+                          updateTheme('fontUrl', null);
+                        }
+                      }}
+                    >
+                      <SelectTrigger className="rounded-xl text-sm">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="inherit">Inherit from page</SelectItem>
+                        <SelectItem value="__custom__">Custom Font</SelectItem>
+                        {GOOGLE_FONTS.map((f) => (
+                          <SelectItem key={f.value} value={f.value}>{f.label}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    {isCustom && (
+                      <div className="mt-2 space-y-2">
+                        <div className="space-y-1.5">
+                          <Label className="text-xs text-muted-foreground">Font Family Name</Label>
+                          <Input
+                            value={settings.theme.fontFamily}
+                            onChange={(e) => updateTheme('fontFamily', e.target.value)}
+                            placeholder="e.g. Playfair Display"
+                            className="rounded-xl text-sm"
+                          />
+                        </div>
+                        <div className="space-y-1.5">
+                          <Label className="text-xs text-muted-foreground">CSS URL</Label>
+                          <Input
+                            value={settings.theme.fontUrl ?? ''}
+                            onChange={(e) => updateTheme('fontUrl', e.target.value || null)}
+                            placeholder="https://fonts.googleapis.com/css2?family=..."
+                            className="rounded-xl text-sm"
+                          />
+                        </div>
+                      </div>
+                    )}
+                  </>
+                );
+              })()}
             </div>
 
             {/* Toggles */}
