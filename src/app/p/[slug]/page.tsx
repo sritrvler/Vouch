@@ -331,7 +331,6 @@ export default async function PublicTestimonialsPage({ params }: PageProps) {
                   }`}
                   style={{
                     backgroundColor: cardColor,
-                    ...(t.featured ? { borderLeft: `3px solid ${accentColor}` } : {}),
                   }}
                 >
                   <div className="p-5 flex flex-col gap-3">
