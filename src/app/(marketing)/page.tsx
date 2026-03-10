@@ -1,5 +1,6 @@
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
+import Script from 'next/script';
 import { Star, ArrowRight, Check, Zap, MessageSquare, Code2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 // Dynamic imports for client components with Framer Motion (code-split for smaller main bundle)
@@ -410,6 +411,29 @@ function HowItWorksSection() {
 }
 
 /* ---------------------------------------------------------
+   Social proof (live Vouch widget)
+--------------------------------------------------------- */
+
+function TestimonialsSection() {
+  return (
+    <section className="py-20 sm:py-28 bg-white">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="text-center mb-12">
+          <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 tracking-tight">
+            Loved by freelancers and founders
+          </h2>
+          <p className="mt-4 text-lg text-gray-500">
+            Real feedback from real users. Displayed with Vouch.
+          </p>
+        </div>
+        <div data-vouch="6f08c057-3906-4f90-9346-f2fff0a0a440"></div>
+        <Script src="/embed.js" strategy="lazyOnload" />
+      </div>
+    </section>
+  );
+}
+
+/* ---------------------------------------------------------
    Pricing section
 --------------------------------------------------------- */
 
@@ -548,6 +572,9 @@ export default function HomePage() {
       </div>
       <div className="below-fold">
         <HowItWorksSection />
+      </div>
+      <div className="below-fold">
+        <TestimonialsSection />
       </div>
       <div className="below-fold">
         <PricingSection />
