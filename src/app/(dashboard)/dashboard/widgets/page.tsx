@@ -833,6 +833,9 @@ export default function WidgetsPage() {
     return filtered.slice(0, settings.maxItems);
   }, [orderedTestimonials, testimonials.length, settings.filterMode, settings.minRating, settings.maxItems]);
 
+  const gridPreviewItems = useMemo(() => previewTestimonials.slice(0, 6), [previewTestimonials]);
+  const wallPreviewItems = useMemo(() => previewTestimonials.slice(0, 9), [previewTestimonials]);
+
   const usingSampleData = testimonials.length === 0;
 
   // ── Update helpers ─────────────────────────────────────────────────────────
@@ -853,6 +856,13 @@ export default function WidgetsPage() {
       setSettings((prev) => ({ ...prev, pinnedIds: newOrder.map((t) => t.id) }));
     }
   }, [testimonials.length]);
+
+  const handlePreviewReorder = useCallback((newPreviewOrder: Testimonial[]) => {
+    const previewIdSet = new Set(newPreviewOrder.map(t => t.id));
+    const remaining = orderedTestimonials.filter(t => !previewIdSet.has(t.id));
+    const newFullOrder = [...newPreviewOrder, ...remaining];
+    handleReorder(newFullOrder);
+  }, [orderedTestimonials, handleReorder]);
 
   // ── Switch widget ────────────────────────────────────────────────────────
   const handleSwitchWidget = useCallback((widgetId: string) => {
@@ -1852,16 +1862,28 @@ export function Testimonials() {
                       />
                     )}
                     {settings.layout === 'grid' && (
-                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                        {previewTestimonials.slice(0, 6).map((t) => (
-                          <TestimonialPreviewCard
+                      <Reorder.Group
+                        values={gridPreviewItems}
+                        onReorder={handlePreviewReorder}
+                        className="flex flex-wrap gap-3"
+                        as="div"
+                      >
+                        {gridPreviewItems.map((t) => (
+                          <Reorder.Item
                             key={t.id}
-                            testimonial={t}
-                            theme={settings.theme}
-                            compact
-                          />
+                            value={t}
+                            as="div"
+                            className="w-[calc(33.333%-8px)] min-w-[200px] flex-grow cursor-grab active:cursor-grabbing"
+                            whileDrag={{ scale: 1.03, boxShadow: '0 8px 25px rgba(0,0,0,0.15)', zIndex: 50 }}
+                          >
+                            <TestimonialPreviewCard
+                              testimonial={t}
+                              theme={settings.theme}
+                              compact
+                            />
+                          </Reorder.Item>
                         ))}
-                      </div>
+                      </Reorder.Group>
                     )}
                     {settings.layout === 'list' && (
                       <div className="space-y-3 max-w-2xl mx-auto">
@@ -1880,13 +1902,24 @@ export function Testimonials() {
                       </div>
                     )}
                     {settings.layout === 'wall' && (
-                      <div className="columns-1 sm:columns-2 lg:columns-3 gap-3 space-y-3">
-                        {previewTestimonials.slice(0, 9).map((t) => (
-                          <div key={t.id} className="break-inside-avoid">
+                      <Reorder.Group
+                        values={wallPreviewItems}
+                        onReorder={handlePreviewReorder}
+                        className="flex flex-wrap gap-3"
+                        as="div"
+                      >
+                        {wallPreviewItems.map((t) => (
+                          <Reorder.Item
+                            key={t.id}
+                            value={t}
+                            as="div"
+                            className="w-[calc(33.333%-8px)] min-w-[200px] cursor-grab active:cursor-grabbing"
+                            whileDrag={{ scale: 1.03, boxShadow: '0 8px 25px rgba(0,0,0,0.15)', zIndex: 50 }}
+                          >
                             <TestimonialPreviewCard testimonial={t} theme={settings.theme} />
-                          </div>
+                          </Reorder.Item>
                         ))}
-                      </div>
+                      </Reorder.Group>
                     )}
                     {settings.layout === 'single' && previewTestimonials.length > 0 && (
                       <div className="max-w-lg mx-auto">
