@@ -1,3 +1,28 @@
+## Session Handoff (March 10, 2026, session 12)
+
+**What was done:**
+1. **Fixed broken drag-to-reorder in Grid and Wall preview cards.** Framer Motion `Reorder.Group` only supports 1D (single axis). Replaced with `@dnd-kit/sortable` + `rectSortingStrategy` for proper 2D grid drag. 1 file + npm packages:
+   a. `widgets/page.tsx`: Added `SortablePreviewCard` wrapper, `DndContext`/`SortableContext` for Grid and Wall, `handleDragEnd` callback, `PointerSensor` (5px activation) + `KeyboardSensor` (a11y).
+   b. Installed `@dnd-kit/core`, `@dnd-kit/sortable`, `@dnd-kit/utilities`.
+2. **Fixed white space bug in Grid preview.** `grid-cols-3` with only 2 items left an empty 3rd column. Changed to `auto-fill` with `minmax(250px, 1fr)` so items fill available width.
+3. **Restored Wall layout to CSS columns** (`columns-1 sm:columns-2 lg:columns-3`) for proper masonry.
+4. **Removed dead code:** `handlePreviewReorder` callback (replaced by `handleDragEnd`).
+5. **Display Order panel (Framer Reorder axis="y") untouched:** still works, stays in sync.
+
+**What's next:** Phase 1 BUILD continues:
+1. Item #13e through 13h: Remaining audit Phase 1 items
+2. Minimal layout (item #2 from active work queue)
+3. **Run the editorial migration SQL** on production Supabase before deploying.
+4. **Update Lemon Squeezy dashboard:** Pro variant price $19->$29/mo, $190->$290/yr.
+5. **Add UPSTASH_REDIS_REST_URL and UPSTASH_REDIS_REST_TOKEN to Vercel project env vars** before deploying.
+
+**What to watch out for:**
+1. Browser automation (CDP) cannot trigger dnd-kit PointerSensor drag (requires real pointer capture). Mouse drag works for real users. Tested via KeyboardSensor.
+2. CSS columns + dnd-kit keyboard: ArrowDown doesn't work in masonry (items are side-by-side). ArrowRight works. Minor edge case.
+3. All previous session watch-outs still apply (LS price mismatch, Upstash env vars, embed.js hardcoded 25, grandfathered users >25 testimonials, cardColor backwards compat, MasonryGrid SSR shift).
+
+---
+
 ## Session Handoff (March 10, 2026, session 11)
 
 **What was done:**
