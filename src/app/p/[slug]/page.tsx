@@ -283,14 +283,61 @@ export default async function PublicTestimonialsPage({ params }: PageProps) {
                   key={t.id}
                   className="break-inside-avoid mb-4 bg-white rounded-2xl border border-gray-100 shadow-sm flex flex-col overflow-hidden"
                 >
-                  {/* Accent top line */}
-                  <div
-                    className="h-0.5 w-full shrink-0"
-                    style={{ backgroundColor: accentColor }}
-                  />
-
                   <div className="p-5 flex flex-col gap-3">
-                    {/* Zone A: Identity */}
+                    {/* Zone C: Stars + metric (TOP) */}
+                    <div className="flex items-center gap-2 flex-wrap">
+                      {t.rating != null && (
+                        <div className="flex gap-0.5">
+                          {[1, 2, 3, 4, 5].map((star) => (
+                            <Star
+                              key={star}
+                              className="w-3.5 h-3.5"
+                              fill={star <= t.rating! ? accentColor : 'none'}
+                              stroke={star <= t.rating! ? accentColor : '#d1d5db'}
+                            />
+                          ))}
+                        </div>
+                      )}
+                      {metricLabel && (
+                        <span
+                          className="text-[10px] font-semibold rounded-full px-2 py-0.5 border whitespace-nowrap"
+                          style={{
+                            color: accentColor,
+                            backgroundColor: `${accentColor}15`,
+                            borderColor: `${accentColor}30`,
+                          }}
+                        >
+                          {metricLabel}
+                        </span>
+                      )}
+                    </div>
+
+                    {/* Zone B: Quote (MIDDLE) */}
+                    <blockquote className="flex-1">
+                      <p data-vouch-quote="" className="text-sm leading-relaxed line-clamp-6">
+                        &ldquo;
+                        {hasGolden ? (
+                          <>
+                            {beforeGolden && <span style={{ color: `${textColor}99` }}>{beforeGolden}</span>}
+                            <span className="font-semibold" style={{ color: textColor }}>{golden}</span>
+                            {afterGolden && <span style={{ color: `${textColor}99` }}>{afterGolden}</span>}
+                          </>
+                        ) : (
+                          <span style={{ color: textColor }}>{t.content}</span>
+                        )}
+                        &rdquo;
+                      </p>
+                      <button
+                        data-vouch-read-more=""
+                        className="hidden text-xs font-semibold mt-1 bg-transparent border-0 p-0 cursor-pointer"
+                        style={{ color: accentColor }}
+                      >
+                        Read more
+                      </button>
+                      <cite className="sr-only">{t.author_name}</cite>
+                    </blockquote>
+
+                    {/* Zone A: Identity (BOTTOM) */}
                     <div className="flex items-center justify-between gap-2">
                       <div className="flex items-center gap-2.5 min-w-0 flex-1">
                         {/* Avatar / favicon / initials */}
@@ -334,7 +381,7 @@ export default async function PublicTestimonialsPage({ params }: PageProps) {
                         </div>
                       </div>
 
-                      {/* Verification badge: top right */}
+                      {/* Verification badge */}
                       {(isX || isLinkedIn) ? (
                         <a
                           href={sourceUrl!}
@@ -366,59 +413,6 @@ export default async function PublicTestimonialsPage({ params }: PageProps) {
                       ) : (
                         <span className="text-[10px] text-gray-400 flex-shrink-0 whitespace-nowrap">
                           &#10003; {verifiedDate}
-                        </span>
-                      )}
-                    </div>
-
-                    {/* Zone B: Quote */}
-                    <blockquote className="flex-1">
-                      <p data-vouch-quote="" className="text-sm leading-relaxed line-clamp-6">
-                        &ldquo;
-                        {hasGolden ? (
-                          <>
-                            {beforeGolden && <span style={{ color: `${textColor}99` }}>{beforeGolden}</span>}
-                            <span className="font-semibold" style={{ color: textColor }}>{golden}</span>
-                            {afterGolden && <span style={{ color: `${textColor}99` }}>{afterGolden}</span>}
-                          </>
-                        ) : (
-                          <span style={{ color: textColor }}>{t.content}</span>
-                        )}
-                        &rdquo;
-                      </p>
-                      <button
-                        data-vouch-read-more=""
-                        className="hidden text-xs font-semibold mt-1 bg-transparent border-0 p-0 cursor-pointer"
-                        style={{ color: accentColor }}
-                      >
-                        Read more
-                      </button>
-                      <cite className="sr-only">{t.author_name}</cite>
-                    </blockquote>
-
-                    {/* Zone C: Stars + metric */}
-                    <div className="flex items-center gap-2 flex-wrap">
-                      {t.rating != null && (
-                        <div className="flex gap-0.5">
-                          {[1, 2, 3, 4, 5].map((star) => (
-                            <Star
-                              key={star}
-                              className="w-3.5 h-3.5"
-                              fill={star <= t.rating! ? accentColor : 'none'}
-                              stroke={star <= t.rating! ? accentColor : '#d1d5db'}
-                            />
-                          ))}
-                        </div>
-                      )}
-                      {metricLabel && (
-                        <span
-                          className="text-[10px] font-semibold rounded-full px-2 py-0.5 border whitespace-nowrap"
-                          style={{
-                            color: accentColor,
-                            backgroundColor: `${accentColor}15`,
-                            borderColor: `${accentColor}30`,
-                          }}
-                        >
-                          {metricLabel}
                         </span>
                       )}
                     </div>

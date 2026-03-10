@@ -244,7 +244,26 @@
       '<article style="background:' + bg + ';border:' + border + ';box-shadow:' + shadow +
       ';border-radius:14px;padding:' + pad + ';display:flex;flex-direction:column;gap:' + gap + 'px">';
 
-    // Identity
+    // Proof (TOP)
+    html += '<div style="display:flex;align-items:center;flex-wrap:wrap;gap:8px">';
+    if (theme.showRating !== false) html += stars(t.rating, pc);
+    if (t.metric_label && theme.showMetric !== false) {
+      html +=
+        '<span style="font-size:10px;font-weight:600;color:' + pc + ';background:' + pc +
+        '15;border:1px solid ' + pc + '30;border-radius:999px;padding:2px 8px;white-space:nowrap">' +
+        esc(t.metric_label) + '</span>';
+    }
+    html += '</div>';
+
+    // Quote (MIDDLE, hidden when show_text is false and testimonial has video)
+    if (t.show_text !== false || !t.video_url) {
+      html +=
+        '<blockquote style="margin:0;padding:0"><p style="font-size:' + quoteSize +
+        'px;line-height:1.65;margin:0;overflow:hidden;display:-webkit-box;-webkit-line-clamp:6;-webkit-box-orient:vertical">' +
+        '&ldquo;' + quoteHtml + '&rdquo;</p></blockquote>';
+    }
+
+    // Identity (BOTTOM)
     html += '<div style="display:flex;align-items:center;justify-content:space-between;gap:8px">';
     if (theme.showAvatar !== false) {
       html += '<div style="display:flex;align-items:center;gap:10px;min-width:0;flex:1">';
@@ -259,32 +278,13 @@
       }
       html += '</div></div>';
     }
-    html += verifyHtml;
-    html += '</div>';
-
-    // Quote (hidden when show_text is false and testimonial has video)
-    if (t.show_text !== false || !t.video_url) {
-      html +=
-        '<blockquote style="margin:0;padding:0"><p style="font-size:' + quoteSize +
-        'px;line-height:1.65;margin:0;overflow:hidden;display:-webkit-box;-webkit-line-clamp:6;-webkit-box-orient:vertical">' +
-        '&ldquo;' + quoteHtml + '&rdquo;</p></blockquote>';
-    }
-
-    // Proof
-    html += '<div style="display:flex;align-items:center;flex-wrap:wrap;gap:8px">';
-    if (theme.showRating !== false) html += stars(t.rating, pc);
-    if (t.metric_label && theme.showMetric !== false) {
-      html +=
-        '<span style="font-size:10px;font-weight:600;color:' + pc + ';background:' + pc +
-        '15;border:1px solid ' + pc + '30;border-radius:999px;padding:2px 8px;white-space:nowrap">' +
-        esc(t.metric_label) + '</span>';
-    }
     if (theme.showDate !== false) {
       var ago = timeAgo(t.created_at);
       if (ago) {
         html += '<span style="font-size:10px;color:#9ca3af;margin-left:auto">' + ago + '</span>';
       }
     }
+    html += verifyHtml;
     html += '</div>';
 
     // Video (thumbnail-first: poster + play button, loads video on click)
