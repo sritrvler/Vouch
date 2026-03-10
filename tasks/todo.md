@@ -1,3 +1,25 @@
+## Session Handoff (March 10, 2026, session 10)
+
+**What was done:**
+1. **Card Color Picker added to widget builder.** Separate `cardColor` field so users can create contrast between widget container background and individual card backgrounds (e.g., light gray bg with white cards). 3 files changed:
+   a. `widgets/page.tsx`: Added `cardColor` to WidgetTheme interface, 3 initializers (useState, DEFAULT_SETTINGS, loadWidgetIntoSettings), TestimonialPreviewCard now uses `theme.cardColor`, new Card Color picker UI (same pattern as Background/Text pickers, swatches: whites/grays + dark options).
+   b. `public/embed.js`: `renderCard()` and `renderSingle()` use `cardBg` with `theme.cardColor || theme.backgroundColor` fallback for backwards compat.
+   c. `supabase/schema.sql`: Added `cardColor` to default JSONB theme.
+
+**What's next:** Phase 1 BUILD continues:
+1. Item #13e through 13h: Remaining audit Phase 1 items
+2. Minimal layout (item #2 from active work queue)
+3. **Run the editorial migration SQL** on production Supabase before deploying.
+4. **Update Lemon Squeezy dashboard:** Pro variant price $19->$29/mo, $190->$290/yr.
+5. **Add UPSTASH_REDIS_REST_URL and UPSTASH_REDIS_REST_TOKEN to Vercel project env vars** before deploying.
+
+**What to watch out for:**
+1. Old widgets without `cardColor` in JSONB: dashboard defaults to `#ffffff`, embed.js falls back to `backgroundColor`. No migration needed.
+2. Editorial and Minimal layouts don't use card backgrounds (transparent/divider based). `cardColor` only affects Grid, Wall, Carousel, List, Single.
+3. All previous session watch-outs still apply (LS price mismatch, Upstash env vars, embed.js hardcoded 25, grandfathered users >25 testimonials).
+
+---
+
 ## Session Handoff (March 8, 2026, session 9)
 
 **What was done:**
