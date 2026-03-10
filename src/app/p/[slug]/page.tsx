@@ -95,12 +95,12 @@ export default async function PublicTestimonialsPage({ params }: PageProps) {
     );
   }
 
-  // Fetch first widget for theme/ordering sync
+  // Fetch most recently updated widget for theme/ordering sync
   const { data: widget } = await supabase
     .from('widgets')
     .select('theme, pinned_ids, filter_mode, min_rating, max_items')
     .eq('project_id', project.id)
-    .order('created_at', { ascending: true })
+    .order('updated_at', { ascending: false })
     .limit(1)
     .maybeSingle();
 
