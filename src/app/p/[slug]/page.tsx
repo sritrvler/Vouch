@@ -291,7 +291,7 @@ export default async function PublicTestimonialsPage({ params }: PageProps) {
             <p className="text-gray-400 text-sm">No reviews yet.</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4" style={{ alignItems: 'start' }}>
+          <div className="columns-1 sm:columns-2 lg:columns-3 gap-4 space-y-4">
             {displayTestimonials.map((t) => {
               const initials = t.author_name
                 .split(' ')
@@ -329,7 +329,7 @@ export default async function PublicTestimonialsPage({ params }: PageProps) {
                   data-card-author={t.author_name}
                   data-card-role={[t.author_role, t.author_company].filter(Boolean).join(', ')}
                   data-card-rating={String(t.rating ?? '')}
-                  className={`rounded-2xl flex flex-col overflow-hidden${
+                  className={`rounded-2xl flex flex-col overflow-hidden break-inside-avoid${
                     cardStyle === 'border' ? ' border border-gray-200' :
                     cardStyle === 'flat' ? '' :
                     ' border border-gray-100 shadow-sm'
