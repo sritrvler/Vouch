@@ -6,12 +6,6 @@ import { PLANS } from '@/lib/lemonsqueezy';
 
 const widgetLimiter = createRateLimiter({ windowMs: 60_000, max: 60, prefix: 'vouch:rl:widget' });
 
-// Our own site widgets get Pro treatment (dog-fooding on landing + pricing pages)
-const OWN_SITE_WIDGET_IDS = [
-  '6f08c057-3906-4f90-9346-f2fff0a0a440', // Homepage Wall of Love
-  '7b693bf1-613a-424b-96b3-bf0de049fe58', // Pricing Carousel
-];
-
 const CORS_HEADERS = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Methods': 'GET, OPTIONS',
@@ -100,7 +94,7 @@ export async function GET(request: NextRequest, { params }: PageProps) {
       );
     }
 
-    const isPro = sub?.plan === 'pro' || sub?.plan === 'studio' || OWN_SITE_WIDGET_IDS.includes(widget.id);
+    const isPro = sub?.plan === 'pro' || sub?.plan === 'studio';
     const hardLimit = isPro ? (widget.max_items ?? 12) : Math.min(widget.max_items ?? 12, PLANS.free.widgetDisplayLimit);
 
     // Apply custom ordering if set, then enforce hardLimit
