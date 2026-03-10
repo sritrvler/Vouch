@@ -324,7 +324,10 @@ export default async function PublicTestimonialsPage({ params }: PageProps) {
                     cardStyle === 'flat' ? '' :
                     ' border border-gray-100 shadow-sm'
                   }`}
-                  style={{ backgroundColor: cardColor }}
+                  style={{
+                    backgroundColor: cardColor,
+                    ...(t.featured ? { borderLeft: `3px solid ${accentColor}` } : {}),
+                  }}
                 >
                   <div className="p-5 flex flex-col gap-3">
                     {/* Zone C: Stars + metric (TOP) */}

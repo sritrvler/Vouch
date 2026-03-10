@@ -1720,6 +1720,11 @@ export function Testimonials() {
                     <p className="text-xs font-medium text-foreground truncate flex-1 min-w-0">
                       {t.author_name}
                     </p>
+                    {t.featured && (
+                      <span className="text-[9px] font-semibold text-amber-600 bg-amber-50 border border-amber-200 rounded-full px-1.5 py-0.5 shrink-0">
+                        Featured
+                      </span>
+                    )}
                     <div className="flex items-center gap-0.5 shrink-0">
                       {Array.from({ length: t.rating }).map((_, i) => (
                         <Star key={i} className="size-2.5 fill-amber-400 text-amber-400" />
