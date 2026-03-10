@@ -249,7 +249,7 @@ export default function PricingPage() {
           <h2 className="text-2xl font-bold text-gray-900 mb-8 text-center">
             Trusted by teams who care about design
           </h2>
-          <div data-vouch="7b693bf1-613a-424b-96b3-bf0de049fe58"></div>
+          <div data-vouch="7b693bf1-613a-424b-96b3-bf0de049fe58" style={{ minHeight: '1px' }}></div>
           <VouchEmbed />
         </section>
       </div>

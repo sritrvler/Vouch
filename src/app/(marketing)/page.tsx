@@ -426,7 +426,7 @@ function TestimonialsSection() {
             Real feedback from real users. Displayed with Vouch.
           </p>
         </div>
-        <div data-vouch="6f08c057-3906-4f90-9346-f2fff0a0a440"></div>
+        <div data-vouch="6f08c057-3906-4f90-9346-f2fff0a0a440" style={{ minHeight: '1px' }}></div>
         <Script src="/embed.js" strategy="lazyOnload" />
       </div>
     </section>
