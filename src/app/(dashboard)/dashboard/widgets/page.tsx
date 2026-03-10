@@ -962,6 +962,11 @@ export default function WidgetsPage() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Not authenticated');
 
+      // Auto-populate pinned_ids from current display order if user never dragged
+      const pinnedIdsToSave = settings.pinnedIds.length > 0
+        ? settings.pinnedIds
+        : orderedTestimonials.map((t) => t.id);
+
       const payload = {
         user_id: user.id,
         project_id: selectedProjectId,
@@ -972,7 +977,7 @@ export default function WidgetsPage() {
         min_rating: settings.minRating,
         max_items: settings.maxItems,
         hide_branding: settings.hideBranding,
-        pinned_ids: settings.pinnedIds,
+        pinned_ids: pinnedIdsToSave,
       };
 
       const { error } = await supabase.from('widgets').update(payload).eq('id', activeWidgetId);
@@ -982,7 +987,7 @@ export default function WidgetsPage() {
       setWidgets((prev) =>
         prev.map((w) =>
           w.id === activeWidgetId
-            ? { ...w, name: settings.name, layout: settings.layout, theme: settings.theme as WidgetTheme, filter_mode: settings.filterMode, min_rating: settings.minRating, max_items: settings.maxItems, hide_branding: settings.hideBranding, pinned_ids: settings.pinnedIds }
+            ? { ...w, name: settings.name, layout: settings.layout, theme: settings.theme as WidgetTheme, filter_mode: settings.filterMode, min_rating: settings.minRating, max_items: settings.maxItems, hide_branding: settings.hideBranding, pinned_ids: pinnedIdsToSave }
             : w
         )
       );
@@ -993,7 +998,7 @@ export default function WidgetsPage() {
     } finally {
       setSaving(false);
     }
-  }, [supabase, selectedProjectId, settings, activeWidgetId]);
+  }, [supabase, selectedProjectId, settings, activeWidgetId, orderedTestimonials]);
 
   // ── Embed snippets ────────────────────────────────────────────────────────
   const iframeSnippet = activeWidgetId

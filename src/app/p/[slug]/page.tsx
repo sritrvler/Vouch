@@ -5,6 +5,8 @@ import { Star, ExternalLink, Play } from 'lucide-react';
 import Link from 'next/link';
 import { resolveFontUrl, sanitizeFontFamily } from '@/lib/fonts';
 
+export const revalidate = 60;
+
 // ─── Helpers ───────────────────────────────────────────────────────────────
 
 function companyToDomain(company: string): string {
