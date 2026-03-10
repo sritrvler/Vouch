@@ -202,6 +202,11 @@ function TestimonialPreviewCard({
     .toUpperCase()
     .slice(0, 2);
 
+  const ts = theme.textSize || 'compact';
+  const quoteSize = ts === 'large' ? 17 : ts === 'default' ? 15 : (compact ? 13 : 14);
+  const nameSize = ts === 'large' ? 14 : ts === 'default' ? 14 : 13;
+  const roleSize = ts === 'large' ? 12 : ts === 'default' ? 12 : 11;
+
   const cardStyles: React.CSSProperties = {
     backgroundColor: theme.cardColor,
     ...(theme.cardStyle === 'shadow'
@@ -218,7 +223,7 @@ function TestimonialPreviewCard({
       style={cardStyles}
     >
       {theme.showRating && <StarRating rating={testimonial.rating} color={theme.primaryColor} />}
-      <p className={cn('mt-2 text-sm leading-relaxed', compact && 'text-xs')} style={{ color: theme.textColor + 'd9' }}>{truncated}</p>
+      <p className="mt-2 leading-relaxed" style={{ fontSize: quoteSize, color: theme.textColor + 'd9' }}>{truncated}</p>
       <div className="mt-3 flex items-center gap-2">
         {theme.showAvatar && (
           <Avatar size="sm">
@@ -226,19 +231,19 @@ function TestimonialPreviewCard({
               <AvatarImage src={testimonial.author_avatar_url} alt={testimonial.author_name} />
             )}
             <AvatarFallback
-              className="text-xs font-semibold"
-              style={{ backgroundColor: theme.primaryColor + '20', color: theme.primaryColor }}
+              className="font-semibold"
+              style={{ fontSize: roleSize, backgroundColor: theme.primaryColor + '20', color: theme.primaryColor }}
             >
               {initials}
             </AvatarFallback>
           </Avatar>
         )}
         <div>
-          <p className="text-xs font-semibold" style={{ color: theme.textColor }}>{testimonial.author_name}</p>
-          {roleCompany && <p className="text-xs" style={{ color: theme.textColor + '80' }}>{roleCompany}</p>}
+          <p className="font-semibold" style={{ fontSize: nameSize, color: theme.textColor }}>{testimonial.author_name}</p>
+          {roleCompany && <p style={{ fontSize: roleSize, color: theme.textColor + '80' }}>{roleCompany}</p>}
         </div>
         {theme.showDate && (
-          <span className="ml-auto text-xs" style={{ color: theme.textColor + '60' }}>
+          <span className="ml-auto" style={{ fontSize: roleSize, color: theme.textColor + '60' }}>
             {format(new Date(testimonial.created_at), 'MMM yyyy')}
           </span>
         )}
