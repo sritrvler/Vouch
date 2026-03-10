@@ -291,7 +291,7 @@ export default async function PublicTestimonialsPage({ params }: PageProps) {
             <p className="text-gray-400 text-sm">No reviews yet.</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 items-start">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {displayTestimonials.map((t) => {
               const initials = t.author_name
                 .split(' ')
