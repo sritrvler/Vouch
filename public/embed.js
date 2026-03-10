@@ -1,5 +1,6 @@
 (function () {
   'use strict';
+  console.log('[Vouch embed.js] IIFE executing, readyState:', document.readyState);
 
   var ATTR = 'data-vouch';
   var base =
@@ -1116,6 +1117,7 @@
 
   function init() {
     var els = document.querySelectorAll('[' + ATTR + ']');
+    console.log('[Vouch embed.js] init() called, found', els.length, 'elements');
     if (!('IntersectionObserver' in window)) {
       for (var i = 0; i < els.length; i++) initWidget(els[i]);
       return;
