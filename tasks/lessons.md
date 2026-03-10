@@ -2,6 +2,10 @@
 
 Rules for myself. Read this at session start. Do not repeat these mistakes.
 
+## embed.js Testing (Session 13)
+16. **embed.js uses `data-vouch="WIDGET_ID"` attribute**, not `data-vouch-id`. The init function searches `querySelectorAll('[data-vouch]')`. Test pages must use the correct attribute or the widget won't render.
+17. **Widget ID is not a UUID visible in the DOM.** To find it, query Supabase directly using the anon key, or intercept network requests to the Supabase REST API.
+
 ## Production Schema Sync (Session 20)
 Production Supabase schema was missing columns added via ALTER TABLE in later sessions. The code queries all columns, so missing columns cause 400 errors. Before seeding or testing on prod, always verify the schema is fully up to date. The full list of ALTER TABLE statements is in `supabase/schema.sql` as comments.
 

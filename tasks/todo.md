@@ -1,3 +1,23 @@
+## Session Handoff (March 10, 2026, session 13)
+
+**What was done:**
+1. **Fixed featured card border missing in embed.js.** Added `featuredBorder` variable to `renderCard` function that appends `border-left:3px solid primaryColor` when `t.featured` is true. 1 file, 2 lines changed: `public/embed.js`.
+2. **Verified across all surfaces:** Widget builder preview, slug page, and embed all show consistent 3px left border on featured cards.
+3. **Tested edge cases:** cardStyle=shadow/border/flat all work correctly with featured. Unfeatured cards show no border. All 4 multi-card layouts (grid, wall, carousel, list) inherit the fix via shared `renderCard`.
+
+**What's next:** Phase 1 BUILD continues:
+1. Item #13e through 13h: Remaining audit Phase 1 items
+2. Minimal layout (item #2 from active work queue)
+3. Run editorial migration SQL on production Supabase before deploying
+4. Update Lemon Squeezy dashboard: Pro variant price $19 to $29/mo
+5. Add UPSTASH_REDIS_REST_URL and UPSTASH_REDIS_REST_TOKEN to Vercel project env vars
+
+**What to watch out for:**
+1. `public/test-embed.html` is untracked in repo, delete it before deploying
+2. All previous session watch-outs still apply
+
+---
+
 ## Session Handoff (March 10, 2026, session 12)
 
 **What was done:**
