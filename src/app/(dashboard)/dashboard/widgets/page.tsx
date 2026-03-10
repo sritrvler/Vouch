@@ -2,6 +2,20 @@
 
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { motion, AnimatePresence, Reorder } from 'framer-motion';
+import {
+  DndContext,
+  closestCenter,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+} from '@dnd-kit/core';
+import {
+  SortableContext,
+  rectSortingStrategy,
+  useSortable,
+} from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 import { toast } from 'sonner';
 import {
   LayoutGrid,
@@ -248,6 +262,45 @@ function TestimonialPreviewCard({
           </span>
         )}
       </div>
+    </div>
+  );
+}
+
+// ─── Sortable Preview Card (dnd-kit wrapper for 2D grid drag) ────────────────
+function SortablePreviewCard({
+  id,
+  testimonial,
+  theme,
+  compact,
+  className,
+}: {
+  id: string;
+  testimonial: Testimonial;
+  theme: WidgetTheme;
+  compact?: boolean;
+  className?: string;
+}) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id });
+
+  const style: React.CSSProperties = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    zIndex: isDragging ? 50 : undefined,
+    opacity: isDragging ? 0.9 : 1,
+    cursor: isDragging ? 'grabbing' : 'grab',
+    position: 'relative',
+  };
+
+  return (
+    <div ref={setNodeRef} style={style} className={className} {...attributes} {...listeners}>
+      <TestimonialPreviewCard testimonial={testimonial} theme={theme} compact={compact} />
     </div>
   );
 }
@@ -857,11 +910,23 @@ export default function WidgetsPage() {
     }
   }, [testimonials.length]);
 
-  const handlePreviewReorder = useCallback((newPreviewOrder: Testimonial[]) => {
-    const previewIdSet = new Set(newPreviewOrder.map(t => t.id));
-    const remaining = orderedTestimonials.filter(t => !previewIdSet.has(t.id));
-    const newFullOrder = [...newPreviewOrder, ...remaining];
-    handleReorder(newFullOrder);
+  // ── DnD-kit for 2D grid/wall drag-to-reorder ──────────────────────────────
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 5 } })
+  );
+
+  const handleDragEnd = useCallback((event: DragEndEvent) => {
+    const { active, over } = event;
+    if (!over || active.id === over.id) return;
+
+    const activeIdx = orderedTestimonials.findIndex(t => t.id === active.id);
+    const overIdx = orderedTestimonials.findIndex(t => t.id === over.id);
+    if (activeIdx === -1 || overIdx === -1) return;
+
+    const newOrder = [...orderedTestimonials];
+    const [moved] = newOrder.splice(activeIdx, 1);
+    newOrder.splice(overIdx, 0, moved);
+    handleReorder(newOrder);
   }, [orderedTestimonials, handleReorder]);
 
   // ── Switch widget ────────────────────────────────────────────────────────
@@ -1862,28 +1927,15 @@ export function Testimonials() {
                       />
                     )}
                     {settings.layout === 'grid' && (
-                      <Reorder.Group
-                        values={gridPreviewItems}
-                        onReorder={handlePreviewReorder}
-                        className="flex flex-wrap gap-3"
-                        as="div"
-                      >
-                        {gridPreviewItems.map((t) => (
-                          <Reorder.Item
-                            key={t.id}
-                            value={t}
-                            as="div"
-                            className="w-[calc(33.333%-8px)] min-w-[200px] flex-grow cursor-grab active:cursor-grabbing"
-                            whileDrag={{ scale: 1.03, boxShadow: '0 8px 25px rgba(0,0,0,0.15)', zIndex: 50 }}
-                          >
-                            <TestimonialPreviewCard
-                              testimonial={t}
-                              theme={settings.theme}
-                              compact
-                            />
-                          </Reorder.Item>
-                        ))}
-                      </Reorder.Group>
+                      <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+                        <SortableContext items={gridPreviewItems.map(t => t.id)} strategy={rectSortingStrategy}>
+                          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                            {gridPreviewItems.map((t) => (
+                              <SortablePreviewCard key={t.id} id={t.id} testimonial={t} theme={settings.theme} compact />
+                            ))}
+                          </div>
+                        </SortableContext>
+                      </DndContext>
                     )}
                     {settings.layout === 'list' && (
                       <div className="space-y-3 max-w-2xl mx-auto">
@@ -1902,24 +1954,15 @@ export function Testimonials() {
                       </div>
                     )}
                     {settings.layout === 'wall' && (
-                      <Reorder.Group
-                        values={wallPreviewItems}
-                        onReorder={handlePreviewReorder}
-                        className="flex flex-wrap gap-3"
-                        as="div"
-                      >
-                        {wallPreviewItems.map((t) => (
-                          <Reorder.Item
-                            key={t.id}
-                            value={t}
-                            as="div"
-                            className="w-[calc(33.333%-8px)] min-w-[200px] cursor-grab active:cursor-grabbing"
-                            whileDrag={{ scale: 1.03, boxShadow: '0 8px 25px rgba(0,0,0,0.15)', zIndex: 50 }}
-                          >
-                            <TestimonialPreviewCard testimonial={t} theme={settings.theme} />
-                          </Reorder.Item>
-                        ))}
-                      </Reorder.Group>
+                      <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+                        <SortableContext items={wallPreviewItems.map(t => t.id)} strategy={rectSortingStrategy}>
+                          <div className="columns-1 sm:columns-2 lg:columns-3 gap-3 space-y-3">
+                            {wallPreviewItems.map((t) => (
+                              <SortablePreviewCard key={t.id} id={t.id} testimonial={t} theme={settings.theme} className="break-inside-avoid" />
+                            ))}
+                          </div>
+                        </SortableContext>
+                      </DndContext>
                     )}
                     {settings.layout === 'single' && previewTestimonials.length > 0 && (
                       <div className="max-w-lg mx-auto">
