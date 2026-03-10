@@ -102,7 +102,7 @@ export default async function PublicTestimonialsPage({ params }: PageProps) {
     .eq('project_id', project.id)
     .order('created_at', { ascending: true })
     .limit(1)
-    .single();
+    .maybeSingle();
 
   // Fetch active collection form for this project
   const { data: form } = await supabase
@@ -125,7 +125,7 @@ export default async function PublicTestimonialsPage({ params }: PageProps) {
 
   // Apply widget pinned_ids ordering
   let displayTestimonials = testimonials ?? [];
-  const pinnedIds = (widget?.pinned_ids as string[]) ?? [];
+  const pinnedIds: string[] = Array.isArray(widget?.pinned_ids) ? (widget.pinned_ids as string[]) : [];
   if (pinnedIds.length > 0) {
     const idxMap = new Map(pinnedIds.map((id: string, i: number) => [id, i]));
     displayTestimonials = [...displayTestimonials].sort((a, b) => {
