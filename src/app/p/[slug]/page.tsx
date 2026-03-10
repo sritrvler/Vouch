@@ -156,8 +156,12 @@ export default async function PublicTestimonialsPage({ params }: PageProps) {
   const cardColor = theme?.cardColor || '#ffffff';
   const backgroundColor = theme?.backgroundColor || '#f9fafb';
   const cardStyle: string = theme?.cardStyle || 'shadow';
-  const fontFamily = sanitizeFontFamily(project.font_family);
-  const fontStyleUrl = resolveFontUrl(project.font_family, project.font_url);
+  const ts: string = theme?.textSize || 'compact';
+  const quoteSize = ts === 'large' ? 17 : ts === 'default' ? 15 : 14;
+  const nameSize = ts === 'large' ? 14 : ts === 'default' ? 14 : 13;
+  const roleSize = ts === 'large' ? 12 : ts === 'default' ? 12 : 11;
+  const fontFamily = sanitizeFontFamily(theme?.fontFamily) || sanitizeFontFamily(project.font_family);
+  const fontStyleUrl = resolveFontUrl(theme?.fontFamily, theme?.fontUrl) || resolveFontUrl(project.font_family, project.font_url);
 
   const jsonLd = {
     '@context': 'https://schema.org',
@@ -359,7 +363,7 @@ export default async function PublicTestimonialsPage({ params }: PageProps) {
 
                     {/* Zone B: Quote (MIDDLE) */}
                     <blockquote className="flex-1">
-                      <p data-vouch-quote="" className="text-sm leading-relaxed line-clamp-6">
+                      <p data-vouch-quote="" className="leading-relaxed line-clamp-6" style={{ fontSize: quoteSize }}>
                         &ldquo;
                         {hasGolden ? (
                           <>
@@ -409,9 +413,9 @@ export default async function PublicTestimonialsPage({ params }: PageProps) {
                           </div>
                         )}
                         <div className="min-w-0">
-                          <p className="text-xs font-bold truncate" style={{ color: textColor }}>{t.author_name}</p>
+                          <p className="font-bold truncate" style={{ fontSize: nameSize, color: textColor }}>{t.author_name}</p>
                           {(t.author_role || t.author_company) && (
-                            <p className="text-xs leading-snug" style={{ color: `${textColor}99` }}>
+                            <p className="leading-snug" style={{ fontSize: roleSize, color: `${textColor}99` }}>
                               {[t.author_role, t.author_company].filter(Boolean).join(', ')}
                             </p>
                           )}
