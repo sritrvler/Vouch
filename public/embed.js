@@ -219,9 +219,10 @@
         '<span style="font-size:10px;color:#9ca3af;flex-shrink:0;white-space:nowrap">&#10003; ' + esc(vDate) + '</span>';
     }
 
+    var featuredBorder = t.featured ? ';border-left:3px solid ' + pc : '';
     var html =
       '<article style="background:' + cardBg + ';border:' + border + ';box-shadow:' + shadow +
-      ';border-radius:14px;padding:' + pad + ';display:flex;flex-direction:column;gap:' + gap + 'px;width:100%">';
+      ';border-radius:14px;padding:' + pad + ';display:flex;flex-direction:column;gap:' + gap + 'px;width:100%' + featuredBorder + '">';
 
     // Proof (TOP)
     html += '<div style="display:flex;align-items:center;flex-wrap:wrap;gap:8px">';
