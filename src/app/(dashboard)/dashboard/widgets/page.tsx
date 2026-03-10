@@ -350,13 +350,13 @@ function EditorialPreview({
                 {hasGolden ? (
                   <>
                     {content.slice(0, content.indexOf(golden!)) && (
-                      <span style={{ color: contextColor, fontWeight: 400 }}>
+                      <span style={{ color: goldenColor, fontWeight: 400 }}>
                         {content.slice(0, content.indexOf(golden!))}
                       </span>
                     )}
                     <span style={{ color: goldenColor, fontWeight: 500 }}>{golden}</span>
                     {content.slice(content.indexOf(golden!) + golden!.length) && (
-                      <span style={{ color: contextColor, fontWeight: 400 }}>
+                      <span style={{ color: goldenColor, fontWeight: 400 }}>
                         {content.slice(content.indexOf(golden!) + golden!.length)}
                       </span>
                     )}
@@ -420,7 +420,6 @@ function MinimalPreview({
   const rgbMatch = tc.match(/^rgba?\(\s*(\d+)/);
   const red = rgbMatch ? parseInt(rgbMatch[1], 10) : r;
   const isLightText = red > 160;
-  const contextColor = isLightText ? 'rgba(255,255,255,0.42)' : 'rgba(0,0,0,0.42)';
   const goldenColor = isLightText ? 'rgba(255,255,255,0.92)' : 'rgba(0,0,0,0.88)';
   const dividerColor = isLightText ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.10)';
   const attrMuted = isLightText ? 'rgba(255,255,255,0.45)' : 'rgba(0,0,0,0.45)';
@@ -438,7 +437,7 @@ function MinimalPreview({
             {hasGolden ? (
               <>
                 {content.slice(0, content.indexOf(golden!)) && (
-                  <span style={{ color: contextColor, fontWeight: 400 }}>
+                  <span style={{ color: goldenColor, fontWeight: 400 }}>
                     {content.slice(0, content.indexOf(golden!))}
                   </span>
                 )}
@@ -452,7 +451,7 @@ function MinimalPreview({
                   {golden}
                 </span>
                 {content.slice(content.indexOf(golden!) + golden!.length) && (
-                  <span style={{ color: contextColor, fontWeight: 400 }}>
+                  <span style={{ color: goldenColor, fontWeight: 400 }}>
                     {content.slice(content.indexOf(golden!) + golden!.length)}
                   </span>
                 )}
@@ -633,7 +632,7 @@ export default function WidgetsPage() {
   const [showUpgradePrompt, setShowUpgradePrompt] = useState(false);
 
   // Collapsible section state (multi-open allowed)
-  const [openSections, setOpenSections] = useState<Set<string>>(new Set(['layout']));
+  const [openSections, setOpenSections] = useState<Set<string>>(new Set(['layout', 'order']));
   const toggleSection = useCallback((section: string) => {
     setOpenSections(prev => {
       const next = new Set(prev);

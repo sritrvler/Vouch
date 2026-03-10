@@ -187,9 +187,9 @@
       var before = content.slice(0, idx);
       var after = content.slice(idx + golden.length);
       quoteHtml =
-        (before ? '<span style="color:#9ca3af">' + esc(before) + '</span>' : '') +
+        (before ? '<span style="color:' + tc + '">' + esc(before) + '</span>' : '') +
         '<span style="color:' + tc + ';font-weight:600">' + esc(golden) + '</span>' +
-        (after ? '<span style="color:#9ca3af">' + esc(after) + '</span>' : '');
+        (after ? '<span style="color:' + tc + '">' + esc(after) + '</span>' : '');
     } else {
       quoteHtml = '<span style="color:' + tc + '">' + esc(content) + '</span>';
     }
@@ -305,9 +305,9 @@
     if (hasGolden) {
       var idx = content.indexOf(golden);
       quoteHtml =
-        (content.slice(0, idx) ? '<span style="color:#9ca3af">' + esc(content.slice(0, idx)) + '</span>' : '') +
+        (content.slice(0, idx) ? '<span style="color:' + tc + '">' + esc(content.slice(0, idx)) + '</span>' : '') +
         '<span style="color:' + tc + ';font-weight:600">' + esc(golden) + '</span>' +
-        (content.slice(idx + golden.length) ? '<span style="color:#9ca3af">' + esc(content.slice(idx + golden.length)) + '</span>' : '');
+        (content.slice(idx + golden.length) ? '<span style="color:' + tc + '">' + esc(content.slice(idx + golden.length)) + '</span>' : '');
     } else {
       quoteHtml = esc(content);
     }
@@ -415,7 +415,7 @@
       '.mn-quote{font-size:20px;line-height:1.6;letter-spacing:-0.01em;font-style:normal;quotes:none;margin:0 0 20px}' +
       '.mn-quote p{margin:0}' +
       '.mn-threeup .mn-quote{font-size:18px}' +
-      '.mn-context{color:' + contextColor + ';font-weight:400}' +
+      '.mn-context{color:' + goldenColor + ';font-weight:400}' +
       '.mn-golden{color:' + goldenColor + ';font-weight:500;background:' + pc + '12;border-radius:3px;padding:0 3px}' +
       '.mn-plain{color:' + goldenColor + ';font-weight:400}' +
       '.mn-attr{display:flex;align-items:center;gap:10px}' +
@@ -564,7 +564,7 @@
       '.ed-qmark{position:absolute;top:-16px;left:-6px;font-size:72px;line-height:1;font-weight:300;' +
         'color:' + quoteMarkColor + ';pointer-events:none;user-select:none;font-family:Georgia,serif}' +
       '.ed-quote{font-size:22px;line-height:1.55;margin:0 0 0 0;letter-spacing:-0.01em;position:relative;z-index:1}' +
-      '.ed-quote .ed-context{color:' + contextColor + ';font-weight:400}' +
+      '.ed-quote .ed-context{color:' + goldenColor + ';font-weight:400}' +
       '.ed-quote .ed-golden{color:' + goldenColor + ';font-weight:500}' +
       '.ed-quote .ed-plain{color:' + goldenColor + ';font-weight:400}' +
       '.ed-nav{display:flex;align-items:center;gap:12px;margin-top:32px;justify-content:flex-end}' +
