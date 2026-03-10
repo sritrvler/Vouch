@@ -209,6 +209,7 @@ function TestimonialPreviewCard({
       : theme.cardStyle === 'border'
         ? { boxShadow: 'none' }
         : { boxShadow: 'none', borderColor: 'transparent' }),
+    ...(testimonial.featured ? { borderLeft: `3px solid ${theme.primaryColor}` } : {}),
   };
 
   return (
