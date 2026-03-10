@@ -1,7 +1,5 @@
 (function () {
   'use strict';
-  console.log('[Vouch embed.js] IIFE executing, readyState:', document.readyState);
-
   var ATTR = 'data-vouch';
   var base =
     window.VOUCH_BASE_URL ||
@@ -1117,7 +1115,6 @@
 
   function init() {
     var els = document.querySelectorAll('[' + ATTR + ']');
-    console.log('[Vouch embed.js] init() called, found', els.length, 'elements');
     if (!('IntersectionObserver' in window)) {
       for (var i = 0; i < els.length; i++) initWidget(els[i]);
       return;
@@ -1141,4 +1138,11 @@
   } else {
     init();
   }
+
+  // Expose for SPA frameworks (React, Next.js) where IntersectionObserver
+  // may not fire for dynamically hydrated elements
+  window.__vouchInit = function () {
+    var els = document.querySelectorAll('[' + ATTR + ']');
+    for (var i = 0; i < els.length; i++) initWidget(els[i]);
+  };
 })();
