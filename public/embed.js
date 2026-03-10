@@ -79,22 +79,10 @@
 
   function timeAgo(dateStr) {
     if (!dateStr) return '';
-    var then = new Date(dateStr).getTime();
-    if (isNaN(then)) return '';
-    var now = Date.now();
-    var diff = Math.max(0, now - then);
-    var sec = Math.floor(diff / 1000);
-    if (sec < 60) return 'just now';
-    var min = Math.floor(sec / 60);
-    if (min < 60) return min + (min === 1 ? ' minute ago' : ' minutes ago');
-    var hr = Math.floor(min / 60);
-    if (hr < 24) return hr + (hr === 1 ? ' hour ago' : ' hours ago');
-    var day = Math.floor(hr / 24);
-    if (day < 30) return day + (day === 1 ? ' day ago' : ' days ago');
-    var mo = Math.floor(day / 30);
-    if (mo < 12) return mo + (mo === 1 ? ' month ago' : ' months ago');
-    var yr = Math.floor(mo / 12);
-    return yr + (yr === 1 ? ' year ago' : ' years ago');
+    var d = new Date(dateStr);
+    if (isNaN(d.getTime())) return '';
+    var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    return months[d.getMonth()] + ' ' + d.getFullYear();
   }
 
   function esc(s) {
@@ -241,7 +229,7 @@
 
     var html =
       '<article style="background:' + cardBg + ';border:' + border + ';box-shadow:' + shadow +
-      ';border-radius:14px;padding:' + pad + ';display:flex;flex-direction:column;gap:' + gap + 'px">';
+      ';border-radius:14px;padding:' + pad + ';display:flex;flex-direction:column;gap:' + gap + 'px;width:100%">';
 
     // Proof (TOP)
     html += '<div style="display:flex;align-items:center;flex-wrap:wrap;gap:8px">';
@@ -377,9 +365,9 @@
   // ── Layouts ──────────────────────────────────────────────────────────────────
 
   function renderGrid(testimonials, theme) {
-    var html = '<div style="columns:280px;column-gap:20px;padding:4px">';
+    var html = '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:20px;padding:4px">';
     for (var i = 0; i < testimonials.length; i++) {
-      html += '<div style="break-inside:avoid;margin-bottom:20px">' + renderCard(testimonials[i], theme, false) + '</div>';
+      html += '<div style="display:flex">' + renderCard(testimonials[i], theme, false) + '</div>';
     }
     html += '</div>';
     return html;
