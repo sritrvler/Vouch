@@ -1,3 +1,24 @@
+## Session Handoff (March 10, 2026, session 11)
+
+**What was done:**
+1. **Slug page masonry layout fixed: row-first ordering.** CSS Columns filled column-first (1,4,7 / 2,5,8 / 3,6,9). Replaced with client-side round-robin distribution into flex columns for row-first visual order (1,2,3 / 4,5,6 / 7,8,9) matching the widget preview. No row-height gaps (each column is independent flex). 2 files:
+   a. `src/components/MasonryGrid.tsx` (NEW): Client component, useState+useEffect with matchMedia for 1/2/3 columns (mobile/sm/lg). Round-robin distributes children into N flex columns.
+   b. `src/app/p/[slug]/page.tsx`: Replaced CSS columns div with `<MasonryGrid>`, removed `break-inside-avoid` from article class.
+
+**What's next:** Phase 1 BUILD continues:
+1. Item #13e through 13h: Remaining audit Phase 1 items
+2. Minimal layout (item #2 from active work queue)
+3. **Run the editorial migration SQL** on production Supabase before deploying.
+4. **Update Lemon Squeezy dashboard:** Pro variant price $19->$29/mo, $190->$290/yr.
+5. **Add UPSTASH_REDIS_REST_URL and UPSTASH_REDIS_REST_TOKEN to Vercel project env vars** before deploying.
+
+**What to watch out for:**
+1. MasonryGrid SSR: Server renders as 1 column, hydrates to correct count. Brief layout shift on desktop is expected (acceptable for ISR page).
+2. embed.js has its own masonry in `renderGrid()` — completely separate, not affected by this change.
+3. All previous session watch-outs still apply (LS price mismatch, Upstash env vars, embed.js hardcoded 25, grandfathered users >25 testimonials, cardColor backwards compat).
+
+---
+
 ## Session Handoff (March 10, 2026, session 10)
 
 **What was done:**
