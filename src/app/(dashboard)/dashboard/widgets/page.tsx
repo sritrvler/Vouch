@@ -6,6 +6,7 @@ import {
   DndContext,
   closestCenter,
   PointerSensor,
+  KeyboardSensor,
   useSensor,
   useSensors,
   type DragEndEvent,
@@ -14,6 +15,7 @@ import {
   SortableContext,
   rectSortingStrategy,
   useSortable,
+  sortableKeyboardCoordinates,
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { toast } from 'sonner';
@@ -912,7 +914,8 @@ export default function WidgetsPage() {
 
   // ── DnD-kit for 2D grid/wall drag-to-reorder ──────────────────────────────
   const sensors = useSensors(
-    useSensor(PointerSensor, { activationConstraint: { distance: 5 } })
+    useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
   );
 
   const handleDragEnd = useCallback((event: DragEndEvent) => {
@@ -1929,7 +1932,7 @@ export function Testimonials() {
                     {settings.layout === 'grid' && (
                       <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
                         <SortableContext items={gridPreviewItems.map(t => t.id)} strategy={rectSortingStrategy}>
-                          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                          <div className="grid gap-3" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))' }}>
                             {gridPreviewItems.map((t) => (
                               <SortablePreviewCard key={t.id} id={t.id} testimonial={t} theme={settings.theme} compact />
                             ))}
