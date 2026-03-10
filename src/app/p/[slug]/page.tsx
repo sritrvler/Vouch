@@ -291,7 +291,7 @@ export default async function PublicTestimonialsPage({ params }: PageProps) {
             <p className="text-gray-400 text-sm">No reviews yet.</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 items-start">
             {displayTestimonials.map((t) => {
               const initials = t.author_name
                 .split(' ')
@@ -324,6 +324,11 @@ export default async function PublicTestimonialsPage({ params }: PageProps) {
               return (
                 <article
                   key={t.id}
+                  data-vouch-card=""
+                  data-card-content={t.content}
+                  data-card-author={t.author_name}
+                  data-card-role={[t.author_role, t.author_company].filter(Boolean).join(', ')}
+                  data-card-rating={String(t.rating ?? '')}
                   className={`rounded-2xl flex flex-col overflow-hidden${
                     cardStyle === 'border' ? ' border border-gray-200' :
                     cardStyle === 'flat' ? '' :
@@ -549,11 +554,111 @@ export default async function PublicTestimonialsPage({ params }: PageProps) {
         </div>
       </div>
 
+      {/* Read more modal overlay */}
+      <div
+        id="vouch-read-modal"
+        style={{
+          display: 'none',
+          position: 'fixed',
+          inset: 0,
+          zIndex: 50,
+          background: 'rgba(0,0,0,0.5)',
+          alignItems: 'center',
+          justifyContent: 'center',
+          padding: '16px',
+        }}
+      >
+        <div
+          style={{
+            position: 'relative',
+            width: '100%',
+            maxWidth: '520px',
+            maxHeight: '80vh',
+            overflowY: 'auto',
+            borderRadius: '16px',
+            padding: '28px',
+            backgroundColor: cardColor,
+          }}
+        >
+          <button
+            id="vouch-read-modal-close"
+            style={{
+              position: 'absolute',
+              top: '12px',
+              right: '16px',
+              color: '#9ca3af',
+              fontSize: '22px',
+              background: 'none',
+              border: 'none',
+              cursor: 'pointer',
+              lineHeight: '1',
+              padding: '4px',
+            }}
+            aria-label="Close"
+          >
+            &times;
+          </button>
+          <div id="vouch-read-modal-stars" style={{ marginBottom: '12px' }}></div>
+          <p id="vouch-read-modal-content" style={{ fontSize: quoteSize, lineHeight: '1.7', color: textColor }}></p>
+          <div style={{ marginTop: '16px', borderTop: '1px solid #f3f4f6', paddingTop: '14px' }}>
+            <p id="vouch-read-modal-author" style={{ fontWeight: 700, fontSize: nameSize, color: textColor }}></p>
+            <p id="vouch-read-modal-role" style={{ fontSize: roleSize, color: `${textColor}99` }}></p>
+          </div>
+        </div>
+      </div>
+
       {/* Read more expander + video modal */}
       <script
         dangerouslySetInnerHTML={{
           __html: `
             window.addEventListener('load', function() {
+              var readModal = document.getElementById('vouch-read-modal');
+              var readContent = document.getElementById('vouch-read-modal-content');
+              var readAuthor = document.getElementById('vouch-read-modal-author');
+              var readRole = document.getElementById('vouch-read-modal-role');
+              var readStars = document.getElementById('vouch-read-modal-stars');
+              var readClose = document.getElementById('vouch-read-modal-close');
+              var accentColor = '${accentColor.replace(/'/g, "\\'")}';
+
+              function openReadModal(card) {
+                if (!readModal || !readContent) return;
+                var content = card.getAttribute('data-card-content') || '';
+                var author = card.getAttribute('data-card-author') || '';
+                var role = card.getAttribute('data-card-role') || '';
+                var rating = parseInt(card.getAttribute('data-card-rating'));
+                readContent.textContent = '\\u201C' + content + '\\u201D';
+                readAuthor.textContent = author;
+                readRole.textContent = role;
+                if (readStars) {
+                  readStars.innerHTML = '';
+                  if (rating > 0) {
+                    for (var s = 1; s <= 5; s++) {
+                      var svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+                      svg.setAttribute('width', '16');
+                      svg.setAttribute('height', '16');
+                      svg.setAttribute('viewBox', '0 0 24 24');
+                      svg.setAttribute('fill', s <= rating ? accentColor : 'none');
+                      svg.setAttribute('stroke', s <= rating ? accentColor : '#d1d5db');
+                      svg.setAttribute('stroke-width', '2');
+                      svg.innerHTML = '<polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>';
+                      svg.style.display = 'inline-block';
+                      svg.style.marginRight = '2px';
+                      readStars.appendChild(svg);
+                    }
+                  }
+                }
+                readModal.style.display = 'flex';
+              }
+
+              function closeReadModal() {
+                if (readModal) readModal.style.display = 'none';
+              }
+
+              if (readClose) readClose.addEventListener('click', closeReadModal);
+              if (readModal) readModal.addEventListener('click', function(e) {
+                if (e.target === readModal) closeReadModal();
+              });
+
               document.querySelectorAll('[data-vouch-quote]').forEach(function(p) {
                 if (p.scrollHeight > p.clientHeight + 2) {
                   var btn = p.parentNode.querySelector('[data-vouch-read-more]');
@@ -561,8 +666,8 @@ export default async function PublicTestimonialsPage({ params }: PageProps) {
                     btn.classList.remove('hidden');
                     btn.classList.add('inline-block');
                     btn.addEventListener('click', function() {
-                      p.classList.remove('line-clamp-6');
-                      btn.style.display = 'none';
+                      var card = btn.closest('[data-vouch-card]');
+                      if (card) openReadModal(card);
                     });
                   }
                 }
