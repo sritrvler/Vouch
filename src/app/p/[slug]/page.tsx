@@ -369,7 +369,7 @@ export default async function PublicTestimonialsPage({ params }: PageProps) {
                     </div>
 
                     {/* Zone B: Quote (MIDDLE) */}
-                    <blockquote className="flex-1">
+                    <blockquote>
                       <p data-vouch-quote="" className="leading-relaxed line-clamp-6" style={{ fontSize: quoteSize }}>
                         &ldquo;
                         {hasGolden ? (
