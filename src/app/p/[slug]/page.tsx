@@ -4,6 +4,7 @@ import type { Metadata } from 'next';
 import { Star, ExternalLink, Play } from 'lucide-react';
 import Link from 'next/link';
 import { resolveFontUrl, sanitizeFontFamily } from '@/lib/fonts';
+import { MasonryGrid } from '@/components/MasonryGrid';
 
 export const revalidate = 60;
 
@@ -291,7 +292,7 @@ export default async function PublicTestimonialsPage({ params }: PageProps) {
             <p className="text-gray-400 text-sm">No reviews yet.</p>
           </div>
         ) : (
-          <div className="columns-1 sm:columns-2 lg:columns-3 gap-4 space-y-4">
+          <MasonryGrid>
             {displayTestimonials.map((t) => {
               const initials = t.author_name
                 .split(' ')
@@ -329,7 +330,7 @@ export default async function PublicTestimonialsPage({ params }: PageProps) {
                   data-card-author={t.author_name}
                   data-card-role={[t.author_role, t.author_company].filter(Boolean).join(', ')}
                   data-card-rating={String(t.rating ?? '')}
-                  className={`rounded-2xl flex flex-col overflow-hidden break-inside-avoid${
+                  className={`rounded-2xl flex flex-col overflow-hidden${
                     cardStyle === 'border' ? ' border border-gray-200' :
                     cardStyle === 'flat' ? '' :
                     ' border border-gray-100 shadow-sm'
@@ -508,7 +509,7 @@ export default async function PublicTestimonialsPage({ params }: PageProps) {
                 </article>
               );
             })}
-          </div>
+          </MasonryGrid>
         )}
       </div>
 
