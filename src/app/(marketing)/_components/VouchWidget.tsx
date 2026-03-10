@@ -2,38 +2,19 @@
 
 import { useEffect, useRef } from "react";
 
-declare global {
-  interface Window {
-    __vouchInit?: () => void;
-  }
-}
-
 export default function VouchWidget({ widgetId }: { widgetId: string }) {
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-
-    // If embed.js already loaded (e.g. another widget on the page), just re-init
-    if (window.__vouchInit) {
-      window.__vouchInit();
-      return;
+    // If embed.js already loaded on this page, MutationObserver handles init.
+    // Otherwise, load the script.
+    if (!document.querySelector('script[src$="/embed.js"]')) {
+      const s = document.createElement("script");
+      s.src = "/embed.js";
+      s.async = true;
+      ref.current?.parentElement?.appendChild(s);
     }
-
-    const s = document.createElement("script");
-    s.src = "/embed.js";
-    s.async = true;
-    // After script loads, force init in case IntersectionObserver didn't fire
-    s.onload = () => {
-      if (window.__vouchInit) window.__vouchInit();
-    };
-    el.parentElement?.appendChild(s);
-
-    return () => {
-      s.remove();
-    };
   }, []);
 
-  return <div ref={ref} data-vouch={widgetId} style={{ minHeight: 100 }} />;
+  return <div ref={ref} data-vouch={widgetId} />;
 }

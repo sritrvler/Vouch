@@ -1131,6 +1131,14 @@
       { rootMargin: '200px' }
     );
     for (var j = 0; j < els.length; j++) observer.observe(els[j]);
+
+    // Fallback: if IntersectionObserver doesn't fire within 2s, init directly.
+    // Covers SSR hydration race where IO callback never triggers.
+    setTimeout(function () {
+      for (var k = 0; k < els.length; k++) {
+        if (!els[k]._vouchLoaded) initWidget(els[k]);
+      }
+    }, 2000);
   }
 
   if (document.readyState === 'loading') {
@@ -1139,10 +1147,22 @@
     init();
   }
 
-  // Expose for SPA frameworks (React, Next.js) where IntersectionObserver
-  // may not fire for dynamically hydrated elements
-  window.__vouchInit = function () {
-    var els = document.querySelectorAll('[' + ATTR + ']');
-    for (var i = 0; i < els.length; i++) initWidget(els[i]);
-  };
+  // MutationObserver: auto-init data-vouch elements added after page load (SPA navigation)
+  if ('MutationObserver' in window) {
+    new MutationObserver(function (mutations) {
+      for (var i = 0; i < mutations.length; i++) {
+        var added = mutations[i].addedNodes;
+        for (var j = 0; j < added.length; j++) {
+          if (added[j].nodeType !== 1) continue;
+          if (added[j].hasAttribute && added[j].hasAttribute(ATTR)) {
+            initWidget(added[j]);
+          }
+          if (added[j].querySelectorAll) {
+            var nested = added[j].querySelectorAll('[' + ATTR + ']');
+            for (var k = 0; k < nested.length; k++) initWidget(nested[k]);
+          }
+        }
+      }
+    }).observe(document.body || document.documentElement, { childList: true, subtree: true });
+  }
 })();
