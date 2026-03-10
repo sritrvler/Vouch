@@ -477,7 +477,7 @@ function SingleLayout({
   testimonials: Testimonial[];
   theme: WidgetTheme;
 }) {
-  const featured = testimonials[0];
+  const featured = testimonials.find((t) => t.featured) || testimonials[0];
   if (!featured) return null;
 
   const primaryColor = theme.primaryColor || '#6366F1';

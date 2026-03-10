@@ -284,14 +284,14 @@ export default async function PublicTestimonialsPage({ params }: PageProps) {
         </div>
       </div>
 
-      {/* Testimonials: CSS columns masonry */}
+      {/* Testimonials grid */}
       <div className="max-w-4xl mx-auto px-4 py-10">
         {displayTestimonials.length === 0 ? (
           <div className="text-center py-20">
             <p className="text-gray-400 text-sm">No reviews yet.</p>
           </div>
         ) : (
-          <div className="columns-1 sm:columns-2 lg:columns-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 items-start">
             {displayTestimonials.map((t) => {
               const initials = t.author_name
                 .split(' ')
@@ -324,13 +324,14 @@ export default async function PublicTestimonialsPage({ params }: PageProps) {
               return (
                 <article
                   key={t.id}
-                  className={`break-inside-avoid mb-4 rounded-2xl flex flex-col overflow-hidden${
+                  className={`rounded-2xl flex flex-col overflow-hidden${
                     cardStyle === 'border' ? ' border border-gray-200' :
                     cardStyle === 'flat' ? '' :
                     ' border border-gray-100 shadow-sm'
                   }`}
                   style={{
                     backgroundColor: cardColor,
+                    ...(t.featured ? { borderLeft: `3px solid ${accentColor}` } : {}),
                   }}
                 >
                   <div className="p-5 flex flex-col gap-3">

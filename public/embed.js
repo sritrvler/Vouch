@@ -309,7 +309,11 @@
   // ── Single layout (different card structure) ─────────────────────────────────
 
   function renderSingle(testimonials, theme) {
-    var t = testimonials[0];
+    var t = null;
+    for (var i = 0; i < testimonials.length; i++) {
+      if (testimonials[i].featured) { t = testimonials[i]; break; }
+    }
+    if (!t) t = testimonials[0];
     if (!t) return '';
 
     var pc = safeColor(theme.primaryColor, '#6366F1');
