@@ -95,6 +95,15 @@ export default async function PublicTestimonialsPage({ params }: PageProps) {
     );
   }
 
+  // Fetch first widget for theme/ordering sync
+  const { data: widget } = await supabase
+    .from('widgets')
+    .select('theme, pinned_ids, filter_mode, min_rating, max_items')
+    .eq('project_id', project.id)
+    .order('created_at', { ascending: true })
+    .limit(1)
+    .single();
+
   // Fetch active collection form for this project
   const { data: form } = await supabase
     .from('collection_forms')
@@ -107,21 +116,47 @@ export default async function PublicTestimonialsPage({ params }: PageProps) {
   // Fetch approved testimonials
   const { data: testimonials } = await supabase
     .from('testimonials')
-    .select('id, author_name, author_role, author_company, author_avatar_url, content, rating, golden_sentence, metric_label, source_url, video_url, video_thumbnail_url, email_domain, created_at')
+    .select('id, author_name, author_role, author_company, author_avatar_url, content, rating, featured, golden_sentence, metric_label, source_url, video_url, video_thumbnail_url, email_domain, created_at')
     .eq('project_id', project.id)
     .eq('status', 'approved')
     .order('featured', { ascending: false })
     .order('created_at', { ascending: false })
     .limit(50);
 
-  const displayTestimonials = testimonials ?? [];
+  // Apply widget pinned_ids ordering
+  let displayTestimonials = testimonials ?? [];
+  const pinnedIds = (widget?.pinned_ids as string[]) ?? [];
+  if (pinnedIds.length > 0) {
+    const idxMap = new Map(pinnedIds.map((id: string, i: number) => [id, i]));
+    displayTestimonials = [...displayTestimonials].sort((a, b) => {
+      const ai = idxMap.get(a.id) ?? Infinity;
+      const bi = idxMap.get(b.id) ?? Infinity;
+      return ai - bi;
+    });
+  }
+
+  // Apply widget filtering
+  if (widget?.filter_mode === 'featured') {
+    displayTestimonials = displayTestimonials.filter((t: any) => t.featured);
+  } else if (widget?.filter_mode === 'rating' && widget?.min_rating) {
+    displayTestimonials = displayTestimonials.filter((t: any) => (t.rating ?? 0) >= widget.min_rating);
+  }
+  if (widget?.max_items) {
+    displayTestimonials = displayTestimonials.slice(0, widget.max_items);
+  }
+
   const avgRating =
     displayTestimonials.length > 0
       ? displayTestimonials.reduce((sum, t) => sum + (t.rating ?? 0), 0) / displayTestimonials.length
       : 0;
 
-  const accentColor = project.button_color || project.accent_color || '#4f46e5';
-  const textColor = project.text_color || '#1a1a1a';
+  // Derive colors from widget theme, falling back to project colors
+  const theme = widget?.theme as Record<string, any> | null;
+  const accentColor = theme?.primaryColor || project.button_color || project.accent_color || '#4f46e5';
+  const textColor = theme?.textColor || project.text_color || '#1a1a1a';
+  const cardColor = theme?.cardColor || '#ffffff';
+  const backgroundColor = theme?.backgroundColor || '#f9fafb';
+  const cardStyle: string = theme?.cardStyle || 'shadow';
   const fontFamily = sanitizeFontFamily(project.font_family);
   const fontStyleUrl = resolveFontUrl(project.font_family, project.font_url);
 
@@ -169,8 +204,11 @@ export default async function PublicTestimonialsPage({ params }: PageProps) {
       dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
     />
     <div
-      className="min-h-screen bg-gray-50"
-      style={fontFamily ? { fontFamily: `"${fontFamily}", sans-serif` } : undefined}
+      className="min-h-screen"
+      style={{
+        backgroundColor,
+        ...(fontFamily ? { fontFamily: `"${fontFamily}", sans-serif` } : {}),
+      }}
     >
       {/* Header: accent-tinted gradient with decorative quotation mark */}
       <div
@@ -281,7 +319,12 @@ export default async function PublicTestimonialsPage({ params }: PageProps) {
               return (
                 <article
                   key={t.id}
-                  className="break-inside-avoid mb-4 bg-white rounded-2xl border border-gray-100 shadow-sm flex flex-col overflow-hidden"
+                  className={`break-inside-avoid mb-4 rounded-2xl flex flex-col overflow-hidden${
+                    cardStyle === 'border' ? ' border border-gray-200' :
+                    cardStyle === 'flat' ? '' :
+                    ' border border-gray-100 shadow-sm'
+                  }`}
+                  style={{ backgroundColor: cardColor }}
                 >
                   <div className="p-5 flex flex-col gap-3">
                     {/* Zone C: Stars + metric (TOP) */}
