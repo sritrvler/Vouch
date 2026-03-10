@@ -163,8 +163,13 @@ export default async function PublicTestimonialsPage({ params }: PageProps) {
   const quoteSize = ts === 'large' ? 17 : ts === 'default' ? 15 : 14;
   const nameSize = ts === 'large' ? 14 : ts === 'default' ? 14 : 13;
   const roleSize = ts === 'large' ? 12 : ts === 'default' ? 12 : 11;
-  const fontFamily = sanitizeFontFamily(theme?.fontFamily) || sanitizeFontFamily(project.font_family);
-  const fontStyleUrl = resolveFontUrl(theme?.fontFamily, theme?.fontUrl) || resolveFontUrl(project.font_family, project.font_url);
+  const resolvedFontFamily = theme?.fontFamily === 'inherit' ? null : theme?.fontFamily;
+  const fontFamily = sanitizeFontFamily(resolvedFontFamily) || sanitizeFontFamily(project.font_family);
+  const fontStyleUrl = resolveFontUrl(resolvedFontFamily, theme?.fontUrl) || resolveFontUrl(project.font_family, project.font_url);
+  const showRating = theme?.showRating !== false;
+  const showAvatar = theme?.showAvatar !== false;
+  const showDate = theme?.showDate !== false;
+  const showMetric = theme?.showMetric !== false;
 
   const jsonLd = {
     '@context': 'https://schema.org',
@@ -343,7 +348,7 @@ export default async function PublicTestimonialsPage({ params }: PageProps) {
                   <div className="p-5 flex flex-col gap-3">
                     {/* Zone C: Stars + metric (TOP) */}
                     <div className="flex items-center gap-2 flex-wrap">
-                      {t.rating != null && (
+                      {showRating && t.rating != null && (
                         <div className="flex gap-0.5">
                           {[1, 2, 3, 4, 5].map((star) => (
                             <Star
@@ -355,7 +360,7 @@ export default async function PublicTestimonialsPage({ params }: PageProps) {
                           ))}
                         </div>
                       )}
-                      {metricLabel && (
+                      {showMetric && metricLabel && (
                         <span
                           className="text-[10px] font-semibold rounded-full px-2 py-0.5 border whitespace-nowrap"
                           style={{
@@ -398,7 +403,7 @@ export default async function PublicTestimonialsPage({ params }: PageProps) {
                     <div className="flex items-center justify-between gap-2">
                       <div className="flex items-center gap-2.5 min-w-0 flex-1">
                         {/* Avatar / favicon / initials */}
-                        {t.author_avatar_url ? (
+                        {showAvatar && (t.author_avatar_url ? (
                           // eslint-disable-next-line @next/next/no-img-element
                           <img
                             src={t.author_avatar_url}
@@ -419,7 +424,7 @@ export default async function PublicTestimonialsPage({ params }: PageProps) {
                           >
                             {initials}
                           </div>
-                        )}
+                        ))}
                         <div className="min-w-0">
                           <p className="font-bold truncate" style={{ fontSize: nameSize, color: textColor }}>{t.author_name}</p>
                           {(t.author_role || t.author_company) && (
@@ -467,11 +472,11 @@ export default async function PublicTestimonialsPage({ params }: PageProps) {
                         >
                           <ExternalLink className="w-3 h-3" />
                         </a>
-                      ) : (
+                      ) : showDate ? (
                         <span className="text-[10px] text-gray-400 flex-shrink-0 whitespace-nowrap">
                           &#10003; {verifiedDate}
                         </span>
-                      )}
+                      ) : null}
                     </div>
 
                     {/* Video thumbnail with play overlay */}
