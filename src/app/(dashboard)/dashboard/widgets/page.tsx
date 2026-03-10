@@ -55,6 +55,7 @@ type FilterMode = 'all' | 'featured' | 'rating';
 interface WidgetTheme {
   primaryColor: string;
   backgroundColor: string;
+  cardColor: string;
   textColor: string;
   cardStyle: 'shadow' | 'border' | 'flat';
   textSize: 'compact' | 'default' | 'large';
@@ -202,7 +203,7 @@ function TestimonialPreviewCard({
     .slice(0, 2);
 
   const cardStyles: React.CSSProperties = {
-    backgroundColor: theme.backgroundColor,
+    backgroundColor: theme.cardColor,
     ...(theme.cardStyle === 'shadow'
       ? { boxShadow: '0 1px 3px 0 rgb(0 0 0 / 0.1)' }
       : theme.cardStyle === 'border'
@@ -655,6 +656,7 @@ export default function WidgetsPage() {
     theme: {
       primaryColor: '#6366F1',
       backgroundColor: '#ffffff',
+      cardColor: '#ffffff',
       textColor: '#0f172a',
       cardStyle: 'shadow',
       textSize: 'default',
@@ -679,6 +681,7 @@ export default function WidgetsPage() {
     theme: {
       primaryColor: '#6366F1',
       backgroundColor: '#ffffff',
+      cardColor: '#ffffff',
       textColor: '#0f172a',
       cardStyle: 'shadow' as const,
       textSize: 'default' as const,
@@ -718,6 +721,7 @@ export default function WidgetsPage() {
       theme: {
         primaryColor: loadedTheme.primaryColor ?? '#6366F1',
         backgroundColor: loadedTheme.backgroundColor ?? '#ffffff',
+        cardColor: loadedTheme.cardColor ?? '#ffffff',
         textColor: loadedTheme.textColor ?? '#0f172a',
         cardStyle: loadedTheme.cardStyle ?? 'shadow',
         textSize: loadedTheme.textSize ?? 'compact',
@@ -1427,6 +1431,52 @@ export function Testimonials() {
                     aria-label="Text color hex value"
                     className="w-20 text-xs font-mono px-2 py-1 rounded border border-border bg-muted/50 focus:outline-none focus:ring-1 focus:ring-ring"
                     placeholder="#0f172a"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Card Color */}
+            <div>
+              <Label className="text-xs text-muted-foreground mb-2 block">Card Color</Label>
+              <div className="flex items-center gap-2 flex-wrap">
+                {['#ffffff', '#f8fafc', '#f1f5f9', '#fafafa', '#1e293b', '#0f172a'].map((c) => (
+                  <button
+                    key={c}
+                    onClick={() => updateTheme('cardColor', c)}
+                    title={c}
+                    className={cn(
+                      'size-7 rounded-full border-2 transition-all',
+                      settings.theme.cardColor === c
+                        ? 'border-foreground scale-110 shadow-md'
+                        : 'border-border hover:scale-105'
+                    )}
+                    style={{ backgroundColor: c }}
+                  />
+                ))}
+                <div className="flex items-center gap-1.5">
+                  <button
+                    type="button"
+                    className="size-7 rounded-full border-2 border-border shrink-0 cursor-pointer hover:scale-110 transition-transform"
+                    style={{ backgroundColor: settings.theme.cardColor }}
+                    title="Click to edit hex color"
+                    onClick={(e) => { const input = (e.currentTarget.nextElementSibling as HTMLInputElement); input?.focus(); input?.select(); }}
+                  />
+                  <input
+                    type="text"
+                    value={settings.theme.cardColor}
+                    onChange={(e) => {
+                      let v = e.target.value;
+                      if (!v.startsWith('#')) v = '#' + v;
+                      if (/^#[0-9A-Fa-f]{0,6}$/.test(v)) updateTheme('cardColor', v);
+                    }}
+                    onBlur={() => {
+                      if (!/^#[0-9A-Fa-f]{6}$/.test(settings.theme.cardColor)) updateTheme('cardColor', '#ffffff');
+                    }}
+                    maxLength={7}
+                    aria-label="Card color hex value"
+                    className="w-20 text-xs font-mono px-2 py-1 rounded border border-border bg-muted/50 focus:outline-none focus:ring-1 focus:ring-ring"
+                    placeholder="#ffffff"
                   />
                 </div>
               </div>

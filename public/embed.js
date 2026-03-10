@@ -186,7 +186,7 @@
   function renderCard(t, theme, compact) {
     var pc = safeColor(theme.primaryColor, '#6366F1');
     var tc = safeColor(theme.textColor, '#0f172a');
-    var bg = safeColor(theme.backgroundColor, '#ffffff');
+    var cardBg = safeColor(theme.cardColor || theme.backgroundColor, '#ffffff');
     var cs = theme.cardStyle || 'shadow';
     var border = cs === 'border' ? '1px solid #e2e8f0' : 'none';
     var shadow = cs === 'shadow' ? '0 1px 3px rgba(0,0,0,0.08),0 1px 2px rgba(0,0,0,0.04)' : 'none';
@@ -241,7 +241,7 @@
     }
 
     var html =
-      '<article style="background:' + bg + ';border:' + border + ';box-shadow:' + shadow +
+      '<article style="background:' + cardBg + ';border:' + border + ';box-shadow:' + shadow +
       ';border-radius:14px;padding:' + pad + ';display:flex;flex-direction:column;gap:' + gap + 'px">';
 
     // Proof (TOP)
@@ -318,7 +318,7 @@
 
     var pc = safeColor(theme.primaryColor, '#6366F1');
     var tc = safeColor(theme.textColor, '#0f172a');
-    var bg = safeColor(theme.backgroundColor, '#ffffff');
+    var cardBg = safeColor(theme.cardColor || theme.backgroundColor, '#ffffff');
     var authorLine = [t.author_role, t.author_company].filter(Boolean).join(', ');
     var ts = theme.textSize || 'default';
     var sqSize = ts === 'large' ? '20' : ts === 'default' ? '18' : '16';
@@ -344,7 +344,7 @@
     var isLI = src.indexOf('linkedin.com') !== -1;
 
     var html =
-      '<article style="background:' + bg + ';border-radius:16px;padding:32px;text-align:center;box-shadow:0 4px 24px rgba(0,0,0,0.08)">';
+      '<article style="background:' + cardBg + ';border-radius:16px;padding:32px;text-align:center;box-shadow:0 4px 24px rgba(0,0,0,0.08)">';
     if (theme.showRating !== false) {
       html += '<div style="display:flex;justify-content:center;margin-bottom:16px">' + stars(t.rating, pc) + '</div>';
     }

@@ -125,6 +125,7 @@ create table public.widgets (
   theme jsonb default '{
     "primaryColor": "#6366F1",
     "backgroundColor": "#ffffff",
+    "cardColor": "#ffffff",
     "textColor": "#0f172a",
     "cardStyle": "shadow",
     "fontFamily": "inherit",
