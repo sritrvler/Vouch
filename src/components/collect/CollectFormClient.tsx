@@ -628,7 +628,8 @@ export default function CollectFormClient({
     setVideoUploadFailed(false);
     try {
       const fd = new FormData();
-      fd.append('video', videoBlob, 'testimonial.webm');
+      const videoExt = videoBlob.type.includes('mp4') ? 'mp4' : 'webm';
+      fd.append('video', videoBlob, `testimonial.${videoExt}`);
       fd.append('formId', form.id);
       if (thumbnailFrames.length > 0 && thumbnailFrames[selectedThumbnailIdx]) {
         fd.append('thumbnail', dataURLToBlob(thumbnailFrames[selectedThumbnailIdx]), 'thumbnail.jpg');
@@ -637,7 +638,7 @@ export default function CollectFormClient({
       if (res.status === 403) {
         const data = (await res.json()) as { limitReached?: boolean };
         if (data.limitReached) {
-          toast.error('Video testimonials are not available for this form right now. You can skip this step.');
+          toast.error('Video testimonials are not available for this form right now.');
           setIsUploadingVideo(false);
           goTo(3, 'forward');
           return;
@@ -1039,7 +1040,7 @@ export default function CollectFormClient({
                           </svg>
                         </div>
                         <p className="text-sm font-medium text-foreground">Video upload failed</p>
-                        <p className="text-xs text-muted-foreground">Check your connection and try again, or skip this step.</p>
+                        <p className="text-xs text-muted-foreground">Check your connection and try again, or go back to write a text testimonial.</p>
                         <div className="flex gap-3 mt-2">
                           <button
                             onClick={() => { setVideoUploadFailed(false); handleVideoNext(); }}
@@ -1208,7 +1209,7 @@ export default function CollectFormClient({
                       </div>
                     )}
 
-                    {!isRecording && !isUploadingVideo && (
+                    {!isRecording && !isUploadingVideo && !cameraError && !videoUploadFailed && (
                       <div className="mt-4 text-center">
                         <button
                           type="button"
