@@ -65,7 +65,7 @@ const FAQS = [
   },
   {
     q: "Can my clients record video testimonials?",
-    a: "Yes. The collection form has a built-in video recording step. Clients record directly in their browser with one click. No app to download, no third-party service. Free accounts include 3 video testimonials per project. Pro gets unlimited.",
+    a: "Yes. The collection form has a built-in video recording step. Clients record directly in their browser with one click. No app to download, no third-party service. Video testimonials are available on Pro and Studio plans.",
   },
   {
     q: "Can I remove the 'Powered by Vouch' branding?",

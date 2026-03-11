@@ -21,7 +21,7 @@ const TABLE_ROWS: FeatureRow[] = [
   { type: "feature", label: "Testimonials shown in widget", free: "25", pro: "Unlimited", studio: "Unlimited" },
   { type: "feature", label: "Collection forms", free: "1", pro: "Unlimited", studio: "Unlimited" },
   { type: "feature", label: "Projects", free: "1", pro: "Unlimited", studio: "Unlimited" },
-  { type: "feature", label: "Video testimonials", free: "3 per project", pro: "Unlimited", studio: "Unlimited" },
+  { type: "feature", label: "Video testimonials", free: false, pro: "Unlimited", studio: "Unlimited" },
   { type: "feature", label: "Star ratings and written reviews", free: true, pro: true, studio: true },
   { type: "feature", label: "Custom questions on form", free: true, pro: true, studio: true },
   { type: "feature", label: "Approval and reject flow", free: true, pro: true, studio: true },

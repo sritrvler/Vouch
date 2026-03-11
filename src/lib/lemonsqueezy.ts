@@ -79,7 +79,7 @@ export const PLANS = {
   free: {
     name: 'Free',
     testimonialLimit: 25,
-    videoLimit: 3,
+    videoLimit: 0,
     widgetDisplayLimit: 25,
     widgetLimit: 1,
     formLimit: 1,
@@ -125,7 +125,7 @@ export type PlanKey = keyof typeof PLANS;
 
 export const PRO_FEATURES = [
   'Unlimited forms and embed widgets',
-  'Unlimited video testimonials',
+  'Video testimonials',
   'Google Review and LinkedIn nudges',
   'Image cards for social sharing',
   'Carousel, wall of love, and list layouts',

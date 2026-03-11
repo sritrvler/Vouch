@@ -18,7 +18,6 @@ export const FREE_FEATURES: FeatureItem[] = [
   { text: "Custom questions on your form" },
   { text: "Public reviews page (/p/you)" },
   { text: "Custom widget colors" },
-  { text: "3 video testimonials per project" },
   { text: "Contains Vouch branding", limitation: true },
 ];
 
