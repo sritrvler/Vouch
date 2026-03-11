@@ -221,9 +221,11 @@ alter table public.widget_views enable row level security;
 create policy "Users manage own subscription" on public.subscriptions
   for all using (auth.uid() = user_id);
 
--- Projects: users manage their own
+-- Projects: users manage their own, public can read (needed for collection forms + widgets)
 create policy "Users manage own projects" on public.projects
   for all using (auth.uid() = user_id);
+create policy "Public can read projects" on public.projects
+  for select using (true);
 
 -- Forms: owners manage, public can view active forms
 create policy "Owners manage forms" on public.collection_forms

@@ -1,4 +1,3 @@
-import { createServerSupabaseClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import CollectFormClient from '@/components/collect/CollectFormClient';
 import type { Metadata } from 'next';
@@ -9,9 +8,9 @@ interface PageProps {
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { formId } = await params;
-  const supabase = await createServerSupabaseClient();
+  const adminClient = createAdminClient();
 
-  const { data: form } = await supabase
+  const { data: form } = await adminClient
     .from('collection_forms')
     .select('title, projects(name)')
     .eq('id', formId)
@@ -33,10 +32,10 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
 export default async function CollectPage({ params }: PageProps) {
   const { formId } = await params;
-  const supabase = await createServerSupabaseClient();
+  const adminClient = createAdminClient();
 
-  // Fetch form + project in a single query
-  const { data: form, error } = await supabase
+  // Fetch form + project using admin client (bypasses RLS for public visitors)
+  const { data: form, error } = await adminClient
     .from('collection_forms')
     .select(`
       id,
@@ -122,8 +121,7 @@ export default async function CollectPage({ params }: PageProps) {
     );
   }
 
-  // Check subscription plan + ban status via admin client (bypasses RLS for public visitors)
-  const adminClient = createAdminClient();
+  // Check subscription plan + ban status (reuse admin client)
   const { data: subscription } = await adminClient
     .from('subscriptions')
     .select('plan, is_banned')
