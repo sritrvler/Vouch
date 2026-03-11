@@ -480,6 +480,11 @@ export default function CollectFormClient({
 
   function handleRatingClick(value: number) {
     setRating(value);
+    // Auto-advance to text step after a brief delay so user sees the star fill
+    setTimeout(() => {
+      setTestimonialType('text');
+      goTo(2, 'forward');
+    }, 350);
   }
 
   function handleTypeChoice(type: 'text' | 'video') {
@@ -916,23 +921,7 @@ export default function CollectFormClient({
                   ))}
                 </div>
 
-                {rating > 0 ? (
-                  <motion.div
-                    initial={{ opacity: 0, y: 12 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.25, ease: 'easeOut' }}
-                    className="mt-8 flex justify-center"
-                  >
-                    <Button
-                      type="button"
-                      onClick={() => handleTypeChoice('text')}
-                      className="rounded-full px-8 py-2.5 text-sm font-semibold shadow-sm"
-                      style={{ backgroundColor: buttonColor, color: '#fff' }}
-                    >
-                      Continue <ChevronRight className="size-4 ml-1" />
-                    </Button>
-                  </motion.div>
-                ) : (
+                {rating === 0 && (
                   <p className="text-center text-xs text-muted-foreground mt-4">
                     Tap a star to continue
                   </p>
