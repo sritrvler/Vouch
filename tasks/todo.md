@@ -1,3 +1,23 @@
+## Session Handoff (March 12, 2026, session 16)
+
+**What was done:**
+1. **Fixed collection form logo not loading in production.** Root cause: `vouch-assets` storage bucket in production Supabase was not marked public. `createBucket('vouch-assets', { public: true })` only works on first creation; if bucket already existed, the `public: true` flag was never applied. Changed to `createBucket().catch(() => updateBucket())` pattern so every upload ensures the bucket is public.
+
+**What's next:** Phase 1 BUILD continues:
+1. **MANUAL: Toggle `vouch-assets` bucket to public in Supabase Dashboard** (Storage > vouch-assets > Settings > Public bucket: ON). This is the immediate fix.
+2. Item #13e through 13h: Remaining audit Phase 1 items
+3. Minimal layout (item #2 from active work queue)
+4. Run editorial migration SQL on production Supabase before deploying
+5. Update Lemon Squeezy dashboard: Pro variant price $19 to $29/mo
+6. Add UPSTASH_REDIS_REST_URL and UPSTASH_REDIS_REST_TOKEN to Vercel project env vars
+
+**What to watch out for:**
+1. `public/test-embed.html` is untracked in repo, delete it before deploying
+2. After toggling bucket to public, verify logo loads on `/c/[formId]` in incognito
+3. All previous session watch-outs still apply
+
+---
+
 ## Session Handoff (March 11, 2026, session 15)
 
 **What was done:**
