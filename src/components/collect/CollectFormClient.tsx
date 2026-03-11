@@ -134,17 +134,17 @@ function ProgressBar({
   currentStep: number;
   buttonColor: string;
 }) {
-  // Endowed progress: start at 20% so the user feels they've already begun
-  // Step 1 = 20%, Step 2 = 45%, Step 3 = 70%, Step 4 = 90%
-  const progressMap: Record<number, number> = { 1: 20, 2: 45, 3: 70, 4: 90 };
-  const percent = progressMap[currentStep] ?? 20;
+  // Endowed progress: start at 25% so the user feels they've already begun
+  // Step 1 = 25%, Step 2 = 55%, Step 3 = 85%
+  const progressMap: Record<number, number> = { 1: 25, 2: 55, 3: 85 };
+  const percent = progressMap[currentStep] ?? 25;
   return (
     <div className="w-full max-w-xs mx-auto">
       <div className="h-1.5 rounded-full bg-black/5 overflow-hidden">
         <motion.div
           className="h-full rounded-full"
           style={{ backgroundColor: buttonColor }}
-          initial={{ width: '20%' }}
+          initial={{ width: '25%' }}
           animate={{ width: `${percent}%` }}
           transition={{ duration: 0.5, ease: 'easeOut' }}
         />
@@ -173,11 +173,11 @@ function BusinessHeader({
     <div className="flex flex-col items-center gap-3">
       {project.logo_url ? (
         <div className="relative w-16 h-16 rounded-2xl overflow-hidden shadow-md border border-border/50">
-          <Image
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
             src={project.logo_url}
             alt={project.name}
-            fill
-            className="object-cover"
+            className="w-full h-full object-cover"
           />
         </div>
       ) : (
@@ -384,8 +384,9 @@ export default function CollectFormClient({
   }, [fontStyleUrl]);
 
   // Step state
-  const [step, setStep] = useState<1 | 2 | 3 | 4 | 5>(1);
+  const [step, setStep] = useState<1 | 2 | 3 | 4>(1);
   const [direction, setDirection] = useState<'forward' | 'back'>('forward');
+  const [testimonialType, setTestimonialType] = useState<'text' | 'video' | null>(null);
 
   // Form values
   const [rating, setRating] = useState(0);
@@ -421,7 +422,6 @@ export default function CollectFormClient({
   const [isCameraActive, setIsCameraActive] = useState(false);
   const [isCameraVisible, setIsCameraVisible] = useState(false);
   const [isCapReached, setIsCapReached] = useState(false);
-  const [wantsVideo, setWantsVideo] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
   const [thumbnailFrames, setThumbnailFrames] = useState<string[]>([]);
   const [selectedThumbnailIdx, setSelectedThumbnailIdx] = useState<number>(0);
@@ -431,15 +431,21 @@ export default function CollectFormClient({
   const contentLength = content.trim().length;
   const contentValid = contentLength >= 20;
   const nameValid = authorName.trim().length > 0;
+  // Video-only submissions don't require written content, but must have an actual uploaded video
+  const canSubmit = nameValid && agreed && (contentValid || videoUrl !== null);
 
-  function goTo(nextStep: 1 | 2 | 3 | 4 | 5, dir: 'forward' | 'back') {
+  function goTo(nextStep: 1 | 2 | 3 | 4, dir: 'forward' | 'back') {
     setDirection(dir);
     setStep(nextStep);
   }
 
   function handleRatingClick(value: number) {
     setRating(value);
-    setTimeout(() => goTo(2, 'forward'), 200);
+  }
+
+  function handleTypeChoice(type: 'text' | 'video') {
+    setTestimonialType(type);
+    goTo(2, 'forward');
   }
 
   function handleAvatarChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -475,8 +481,11 @@ export default function CollectFormClient({
     setIsCameraVisible(false);
     setIsRecording(false);
     setIsPaused(false);
-    setWantsVideo(false);
+    setVideoUploadFailed(false);
     cameraInitRef.current = false;
+    if (videoObjectUrl) URL.revokeObjectURL(videoObjectUrl);
+    setVideoBlob(null);
+    setVideoObjectUrl(null);
     if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
       mediaRecorderRef.current.stop();
     }
@@ -540,9 +549,9 @@ export default function CollectFormClient({
     cameraInitRef.current = false;
   }
 
-  // Init camera only after user opts in
+  // Init camera when user chose video on step 2
   useEffect(() => {
-    if (step !== 3 || !wantsVideo || videoBlob || cameraInitRef.current) return;
+    if (step !== 2 || testimonialType !== 'video' || videoBlob || cameraInitRef.current) return;
     cameraInitRef.current = true;
     setIsCameraInitializing(true);
     setCameraError(false);
@@ -573,7 +582,7 @@ export default function CollectFormClient({
         cameraInitRef.current = false;
         setIsCameraInitializing(false);
       });
-  }, [step, wantsVideo, videoBlob]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [step, testimonialType, videoBlob]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Component unmount: stop any active stream
   useEffect(() => {
@@ -612,7 +621,7 @@ export default function CollectFormClient({
 
   async function handleVideoNext() {
     if (!videoBlob) {
-      goTo(4, 'forward');
+      goTo(3, 'forward');
       return;
     }
     setIsUploadingVideo(true);
@@ -630,7 +639,7 @@ export default function CollectFormClient({
         if (data.limitReached) {
           toast.error('Video testimonials are not available for this form right now. You can skip this step.');
           setIsUploadingVideo(false);
-          goTo(4, 'forward');
+          goTo(3, 'forward');
           return;
         }
       } else if (res.ok) {
@@ -638,7 +647,7 @@ export default function CollectFormClient({
         setVideoUrl(url);
         if (thumbnailUrl) setVideoThumbnailUrl(thumbnailUrl);
         setIsUploadingVideo(false);
-        goTo(4, 'forward');
+        goTo(3, 'forward');
         return;
       }
       // Non-403, non-ok: upload failed
@@ -651,7 +660,7 @@ export default function CollectFormClient({
   }
 
   const handleSubmit = useCallback(async () => {
-    if (!nameValid || !contentValid || !agreed) return;
+    if (!canSubmit) return;
 
     setIsSubmitting(true);
 
@@ -703,20 +712,21 @@ export default function CollectFormClient({
         return;
       }
 
-      goTo(5, 'forward');
+      goTo(4, 'forward');
     } catch {
       toast.error('Network error. Your response is still here. Please check your connection and try again.', { duration: 8000 });
     } finally {
       setIsSubmitting(false);
     }
   }, [
-    nameValid, contentValid, agreed, avatarFile, form.id, rating, content,
+    canSubmit, avatarFile, form.id, rating, content,
     authorName, authorEmail, authorRole, authorCompany, customAnswers, videoUrl, videoThumbnailUrl,
   ]);
 
   function resetForm() {
     setStep(1);
     setDirection('back');
+    setTestimonialType(null);
     setRating(0);
     setHoverRating(0);
     setContent('');
@@ -735,6 +745,7 @@ export default function CollectFormClient({
     setIsRecording(false);
     setRecordingTime(0);
     setCameraError(false);
+    cameraInitRef.current = false;
   }
 
   const firstName = authorName.split(' ')[0] || 'there';
@@ -790,8 +801,8 @@ export default function CollectFormClient({
           <BusinessHeader project={project} buttonColor={buttonColor} />
         </div>
 
-        {/* Progress (steps 1–4 only) */}
-        {step !== 5 && (
+        {/* Progress (steps 1–3 only) */}
+        {step !== 4 && (
           <div className="mb-6">
             <ProgressBar currentStep={step} buttonColor={buttonColor} />
             {step === 1 && (
@@ -838,13 +849,60 @@ export default function CollectFormClient({
                   ))}
                 </div>
 
-                <p className="text-center text-xs text-muted-foreground mt-4">
-                  Tap a star to continue
-                </p>
+                {rating > 0 ? (
+                  <motion.div
+                    initial={{ opacity: 0, y: 12 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.25, ease: 'easeOut' }}
+                    className="mt-8 space-y-3"
+                  >
+                    <p className="text-center text-sm font-medium" style={{ color: textColor }}>
+                      How would you like to share?
+                    </p>
+                    <div className="flex gap-3">
+                      <button
+                        type="button"
+                        onClick={() => handleTypeChoice('text')}
+                        className="flex-1 flex flex-col items-center gap-2.5 p-5 rounded-2xl border-2 transition-all hover:shadow-md"
+                        style={{ borderColor: `${buttonColor}30`, backgroundColor: `${buttonColor}06` }}
+                        onMouseEnter={(e) => { e.currentTarget.style.borderColor = buttonColor; }}
+                        onMouseLeave={(e) => { e.currentTarget.style.borderColor = `${buttonColor}30`; }}
+                      >
+                        <div
+                          className="w-11 h-11 rounded-xl flex items-center justify-center"
+                          style={{ backgroundColor: `${buttonColor}15` }}
+                        >
+                          <MessageSquare className="size-5" style={{ color: buttonColor }} />
+                        </div>
+                        <span className="text-sm font-semibold" style={{ color: textColor }}>Write a testimonial</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleTypeChoice('video')}
+                        className="flex-1 flex flex-col items-center gap-2.5 p-5 rounded-2xl border-2 transition-all hover:shadow-md"
+                        style={{ borderColor: `${buttonColor}30`, backgroundColor: `${buttonColor}06` }}
+                        onMouseEnter={(e) => { e.currentTarget.style.borderColor = buttonColor; }}
+                        onMouseLeave={(e) => { e.currentTarget.style.borderColor = `${buttonColor}30`; }}
+                      >
+                        <div
+                          className="w-11 h-11 rounded-xl flex items-center justify-center"
+                          style={{ backgroundColor: `${buttonColor}15` }}
+                        >
+                          <Video className="size-5" style={{ color: buttonColor }} />
+                        </div>
+                        <span className="text-sm font-semibold" style={{ color: textColor }}>Record a video</span>
+                      </button>
+                    </div>
+                  </motion.div>
+                ) : (
+                  <p className="text-center text-xs text-muted-foreground mt-4">
+                    Tap a star to continue
+                  </p>
+                )}
               </motion.div>
             )}
 
-            {/* ── Step 2: Content ── */}
+            {/* ── Step 2: Text testimonial OR Video recording ── */}
             {step === 2 && (
               <motion.div
                 key="step-2"
@@ -855,372 +913,330 @@ export default function CollectFormClient({
                 transition={transition}
                 className="p-7 sm:p-9"
               >
-                {/* Selected rating display */}
-                <div className="flex justify-center gap-1 mb-6">
-                  {[1, 2, 3, 4, 5].map((v) => (
-                    <Star
-                      key={v}
-                      style={{
-                        width: 20,
-                        height: 20,
-                        fill: v <= rating ? buttonColor : 'transparent',
-                        stroke: v <= rating ? buttonColor : '#cbd5e1',
-                      }}
-                    />
-                  ))}
-                </div>
-
-                <div className="mb-6">
-                  <h2 className="text-2xl font-bold" style={{ color: textColor }}>Tell us more</h2>
-                  <p className="mt-1.5 text-sm text-muted-foreground">
-                    {form.prompt || 'What did you love? What stood out?'}
-                  </p>
-                </div>
-
-                <div className="space-y-4">
-                  <div>
-                    <Textarea
-                      value={content}
-                      onChange={(e) => setContent(e.target.value)}
-                      placeholder="I really appreciated..."
-                      className="min-h-[120px] text-base resize-none focus:ring-2 transition-shadow"
-                      style={
-                        {
-                          '--tw-ring-color': buttonColor,
-                          backgroundColor: inputColor,
-                          borderColor: `${textColor}20`,
-                          color: textColor,
-                        } as React.CSSProperties
-                      }
-                      maxLength={500}
-                    />
-                    <div className="flex justify-between items-center mt-1.5">
-                      <span
-                        className="text-xs"
-                        style={{
-                          color: contentValid ? '#10b981' : '#94a3b8',
-                        }}
-                      >
-                        {contentValid ? 'Looks great!' : `${Math.max(0, 20 - contentLength)} more characters needed`}
-                      </span>
-                      <span className="text-xs text-muted-foreground">
-                        {contentLength}/500
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Custom questions */}
-                  {form.custom_questions && form.custom_questions.length > 0 && (
-                    <div className="space-y-3 pt-2">
-                      {form.custom_questions.map((question, idx) => (
-                        <div key={idx}>
-                          <Label className="text-sm font-medium text-foreground mb-1.5 block">
-                            {question}
-                          </Label>
-                          <Input
-                            value={customAnswers[question] || ''}
-                            onChange={(e) =>
-                              setCustomAnswers((prev) => ({
-                                ...prev,
-                                [question]: e.target.value,
-                              }))
-                            }
-                            placeholder="Your answer..."
-                            className="h-11 text-sm"
-                            style={{ backgroundColor: inputColor, borderColor: `${textColor}20`, color: textColor }}
-                          />
-                        </div>
+                {testimonialType === 'text' ? (
+                  <>
+                    {/* Selected rating display */}
+                    <div className="flex justify-center gap-1 mb-6">
+                      {[1, 2, 3, 4, 5].map((v) => (
+                        <Star
+                          key={v}
+                          style={{
+                            width: 20,
+                            height: 20,
+                            fill: v <= rating ? buttonColor : 'transparent',
+                            stroke: v <= rating ? buttonColor : '#cbd5e1',
+                          }}
+                        />
                       ))}
                     </div>
-                  )}
-                </div>
 
-                <div className="mt-6 flex flex-col gap-3">
-                  <Button
-                    onClick={() => goTo(3, 'forward')}
-                    disabled={!contentValid}
-                    className="w-full h-12 text-base font-semibold rounded-xl gap-2"
-                    style={{
-                      backgroundColor: contentValid ? buttonColor : undefined,
-                    }}
-                  >
-                    Next
-                    <ChevronRight className="size-4" />
-                  </Button>
-                  <button
-                    type="button"
-                    onClick={() => goTo(1, 'back')}
-                    className="text-sm text-muted-foreground hover:text-foreground transition-colors underline-offset-4 hover:underline mx-auto"
-                  >
-                    Back
-                  </button>
-                </div>
-              </motion.div>
-            )}
-
-            {/* ── Step 3: Video (optional) ── */}
-            {step === 3 && (
-              <motion.div
-                key="step-3"
-                variants={slideVariants}
-                initial={enterVariant}
-                animate="center"
-                exit={exitVariant}
-                transition={transition}
-                className="p-7 sm:p-9"
-              >
-                {!wantsVideo && !videoBlob ? (
-                  /* Opt-in screen: ask before turning on camera */
-                  <div className="flex flex-col items-center py-6 gap-5">
-                    <div className="w-16 h-16 rounded-full flex items-center justify-center" style={{ backgroundColor: `${buttonColor}15` }}>
-                      <Video className="size-7" style={{ color: buttonColor }} />
-                    </div>
-                    <div className="text-center">
-                      <h2 className="text-2xl font-bold" style={{ color: textColor }}>Add a video?</h2>
-                      <p className="mt-1.5 text-sm text-muted-foreground max-w-[280px]">
-                        A short video makes your testimonial feel personal and builds trust.
+                    <div className="mb-6">
+                      <h2 className="text-2xl font-bold" style={{ color: textColor }}>Tell us more</h2>
+                      <p className="mt-1.5 text-sm text-muted-foreground">
+                        {form.prompt || 'What did you love? What stood out?'}
                       </p>
                     </div>
-                    <div className="w-full space-y-3">
-                      <Button
-                        onClick={() => setWantsVideo(true)}
-                        className="w-full h-12 text-base font-semibold rounded-xl gap-2"
-                        style={{ backgroundColor: buttonColor }}
-                      >
-                        <Camera className="size-4" />
-                        Yes, record a video
-                      </Button>
-                      <Button
-                        type="button"
-                        variant="outline"
-                        onClick={() => { leaveVideoStep(); goTo(4, 'forward'); }}
-                        className="w-full h-11 rounded-xl gap-2"
-                      >
-                        Skip, continue without video
-                      </Button>
-                    </div>
-                  </div>
-                ) : (
-                <>
-                <div className="mb-5 text-center">
-                  <h2 className="text-2xl font-bold" style={{ color: textColor }}>Record your video</h2>
-                  <p className="mt-1.5 text-sm text-muted-foreground">
-                    Keep it short, 30 seconds to 2 minutes is perfect.
-                  </p>
-                </div>
 
-                {isUploadingVideo ? (
-                  <div className="flex flex-col items-center justify-center py-10 gap-3">
-                    <Loader2 className="size-7 animate-spin" style={{ color: buttonColor }} />
-                    <p className="text-sm text-muted-foreground">Uploading video...</p>
-                  </div>
-                ) : videoUploadFailed ? (
-                  <div className="flex flex-col items-center justify-center py-10 gap-3">
-                    <div className="size-12 rounded-full bg-red-100 flex items-center justify-center">
-                      <svg className="size-6 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                      </svg>
-                    </div>
-                    <p className="text-sm font-medium text-foreground">Video upload failed</p>
-                    <p className="text-xs text-muted-foreground">Check your connection and try again, or skip this step.</p>
-                    <div className="flex gap-3 mt-2">
-                      <button
-                        onClick={() => { setVideoUploadFailed(false); handleVideoNext(); }}
-                        className="px-4 py-2 rounded-xl text-sm font-medium text-white"
-                        style={{ backgroundColor: buttonColor }}
-                      >
-                        Try again
-                      </button>
-                      <button
-                        onClick={() => { setVideoUploadFailed(false); setVideoBlob(null); goTo(4, 'forward'); }}
-                        className="px-4 py-2 rounded-xl text-sm font-medium text-muted-foreground hover:text-foreground border border-border"
-                      >
-                        Skip video
-                      </button>
-                    </div>
-                  </div>
-                ) : videoBlob ? (
-                  /* Review state: video player + thumbnail picker */
-                  <div className="space-y-4">
-                    {/* eslint-disable-next-line jsx-a11y/media-has-caption */}
-                    <video
-                      src={videoObjectUrl!}
-                      controls
-                      preload="auto"
-                      poster={thumbnailFrames[selectedThumbnailIdx] || undefined}
-                      className="w-full rounded-2xl border border-border bg-black"
-                      style={{ maxHeight: 280 }}
-                    />
-
-                    {thumbnailFrames.length > 0 && (
+                    <div className="space-y-4">
                       <div>
-                        <p className="text-xs font-medium text-muted-foreground mb-2">Choose a thumbnail</p>
-                        <div className="grid grid-cols-4 gap-2">
-                          {thumbnailFrames.map((frame, idx) => (
-                            <button
-                              key={idx}
-                              type="button"
-                              onClick={() => setSelectedThumbnailIdx(idx)}
-                              className="relative rounded-lg overflow-hidden border-2 transition-all"
-                              style={
-                                selectedThumbnailIdx === idx
-                                  ? { borderColor: buttonColor }
-                                  : { borderColor: 'transparent' }
-                              }
-                            >
-                              {/* eslint-disable-next-line @next/next/no-img-element */}
-                              <img
-                                src={frame}
-                                alt={`Frame ${idx + 1}`}
-                                className="w-full block aspect-video object-cover"
+                        <Textarea
+                          value={content}
+                          onChange={(e) => setContent(e.target.value)}
+                          placeholder="I really appreciated..."
+                          className="min-h-[120px] text-base resize-none focus:ring-2 transition-shadow"
+                          style={
+                            {
+                              '--tw-ring-color': buttonColor,
+                              backgroundColor: inputColor,
+                              borderColor: `${textColor}20`,
+                              color: textColor,
+                            } as React.CSSProperties
+                          }
+                          maxLength={500}
+                        />
+                        <div className="flex justify-between items-center mt-1.5">
+                          <span
+                            className="text-xs"
+                            style={{
+                              color: contentValid ? '#10b981' : '#94a3b8',
+                            }}
+                          >
+                            {contentValid ? 'Looks great!' : `${Math.max(0, 20 - contentLength)} more characters needed`}
+                          </span>
+                          <span className="text-xs text-muted-foreground">
+                            {contentLength}/500
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Custom questions */}
+                      {form.custom_questions && form.custom_questions.length > 0 && (
+                        <div className="space-y-3 pt-2">
+                          {form.custom_questions.map((question, idx) => (
+                            <div key={idx}>
+                              <Label className="text-sm font-medium text-foreground mb-1.5 block">
+                                {question}
+                              </Label>
+                              <Input
+                                value={customAnswers[question] || ''}
+                                onChange={(e) =>
+                                  setCustomAnswers((prev) => ({
+                                    ...prev,
+                                    [question]: e.target.value,
+                                  }))
+                                }
+                                placeholder="Your answer..."
+                                className="h-11 text-sm"
+                                style={{ backgroundColor: inputColor, borderColor: `${textColor}20`, color: textColor }}
                               />
-                              {selectedThumbnailIdx === idx && (
-                                <div className="absolute inset-0 flex items-center justify-center bg-black/25">
-                                  <Check className="size-3.5 text-white drop-shadow" />
-                                </div>
-                              )}
-                            </button>
+                            </div>
                           ))}
                         </div>
-                      </div>
-                    )}
+                      )}
+                    </div>
 
-                    <div className="flex gap-3">
+                    <div className="mt-6 flex flex-col gap-3">
                       <Button
-                        type="button"
-                        variant="outline"
-                        onClick={handleReRecord}
-                        className="flex-1 h-11 rounded-xl gap-2"
+                        onClick={() => goTo(3, 'forward')}
+                        disabled={!contentValid}
+                        className="w-full h-12 text-base font-semibold rounded-xl gap-2"
+                        style={{
+                          backgroundColor: contentValid ? buttonColor : undefined,
+                        }}
                       >
-                        <Video className="size-3.5" />
-                        Re-record
-                      </Button>
-                      <Button
-                        onClick={handleVideoNext}
-                        className="flex-1 h-11 text-base font-semibold rounded-xl gap-2"
-                        style={{ backgroundColor: buttonColor }}
-                      >
-                        Continue
+                        Next
                         <ChevronRight className="size-4" />
                       </Button>
+                      <button
+                        type="button"
+                        onClick={() => { setTestimonialType(null); goTo(1, 'back'); }}
+                        className="text-sm text-muted-foreground hover:text-foreground transition-colors underline-offset-4 hover:underline mx-auto"
+                      >
+                        Back
+                      </button>
                     </div>
-                  </div>
-                ) : cameraError ? (
-                  <div className="text-center py-6 space-y-4" role="alert">
-                    <p className="text-sm text-muted-foreground">
-                      {cameraErrorMessage || 'Camera is not available right now.'} You can skip and continue without a video.
-                    </p>
-                    <Button
-                      onClick={() => { leaveVideoStep(); goTo(4, 'forward'); }}
-                      className="w-full h-12 text-base font-semibold rounded-xl gap-2"
-                      style={{ backgroundColor: buttonColor }}
-                    >
-                      Skip
-                      <ChevronRight className="size-4" />
-                    </Button>
-                  </div>
+                  </>
                 ) : (
-                  /* Camera active: preview + controls */
-                  <div className="space-y-4">
-                    <div className="relative rounded-2xl overflow-hidden border border-border bg-black">
-                      {/* eslint-disable-next-line jsx-a11y/media-has-caption */}
-                      <video
-                        ref={videoPreviewRef}
-                        autoPlay
-                        muted
-                        playsInline
-                        onPlaying={() => { setIsCameraInitializing(false); setIsCameraVisible(true); }}
-                        className="w-full block"
-                        style={{ maxHeight: 260, objectFit: 'cover', opacity: isCameraVisible ? 1 : 0 }}
-                      />
-                      {!isCameraVisible && (
-                        <div className="absolute inset-0 flex flex-col items-center justify-center gap-3">
-                          <Loader2 className="size-6 animate-spin text-white/70" />
-                          <p className="text-sm text-white/70">Opening camera...</p>
-                        </div>
-                      )}
-                      {isRecording && (
-                        <div className="absolute top-3 left-3 flex items-center gap-2 bg-black/60 rounded-full px-3 py-1">
-                          <span
-                            className={`w-2 h-2 rounded-full bg-red-500 ${isPaused ? 'opacity-50' : 'animate-pulse'}`}
-                          />
-                          <span className="text-white text-xs font-mono">
-                            {`${Math.floor(recordingTime / 60)}:${String(recordingTime % 60).padStart(2, '0')} / 2:00`}
-                          </span>
-                          {isPaused && (
-                            <span className="text-white/70 text-xs ml-0.5">Paused</span>
-                          )}
-                        </div>
-                      )}
+                  /* ── Video recording path ── */
+                  <>
+                    <div className="mb-5 text-center">
+                      <h2 className="text-2xl font-bold" style={{ color: textColor }}>Record your video</h2>
+                      <p className="mt-1.5 text-sm text-muted-foreground">
+                        Keep it short, 30 seconds to 2 minutes is perfect.
+                      </p>
                     </div>
 
-                    {isRecording ? (
-                      <div className="flex gap-3">
-                        <Button
-                          type="button"
-                          variant="outline"
-                          onClick={isPaused ? resumeRecording : pauseRecording}
-                          className="flex-1 h-11 rounded-xl gap-2"
-                        >
-                          {isPaused
-                            ? <><Play className="size-3.5 fill-current" /> Resume</>
-                            : <><Pause className="size-3.5 fill-current" /> Pause</>
-                          }
-                        </Button>
-                        <Button
-                          type="button"
-                          variant="outline"
-                          onClick={stopRecording}
-                          className="flex-1 h-11 rounded-xl gap-2 border-red-200 text-red-600 hover:bg-red-50"
-                        >
-                          <Square className="size-3.5 fill-red-500 text-red-500" />
-                          Stop
-                        </Button>
+                    {isUploadingVideo ? (
+                      <div className="flex flex-col items-center justify-center py-10 gap-3">
+                        <Loader2 className="size-7 animate-spin" style={{ color: buttonColor }} />
+                        <p className="text-sm text-muted-foreground">Uploading video...</p>
                       </div>
-                    ) : isCameraVisible ? (
-                      <div className="space-y-3">
+                    ) : videoUploadFailed ? (
+                      <div className="flex flex-col items-center justify-center py-10 gap-3">
+                        <div className="size-12 rounded-full bg-red-100 flex items-center justify-center">
+                          <svg className="size-6 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                          </svg>
+                        </div>
+                        <p className="text-sm font-medium text-foreground">Video upload failed</p>
+                        <p className="text-xs text-muted-foreground">Check your connection and try again, or skip this step.</p>
+                        <div className="flex gap-3 mt-2">
+                          <button
+                            onClick={() => { setVideoUploadFailed(false); handleVideoNext(); }}
+                            className="px-4 py-2 rounded-xl text-sm font-medium text-white"
+                            style={{ backgroundColor: buttonColor }}
+                          >
+                            Try again
+                          </button>
+                          <button
+                            onClick={() => { setVideoUploadFailed(false); setVideoBlob(null); goTo(3, 'forward'); }}
+                            className="px-4 py-2 rounded-xl text-sm font-medium text-muted-foreground hover:text-foreground border border-border"
+                          >
+                            Skip video
+                          </button>
+                        </div>
+                      </div>
+                    ) : videoBlob ? (
+                      /* Review state: video player + thumbnail picker */
+                      <div className="space-y-4">
+                        {/* eslint-disable-next-line jsx-a11y/media-has-caption */}
+                        <video
+                          src={videoObjectUrl!}
+                          controls
+                          preload="auto"
+                          poster={thumbnailFrames[selectedThumbnailIdx] || undefined}
+                          className="w-full rounded-2xl border border-border bg-black"
+                          style={{ maxHeight: 280 }}
+                        />
+
+                        {thumbnailFrames.length > 0 && (
+                          <div>
+                            <p className="text-xs font-medium text-muted-foreground mb-2">Choose a thumbnail</p>
+                            <div className="grid grid-cols-4 gap-2">
+                              {thumbnailFrames.map((frame, idx) => (
+                                <button
+                                  key={idx}
+                                  type="button"
+                                  onClick={() => setSelectedThumbnailIdx(idx)}
+                                  className="relative rounded-lg overflow-hidden border-2 transition-all"
+                                  style={
+                                    selectedThumbnailIdx === idx
+                                      ? { borderColor: buttonColor }
+                                      : { borderColor: 'transparent' }
+                                  }
+                                >
+                                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                                  <img
+                                    src={frame}
+                                    alt={`Frame ${idx + 1}`}
+                                    className="w-full block aspect-video object-cover"
+                                  />
+                                  {selectedThumbnailIdx === idx && (
+                                    <div className="absolute inset-0 flex items-center justify-center bg-black/25">
+                                      <Check className="size-3.5 text-white drop-shadow" />
+                                    </div>
+                                  )}
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+
+                        <div className="flex gap-3">
+                          <Button
+                            type="button"
+                            variant="outline"
+                            onClick={handleReRecord}
+                            className="flex-1 h-11 rounded-xl gap-2"
+                          >
+                            <Video className="size-3.5" />
+                            Re-record
+                          </Button>
+                          <Button
+                            onClick={handleVideoNext}
+                            className="flex-1 h-11 text-base font-semibold rounded-xl gap-2"
+                            style={{ backgroundColor: buttonColor }}
+                          >
+                            Continue
+                            <ChevronRight className="size-4" />
+                          </Button>
+                        </div>
+                      </div>
+                    ) : cameraError ? (
+                      <div className="text-center py-6 space-y-4" role="alert">
+                        <p className="text-sm text-muted-foreground">
+                          {cameraErrorMessage || 'Camera is not available right now.'} You can skip and continue without a video.
+                        </p>
                         <Button
-                          onClick={startRecording}
+                          onClick={() => { leaveVideoStep(); goTo(3, 'forward'); }}
                           className="w-full h-12 text-base font-semibold rounded-xl gap-2"
                           style={{ backgroundColor: buttonColor }}
                         >
-                          <Camera className="size-4" />
-                          Start Recording
-                        </Button>
-                        <Button
-                          type="button"
-                          variant="outline"
-                          onClick={() => { leaveVideoStep(); goTo(4, 'forward'); }}
-                          className="w-full h-11 rounded-xl gap-2"
-                        >
-                          Skip, continue without video
+                          Skip
+                          <ChevronRight className="size-4" />
                         </Button>
                       </div>
-                    ) : null}
-                  </div>
-                )}
+                    ) : (
+                      /* Camera active: preview + controls */
+                      <div className="space-y-4">
+                        <div className="relative rounded-2xl overflow-hidden border border-border bg-black">
+                          {/* eslint-disable-next-line jsx-a11y/media-has-caption */}
+                          <video
+                            ref={videoPreviewRef}
+                            autoPlay
+                            muted
+                            playsInline
+                            onPlaying={() => { setIsCameraInitializing(false); setIsCameraVisible(true); }}
+                            className="w-full block"
+                            style={{ maxHeight: 260, objectFit: 'cover', opacity: isCameraVisible ? 1 : 0 }}
+                          />
+                          {!isCameraVisible && (
+                            <div className="absolute inset-0 flex flex-col items-center justify-center gap-3">
+                              <Loader2 className="size-6 animate-spin text-white/70" />
+                              <p className="text-sm text-white/70">Opening camera...</p>
+                            </div>
+                          )}
+                          {isRecording && (
+                            <div className="absolute top-3 left-3 flex items-center gap-2 bg-black/60 rounded-full px-3 py-1">
+                              <span
+                                className={`w-2 h-2 rounded-full bg-red-500 ${isPaused ? 'opacity-50' : 'animate-pulse'}`}
+                              />
+                              <span className="text-white text-xs font-mono">
+                                {`${Math.floor(recordingTime / 60)}:${String(recordingTime % 60).padStart(2, '0')} / 2:00`}
+                              </span>
+                              {isPaused && (
+                                <span className="text-white/70 text-xs ml-0.5">Paused</span>
+                              )}
+                            </div>
+                          )}
+                        </div>
 
-                </>
-                )}
+                        {isRecording ? (
+                          <div className="flex gap-3">
+                            <Button
+                              type="button"
+                              variant="outline"
+                              onClick={isPaused ? resumeRecording : pauseRecording}
+                              className="flex-1 h-11 rounded-xl gap-2"
+                            >
+                              {isPaused
+                                ? <><Play className="size-3.5 fill-current" /> Resume</>
+                                : <><Pause className="size-3.5 fill-current" /> Pause</>
+                              }
+                            </Button>
+                            <Button
+                              type="button"
+                              variant="outline"
+                              onClick={stopRecording}
+                              className="flex-1 h-11 rounded-xl gap-2 border-red-200 text-red-600 hover:bg-red-50"
+                            >
+                              <Square className="size-3.5 fill-red-500 text-red-500" />
+                              Stop
+                            </Button>
+                          </div>
+                        ) : isCameraVisible ? (
+                          <div className="space-y-3">
+                            <Button
+                              onClick={startRecording}
+                              className="w-full h-12 text-base font-semibold rounded-xl gap-2"
+                              style={{ backgroundColor: buttonColor }}
+                            >
+                              <Camera className="size-4" />
+                              Start Recording
+                            </Button>
+                            <Button
+                              type="button"
+                              variant="outline"
+                              onClick={() => { leaveVideoStep(); goTo(3, 'forward'); }}
+                              className="w-full h-11 rounded-xl gap-2"
+                            >
+                              Skip, continue without video
+                            </Button>
+                          </div>
+                        ) : null}
+                      </div>
+                    )}
 
-                {!isRecording && !isUploadingVideo && (
-                  <div className="mt-4 text-center">
-                    <button
-                      type="button"
-                      onClick={() => { leaveVideoStep(); goTo(2, 'back'); }}
-                      className="text-sm text-muted-foreground hover:text-foreground transition-colors underline-offset-4 hover:underline"
-                    >
-                      Back
-                    </button>
-                  </div>
+                    {!isRecording && !isUploadingVideo && (
+                      <div className="mt-4 text-center">
+                        <button
+                          type="button"
+                          onClick={() => { leaveVideoStep(); setTestimonialType(null); goTo(1, 'back'); }}
+                          className="text-sm text-muted-foreground hover:text-foreground transition-colors underline-offset-4 hover:underline"
+                        >
+                          Back
+                        </button>
+                      </div>
+                    )}
+                  </>
                 )}
               </motion.div>
             )}
 
-            {/* ── Step 4: About you ── */}
-            {step === 4 && (
+            {/* ── Step 3: About you ── */}
+            {step === 3 && (
               <motion.div
-                key="step-4"
+                key="step-3"
                 variants={slideVariants}
                 initial={enterVariant}
                 animate="center"
@@ -1365,11 +1381,11 @@ export default function CollectFormClient({
                 <div className="mt-6 flex flex-col gap-3">
                   <Button
                     onClick={handleSubmit}
-                    disabled={!nameValid || !contentValid || !agreed || isSubmitting}
+                    disabled={!canSubmit || isSubmitting}
                     className="w-full h-12 text-base font-semibold rounded-xl gap-2"
                     style={{
                       backgroundColor:
-                        nameValid && contentValid && agreed && !isSubmitting
+                        canSubmit && !isSubmitting
                           ? buttonColor
                           : undefined,
                     }}
@@ -1385,7 +1401,7 @@ export default function CollectFormClient({
                   </Button>
                   <button
                     type="button"
-                    onClick={() => goTo(3, 'back')}
+                    onClick={() => goTo(2, 'back')}
                     className="text-sm text-muted-foreground hover:text-foreground transition-colors underline-offset-4 hover:underline mx-auto"
                     disabled={isSubmitting}
                   >
@@ -1395,10 +1411,10 @@ export default function CollectFormClient({
               </motion.div>
             )}
 
-            {/* ── Step 5: Success ── */}
-            {step === 5 && (
+            {/* ── Step 4: Success ── */}
+            {step === 4 && (
               <motion.div
-                key="step-5"
+                key="step-4"
                 variants={slideVariants}
                 initial="enterFromRight"
                 animate="center"
