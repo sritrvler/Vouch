@@ -296,20 +296,59 @@ function ShareElsewhere({
 
 // ─── Video utilities ──────────────────────────────────────────────────────────
 
+function getSupportedMimeType(): string {
+  if (typeof MediaRecorder === 'undefined') return '';
+  const candidates = [
+    'video/webm;codecs=vp8,opus',
+    'video/webm;codecs=vp9,opus',
+    'video/webm',
+    'video/mp4;codecs=avc1,mp4a.40.2',
+    'video/mp4',
+  ];
+  for (const type of candidates) {
+    if (MediaRecorder.isTypeSupported(type)) return type;
+  }
+  return ''; // empty = let browser pick default
+}
+
+function getVideoExtension(mimeType: string): string {
+  if (mimeType.includes('mp4') || mimeType.includes('quicktime') || mimeType.includes('avc')) return 'mp4';
+  if (mimeType.includes('webm') || mimeType.includes('vp8') || mimeType.includes('vp9')) return 'webm';
+  return 'mp4'; // safe default
+}
+
 function extractVideoFrames(videoUrl: string, count: number): Promise<string[]> {
   return new Promise((resolve) => {
+    let settled = false;
+    const done = (frames: string[]) => {
+      if (settled) return;
+      settled = true;
+      clearTimeout(timeoutId);
+      resolve(frames);
+    };
+    // 8s timeout: Safari iOS may never fire onseeked on blob URLs
+    const timeoutId = setTimeout(() => {
+      video.src = '';
+      video.onloadedmetadata = null;
+      video.onseeked = null;
+      video.onerror = null;
+      done([]);
+    }, 8000);
+
     const video = document.createElement('video');
-    video.src = videoUrl;
+    video.playsInline = true;
+    video.setAttribute('playsinline', ''); // older Safari
     video.muted = true;
     video.preload = 'metadata';
+    video.src = videoUrl;
     video.onloadedmetadata = () => {
       const duration = video.duration;
-      if (!duration || !isFinite(duration)) { resolve([]); return; }
+      if (!duration || !isFinite(duration)) { done([]); return; }
       const canvas = document.createElement('canvas');
       canvas.width = 320;
       canvas.height = 180;
       const ctx = canvas.getContext('2d');
-      if (!ctx) { resolve([]); return; }
+      if (!ctx) { done([]); return; }
       const frames: string[] = [];
       const timestamps = Array.from({ length: count }, (_, i) =>
         duration * (0.1 + (0.8 * i) / Math.max(count - 1, 1))
@@ -324,19 +363,19 @@ function extractVideoFrames(videoUrl: string, count: number): Promise<string[]> 
         if (i < timestamps.length) {
           video.currentTime = timestamps[i];
         } else {
-          resolve(frames.filter(Boolean));
+          done(frames.filter(Boolean));
         }
       };
-      video.onerror = () => resolve(frames);
+      video.onerror = () => done(frames);
       video.currentTime = timestamps[0];
     };
-    video.onerror = () => resolve([]);
+    video.onerror = () => done([]);
   });
 }
 
 function dataURLToBlob(dataUrl: string): Blob {
   const [header, data] = dataUrl.split(',');
-  const mime = header.match(/:(.*?);/)![1];
+  const mime = header.match(/:(.*?);/)?.[1] ?? 'image/jpeg';
   const binary = atob(data);
   const bytes = new Uint8Array(binary.length);
   for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
@@ -492,35 +531,46 @@ export default function CollectFormClient({
   }
 
   function startRecording() {
+    if (typeof MediaRecorder === 'undefined') {
+      setCameraErrorMessage('Video recording is not supported in this browser. Please try Chrome, Safari, or Firefox.');
+      setCameraError(true);
+      return;
+    }
     const stream = currentStreamRef.current;
     if (!stream) return;
     const chunks: Blob[] = [];
-    const mimeType = MediaRecorder.isTypeSupported('video/webm;codecs=vp8,opus')
-      ? 'video/webm;codecs=vp8,opus'
-      : 'video/mp4';
-    const mr = new MediaRecorder(stream, { videoBitsPerSecond: 600_000, mimeType });
-    mr.ondataavailable = (e) => { if (e.data.size > 0) chunks.push(e.data); };
-    mr.onstop = () => {
-      const blob = new Blob(chunks, { type: mimeType });
-      const objUrl = URL.createObjectURL(blob);
-      setVideoBlob(blob);
-      setVideoObjectUrl(objUrl);
-      stream.getTracks().forEach((t) => t.stop());
-      currentStreamRef.current = null;
-      setMediaStream(null);
-      setIsCameraActive(false);
-      setIsRecording(false);
+    const mimeType = getSupportedMimeType();
+    try {
+      const options: MediaRecorderOptions = { videoBitsPerSecond: 600_000 };
+      if (mimeType) options.mimeType = mimeType;
+      const mr = new MediaRecorder(stream, options);
+      mr.ondataavailable = (e) => { if (e.data.size > 0) chunks.push(e.data); };
+      mr.onstop = () => {
+        const actualMime = mr.mimeType || mimeType || 'video/webm';
+        const blob = new Blob(chunks, { type: actualMime });
+        const objUrl = URL.createObjectURL(blob);
+        setVideoBlob(blob);
+        setVideoObjectUrl(objUrl);
+        stream.getTracks().forEach((t) => t.stop());
+        currentStreamRef.current = null;
+        setMediaStream(null);
+        setIsCameraActive(false);
+        setIsRecording(false);
+        setIsPaused(false);
+        extractVideoFrames(objUrl, 4).then((frames) => {
+          setThumbnailFrames(frames);
+          setSelectedThumbnailIdx(0);
+        });
+      };
+      mediaRecorderRef.current = mr;
+      mr.start();
+      setIsRecording(true);
       setIsPaused(false);
-      extractVideoFrames(objUrl, 4).then((frames) => {
-        setThumbnailFrames(frames);
-        setSelectedThumbnailIdx(0);
-      });
-    };
-    mediaRecorderRef.current = mr;
-    mr.start();
-    setIsRecording(true);
-    setIsPaused(false);
-    setRecordingTime(0);
+      setRecordingTime(0);
+    } catch {
+      setCameraErrorMessage('Could not start recording. Please try a different browser.');
+      setCameraError(true);
+    }
   }
 
   function stopRecording() {
@@ -566,6 +616,22 @@ export default function CollectFormClient({
         // isCameraInitializing stays true until video element fires onPlaying
       })
       .catch((err: Error) => {
+        // OverconstrainedError: retry with relaxed constraints before giving up
+        if (err.name === 'OverconstrainedError') {
+          navigator.mediaDevices.getUserMedia({ video: true, audio: true })
+            .then((stream) => {
+              currentStreamRef.current = stream;
+              setMediaStream(stream);
+              setIsCameraActive(true);
+            })
+            .catch(() => {
+              setCameraErrorMessage('Camera does not support the required settings. Try a different browser or device.');
+              setCameraError(true);
+              cameraInitRef.current = false;
+              setIsCameraInitializing(false);
+            });
+          return;
+        }
         // Provide specific, actionable error messages based on the error type
         let message = 'Camera is not available right now.';
         if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
@@ -574,8 +640,6 @@ export default function CollectFormClient({
           message = 'No camera found on this device.';
         } else if (err.name === 'NotReadableError' || err.name === 'TrackStartError') {
           message = 'Camera is in use by another app. Close other apps using your camera and try again.';
-        } else if (err.name === 'OverconstrainedError') {
-          message = 'Camera does not support the required settings. Try a different browser or device.';
         }
         setCameraErrorMessage(message);
         setCameraError(true);
@@ -628,8 +692,10 @@ export default function CollectFormClient({
     setVideoUploadFailed(false);
     try {
       const fd = new FormData();
-      const videoExt = videoBlob.type.includes('mp4') ? 'mp4' : 'webm';
-      fd.append('video', videoBlob, `testimonial.${videoExt}`);
+      const effectiveMime = videoBlob.type || 'video/mp4';
+      const videoExt = getVideoExtension(effectiveMime);
+      const safeContentType = effectiveMime.startsWith('video/') ? effectiveMime : 'video/mp4';
+      fd.append('video', new File([videoBlob], `testimonial.${videoExt}`, { type: safeContentType }));
       fd.append('formId', form.id);
       if (thumbnailFrames.length > 0 && thumbnailFrames[selectedThumbnailIdx]) {
         fd.append('thumbnail', dataURLToBlob(thumbnailFrames[selectedThumbnailIdx]), 'thumbnail.jpg');

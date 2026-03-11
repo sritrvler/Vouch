@@ -22,7 +22,10 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Missing or invalid video/formId' }, { status: 400 });
     }
 
-    if (!video.type.startsWith('video/')) {
+    // Accept video/* and application/octet-stream (iOS Safari blob serialization)
+    // Magic byte validation below is the real security gate
+    const isVideoMime = video.type.startsWith('video/') || video.type === 'application/octet-stream';
+    if (!isVideoMime) {
       return NextResponse.json({ error: 'Invalid file type' }, { status: 400 });
     }
 
@@ -34,18 +37,19 @@ export async function POST(request: NextRequest) {
     const supabase = await createServerSupabaseClient();
     const adminClient = createAdminClient();
 
-    const ext = video.type.includes('mp4') ? 'mp4' : 'webm';
-    const path = `${formId}/${crypto.randomUUID()}.${ext}`;
+    // Verify form exists before reading potentially large video buffer
+    const formRes = await supabase
+      .from('collection_forms')
+      .select('id, project_id, user_id')
+      .eq('id', formId)
+      .single();
 
-    // Fetch form and read video buffer in parallel
-    const [formRes, videoBuffer] = await Promise.all([
-      supabase
-        .from('collection_forms')
-        .select('id, project_id, user_id')
-        .eq('id', formId)
-        .single(),
-      video.arrayBuffer(),
-    ]);
+    if (formRes.error || !formRes.data) {
+      return NextResponse.json({ error: 'Form not found' }, { status: 404 });
+    }
+    const form = formRes.data;
+
+    const videoBuffer = await video.arrayBuffer();
 
     // Verify file magic bytes match a real video format (not just client-provided MIME)
     const header = new Uint8Array(videoBuffer.slice(0, 12));
@@ -55,10 +59,10 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Invalid video file' }, { status: 400 });
     }
 
-    if (formRes.error || !formRes.data) {
-      return NextResponse.json({ error: 'Form not found' }, { status: 404 });
-    }
-    const form = formRes.data;
+    // Derive extension from actual content (magic bytes), not client MIME which may be octet-stream
+    const ext = isMp4 ? 'mp4' : 'webm';
+    const contentType = isMp4 ? 'video/mp4' : 'video/webm';
+    const path = `${formId}/${crypto.randomUUID()}.${ext}`;
 
     // Check subscription + video count in parallel
     const [subRes, countRes] = await Promise.all([
@@ -85,7 +89,7 @@ export async function POST(request: NextRequest) {
     const { error: uploadError } = await adminClient.storage
       .from('testimonial-videos')
       .upload(path, videoBuffer, {
-        contentType: video.type,
+        contentType,
         upsert: false,
       });
 
