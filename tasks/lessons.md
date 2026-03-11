@@ -2,6 +2,10 @@
 
 Rules for myself. Read this at session start. Do not repeat these mistakes.
 
+## Slug Page Parity (Session 14)
+18. **Slug page must mirror embed.js toggle support.** When adding new widget theme properties (showRating, showAvatar, etc.), check ALL rendering surfaces: widget builder preview, slug page, AND embed.js. Slug page was missing toggle support entirely.
+19. **"inherit" is truthy in JS.** `sanitizeFontFamily("inherit")` returns the string "inherit" which is truthy, preventing fallback. Map special values to null before sanitization chains.
+
 ## embed.js Testing (Session 13)
 16. **embed.js uses `data-vouch="WIDGET_ID"` attribute**, not `data-vouch-id`. The init function searches `querySelectorAll('[data-vouch]')`. Test pages must use the correct attribute or the widget won't render.
 17. **Widget ID is not a UUID visible in the DOM.** To find it, query Supabase directly using the anon key, or intercept network requests to the Supabase REST API.

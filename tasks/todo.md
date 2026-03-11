@@ -1,3 +1,24 @@
+## Session Handoff (March 11, 2026, session 14)
+
+**What was done:**
+1. **Comprehensive widget property testing across all 3 surfaces** (widget builder preview, slug page, embed.js). Tested: primary color, background color, text color, card color, card style, text size, font, filter/limits, featured border, card order (pinnedIds).
+2. **Restored cache values** after testing: widget API route back to `max-age=60, s-maxage=60`, slug page back to `revalidate = 60`.
+3. **Fixed BUG 1: Slug page font "inherit" resolution.** When widget font is "inherit", `sanitizeFontFamily("inherit")` returned truthy "inherit" string, preventing fallback to project font. Fix: map "inherit" to null before sanitization so it falls through correctly.
+4. **Fixed BUG 2: Slug page show/hide toggle support.** Slug page was always rendering stars, avatar, date, and metric regardless of widget theme toggles. Added `showRating`, `showAvatar`, `showDate`, `showMetric` checks (default true via `!== false` for backwards compat).
+
+**What's next:** Phase 1 BUILD continues:
+1. Item #13e through 13h: Remaining audit Phase 1 items
+2. Minimal layout (item #2 from active work queue)
+3. Run editorial migration SQL on production Supabase before deploying
+4. Update Lemon Squeezy dashboard: Pro variant price $19 to $29/mo
+5. Add UPSTASH_REDIS_REST_URL and UPSTASH_REDIS_REST_TOKEN to Vercel project env vars
+
+**What to watch out for:**
+1. `public/test-embed.html` is untracked in repo, delete it before deploying
+2. All previous session watch-outs still apply
+
+---
+
 ## Session Handoff (March 10, 2026, session 13)
 
 **What was done:**
