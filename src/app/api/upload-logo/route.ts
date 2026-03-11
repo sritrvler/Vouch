@@ -33,8 +33,11 @@ export async function POST(request: NextRequest) {
 
     const adminClient = createAdminClient();
 
-    // Ensure bucket exists (lazy creation, ignore error if already exists)
-    await adminClient.storage.createBucket('vouch-assets', { public: true });
+    // Ensure bucket exists and is public (createBucket is a no-op if bucket already exists,
+    // so updateBucket ensures the public flag is enforced even for pre-existing buckets)
+    await adminClient.storage.createBucket('vouch-assets', { public: true }).catch(() =>
+      adminClient.storage.updateBucket('vouch-assets', { public: true })
+    );
     const path = `logos/${user.id}/logo.${ext}`;
     const buffer = await file.arrayBuffer();
 
