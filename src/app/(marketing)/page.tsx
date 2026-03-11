@@ -131,7 +131,7 @@ function HeroSection() {
             </h1>
 
             <p className="text-lg sm:text-xl text-gray-500 leading-relaxed mb-9 max-w-lg">
-              Send a link, your client records in 2 minutes, paste one line of code. Your testimonial section is live and looks like you built it.
+              No chasing clients. No design work. Real testimonials on your site, looking exactly how you want.
             </p>
 
             <div className="flex flex-col sm:flex-row gap-3 mb-10">
