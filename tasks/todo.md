@@ -1,3 +1,28 @@
+## Session Handoff (March 11, 2026, session 15)
+
+**What was done:**
+1. **Fixed logo bug in collection form.** Replaced Next.js `<Image>` with plain `<img>` in BusinessHeader. The Next.js image optimization proxy was failing to fetch Supabase storage URLs; settings page used `<img>` and worked fine.
+2. **Redesigned collection form flow from 5 steps to 4 steps.** Step 1: star rating + text/video choice (no auto-advance). Step 2: conditional text OR video content. Step 3: About You + Submit. Step 4: Success.
+3. **Added `testimonialType` state** to track user's choice between text and video paths.
+4. **Fixed video-only submission bug** caught in review: `canSubmit` now checks `videoUrl !== null` (actual upload) instead of `testimonialType === 'video'` (just intent), preventing blank submissions.
+5. **Removed "Skip, continue without video" button.** Users who chose video must record or go back to pick text. Camera error and upload failure now send users back to step 1 instead of skipping forward.
+6. **Removed "Submit another testimonial" button** from success screen.
+7. **Cleaned up dead state:** removed unused `wantsVideo` state, fixed `leaveVideoStep` to clear `videoUploadFailed` and revoke `videoObjectUrl`.
+
+**What's next:** Phase 1 BUILD continues:
+1. Item #13e through 13h: Remaining audit Phase 1 items
+2. Minimal layout (item #2 from active work queue)
+3. Run editorial migration SQL on production Supabase before deploying
+4. Update Lemon Squeezy dashboard: Pro variant price $19 to $29/mo
+5. Add UPSTASH_REDIS_REST_URL and UPSTASH_REDIS_REST_TOKEN to Vercel project env vars
+
+**What to watch out for:**
+1. `public/test-embed.html` is untracked in repo, delete it before deploying
+2. Collection form video path: if camera fails, user goes back to step 1. No skip-forward path exists anymore. This is intentional but test on mobile devices where camera access is flaky.
+3. All previous session watch-outs still apply
+
+---
+
 ## Session Handoff (March 11, 2026, session 14)
 
 **What was done:**
