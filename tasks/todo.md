@@ -1,3 +1,26 @@
+## Session Handoff (March 12, 2026, session 17)
+
+**What was done:**
+1. **Fixed landing page scroll jitter on mobile.** Removed `backdrop-blur-md` from NavHeader (solid `bg-white` instead), narrowed `transition-all` to specific properties, added ref-based scroll state deduplication to avoid unnecessary React re-renders.
+2. **Stopped 3 infinite Framer Motion animations on landing page.** Floating badge (CollectVisual) changed to single fade-in. Blinking cursor (CollectVisual) and pulsing dot (HeroVisual) limited to 3 repeats each.
+3. **Fixed collection form step transition jitter.** Switched `AnimatePresence mode="wait"` to `mode="popLayout"` to prevent zero-height container collapse between steps. Added `relative` to card container for proper absolute exit positioning.
+4. **Optimized progress bar animation.** Changed from `width` animation (triggers layout) to `scaleX` with `origin-left` (GPU-composited).
+
+**What's next:** Phase 1 BUILD continues:
+1. **MANUAL: Toggle `vouch-assets` bucket to public in Supabase Dashboard** (Storage > vouch-assets > Settings > Public bucket: ON). This is the immediate fix from session 16.
+2. Item #13e through 13h: Remaining audit Phase 1 items
+3. Minimal layout (item #2 from active work queue)
+4. Run editorial migration SQL on production Supabase before deploying
+5. Update Lemon Squeezy dashboard: Pro variant price $19 to $29/mo
+6. Add UPSTASH_REDIS_REST_URL and UPSTASH_REDIS_REST_TOKEN to Vercel project env vars
+
+**What to watch out for:**
+1. `popLayout` mode means exiting step overlaps entering step briefly during transition. If visual glitch appears on slow devices, fallback is `mode="wait"` with `min-h-[280px]` on the container instead.
+2. `public/test-embed.html` is untracked in repo, delete it before deploying
+3. All previous session watch-outs still apply
+
+---
+
 ## Session Handoff (March 12, 2026, session 16)
 
 **What was done:**

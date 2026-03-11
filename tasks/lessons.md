@@ -2,6 +2,13 @@
 
 Rules for myself. Read this at session start. Do not repeat these mistakes.
 
+## Mobile Scroll Performance (Session 17)
+43. **`backdrop-filter: blur()` on `position: fixed` elements causes scroll jitter on mobile.** The browser re-composites the blur region every scroll frame. Use solid backgrounds for fixed headers on mobile. The visual tradeoff (no glassmorphism) is worth the smooth scroll.
+44. **`transition-all` is wasteful.** Only transition the properties that actually change: `transition-[background-color,border-color,box-shadow]`. Fewer properties = less compositor work.
+45. **Infinite Framer Motion animations keep compositor layers active during scroll.** `repeat: Infinity` on elements visible during scroll degrades performance. Use `repeat: 3` or play-once instead.
+46. **`AnimatePresence mode="wait"` causes height collapse** when steps have different heights. The gap between exit complete and enter mount leaves the container with zero children. Use `mode="popLayout"` instead: exiting element becomes `position: absolute` (removed from flow) while entering element mounts simultaneously.
+47. **Animate `scaleX` instead of `width` for progress bars.** `width` triggers layout recalculation. `scaleX` with `origin-left` is GPU-composited and does not trigger layout. Set the element to `w-full` and control visible fill with `scaleX`.
+
 ## Slug Page Parity (Session 14)
 18. **Slug page must mirror embed.js toggle support.** When adding new widget theme properties (showRating, showAvatar, etc.), check ALL rendering surfaces: widget builder preview, slug page, AND embed.js. Slug page was missing toggle support entirely.
 19. **"inherit" is truthy in JS.** `sanitizeFontFamily("inherit")` returns the string "inherit" which is truthy, preventing fallback. Map special values to null before sanitization chains.
