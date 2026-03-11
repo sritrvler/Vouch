@@ -1049,10 +1049,10 @@ export default function CollectFormClient({
                             Try again
                           </button>
                           <button
-                            onClick={() => { setVideoUploadFailed(false); setVideoBlob(null); goTo(3, 'forward'); }}
+                            onClick={() => { setVideoUploadFailed(false); leaveVideoStep(); setTestimonialType(null); goTo(1, 'back'); }}
                             className="px-4 py-2 rounded-xl text-sm font-medium text-muted-foreground hover:text-foreground border border-border"
                           >
-                            Skip video
+                            Go back
                           </button>
                         </div>
                       </div>
@@ -1125,15 +1125,14 @@ export default function CollectFormClient({
                     ) : cameraError ? (
                       <div className="text-center py-6 space-y-4" role="alert">
                         <p className="text-sm text-muted-foreground">
-                          {cameraErrorMessage || 'Camera is not available right now.'} You can skip and continue without a video.
+                          {cameraErrorMessage || 'Camera is not available right now.'} You can go back and write a text testimonial instead.
                         </p>
                         <Button
-                          onClick={() => { leaveVideoStep(); goTo(3, 'forward'); }}
+                          onClick={() => { leaveVideoStep(); setTestimonialType(null); goTo(1, 'back'); }}
                           className="w-full h-12 text-base font-semibold rounded-xl gap-2"
                           style={{ backgroundColor: buttonColor }}
                         >
-                          Skip
-                          <ChevronRight className="size-4" />
+                          Go back
                         </Button>
                       </div>
                     ) : (
@@ -1203,14 +1202,6 @@ export default function CollectFormClient({
                             >
                               <Camera className="size-4" />
                               Start Recording
-                            </Button>
-                            <Button
-                              type="button"
-                              variant="outline"
-                              onClick={() => { leaveVideoStep(); goTo(3, 'forward'); }}
-                              className="w-full h-11 rounded-xl gap-2"
-                            >
-                              Skip, continue without video
                             </Button>
                           </div>
                         ) : null}
@@ -1477,20 +1468,6 @@ export default function CollectFormClient({
                   />
                 )}
 
-                <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ delay: 0.6, duration: 0.3 }}
-                  className="mt-7"
-                >
-                  <button
-                    type="button"
-                    onClick={resetForm}
-                    className="text-sm text-muted-foreground hover:text-foreground underline-offset-4 hover:underline transition-colors"
-                  >
-                    Submit another testimonial
-                  </button>
-                </motion.div>
               </motion.div>
             )}
           </AnimatePresence>
