@@ -67,7 +67,7 @@ export default function HeroVisual() {
           <div className="flex items-center gap-1.5 bg-white/10 rounded-full px-2.5 py-1">
             <motion.div
               animate={{ opacity: [1, 0.3, 1] }}
-              transition={{ duration: 1.8, repeat: Infinity }}
+              transition={{ duration: 1.8, repeat: 3 }}
               className="w-1.5 h-1.5 rounded-full bg-emerald-400"
             />
             <span className="text-[11px] font-medium text-white">Live</span>

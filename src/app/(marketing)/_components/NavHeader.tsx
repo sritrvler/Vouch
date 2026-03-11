@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { Menu, X, Zap } from "lucide-react";
@@ -23,6 +23,7 @@ function VouchLogo() {
 
 export default function NavHeader() {
   const [scrolled, setScrolled] = useState(false);
+  const scrolledRef = useRef(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
@@ -38,7 +39,13 @@ export default function NavHeader() {
   }, []);
 
   useEffect(() => {
-    const handleScroll = () => setScrolled(window.scrollY > 10);
+    const handleScroll = () => {
+      const shouldBeScrolled = window.scrollY > 10;
+      if (shouldBeScrolled !== scrolledRef.current) {
+        scrolledRef.current = shouldBeScrolled;
+        setScrolled(shouldBeScrolled);
+      }
+    };
     window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
@@ -56,10 +63,10 @@ export default function NavHeader() {
     <>
       <header
         className={cn(
-          "fixed top-0 left-0 right-0 z-50 transition-all duration-300",
+          "fixed top-0 left-0 right-0 z-50 transition-[background-color,border-color,box-shadow] duration-300",
           scrolled
-            ? "bg-white/90 backdrop-blur-md border-b border-gray-100 shadow-sm"
-            : "bg-white/0"
+            ? "bg-white border-b border-gray-100 shadow-sm"
+            : "bg-transparent"
         )}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

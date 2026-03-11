@@ -142,10 +142,10 @@ function ProgressBar({
     <div className="w-full max-w-xs mx-auto">
       <div className="h-1.5 rounded-full bg-black/5 overflow-hidden">
         <motion.div
-          className="h-full rounded-full"
+          className="h-full w-full rounded-full origin-left"
           style={{ backgroundColor: buttonColor }}
-          initial={{ width: '25%' }}
-          animate={{ width: `${percent}%` }}
+          initial={{ scaleX: 0.25 }}
+          animate={{ scaleX: percent / 100 }}
           transition={{ duration: 0.5, ease: 'easeOut' }}
         />
       </div>
@@ -886,8 +886,8 @@ export default function CollectFormClient({
         )}
 
         {/* Card */}
-        <div className="bg-white rounded-3xl shadow-xl border border-border/40 overflow-hidden">
-          <AnimatePresence mode="wait" initial={false}>
+        <div className="relative bg-white rounded-3xl shadow-xl border border-border/40 overflow-hidden">
+          <AnimatePresence mode="popLayout" initial={false}>
             {/* ── Step 1: Rating ── */}
             {step === 1 && (
               <motion.div

@@ -56,7 +56,7 @@ export default function CollectVisual() {
               </motion.span>
               <motion.span
                 animate={{ opacity: [1, 0, 1] }}
-                transition={{ duration: 1, repeat: Infinity, delay: 1.8 }}
+                transition={{ duration: 1, repeat: 3, delay: 1.8 }}
                 className="inline-block w-0.5 h-4 bg-indigo-500 ml-0.5 align-middle"
               />
             </p>
@@ -81,8 +81,9 @@ export default function CollectVisual() {
       {/* Floating badge */}
       <motion.div
         className="absolute -top-3 -right-3 bg-emerald-700 text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-lg shadow-emerald-200"
-        animate={{ y: [0, -5, 0] }}
-        transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
+        initial={{ opacity: 0, y: 8 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.8, duration: 0.5 }}
       >
         Takes 2 min
       </motion.div>
