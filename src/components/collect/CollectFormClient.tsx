@@ -2,7 +2,7 @@
 
 import { useState, useRef, useCallback, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { toast } from 'sonner';
+import { toast, Toaster } from 'sonner';
 import { Loader2, Star, ChevronRight, Check, ExternalLink, Upload, X, Linkedin, Camera, Video, Square, Pause, Play, MessageSquare } from 'lucide-react';
 import { resolveFontUrl, sanitizeFontFamily } from '@/lib/fonts';
 import Image from 'next/image';
@@ -856,6 +856,8 @@ export default function CollectFormClient({
   }
 
   return (
+    <>
+    <Toaster position="top-center" />
     <div
       className="min-h-screen flex flex-col items-center justify-start py-8 px-4"
       style={{
@@ -1518,5 +1520,6 @@ export default function CollectFormClient({
         )}
       </div>
     </div>
+    </>
   );
 }

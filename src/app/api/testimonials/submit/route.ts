@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createServerSupabaseClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { sendNewTestimonialNotification } from '@/lib/email';
 import { createRateLimiter, getClientIp } from '@/lib/ratelimit';
@@ -104,10 +103,9 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Avatar image too large (max 500KB)' }, { status: 400 });
     }
 
-    const supabase = await createServerSupabaseClient();
-
     // ── Fetch form ───────────────────────────────────────────────────────────
-    const { data: form, error: formError } = await supabase
+    const adminClient = createAdminClient();
+    const { data: form, error: formError } = await adminClient
       .from('collection_forms')
       .select('id, is_active, project_id, user_id')
       .eq('id', formId)
@@ -121,7 +119,6 @@ export async function POST(request: NextRequest) {
     }
 
     // ── Check free tier testimonial cap ───────────────────────────────────────
-    const adminClient = createAdminClient();
     const [subRes, countRes] = await Promise.all([
       adminClient
         .from('subscriptions')
@@ -144,7 +141,7 @@ export async function POST(request: NextRequest) {
     }
 
     // ── Insert testimonial ───────────────────────────────────────────────────
-    const { data: testimonial, error: insertError } = await supabase
+    const { data: testimonial, error: insertError } = await adminClient
       .from('testimonials')
       .insert({
         form_id: form.id,
@@ -176,7 +173,7 @@ export async function POST(request: NextRequest) {
     }
 
     // ── Record form view as submitted (non-blocking) ─────────────────────────
-    void supabase
+    void adminClient
       .from('form_views')
       .insert({
         form_id: form.id,
@@ -188,7 +185,7 @@ export async function POST(request: NextRequest) {
     // ── Notify form owner by email (non-blocking) ─────────────────────────────
     void (async () => {
       try {
-        const { data: ownerData } = await supabase.auth.admin.getUserById(form.user_id);
+        const { data: ownerData } = await adminClient.auth.admin.getUserById(form.user_id);
         const ownerEmail = ownerData?.user?.email;
         if (ownerEmail) {
           await sendNewTestimonialNotification({
