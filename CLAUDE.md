@@ -16,7 +16,7 @@ Never use em dashes. Never use `-` for bullet points (use numbered lists or pros
 | `.claude/skills/validate-and-plan/SKILL.md` | New features |
 | `.claude/skills/design-and-build/SKILL.md` | While building |
 | `.claude/skills/test-and-ship/SKILL.md` | Before deploying |
-| `.claude/commands/SKILL.md` | Dashboard/app UI work |
+| `.claude/skills/interface-design/SKILL.md` | Dashboard/app UI work |
 | `.claude/commands/vouch-test.md` | Before production push |
 
 ## Rules (auto-loaded from `.claude/rules/`)

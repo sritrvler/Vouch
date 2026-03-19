@@ -192,7 +192,7 @@ Contains 12 parts (data model, security, scalability, URL mapping, implementatio
 **If deploying:** `.claude/skills/test-and-ship/SKILL.md`
 Contains 6-step pre-deploy checklist (build verification, route smoke tests, security testing with attack payloads, QA across browsers)
 
-**If doing UI work:** `.claude/commands/SKILL.md` (interface-design)
+**If doing UI work:** `.claude/skills/interface-design/SKILL.md`
 Contains the full design system (intent-first, domain exploration, mandate checks, craft foundations)
 
 Claude lists which skills it read so you can verify it's not skipping.
@@ -476,7 +476,7 @@ Each layer exists because a previous layer was insufficient:
 | `.claude/skills/validate-and-plan/SKILL.md` | 10-step feature validation | New features |
 | `.claude/skills/design-and-build/SKILL.md` | 12-part implementation guide | While building |
 | `.claude/skills/test-and-ship/SKILL.md` | 6-step pre-deploy checklist | Before deploying |
-| `.claude/commands/SKILL.md` | Interface design system | Dashboard/app UI work |
+| `.claude/skills/interface-design/SKILL.md` | Interface design system | Dashboard/app UI work |
 | `.claude/commands/vouch-test.md` | Pre-release verification script | Before production push |
 | `tasks/todo.md` | Work queue + session handoffs | Read at session start |
 | `tasks/lessons.md` | 30 active technical patterns | Read at session start |

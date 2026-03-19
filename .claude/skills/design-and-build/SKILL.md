@@ -5,7 +5,7 @@ description: Use WHILE building features - design, implementation, security, sca
 
 # Design & Build
 
-Applied during active feature development. This skill covers implementation concerns: data model, security, scalability, and coding patterns. For UI/UX design principles (personas, intent, craft, layering, tokens), apply the `interface-design` skill (`.claude/commands/SKILL.md`) for app/dashboard UI or the `frontend-design` skill for landing/marketing pages. Those skills own all design/aesthetics decisions. This skill owns everything else.
+Applied during active feature development. This skill covers implementation concerns: data model, security, scalability, and coding patterns. For UI/UX design principles (personas, intent, craft, layering, tokens), apply the `interface-design` skill (`.claude/skills/interface-design/SKILL.md`) for app/dashboard UI or the `frontend-design` skill for landing/marketing pages. Those skills own all design/aesthetics decisions. This skill owns everything else.
 
 ---
 

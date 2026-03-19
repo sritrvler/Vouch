@@ -39,7 +39,7 @@ Free: 25 testimonials, 1 form, 1 widget, 1 project, "Powered by Vouch" badge. Pr
 | `.claude/skills/validate-and-plan/SKILL.md` | New features |
 | `.claude/skills/design-and-build/SKILL.md` | While building |
 | `.claude/skills/test-and-ship/SKILL.md` | Before deploying |
-| `.claude/commands/SKILL.md` | Interface work |
+| `.claude/skills/interface-design/SKILL.md` | Interface work |
 | `.claude/commands/vouch-test.md` | Before pushing to prod |
 
 ## Rules (auto-loaded from `.claude/rules/`)
