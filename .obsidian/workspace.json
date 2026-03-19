@@ -11,10 +11,14 @@
             "id": "db95224f1de8923b",
             "type": "leaf",
             "state": {
-              "type": "empty",
-              "state": {},
+              "type": "markdown",
+              "state": {
+                "file": "tasks/todo.md",
+                "mode": "source",
+                "source": false
+              },
               "icon": "lucide-file",
-              "title": "New tab"
+              "title": "todo"
             }
           }
         ]
@@ -178,6 +182,10 @@
   },
   "active": "db95224f1de8923b",
   "lastOpenFiles": [
+    "tasks/lessons-archive.md",
+    "tasks/lessons.md",
+    "CLAUDE.md",
+    "README.md",
     "PROCESS.md",
     "_archive/2026-03-19/PROCESS.md",
     "_archive/2026-03-19/commands-SKILL.md",
