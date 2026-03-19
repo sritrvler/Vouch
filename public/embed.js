@@ -17,21 +17,26 @@
 
   function hexAlpha(color, alpha) {
     if (!color) return 'rgba(0,0,0,' + alpha + ')';
+    // Strip alpha from 8-char hex (#rrggbbaa -> #rrggbb) or 4-char (#rgba -> #rgb)
+    var c = color.replace(/^(#[0-9a-fA-F]{6})[0-9a-fA-F]{2}$/, '$1')
+                 .replace(/^(#[0-9a-fA-F]{3})[0-9a-fA-F]$/, '$1');
     // 6-char hex
-    var hexMatch = color.match(/^#([0-9a-fA-F]{2})([0-9a-fA-F]{2})([0-9a-fA-F]{2})/);
+    var hexMatch = c.match(/^#([0-9a-fA-F]{2})([0-9a-fA-F]{2})([0-9a-fA-F]{2})$/);
     if (hexMatch) {
       return 'rgba(' + parseInt(hexMatch[1], 16) + ',' + parseInt(hexMatch[2], 16) + ',' + parseInt(hexMatch[3], 16) + ',' + alpha + ')';
     }
     // 3-char hex (#fff -> #ffffff)
-    var shortHex = color.match(/^#([0-9a-fA-F])([0-9a-fA-F])([0-9a-fA-F])$/);
+    var shortHex = c.match(/^#([0-9a-fA-F])([0-9a-fA-F])([0-9a-fA-F])$/);
     if (shortHex) {
       return 'rgba(' + parseInt(shortHex[1] + shortHex[1], 16) + ',' + parseInt(shortHex[2] + shortHex[2], 16) + ',' + parseInt(shortHex[3] + shortHex[3], 16) + ',' + alpha + ')';
     }
+    // rgb/rgba
     var rgbMatch = color.match(/^rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)/);
     if (rgbMatch) {
       return 'rgba(' + rgbMatch[1] + ',' + rgbMatch[2] + ',' + rgbMatch[3] + ',' + alpha + ')';
     }
-    return 'rgba(0,0,0,' + alpha + ')';
+    // Unknown format (hsl, etc.): return color unchanged rather than black
+    return color;
   }
 
   function safeFontUrl(url) {
