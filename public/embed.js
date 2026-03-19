@@ -1028,7 +1028,7 @@
       '-webkit-font-smoothing:antialiased;color:' + tc + '}' +
       '*{box-sizing:border-box;margin:0;padding:0}' +
       'img{max-width:100%}' +
-      'a{color:inherit}';
+      'a{color:inherit}a:hover{opacity:0.8}';
     shadow.appendChild(style);
 
     var container = document.createElement('div');
@@ -1081,7 +1081,7 @@
       brandLink.target = '_blank';
       brandLink.rel = 'noopener noreferrer';
       brandLink.style.cssText = 'font-size:11px;color:' + hexAlpha(tc, 0.4) + ';text-decoration:none';
-      brandLink.textContent = 'Powered by ';
+      brandLink.appendChild(document.createTextNode('Powered by '));
       var brandName = document.createElement('span');
       brandName.textContent = 'Vouch';
       brandName.style.cssText = 'font-weight:600;color:' + pc;
