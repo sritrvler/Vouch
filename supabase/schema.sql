@@ -224,6 +224,9 @@ create policy "Users manage own subscription" on public.subscriptions
 -- Projects: users manage their own, public can read (needed for collection forms + widgets)
 create policy "Users manage own projects" on public.projects
   for all using (auth.uid() = user_id);
+-- NOTE: Exposes all project columns (including report_token) to anon reads.
+-- Accepted risk: project IDs are random v4 UUIDs (enumeration infeasible),
+-- and PostgreSQL RLS is row-level only (no column-level filtering).
 create policy "Public can read projects" on public.projects
   for select using (true);
 

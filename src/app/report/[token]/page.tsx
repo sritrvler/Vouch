@@ -1,4 +1,5 @@
 import { createServerSupabaseClient } from '@/lib/supabase/server';
+import { createAdminClient } from '@/lib/supabase/admin';
 import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
 import { Star } from 'lucide-react';
@@ -35,8 +36,9 @@ export default async function ClientReportPage({ params }: PageProps) {
 
   if (!project) return notFound();
 
-  // Check if project owner is on Studio plan
-  const { data: subscription } = await supabase
+  // Use admin client to bypass RLS (no public SELECT policy on subscriptions)
+  const adminClient = createAdminClient();
+  const { data: subscription } = await adminClient
     .from('subscriptions')
     .select('plan')
     .eq('user_id', project.user_id)

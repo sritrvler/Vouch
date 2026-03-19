@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServerSupabaseClient } from '@/lib/supabase/server';
+import { createAdminClient } from '@/lib/supabase/admin';
 import { createRateLimiter, getClientIp } from '@/lib/ratelimit';
 import { sanitizeFontUrl } from '@/lib/fonts';
 import { PLANS } from '@/lib/lemonsqueezy';
@@ -54,7 +55,9 @@ export async function GET(request: NextRequest, { params }: PageProps) {
       .eq('id', widget.project_id)
       .single();
 
-    const subPromise = supabase
+    // Use admin client to bypass RLS (no public SELECT policy on subscriptions)
+    const adminClient = createAdminClient();
+    const subPromise = adminClient
       .from('subscriptions')
       .select('plan, is_banned')
       .eq('user_id', widget.user_id)
