@@ -1,10 +1,7 @@
-## Session Handoff (March 19, 2026, session 19)
+## Session Handoff (March 19, 2026, session 20)
 
 **What was done:**
-1. **Slimmed todo.md from 2,523 to 272 lines (89% reduction).** Moved all strategy research (sections A through L, persona role-plays, competitive analysis, pricing rationale) to new `tasks/strategy-research.md` archive file. Removed 16 stale session handoffs (git preserves them), the item cross-reference table, and the completed go-live checklist.
-2. **Added Persistent Watch-Outs section** (max 10 items) between handoff and roadmap. Consolidates active watch-outs from sessions 2 through 18.
-3. **Added 16 section pointers** to roadmap items that need strategic context (e.g., "#11 Reprice" now points to "strategy-research.md Section B4").
-4. **Updated session end gate** in CLAUDE.md (root), .claude/CLAUDE.md, MEMORY.md, and PROCESS.md: handoffs now replace the previous one instead of appending. Only one handoff exists at any time.
+1. **Fixed widget 3-5s loading delay** across 4 files. Eliminated compounding chain: auth middleware on public endpoint (100-300ms), IO fallback 2s timeout (now 300ms), short 60s cache TTL (now 300s + SWR), no CDN caching for embed.js (now s-maxage=86400). Senior code review passed with one adjustment (SWR reduced from 600 to 60 to limit ban-check staleness to ~6 min).
 
 **What's next:** Phase 1 BUILD continues:
 1. **MANUAL: Toggle `vouch-assets` bucket to public in Supabase Dashboard** (Storage > vouch-assets > Settings > Public bucket: ON).
@@ -16,7 +13,8 @@
 
 **What to watch out for:**
 1. See Persistent Watch-Outs section below for all active items.
-2. When loading strategy context for pricing/comparison work, read `tasks/strategy-research.md` on demand.
+2. Widget view counts now undercount ~5x due to 300s CDN cache (documented in code). Acceptable tradeoff.
+3. After deploy, verify in DevTools: embed.js has `s-maxage=86400`, widget API has `s-maxage=300, stale-while-revalidate=60`.
 
 ---
 
