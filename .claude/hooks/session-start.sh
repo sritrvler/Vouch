@@ -24,4 +24,7 @@ fi
 if [ -f "tasks/lessons.md" ]; then
   LESSON_COUNT=$(grep -c "^[0-9]" tasks/lessons.md 2>/dev/null || echo "0")
   echo "--- $LESSON_COUNT lessons in lessons.md (read at start) ---"
+  if [ "$LESSON_COUNT" -gt 30 ] 2>/dev/null; then
+    echo "WARNING: lessons.md has $LESSON_COUNT items (cap is 30). Graduate lessons before adding new ones."
+  fi
 fi

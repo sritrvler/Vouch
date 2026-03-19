@@ -25,3 +25,16 @@ Our strengths: output quality (Editorial layout), simplicity, unlimited forms/pr
 Our weakness: feature count vs Senja (they have 200+ features at $29).
 Validated pain point: "limited customization" (NOT "widgets look generic").
 Growth engine: "Powered by Vouch" badge on free widgets = organic marketing.
+
+## Decision Patterns (graduated from lessons.md)
+
+1. Copy must match reality. If pricing page lists a feature, code must implement it.
+2. Customer-facing errors: ask "Who sees this? Can they act on it?" Submitters cannot upgrade.
+3. Never list features that don't exist in the shipped product.
+4. Copy that implies exclusion creates doubt. "SEO-friendly" on one path implies others aren't.
+5. Gate at deployment, not discovery. Let users preview with own data, gate at Save/export.
+6. Validate pain points against real user complaints, not assumptions. Check G2, forums, feedback.
+7. "Native-looking" is a spectrum. Optimal = visual harmony + credibility signals, not fully native.
+8. Free tier generosity = growth engine (badge impressions), not revenue leak.
+9. Counter-position: "200 features. You need 5. We built those 5 best."
+10. Use competitor products live, not just pricing pages. Feature gaps are 10x larger than apparent.

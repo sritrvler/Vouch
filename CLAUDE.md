@@ -35,7 +35,7 @@ Detailed rules live in `.claude/rules/` and load automatically (some are path-sp
 
 **START (do not write code until done):**
 1. Read `tasks/todo.md` (work queue + handoff note)
-2. Read `tasks/lessons.md` (120+ lessons, mistakes to avoid)
+2. Read `tasks/lessons.md` (30 active patterns, capped)
 3. Read ALL matching skill files. List which ones.
 4. Understand the WHY before coding
 5. Git checkpoint: `git add -A && git commit -m "checkpoint: before [task]"`

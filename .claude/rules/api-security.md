@@ -10,3 +10,5 @@ paths: ["src/app/api/**/*.ts", "src/app/api/**/*.tsx"]
 5. Error messages must not leak internal details. Ask: "Who sees this? Can they act on it?"
 6. API JSON endpoints need `X-Content-Type-Options: nosniff`.
 7. Auth callback redirect: validate `next` starts with `/` and not `//`.
+8. Service role client ONLY when RLS must be bypassed (webhooks, admin ops). Authenticated user client for user-owned rows.
+9. Admin secret guard: `if (!secret || header !== secret)` (fail closed). NOT `if (secret && header !== secret)` (fail open when env var unset).

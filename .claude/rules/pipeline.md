@@ -32,7 +32,8 @@ SELF-REVIEW CHECKLIST:
 [ ] STATE: Shared state conflicts, loading states, cleanup?
 [ ] SECURITY: Input validation, XSS, injection, auth?
 [ ] CONSISTENCY: Matches existing codebase patterns?
-[ ] MISSED FILES: Grep for related patterns. All instances fixed?
+[ ] DATA LAYER: Array.isArray() on Supabase joins? user_id alongside project_id? Error check before sort/slice? Plan check via negation (=== 'free')?
+[ ] MISSED FILES: Grep for related patterns. Check: .limit(1).single() if multi-support, isPro if plan logic, canSubmit if submission flow, skip buttons if removing paths.
 [ ] REGRESSION: Could this break existing functionality?
 ```
 
@@ -51,3 +52,7 @@ With UI: above + `ux-reviewer` FLOW DESIGN -> `premium-ui-designer` -> `software
 ### Build Check
 
 `npx next build` must exit 0. After all steps: say `PIPELINE COMPLETE`.
+
+### Pipeline Complete Requirements (T3/T4)
+Before saying `PIPELINE COMPLETE`, list: "Agents used: [names and purpose]"
+If no agents were used at T3/T4, justify why the tier classification is correct.

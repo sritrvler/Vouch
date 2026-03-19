@@ -9,3 +9,5 @@ paths: ["src/app/(dashboard)/dashboard/widgets/**"]
 4. `updateTheme` callback must accept the widest field type (including `null` for nullable fields).
 5. isPro check must include both 'pro' AND 'studio' plans.
 6. New widget defaults: hide date and metric badge. Stars and avatar visible.
+7. Slug page must mirror embed.js toggle support. New theme properties must update: widget builder preview, slug page, AND embed.js.
+8. Plan limit gates query user_id across ALL projects, not just current project. Free = "1 widget total" not "1 per project."
