@@ -67,6 +67,13 @@ const nextConfig: NextConfig = {
         source: '/api/testimonials/widget/:path*',
         headers: securityHeaders.filter(h => h.key === 'X-Content-Type-Options' || h.key === 'Strict-Transport-Security'),
       },
+      {
+        source: '/embed.js',
+        headers: [
+          { key: 'Cache-Control', value: 'public, max-age=0, s-maxage=86400, stale-while-revalidate=86400' },
+          { key: 'X-Content-Type-Options', value: 'nosniff' },
+        ],
+      },
     ];
   },
 };

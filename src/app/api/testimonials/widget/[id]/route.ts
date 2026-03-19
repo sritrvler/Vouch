@@ -11,7 +11,7 @@ const CORS_HEADERS = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Methods': 'GET, OPTIONS',
   'Access-Control-Allow-Headers': 'Content-Type',
-  'Cache-Control': 'public, max-age=60, s-maxage=60',
+  'Cache-Control': 'public, max-age=300, s-maxage=300, stale-while-revalidate=60',
 };
 
 interface PageProps {
@@ -111,6 +111,7 @@ export async function GET(request: NextRequest, { params }: PageProps) {
     testimonials = testimonials.slice(0, hardLimit);
 
     // ── Record widget view (non-blocking) ─────────────────────────────────────
+    // Note: with 5-min CDN cache, view counts undercount by ~5x. Acceptable tradeoff for speed.
     void supabase.from('widget_views').insert({ widget_id: widget.id });
 
     const totalApproved = totalCount ?? testimonials.length;

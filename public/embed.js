@@ -1141,17 +1141,18 @@
           }
         }
       },
-      { rootMargin: '200px' }
+      { rootMargin: '400px' }
     );
     for (var j = 0; j < els.length; j++) observer.observe(els[j]);
 
-    // Fallback: if IntersectionObserver doesn't fire within 2s, init directly.
+    // Fallback: if IntersectionObserver doesn't fire within 300ms, init directly.
     // Covers SSR hydration race where IO callback never triggers.
+    // 300ms gives IO time for first callback on low-end mobile (150-250ms first frame).
     setTimeout(function () {
       for (var k = 0; k < els.length; k++) {
         if (!els[k]._vouchLoaded) initWidget(els[k]);
       }
-    }, 2000);
+    }, 300);
   }
 
   if (document.readyState === 'loading') {
