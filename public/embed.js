@@ -1066,21 +1066,26 @@
     // Free-tier note
     if (!data.isPro && data.totalApproved > 25) {
       var note = document.createElement('div');
-      note.style.cssText = 'text-align:center;margin-top:16px;padding-top:12px;border-top:1px solid #f1f5f9;font-size:11px;color:#94a3b8';
+      note.style.cssText = 'text-align:center;margin-top:16px;padding-top:12px;border-top:1px solid ' + hexAlpha(tc, 0.08) + ';font-size:11px;color:' + hexAlpha(tc, 0.4);
       note.textContent = 'Showing 25 of ' + data.totalApproved + ' reviews';
       container.appendChild(note);
     }
 
     // Branding
     if (!w.hideBranding) {
+      var pc = safeColor(theme.primaryColor, '#6366F1');
       var brand = document.createElement('div');
-      brand.style.cssText = 'text-align:center;margin-top:16px;padding-top:12px;border-top:1px solid #f1f5f9';
+      brand.style.cssText = 'text-align:center;margin-top:16px;padding-top:12px;border-top:1px solid ' + hexAlpha(tc, 0.08);
       var brandLink = document.createElement('a');
       brandLink.href = base + '/via';
       brandLink.target = '_blank';
       brandLink.rel = 'noopener noreferrer';
-      brandLink.style.cssText = 'font-size:11px;color:#94a3b8;text-decoration:none';
-      brandLink.textContent = 'Powered by Vouch';
+      brandLink.style.cssText = 'font-size:11px;color:' + hexAlpha(tc, 0.4) + ';text-decoration:none';
+      brandLink.textContent = 'Powered by ';
+      var brandName = document.createElement('span');
+      brandName.textContent = 'Vouch';
+      brandName.style.cssText = 'font-weight:600;color:' + pc;
+      brandLink.appendChild(brandName);
       brand.appendChild(brandLink);
       container.appendChild(brand);
     }
