@@ -109,6 +109,7 @@ function SignupForm() {
     const supabase = createClient();
     const origin = window.location.origin;
 
+    // Force account picker so Google doesn't auto-login after Supabase signOut
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
