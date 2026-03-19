@@ -15,6 +15,25 @@
     return fallback;
   }
 
+  function hexAlpha(color, alpha) {
+    if (!color) return 'rgba(0,0,0,' + alpha + ')';
+    // 6-char hex
+    var hexMatch = color.match(/^#([0-9a-fA-F]{2})([0-9a-fA-F]{2})([0-9a-fA-F]{2})/);
+    if (hexMatch) {
+      return 'rgba(' + parseInt(hexMatch[1], 16) + ',' + parseInt(hexMatch[2], 16) + ',' + parseInt(hexMatch[3], 16) + ',' + alpha + ')';
+    }
+    // 3-char hex (#fff -> #ffffff)
+    var shortHex = color.match(/^#([0-9a-fA-F])([0-9a-fA-F])([0-9a-fA-F])$/);
+    if (shortHex) {
+      return 'rgba(' + parseInt(shortHex[1] + shortHex[1], 16) + ',' + parseInt(shortHex[2] + shortHex[2], 16) + ',' + parseInt(shortHex[3] + shortHex[3], 16) + ',' + alpha + ')';
+    }
+    var rgbMatch = color.match(/^rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)/);
+    if (rgbMatch) {
+      return 'rgba(' + rgbMatch[1] + ',' + rgbMatch[2] + ',' + rgbMatch[3] + ',' + alpha + ')';
+    }
+    return 'rgba(0,0,0,' + alpha + ')';
+  }
+
   function safeFontUrl(url) {
     if (!url || typeof url !== 'string') return null;
     var trimmed = url.trim();
@@ -105,20 +124,21 @@
 
   // ── SVG icons ────────────────────────────────────────────────────────────────
 
-  function starSvg(filled, color) {
+  function starSvg(filled, color, emptyColor) {
+    var empty = emptyColor || '#cbd5e1';
     return (
       '<svg width="13" height="13" viewBox="0 0 24 24" fill="' +
       (filled ? color : 'none') +
       '" stroke="' +
-      (filled ? color : '#cbd5e1') +
+      (filled ? color : empty) +
       '" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>'
     );
   }
 
-  function stars(rating, color) {
+  function stars(rating, color, emptyColor) {
     var r = typeof rating === 'number' ? rating : 0;
     var html = '<span style="display:flex;gap:2px">';
-    for (var i = 1; i <= 5; i++) html += starSvg(i <= r, color);
+    for (var i = 1; i <= 5; i++) html += starSvg(i <= r, color, emptyColor);
     html += '</span>';
     return html;
   }
@@ -167,8 +187,12 @@
     var tc = safeColor(theme.textColor, '#0f172a');
     var cardBg = safeColor(theme.cardColor || theme.backgroundColor, '#ffffff');
     var cs = theme.cardStyle || 'shadow';
-    var border = cs === 'border' ? '1px solid #e2e8f0' : 'none';
+    var border = cs === 'border' ? '1px solid ' + hexAlpha(tc, 0.15) : 'none';
     var shadow = cs === 'shadow' ? '0 1px 3px rgba(0,0,0,0.08),0 1px 2px rgba(0,0,0,0.04)' : 'none';
+    var brMap = { none: '0px', small: '8px', medium: '14px', large: '20px' };
+    var br = brMap[theme.borderRadius] || '14px';
+    var emptyStarColor = hexAlpha(tc, 0.22);
+    var subtitleColor = hexAlpha(tc, 0.55);
     var pad = compact ? '14px 16px' : '24px';
     var gap = compact ? '10' : '16';
     var ts = theme.textSize || 'compact';
@@ -222,11 +246,11 @@
     var featuredBorder = t.featured ? ';border-left:3px solid ' + pc : '';
     var html =
       '<article style="background:' + cardBg + ';border:' + border + ';box-shadow:' + shadow +
-      ';border-radius:14px;padding:' + pad + ';display:flex;flex-direction:column;gap:' + gap + 'px;width:100%' + featuredBorder + '">';
+      ';border-radius:' + br + ';padding:' + pad + ';display:flex;flex-direction:column;gap:' + gap + 'px;width:100%' + featuredBorder + '">';
 
     // Proof (TOP)
     html += '<div style="display:flex;align-items:center;flex-wrap:wrap;gap:8px">';
-    if (theme.showRating !== false) html += stars(t.rating, pc);
+    if (theme.showRating !== false) html += stars(t.rating, pc, emptyStarColor);
     if (t.metric_label && theme.showMetric !== false) {
       html +=
         '<span style="font-size:10px;font-weight:600;color:' + pc + ';background:' + pc +
@@ -251,7 +275,7 @@
       html += '<div style="min-width:0">';
       html += '<div style="font-weight:700;font-size:' + nameSize + 'px;color:' + tc + ';overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + esc(t.author_name) + '</div>';
       if (authorLine) {
-        html += '<div style="font-size:' + roleSize + 'px;color:#6b7280;line-height:1.4">' + esc(authorLine) + '</div>';
+        html += '<div style="font-size:' + roleSize + 'px;color:' + subtitleColor + ';line-height:1.4">' + esc(authorLine) + '</div>';
       }
       if (t.email_domain) {
         html += '<div style="display:flex;align-items:center;gap:3px;margin-top:2px;font-size:10px;font-weight:600;color:#059669">' + shieldIcon + esc(t.email_domain) + '</div>';
@@ -293,6 +317,10 @@
     var pc = safeColor(theme.primaryColor, '#6366F1');
     var tc = safeColor(theme.textColor, '#0f172a');
     var cardBg = safeColor(theme.cardColor || theme.backgroundColor, '#ffffff');
+    var brMap = { none: '0px', small: '8px', medium: '14px', large: '20px' };
+    var br = brMap[theme.borderRadius] || '16px';
+    var emptyStarColor = hexAlpha(tc, 0.22);
+    var subtitleColor = hexAlpha(tc, 0.55);
     var authorLine = [t.author_role, t.author_company].filter(Boolean).join(', ');
     var ts = theme.textSize || 'default';
     var sqSize = ts === 'large' ? '20' : ts === 'default' ? '18' : '16';
@@ -318,9 +346,9 @@
     var isLI = src.indexOf('linkedin.com') !== -1;
 
     var html =
-      '<article style="background:' + cardBg + ';border-radius:16px;padding:32px;text-align:center;box-shadow:0 4px 24px rgba(0,0,0,0.08)">';
+      '<article style="background:' + cardBg + ';border-radius:' + br + ';padding:32px;text-align:center;box-shadow:0 4px 24px rgba(0,0,0,0.08)">';
     if (theme.showRating !== false) {
-      html += '<div style="display:flex;justify-content:center;margin-bottom:16px">' + stars(t.rating, pc) + '</div>';
+      html += '<div style="display:flex;justify-content:center;margin-bottom:16px">' + stars(t.rating, pc, emptyStarColor) + '</div>';
     }
     if (t.show_text !== false || !t.video_url) {
       html +=
@@ -333,7 +361,7 @@
     }
     html += '<div style="text-align:left">';
     html += '<div style="font-weight:700;font-size:' + snSize + 'px;color:' + tc + '">' + esc(t.author_name) + '</div>';
-    if (authorLine) html += '<div style="font-size:' + srSize + 'px;color:#6b7280">' + esc(authorLine) + '</div>';
+    if (authorLine) html += '<div style="font-size:' + srSize + 'px;color:' + subtitleColor + '">' + esc(authorLine) + '</div>';
     if (t.metric_label && theme.showMetric !== false) {
       html +=
         '<span style="font-size:10px;font-weight:600;color:' + pc + ';background:' + pc +

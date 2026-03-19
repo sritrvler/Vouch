@@ -53,7 +53,7 @@ const FAQS = [
   },
   {
     q: "Does this work for SaaS products and apps?",
-    a: "Yes. SaaS founders use Vouch to collect testimonials from users and display them on their landing page to improve conversion. The React component drops directly into any Next.js app. The script tag works on any marketing page. Your widget reads your accent color and looks native to your product from day one.",
+    a: "Yes. SaaS founders use Vouch to collect testimonials from users and display them on their landing page to improve conversion. The React component drops directly into any Next.js app. The script tag works on any marketing page. Your widget picks up your brand color and looks native to your product from day one.",
   },
   {
     q: "How is this different from Testimonial.to or EmbedSocial?",
@@ -320,7 +320,7 @@ function FeaturesSection() {
               <p className="text-base text-gray-500 leading-relaxed mb-7">
                 Testimonials arrive in your dashboard. Approve what works. Embed with a script tag
                 on any platform, or drop the React component into your Next.js app or SaaS product.
-                The widget reads your accent color and looks native on day one.
+                Set your brand color once. The widget matches your site from day one.
               </p>
               <ul className="space-y-3">
                 {[

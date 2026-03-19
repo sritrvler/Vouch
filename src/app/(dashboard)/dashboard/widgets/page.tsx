@@ -75,6 +75,7 @@ interface WidgetTheme {
   textColor: string;
   cardStyle: 'shadow' | 'border' | 'flat';
   textSize: 'compact' | 'default' | 'large';
+  borderRadius: 'none' | 'small' | 'medium' | 'large';
   fontFamily: string;
   fontUrl: string | null;
   showRating: boolean;
@@ -223,8 +224,12 @@ function TestimonialPreviewCard({
   const nameSize = ts === 'large' ? 14 : ts === 'default' ? 14 : 13;
   const roleSize = ts === 'large' ? 12 : ts === 'default' ? 12 : 11;
 
+  const brMap: Record<string, string> = { none: '0px', small: '8px', medium: '14px', large: '20px' };
+  const br = brMap[theme.borderRadius] || '14px';
+
   const cardStyles: React.CSSProperties = {
     backgroundColor: theme.cardColor,
+    borderRadius: br,
     ...(theme.cardStyle === 'shadow'
       ? { boxShadow: '0 1px 3px 0 rgb(0 0 0 / 0.1)' }
       : theme.cardStyle === 'border'
@@ -235,7 +240,7 @@ function TestimonialPreviewCard({
 
   return (
     <div
-      className={cn('rounded-xl p-4', theme.cardStyle !== 'flat' && 'border border-border/60')}
+      className={cn('p-4', theme.cardStyle !== 'flat' && 'border border-border/60')}
       style={cardStyles}
     >
       {theme.showRating && <StarRating rating={testimonial.rating} color={theme.primaryColor} />}
@@ -256,7 +261,7 @@ function TestimonialPreviewCard({
         )}
         <div>
           <p className="font-semibold" style={{ fontSize: nameSize, color: theme.textColor }}>{testimonial.author_name}</p>
-          {roleCompany && <p style={{ fontSize: roleSize, color: theme.textColor + '80' }}>{roleCompany}</p>}
+          {roleCompany && <p style={{ fontSize: roleSize, color: theme.textColor + '8c' }}>{roleCompany}</p>}
         </div>
         {theme.showDate && (
           <span className="ml-auto" style={{ fontSize: roleSize, color: theme.textColor + '60' }}>
@@ -720,6 +725,7 @@ export default function WidgetsPage() {
       textColor: '#0f172a',
       cardStyle: 'shadow',
       textSize: 'default',
+      borderRadius: 'medium',
       fontFamily: 'inherit',
       fontUrl: null,
       showRating: true,
@@ -745,6 +751,7 @@ export default function WidgetsPage() {
       textColor: '#0f172a',
       cardStyle: 'shadow' as const,
       textSize: 'default' as const,
+      borderRadius: 'medium' as const,
       fontFamily: 'inherit',
       fontUrl: null,
       showRating: true,
@@ -785,6 +792,7 @@ export default function WidgetsPage() {
         textColor: loadedTheme.textColor ?? '#0f172a',
         cardStyle: loadedTheme.cardStyle ?? 'shadow',
         textSize: loadedTheme.textSize ?? 'compact',
+        borderRadius: loadedTheme.borderRadius ?? 'medium',
         fontFamily: loadedTheme.fontFamily ?? 'inherit',
         fontUrl: loadedTheme.fontUrl ?? null,
         showRating: loadedTheme.showRating ?? true,
@@ -957,13 +965,22 @@ export default function WidgetsPage() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Not authenticated');
 
+      // Pre-fill primaryColor from project accent_color if available
+      const { data: proj } = await supabase
+        .from('projects').select('accent_color')
+        .eq('id', selectedProjectId).single();
+      const initialTheme = {
+        ...DEFAULT_SETTINGS.theme,
+        ...(proj?.accent_color ? { primaryColor: proj.accent_color } : {}),
+      };
+
       const widgetNumber = widgets.length + 1;
       const payload = {
         user_id: user.id,
         project_id: selectedProjectId,
         name: `Widget ${widgetNumber}`,
         layout: 'grid' as WidgetLayout,
-        theme: DEFAULT_SETTINGS.theme,
+        theme: initialTheme,
         filter_mode: DEFAULT_SETTINGS.filterMode,
         min_rating: DEFAULT_SETTINGS.minRating,
         max_items: DEFAULT_SETTINGS.maxItems,
@@ -978,7 +995,7 @@ export default function WidgetsPage() {
       setWidgets((prev) => [...prev, newWidget]);
       setTotalWidgetCount((prev) => prev + 1);
       setActiveWidgetId(newWidget.id);
-      setSettings({ ...DEFAULT_SETTINGS, name: newWidget.name });
+      setSettings({ ...DEFAULT_SETTINGS, name: newWidget.name, theme: initialTheme });
       setOrderedTestimonials(testimonials);
       setOpenSections(new Set(['layout', 'appearance']));
       toast.success('Widget created');
@@ -1585,6 +1602,32 @@ export function Testimonials() {
                     className={cn(
                       'flex-1 px-3 py-2 rounded-xl text-xs font-medium transition-all border',
                       settings.theme.cardStyle === value
+                        ? 'border-indigo-300 bg-indigo-50 text-indigo-700'
+                        : 'border-border text-muted-foreground hover:bg-muted/50'
+                    )}
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Corner Radius */}
+            <div>
+              <Label className="text-xs text-muted-foreground mb-2 block">Corner Radius</Label>
+              <div className="flex gap-2">
+                {([
+                  { value: 'none' as const, label: 'None' },
+                  { value: 'small' as const, label: 'Small' },
+                  { value: 'medium' as const, label: 'Medium' },
+                  { value: 'large' as const, label: 'Large' },
+                ]).map(({ value, label }) => (
+                  <button
+                    key={value}
+                    onClick={() => updateTheme('borderRadius', value)}
+                    className={cn(
+                      'flex-1 px-3 py-2 rounded-xl text-xs font-medium transition-all border',
+                      settings.theme.borderRadius === value
                         ? 'border-indigo-300 bg-indigo-50 text-indigo-700'
                         : 'border-border text-muted-foreground hover:bg-muted/50'
                     )}

@@ -6,7 +6,7 @@ const BENEFITS = [
   {
     icon: Palette,
     title: 'Looks native to any design',
-    desc: 'Matches your brand colors automatically. Works on Webflow, Framer, or custom HTML.',
+    desc: 'Set your brand color once. Works on Webflow, Framer, or custom HTML.',
   },
   {
     icon: Gauge,

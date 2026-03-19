@@ -51,7 +51,7 @@ export async function GET(request: NextRequest, { params }: PageProps) {
     // ── Parallel fetch: project, subscription, and testimonials ─────────────
     const projectPromise = supabase
       .from('projects')
-      .select('name, logo_url, font_family, font_url')
+      .select('name, logo_url, font_family, font_url, accent_color')
       .eq('id', widget.project_id)
       .single();
 
@@ -124,7 +124,7 @@ export async function GET(request: NextRequest, { params }: PageProps) {
           theme: widget.theme,
           hideBranding: widget.hide_branding,
         },
-        project: project ? { name: project.name, logoUrl: project.logo_url, fontFamily: project.font_family, fontUrl: sanitizeFontUrl(project.font_url) } : null,
+        project: project ? { name: project.name, logoUrl: project.logo_url, fontFamily: project.font_family, fontUrl: sanitizeFontUrl(project.font_url), accentColor: project.accent_color ?? null } : null,
         testimonials,
         isPro,
         totalApproved,
