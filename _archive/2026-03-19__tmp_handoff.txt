@@ -1,0 +1,21 @@
+## Session Handoff (March 19, 2026, session 18)
+
+**What was done:**
+1. **Fixed "Powered by Vouch" branding color mismatch between preview and embed.** Widget builder preview colored "Vouch" in `primaryColor` but embed.js rendered the entire text in hardcoded `#94a3b8` gray. Split into two DOM nodes: "Powered by" in muted text color, "Vouch" in `primaryColor` bold. Now matches preview exactly.
+2. **Fixed separator lines and text invisible on dark backgrounds.** Replaced hardcoded `#f1f5f9` border and `#94a3b8` text with `hexAlpha(tc, 0.08)` and `hexAlpha(tc, 0.4)` respectively, so they adapt to any text color.
+3. **Used `createTextNode` instead of `textContent`** for the "Powered by " prefix to avoid a latent trap where reordering lines would silently destroy the child span.
+4. **Added `a:hover{opacity:0.8}` to shadow stylesheet** to prevent split-color flicker on hover.
+
+**What's next:** Phase 1 BUILD continues:
+1. **MANUAL: Toggle `vouch-assets` bucket to public in Supabase Dashboard** (Storage > vouch-assets > Settings > Public bucket: ON). This is the immediate fix from session 16.
+2. Item #13e through 13h: Remaining audit Phase 1 items
+3. Minimal layout (item #2 from active work queue)
+4. Run editorial migration SQL on production Supabase before deploying
+5. Update Lemon Squeezy dashboard: Pro variant price $19 to $29/mo
+6. Add UPSTASH_REDIS_REST_URL and UPSTASH_REDIS_REST_TOKEN to Vercel project env vars
+
+**What to watch out for:**
+1. `hexAlpha` does not handle HSL colors (pre-existing). If a customer ever sets textColor to HSL via API, separators and badge text render at full opacity. Low risk since widget builder emits hex only.
+2. `a:hover{opacity:0.8}` applies to ALL anchors in the shadow root (star rating links, read more, etc.), not just branding. Verify other anchor hover states still look correct.
+3. All previous session watch-outs still apply
+

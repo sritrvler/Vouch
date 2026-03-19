@@ -370,7 +370,7 @@ At T3/T4, Claude also lists: "Agents used: [names and purpose]". If no agents we
 
 ### Step 1: Update `tasks/todo.md`
 
-New handoff section at the top:
+Replace the previous handoff (only one exists at any time):
 ```
 ## Session Handoff (March 19, 2026, session 19)
 
@@ -378,6 +378,8 @@ What was done: Fixed star ratings hidden on mobile in embed.js
 What's next: Minimal layout (item #2 from active work queue)
 What to watch out for: flex-wrap gap may need testing on carousel layout
 ```
+
+Note: old handoffs are preserved in git history. Only the latest handoff stays in todo.md to keep the file slim.
 
 ### Step 2: Update `tasks/lessons.md`
 

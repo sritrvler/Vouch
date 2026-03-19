@@ -42,7 +42,7 @@ Detailed rules live in `.claude/rules/` and load automatically (some are path-sp
 Then say: `I FOLLOWED SESSION START RULES`
 
 **END (do not suggest /clear until done):**
-1. Update `tasks/todo.md` with "## Session Handoff [date]" at top
+1. Update `tasks/todo.md`: replace the previous handoff with "## Session Handoff [date]" (only one handoff exists at any time)
 2. Update `tasks/lessons.md` (new patterns or "No new lessons")
 3. Commit all changes
 4. Output Handoff Protocol block

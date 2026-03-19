@@ -64,7 +64,7 @@ Free: 25 testimonials, 1 form, 1 widget, 1 project, "Powered by Vouch" badge. Pr
 Then say: `I FOLLOWED SESSION START RULES`
 
 **END (do not suggest /clear until done):**
-1. Update `tasks/todo.md` with "## Session Handoff [date]" at top
+1. Update `tasks/todo.md`: replace the previous handoff with "## Session Handoff [date]" (only one handoff exists at any time)
 2. Update `tasks/lessons.md` (new patterns or "No new lessons")
 3. Commit all changes
 4. Output Handoff Protocol block
