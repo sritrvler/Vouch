@@ -2,6 +2,10 @@
 
 Rules for myself. Read this at session start. Do not repeat these mistakes.
 
+## embed.js Branding Parity (Session 18)
+48. **Use `createTextNode` when building mixed-content DOM nodes in vanilla JS.** `element.textContent = x` replaces ALL child nodes. If you later `appendChild` a span, the order works, but if anyone reorders the lines, the span is silently destroyed. `createTextNode` is order-safe and makes intent explicit.
+49. **Hardcoded colors in embed.js break on dark backgrounds.** Always derive separator and muted text colors from the theme's text color using `hexAlpha(tc, alpha)` instead of hardcoding light-theme values like `#f1f5f9` or `#94a3b8`.
+
 ## Mobile Scroll Performance (Session 17)
 43. **`backdrop-filter: blur()` on `position: fixed` elements causes scroll jitter on mobile.** The browser re-composites the blur region every scroll frame. Use solid backgrounds for fixed headers on mobile. The visual tradeoff (no glassmorphism) is worth the smooth scroll.
 44. **`transition-all` is wasteful.** Only transition the properties that actually change: `transition-[background-color,border-color,box-shadow]`. Fewer properties = less compositor work.
