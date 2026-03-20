@@ -28,13 +28,15 @@ export default function NavHeader() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   useEffect(() => {
+    let mounted = true;
     const init = () => {
+      if (!mounted) return;
       const supabase = createClient();
       supabase.auth.getSession().then(({ data: { session } }) => {
-        setIsLoggedIn(!!session);
+        if (mounted) setIsLoggedIn(!!session);
       });
       const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-        setIsLoggedIn(!!session);
+        if (mounted) setIsLoggedIn(!!session);
       });
       cleanupRef.current = () => subscription.unsubscribe();
     };
@@ -42,12 +44,16 @@ export default function NavHeader() {
     if (typeof window !== "undefined" && "requestIdleCallback" in window) {
       const id = window.requestIdleCallback(init);
       return () => {
+        mounted = false;
         window.cancelIdleCallback(id);
         cleanupRef.current?.();
       };
     }
     init();
-    return () => cleanupRef.current?.();
+    return () => {
+      mounted = false;
+      cleanupRef.current?.();
+    };
   }, []);
 
   useEffect(() => {
@@ -129,6 +135,8 @@ export default function NavHeader() {
               className="md:hidden p-2 rounded-md text-gray-600 hover:text-gray-900 hover:bg-gray-100 transition-colors"
               onClick={() => setMobileOpen((v) => !v)}
               aria-label="Toggle menu"
+              aria-expanded={mobileOpen}
+              aria-controls="mobile-menu"
             >
               {mobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
             </button>
@@ -138,6 +146,7 @@ export default function NavHeader() {
 
       {/* Mobile menu */}
       <div
+        id="mobile-menu"
         className={cn(
           "fixed top-16 left-0 right-0 z-40 bg-white border-b border-gray-100 shadow-lg md:hidden",
           "transition-[opacity,transform] duration-[180ms] ease-out",

@@ -6,11 +6,11 @@ import { Button } from '@/components/ui/button';
 const HeroVisual = dynamic(() => import('./_components/HeroVisual'));
 const CollectVisual = dynamic(() => import('./_components/CollectVisual'));
 const FAQAccordion = dynamic(() => import('./_components/FAQAccordion').then(m => ({ default: m.FAQAccordion })));
-const MotionCTA = dynamic(() => import('./_components/MotionCTA').then(m => ({ default: m.MotionCTA })));
+import { MotionCTA } from './_components/MotionCTA';
 
 // Dynamic imports for below-fold components (defers framer-motion + heavy JS until scroll)
 const EmbedVisual = dynamic(() => import('./_components/EmbedVisual'));
-const PricingCards = dynamic(() => import('./_components/PricingCards'));
+const PricingCards = dynamic(() => import('./_components/PricingCards').then(m => ({ default: m.PricingCards })));
 const VouchWidget = dynamic(() => import('./_components/VouchWidget'));
 
 /* ---------------------------------------------------------
