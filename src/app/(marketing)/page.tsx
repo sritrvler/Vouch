@@ -8,10 +8,10 @@ const CollectVisual = dynamic(() => import('./_components/CollectVisual'));
 const FAQAccordion = dynamic(() => import('./_components/FAQAccordion').then(m => ({ default: m.FAQAccordion })));
 const MotionCTA = dynamic(() => import('./_components/MotionCTA').then(m => ({ default: m.MotionCTA })));
 
-// Regular imports for other client components (below fold, no urgency)
-import EmbedVisual from './_components/EmbedVisual';
-import PricingCards from './_components/PricingCards';
-import VouchWidget from './_components/VouchWidget';
+// Dynamic imports for below-fold components (defers framer-motion + heavy JS until scroll)
+const EmbedVisual = dynamic(() => import('./_components/EmbedVisual'));
+const PricingCards = dynamic(() => import('./_components/PricingCards'));
+const VouchWidget = dynamic(() => import('./_components/VouchWidget'));
 
 /* ---------------------------------------------------------
    Data constants

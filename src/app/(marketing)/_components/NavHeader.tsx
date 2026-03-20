@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
-import { motion, AnimatePresence } from "framer-motion";
 import { Menu, X, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -24,18 +23,31 @@ function VouchLogo() {
 export default function NavHeader() {
   const [scrolled, setScrolled] = useState(false);
   const scrolledRef = useRef(false);
+  const cleanupRef = useRef<(() => void) | null>(null);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   useEffect(() => {
-    const supabase = createClient();
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setIsLoggedIn(!!session);
-    });
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setIsLoggedIn(!!session);
-    });
-    return () => subscription.unsubscribe();
+    const init = () => {
+      const supabase = createClient();
+      supabase.auth.getSession().then(({ data: { session } }) => {
+        setIsLoggedIn(!!session);
+      });
+      const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+        setIsLoggedIn(!!session);
+      });
+      cleanupRef.current = () => subscription.unsubscribe();
+    };
+    // Defer Supabase init out of hydration critical path
+    if (typeof window !== "undefined" && "requestIdleCallback" in window) {
+      const id = window.requestIdleCallback(init);
+      return () => {
+        window.cancelIdleCallback(id);
+        cleanupRef.current?.();
+      };
+    }
+    init();
+    return () => cleanupRef.current?.();
   }, []);
 
   useEffect(() => {
@@ -125,55 +137,55 @@ export default function NavHeader() {
       </header>
 
       {/* Mobile menu */}
-      <AnimatePresence>
-        {mobileOpen && (
-          <motion.div
-            initial={{ opacity: 0, y: -8 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -8 }}
-            transition={{ duration: 0.18 }}
-            className="fixed top-16 left-0 right-0 z-40 bg-white border-b border-gray-100 shadow-lg md:hidden"
-          >
-            <div className="max-w-7xl mx-auto px-4 py-4 flex flex-col gap-1">
-              <Link
-                href="/pricing"
-                onClick={() => setMobileOpen(false)}
-                className="px-4 py-3 text-sm font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50 rounded-md transition-colors"
-              >
-                Pricing
-              </Link>
-              {isLoggedIn ? (
-                <Button
-                  asChild
-                  className="mt-1 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg"
-                >
-                  <Link href="/dashboard" onClick={() => setMobileOpen(false)}>
-                    Go to dashboard
-                  </Link>
-                </Button>
-              ) : (
-                <>
-                  <Link
-                    href="/login"
-                    onClick={() => setMobileOpen(false)}
-                    className="px-4 py-3 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-md transition-colors"
-                  >
-                    Log in
-                  </Link>
-                  <Button
-                    asChild
-                    className="mt-1 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg"
-                  >
-                    <Link href="/signup" onClick={() => setMobileOpen(false)}>
-                      Start for free
-                    </Link>
-                  </Button>
-                </>
-              )}
-            </div>
-          </motion.div>
+      <div
+        className={cn(
+          "fixed top-16 left-0 right-0 z-40 bg-white border-b border-gray-100 shadow-lg md:hidden",
+          "transition-[opacity,transform] duration-[180ms] ease-out",
+          mobileOpen
+            ? "opacity-100 translate-y-0"
+            : "opacity-0 -translate-y-2 pointer-events-none"
         )}
-      </AnimatePresence>
+        aria-hidden={!mobileOpen}
+        inert={!mobileOpen}
+      >
+        <div className="max-w-7xl mx-auto px-4 py-4 flex flex-col gap-1">
+          <Link
+            href="/pricing"
+            onClick={() => setMobileOpen(false)}
+            className="px-4 py-3 text-sm font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50 rounded-md transition-colors"
+          >
+            Pricing
+          </Link>
+          {isLoggedIn ? (
+            <Button
+              asChild
+              className="mt-1 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg"
+            >
+              <Link href="/dashboard" onClick={() => setMobileOpen(false)}>
+                Go to dashboard
+              </Link>
+            </Button>
+          ) : (
+            <>
+              <Link
+                href="/login"
+                onClick={() => setMobileOpen(false)}
+                className="px-4 py-3 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-md transition-colors"
+              >
+                Log in
+              </Link>
+              <Button
+                asChild
+                className="mt-1 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg"
+              >
+                <Link href="/signup" onClick={() => setMobileOpen(false)}>
+                  Start for free
+                </Link>
+              </Button>
+            </>
+          )}
+        </div>
+      </div>
     </>
   );
 }
