@@ -1,7 +1,7 @@
-## Session Handoff (March 19, 2026, session 20)
+## Session Handoff (March 20, 2026, session 21)
 
 **What was done:**
-1. **Fixed widget 3-5s loading delay** across 4 files. Eliminated compounding chain: auth middleware on public endpoint (100-300ms), IO fallback 2s timeout (now 300ms), short 60s cache TTL (now 300s + SWR), no CDN caching for embed.js (now s-maxage=86400). Senior code review passed with one adjustment (SWR reduced from 600 to 60 to limit ban-check staleness to ~6 min).
+1. **Fixed Lighthouse desktop regression** from 87 to 99 (mobile to 94). Dynamic-imported `@vercel/analytics/next` via a thin `'use client'` wrapper (`LazyAnalytics.tsx`) to remove ~7 KiB from the initial root layout JS chunk. Added `va.vercel-scripts.com` to CSP `script-src` for dev/preview analytics.
 
 **What's next:** Phase 1 BUILD continues:
 1. **MANUAL: Toggle `vouch-assets` bucket to public in Supabase Dashboard** (Storage > vouch-assets > Settings > Public bucket: ON).
@@ -15,6 +15,7 @@
 1. See Persistent Watch-Outs section below for all active items.
 2. Widget view counts now undercount ~5x due to 300s CDN cache (documented in code). Acceptable tradeoff.
 3. After deploy, verify in DevTools: embed.js has `s-maxage=86400`, widget API has `s-maxage=300, stale-while-revalidate=60`.
+4. If Lighthouse regresses again, next step is `next/script` with `lazyOnload` (requires custom SPA tracking). See plan mode transcript for details.
 
 ---
 
