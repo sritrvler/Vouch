@@ -119,11 +119,11 @@ export default async function PublicTestimonialsPage({ params }: PageProps) {
   // Fetch approved testimonials
   const { data: testimonials } = await supabase
     .from('testimonials')
-    .select('id, author_name, author_role, author_company, author_avatar_url, content, rating, featured, golden_sentence, metric_label, source_url, video_url, video_thumbnail_url, email_domain, created_at')
+    .select('id, author_name, author_role, author_company, author_avatar_url, content, rating, featured, golden_sentence, metric_label, source_url, video_url, video_thumbnail_url, email_domain, created_at, show_text, show_video')
     .eq('project_id', project.id)
     .eq('status', 'approved')
     .order('created_at', { ascending: false })
-    .limit(50);
+    .limit(200);
 
   // Apply widget pinned_ids ordering
   let displayTestimonials = testimonials ?? [];
@@ -146,6 +146,9 @@ export default async function PublicTestimonialsPage({ params }: PageProps) {
   if (widget?.max_items) {
     displayTestimonials = displayTestimonials.slice(0, widget.max_items);
   }
+
+  // Skip testimonials with neither content nor video (matches embed.js behavior)
+  displayTestimonials = displayTestimonials.filter((t: any) => (t.content || t.video_url));
 
   const avgRating =
     displayTestimonials.length > 0
@@ -195,7 +198,7 @@ export default async function PublicTestimonialsPage({ params }: PageProps) {
         bestRating: '5',
       },
       author: { '@type': 'Person', name: t.author_name },
-      reviewBody: t.content,
+      reviewBody: ((t as any).show_text !== false && t.content) ? t.content : undefined,
       datePublished: new Date(t.created_at).toISOString().split('T')[0],
     })),
   };
@@ -306,17 +309,20 @@ export default async function PublicTestimonialsPage({ params }: PageProps) {
                 .join('')
                 .toUpperCase();
 
-              // Golden sentence split
+              // Golden sentence split (content may be null/empty for video-only testimonials)
+              const content = t.content || '';
               const golden = (t as { golden_sentence?: string | null }).golden_sentence ?? null;
-              const hasGolden = !!(golden && t.content.includes(golden));
-              const goldenIdx = hasGolden ? t.content.indexOf(golden!) : -1;
-              const beforeGolden = hasGolden ? t.content.slice(0, goldenIdx) : '';
-              const afterGolden = hasGolden ? t.content.slice(goldenIdx + (golden?.length ?? 0)) : '';
+              const hasGolden = !!(golden && content && content.includes(golden));
+              const goldenIdx = hasGolden ? content.indexOf(golden!) : -1;
+              const beforeGolden = hasGolden ? content.slice(0, goldenIdx) : '';
+              const afterGolden = hasGolden ? content.slice(goldenIdx + (golden?.length ?? 0)) : '';
 
               const metricLabel = (t as { metric_label?: string | null }).metric_label ?? null;
               const sourceUrl = (t as { source_url?: string | null }).source_url ?? null;
               const videoUrl = (t as { video_url?: string | null }).video_url ?? null;
               const videoThumbnailUrl = (t as { video_thumbnail_url?: string | null }).video_thumbnail_url ?? null;
+              const showText = (t as { show_text?: boolean | null }).show_text;
+              const showVideo = (t as { show_video?: boolean | null }).show_video;
               const emailDomain = (t as { email_domain?: string | null }).email_domain ?? null;
               const isX = !!(sourceUrl && (sourceUrl.includes('twitter.com') || sourceUrl.includes('x.com')));
               const isLinkedIn = !!(sourceUrl && sourceUrl.includes('linkedin.com'));
@@ -331,7 +337,7 @@ export default async function PublicTestimonialsPage({ params }: PageProps) {
                 <article
                   key={t.id}
                   data-vouch-card=""
-                  data-card-content={t.content}
+                  data-card-content={showText !== false ? content : ''}
                   data-card-author={t.author_name}
                   data-card-role={[t.author_role, t.author_company].filter(Boolean).join(', ')}
                   data-card-rating={String(t.rating ?? '')}
@@ -374,30 +380,32 @@ export default async function PublicTestimonialsPage({ params }: PageProps) {
                       )}
                     </div>
 
-                    {/* Zone B: Quote (MIDDLE) */}
-                    <blockquote>
-                      <p data-vouch-quote="" className="leading-relaxed line-clamp-6" style={{ fontSize: quoteSize }}>
-                        &ldquo;
-                        {hasGolden ? (
-                          <>
-                            {beforeGolden && <span style={{ color: `${textColor}99` }}>{beforeGolden}</span>}
-                            <span className="font-semibold" style={{ color: textColor }}>{golden}</span>
-                            {afterGolden && <span style={{ color: `${textColor}99` }}>{afterGolden}</span>}
-                          </>
-                        ) : (
-                          <span style={{ color: textColor }}>{t.content}</span>
-                        )}
-                        &rdquo;
-                      </p>
-                      <button
-                        data-vouch-read-more=""
-                        className="hidden text-xs font-semibold mt-1 bg-transparent border-0 p-0 cursor-pointer"
-                        style={{ color: accentColor }}
-                      >
-                        Read more
-                      </button>
-                      <cite className="sr-only">{t.author_name}</cite>
-                    </blockquote>
+                    {/* Zone B: Quote (MIDDLE, hidden for video-only or show_text=false) */}
+                    {content && (showText !== false || !videoUrl) && (
+                      <blockquote>
+                        <p data-vouch-quote="" className="leading-relaxed line-clamp-6" style={{ fontSize: quoteSize }}>
+                          &ldquo;
+                          {hasGolden ? (
+                            <>
+                              {beforeGolden && <span style={{ color: `${textColor}99` }}>{beforeGolden}</span>}
+                              <span className="font-semibold" style={{ color: textColor }}>{golden}</span>
+                              {afterGolden && <span style={{ color: `${textColor}99` }}>{afterGolden}</span>}
+                            </>
+                          ) : (
+                            <span style={{ color: textColor }}>{content}</span>
+                          )}
+                          &rdquo;
+                        </p>
+                        <button
+                          data-vouch-read-more=""
+                          className="hidden text-xs font-semibold mt-1 bg-transparent border-0 p-0 cursor-pointer"
+                          style={{ color: accentColor }}
+                        >
+                          Read more
+                        </button>
+                        <cite className="sr-only">{t.author_name}</cite>
+                      </blockquote>
+                    )}
 
                     {/* Zone A: Identity (BOTTOM) */}
                     <div className="flex items-center justify-between gap-2">
@@ -480,7 +488,7 @@ export default async function PublicTestimonialsPage({ params }: PageProps) {
                     </div>
 
                     {/* Video thumbnail with play overlay */}
-                    {videoUrl && (
+                    {videoUrl && showVideo !== false && (
                       <div className="pt-2 border-t border-gray-100">
                         <div
                           data-vouch-play=""
