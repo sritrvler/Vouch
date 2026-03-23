@@ -480,11 +480,6 @@ export default function CollectFormClient({
 
   function handleRatingClick(value: number) {
     setRating(value);
-    // Auto-advance to text step after a brief delay so user sees the star fill
-    setTimeout(() => {
-      setTestimonialType('text');
-      goTo(2, 'forward');
-    }, 350);
   }
 
   function handleTypeChoice(type: 'text' | 'video') {
@@ -923,7 +918,52 @@ export default function CollectFormClient({
                   ))}
                 </div>
 
-                {rating === 0 && (
+                {rating > 0 ? (
+                  <motion.div
+                    initial={{ opacity: 0, y: 12 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.25, ease: 'easeOut' }}
+                    className="mt-8 space-y-3"
+                  >
+                    <p className="text-center text-sm font-medium" style={{ color: textColor }}>
+                      How would you like to share?
+                    </p>
+                    <div className="flex gap-3">
+                      <button
+                        type="button"
+                        onClick={() => handleTypeChoice('text')}
+                        className="flex-1 flex flex-col items-center gap-2.5 p-5 rounded-2xl border-2 transition-all hover:shadow-md"
+                        style={{ borderColor: `${buttonColor}30`, backgroundColor: `${buttonColor}06` }}
+                        onMouseEnter={(e) => { e.currentTarget.style.borderColor = buttonColor; }}
+                        onMouseLeave={(e) => { e.currentTarget.style.borderColor = `${buttonColor}30`; }}
+                      >
+                        <div
+                          className="w-11 h-11 rounded-xl flex items-center justify-center"
+                          style={{ backgroundColor: `${buttonColor}15` }}
+                        >
+                          <MessageSquare className="size-5" style={{ color: buttonColor }} />
+                        </div>
+                        <span className="text-sm font-semibold" style={{ color: textColor }}>Write a testimonial</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleTypeChoice('video')}
+                        className="flex-1 flex flex-col items-center gap-2.5 p-5 rounded-2xl border-2 transition-all hover:shadow-md"
+                        style={{ borderColor: `${buttonColor}30`, backgroundColor: `${buttonColor}06` }}
+                        onMouseEnter={(e) => { e.currentTarget.style.borderColor = buttonColor; }}
+                        onMouseLeave={(e) => { e.currentTarget.style.borderColor = `${buttonColor}30`; }}
+                      >
+                        <div
+                          className="w-11 h-11 rounded-xl flex items-center justify-center"
+                          style={{ backgroundColor: `${buttonColor}15` }}
+                        >
+                          <Video className="size-5" style={{ color: buttonColor }} />
+                        </div>
+                        <span className="text-sm font-semibold" style={{ color: textColor }}>Record a video</span>
+                      </button>
+                    </div>
+                  </motion.div>
+                ) : (
                   <p className="text-center text-xs text-muted-foreground mt-4">
                     Tap a star to continue
                   </p>
