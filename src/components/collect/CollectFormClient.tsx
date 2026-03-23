@@ -304,6 +304,8 @@ function getSupportedMimeType(): string {
     'video/webm',
     'video/mp4;codecs=avc1,mp4a.40.2',
     'video/mp4',
+    'video/ogg;codecs=opus',
+    'video/ogg',
   ];
   for (const type of candidates) {
     if (MediaRecorder.isTypeSupported(type)) return type;
@@ -314,7 +316,8 @@ function getSupportedMimeType(): string {
 function getVideoExtension(mimeType: string): string {
   if (mimeType.includes('mp4') || mimeType.includes('quicktime') || mimeType.includes('avc')) return 'mp4';
   if (mimeType.includes('webm') || mimeType.includes('vp8') || mimeType.includes('vp9')) return 'webm';
-  return 'mp4'; // safe default
+  if (mimeType.includes('ogg')) return 'ogg';
+  return 'mp4';
 }
 
 function extractVideoFrames(videoUrl: string, count: number): Promise<string[]> {

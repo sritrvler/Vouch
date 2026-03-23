@@ -55,13 +55,14 @@ export async function POST(request: NextRequest) {
     const header = new Uint8Array(videoBuffer.slice(0, 12));
     const isMp4 = header[4] === 0x66 && header[5] === 0x74 && header[6] === 0x79 && header[7] === 0x70; // ftyp box
     const isWebm = header[0] === 0x1A && header[1] === 0x45 && header[2] === 0xDF && header[3] === 0xA3; // EBML header
-    if (!isMp4 && !isWebm) {
+    const isOgg = header[0] === 0x4F && header[1] === 0x67 && header[2] === 0x67 && header[3] === 0x53; // OggS header
+    if (!isMp4 && !isWebm && !isOgg) {
       return NextResponse.json({ error: 'Invalid video file' }, { status: 400 });
     }
 
     // Derive extension from actual content (magic bytes), not client MIME which may be octet-stream
-    const ext = isMp4 ? 'mp4' : 'webm';
-    const contentType = isMp4 ? 'video/mp4' : 'video/webm';
+    const ext = isMp4 ? 'mp4' : isWebm ? 'webm' : 'ogg';
+    const contentType = isMp4 ? 'video/mp4' : isWebm ? 'video/webm' : 'video/ogg';
     const path = `${formId}/${crypto.randomUUID()}.${ext}`;
 
     // Check subscription + video count in parallel
