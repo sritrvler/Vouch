@@ -1,15 +1,14 @@
-## Session Handoff (March 23, 2026, session 22)
+## Session Handoff (March 23, 2026, session 23)
 
 **What was done:**
-1. **Re-enabled video testimonials** in collection form. Restored type-choice UI ("Write a testimonial" / "Record a video") that was removed in session March 12.
-2. **Fixed video upload "Storage upload failed"** by adding self-healing bucket creation for `testimonial-videos` (same pattern as `upload-logo` route).
-3. **Hardened upload-video route** (architect + reviewer feedback): moved plan check before buffer read (saves 100MB memory for free users), added thumbnail JPEG magic byte validation + 5MB cap, added countRes.error check, added bucket setup error logging.
-4. **Fixed video-only submit** by skipping 20-char content check in submit route when `videoUrl` is present.
-5. **Added pre-camera format check** in collection form: shows "not supported" message before camera permission if browser can't produce WebM/MP4.
-6. **Improved error messages** in handleVideoNext: distinguishes 400 (format), 429 (rate limit), 403 (plan limit) with specific toasts + console logging.
-7. **Added Ogg format support** to server magic byte check (defense-in-depth for Firefox Android).
-8. **Added test suites**: 33 tests for upload-video route, 15 for video utility functions.
-9. **embed.js video preload** stays `'auto'` (reverted from `'metadata'` per reviewer: post-click playback should buffer aggressively since user expressed intent to watch).
+1. **Fixed video-only testimonials invisible in widget** (embed.js). `if (!content) return ''` was dropping video-only cards. Fixed guard in renderCard, renderSingle, renderEditorial, renderMinimalItem. Added video rendering to renderSingle (was missing). Added show_text guard consistency across all 5 renderers. Added empty-card guards in layout loops (grid, carousel, wall, list).
+2. **Fixed video thumbnails missing in widget preview** (widgets/page.tsx). Added video_url, video_thumbnail_url, show_text, show_video to Testimonial interface, Supabase query, SAMPLE_TESTIMONIALS. Added thumbnail+play overlay to TestimonialPreviewCard. Fixed content type to `string | null`.
+3. **Added unsaved changes warning in widget builder**. Dirty state tracking via JSON snapshot comparison. beforeunload listener, confirm dialog on widget switch and delete. Snapshot captured in loadWidgetIntoSettings, handleCreateWidget, handleSave (with pinnedIds sync).
+4. **Added video badge in reorder list**. Sky-blue "Video" pill for video testimonials.
+5. **Fixed signout logging out all devices**. Changed to `signOut({ scope: 'local' })`.
+6. **Created qa-breaker agent** (.claude/agents/qa-breaker.md). Permanent QA agent for breaking things.
+
+**Pipeline:** Architect review, senior code review, QA (42 test cases), QA fix, second senior review, QA retest. All passed.
 
 **What's next:** Phase 1 BUILD continues:
 1. **MANUAL: Toggle `vouch-assets` bucket to public in Supabase Dashboard** (Storage > vouch-assets > Settings > Public bucket: ON).
@@ -25,6 +24,8 @@
 3. Widget view counts now undercount ~5x due to 300s CDN cache (documented in code). Acceptable tradeoff.
 4. After deploy, verify in DevTools: embed.js has `s-maxage=86400`, widget API has `s-maxage=300, stale-while-revalidate=60`.
 5. If Lighthouse regresses again, next step is `next/script` with `lazyOnload` (requires custom SPA tracking).
+6. Pre-existing: handleDeleteWidget calls loadWidgetIntoSettings inside setWidgets functional updater (React StrictMode violation). Works in prod but architecturally wrong. Fix when refactoring widget builder.
+7. Pre-existing: handleSave closes over stale settings during async window. Narrow timing, save button disabled. Fix when refactoring widget builder.
 
 ---
 
