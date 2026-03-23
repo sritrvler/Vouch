@@ -1,22 +1,25 @@
-## Session Handoff (March 23, 2026, session 23)
+## Session Handoff (March 23, 2026, session 24)
 
-**What was done:**
+**What was done (session 23+24 combined):**
 1. **Fixed video-only testimonials invisible in widget** (embed.js). `if (!content) return ''` was dropping video-only cards. Fixed guard in renderCard, renderSingle, renderEditorial, renderMinimalItem. Added video rendering to renderSingle (was missing). Added show_text guard consistency across all 5 renderers. Added empty-card guards in layout loops (grid, carousel, wall, list).
 2. **Fixed video thumbnails missing in widget preview** (widgets/page.tsx). Added video_url, video_thumbnail_url, show_text, show_video to Testimonial interface, Supabase query, SAMPLE_TESTIMONIALS. Added thumbnail+play overlay to TestimonialPreviewCard. Fixed content type to `string | null`.
 3. **Added unsaved changes warning in widget builder**. Dirty state tracking via JSON snapshot comparison. beforeunload listener, confirm dialog on widget switch and delete. Snapshot captured in loadWidgetIntoSettings, handleCreateWidget, handleSave (with pinnedIds sync).
 4. **Added video badge in reorder list**. Sky-blue "Video" pill for video testimonials.
 5. **Fixed signout logging out all devices**. Changed to `signOut({ scope: 'local' })`.
-6. **Created qa-breaker agent** (.claude/agents/qa-breaker.md). Permanent QA agent for breaking things.
+6. **Fixed slug page double quotes on video-only testimonials** (p/[slug]/page.tsx). Added show_text/show_video guards, null-safe content, JSON-LD reviewBody fix, empty-card filter, fetch limit bumped to 200.
+7. **Created qa-breaker agent** (.claude/agents/qa-breaker.md). Permanent QA agent for breaking things.
 
-**Pipeline:** Architect review, senior code review, QA (42 test cases), QA fix, second senior review, QA retest. All passed.
+**Pipeline:** Architect review, senior code review, QA (42 test cases), QA retest, slug page senior review + QA. All passed.
 
-**What's next:** Phase 1 BUILD continues:
-1. **MANUAL: Toggle `vouch-assets` bucket to public in Supabase Dashboard** (Storage > vouch-assets > Settings > Public bucket: ON).
-2. Item #13e through 13h: Remaining audit Phase 1 items
-3. Minimal layout (item #8 in roadmap)
-4. Run editorial migration SQL on production Supabase before deploying
-5. Update Lemon Squeezy dashboard: Pro variant price $19 to $29/mo
-6. Add UPSTASH_REDIS_REST_URL and UPSTASH_REDIS_REST_TOKEN to Vercel project env vars
+**What's next:**
+1. **Add drag-to-reorder hint in widget preview** (user requested). Currently not clear that cards can be reordered. Add visual indicator or tooltip.
+2. Phase 1 BUILD continues:
+   a. **MANUAL: Toggle `vouch-assets` bucket to public in Supabase Dashboard** (Storage > vouch-assets > Settings > Public bucket: ON).
+   b. Item #13e through 13h: Remaining audit Phase 1 items
+   c. Minimal layout (item #8 in roadmap)
+   d. Run editorial migration SQL on production Supabase before deploying
+   e. Update Lemon Squeezy dashboard: Pro variant price $19 to $29/mo
+   f. Add UPSTASH_REDIS_REST_URL and UPSTASH_REDIS_REST_TOKEN to Vercel project env vars
 
 **What to watch out for:**
 1. See Persistent Watch-Outs section below for all active items.
@@ -26,6 +29,7 @@
 5. If Lighthouse regresses again, next step is `next/script` with `lazyOnload` (requires custom SPA tracking).
 6. Pre-existing: handleDeleteWidget calls loadWidgetIntoSettings inside setWidgets functional updater (React StrictMode violation). Works in prod but architecturally wrong. Fix when refactoring widget builder.
 7. Pre-existing: handleSave closes over stale settings during async window. Narrow timing, save button disabled. Fix when refactoring widget builder.
+8. Slug page order visually differs from embed widget due to CSS multi-column layout (fills vertically, not horizontally). Data order is correct. Not a bug.
 
 ---
 
