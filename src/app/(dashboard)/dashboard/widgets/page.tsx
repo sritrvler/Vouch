@@ -102,10 +102,14 @@ interface Testimonial {
   author_company: string | null;
   author_avatar_url: string | null;
   rating: number;
-  content: string;
+  content: string | null;
   golden_sentence: string | null;
   featured: boolean;
   created_at: string;
+  video_url: string | null;
+  video_thumbnail_url: string | null;
+  show_text: boolean | null;
+  show_video: boolean | null;
 }
 
 interface Widget {
@@ -134,6 +138,10 @@ const SAMPLE_TESTIMONIALS: Testimonial[] = [
     golden_sentence: 'The setup took minutes and the results have been incredible.',
     featured: true,
     created_at: new Date(Date.now() - 7 * 86400000).toISOString(),
+    video_url: null,
+    video_thumbnail_url: null,
+    show_text: null,
+    show_video: null,
   },
   {
     id: 's2',
@@ -146,6 +154,10 @@ const SAMPLE_TESTIMONIALS: Testimonial[] = [
     golden_sentence: 'we\'ve seen a 30% increase in conversions since adding social proof.',
     featured: true,
     created_at: new Date(Date.now() - 14 * 86400000).toISOString(),
+    video_url: null,
+    video_thumbnail_url: null,
+    show_text: null,
+    show_video: null,
   },
   {
     id: 's3',
@@ -158,6 +170,10 @@ const SAMPLE_TESTIMONIALS: Testimonial[] = [
     golden_sentence: 'It has doubled our review count in just two months.',
     featured: false,
     created_at: new Date(Date.now() - 21 * 86400000).toISOString(),
+    video_url: null,
+    video_thumbnail_url: null,
+    show_text: null,
+    show_video: null,
   },
 ];
 
@@ -206,7 +222,7 @@ function TestimonialPreviewCard({
   theme: WidgetTheme;
   compact?: boolean;
 }) {
-  const displayContent = testimonial.content;
+  const displayContent = testimonial.content || '';
   const truncated = compact && displayContent.length > 120
     ? displayContent.slice(0, 120) + '…'
     : displayContent;
@@ -244,7 +260,9 @@ function TestimonialPreviewCard({
       style={cardStyles}
     >
       {theme.showRating && <StarRating rating={testimonial.rating} color={theme.primaryColor} />}
-      <p className="mt-2 leading-relaxed" style={{ fontSize: quoteSize, color: theme.textColor + 'd9' }}>{truncated}</p>
+      {truncated && (
+        <p className="mt-2 leading-relaxed" style={{ fontSize: quoteSize, color: theme.textColor + 'd9' }}>{truncated}</p>
+      )}
       <div className="mt-3 flex items-center gap-2">
         {theme.showAvatar && (
           <Avatar size="sm">
@@ -269,6 +287,21 @@ function TestimonialPreviewCard({
           </span>
         )}
       </div>
+      {testimonial.video_url && (
+        <div className="relative w-full rounded-lg overflow-hidden bg-black mt-2" style={{ aspectRatio: '16/9' }}>
+          {testimonial.video_thumbnail_url ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={testimonial.video_thumbnail_url} alt="" className="w-full h-full object-cover" />
+          ) : (
+            <div className="w-full h-full bg-neutral-900" />
+          )}
+          <div className="absolute inset-0 flex items-center justify-center">
+            <div className="bg-black/50 backdrop-blur-sm rounded-lg p-2 flex items-center justify-center">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="white"><polygon points="8,5 20,12 8,19"/></svg>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -691,6 +724,9 @@ export default function WidgetsPage() {
   const [totalWidgetCount, setTotalWidgetCount] = useState(0);
   const [showUpgradePrompt, setShowUpgradePrompt] = useState(false);
 
+  // Unsaved changes tracking
+  const [savedSettingsSnapshot, setSavedSettingsSnapshot] = useState<string | null>(null);
+
   // Collapsible section state (multi-open allowed)
   const [openSections, setOpenSections] = useState<Set<string>>(new Set(['layout', 'order']));
   const toggleSection = useCallback((section: string) => {
@@ -766,6 +802,22 @@ export default function WidgetsPage() {
     pinnedIds: [],
   }), []);
 
+  // ── Unsaved changes detection ──────────────────────────────────────────────
+  const isDirty = useMemo(() => {
+    if (!savedSettingsSnapshot || !activeWidgetId) return false;
+    return JSON.stringify(settings) !== savedSettingsSnapshot;
+  }, [settings, savedSettingsSnapshot, activeWidgetId]);
+
+  useEffect(() => {
+    if (!isDirty) return;
+    const handler = (e: BeforeUnloadEvent) => {
+      e.preventDefault();
+      e.returnValue = '';
+    };
+    window.addEventListener('beforeunload', handler);
+    return () => window.removeEventListener('beforeunload', handler);
+  }, [isDirty]);
+
   // ── Load widget settings into the builder ──────────────────────────────────
   const loadWidgetIntoSettings = useCallback((widget: Widget, fetchedTestimonials: Testimonial[]) => {
     const loadedPinnedIds: string[] = Array.isArray(widget.pinned_ids)
@@ -782,7 +834,7 @@ export default function WidgetsPage() {
     }
 
     const loadedTheme = widget.theme as WidgetTheme;
-    setSettings({
+    const newSettings: WidgetSettings = {
       name: widget.name,
       layout: widget.layout,
       theme: {
@@ -805,7 +857,9 @@ export default function WidgetsPage() {
       maxItems: widget.max_items,
       hideBranding: widget.hide_branding,
       pinnedIds: loadedPinnedIds,
-    });
+    };
+    setSettings(newSettings);
+    setSavedSettingsSnapshot(JSON.stringify(newSettings));
   }, []);
 
   // ── Fetch approved testimonials and all widgets for project ─────────────
@@ -819,6 +873,7 @@ export default function WidgetsPage() {
     setActiveWidgetId(null);
     setWidgets([]);
     setSettings(DEFAULT_SETTINGS);
+    setSavedSettingsSnapshot(null);
 
     try {
       const { data: { user } } = await supabase.auth.getUser();
@@ -828,7 +883,7 @@ export default function WidgetsPage() {
 
       let testimonialsQuery = supabase
         .from('testimonials')
-        .select('id, author_name, author_role, author_company, author_avatar_url, rating, content, golden_sentence, featured, created_at')
+        .select('id, author_name, author_role, author_company, author_avatar_url, rating, content, golden_sentence, featured, created_at, video_url, video_thumbnail_url, show_text, show_video')
         .eq('user_id', user.id)
         .eq('status', 'approved')
         .order('created_at', { ascending: false })
@@ -942,11 +997,15 @@ export default function WidgetsPage() {
 
   // ── Switch widget ────────────────────────────────────────────────────────
   const handleSwitchWidget = useCallback((widgetId: string) => {
+    if (isDirty) {
+      const ok = window.confirm('You have unsaved changes. Switch widget and discard them?');
+      if (!ok) return;
+    }
     const widget = widgets.find((w) => w.id === widgetId);
     if (!widget) return;
     setActiveWidgetId(widgetId);
     loadWidgetIntoSettings(widget, testimonials);
-  }, [widgets, testimonials, loadWidgetIntoSettings]);
+  }, [widgets, testimonials, loadWidgetIntoSettings, isDirty]);
 
   // ── Create widget ──────────────────────────────────────────────────────────
   const handleCreateWidget = useCallback(async () => {
@@ -995,7 +1054,9 @@ export default function WidgetsPage() {
       setWidgets((prev) => [...prev, newWidget]);
       setTotalWidgetCount((prev) => prev + 1);
       setActiveWidgetId(newWidget.id);
-      setSettings({ ...DEFAULT_SETTINGS, name: newWidget.name, theme: initialTheme });
+      const newSettings = { ...DEFAULT_SETTINGS, name: newWidget.name, theme: initialTheme };
+      setSettings(newSettings);
+      setSavedSettingsSnapshot(JSON.stringify(newSettings));
       setOrderedTestimonials(testimonials);
       setOpenSections(new Set(['layout', 'appearance']));
       toast.success('Widget created');
@@ -1009,6 +1070,10 @@ export default function WidgetsPage() {
 
   // ── Delete widget ──────────────────────────────────────────────────────────
   const handleDeleteWidget = useCallback(async (widgetId: string) => {
+    if (activeWidgetId === widgetId && isDirty) {
+      const ok = window.confirm('Delete this widget? Your unsaved changes will be lost.');
+      if (!ok) return;
+    }
     setDeletingWidgetId(widgetId);
     try {
       const { error } = await supabase.from('widgets').delete().eq('id', widgetId);
@@ -1024,6 +1089,7 @@ export default function WidgetsPage() {
           } else {
             setActiveWidgetId(null);
             setSettings(DEFAULT_SETTINGS);
+            setSavedSettingsSnapshot(null);
             setOrderedTestimonials(testimonials);
           }
         }
@@ -1038,7 +1104,7 @@ export default function WidgetsPage() {
     } finally {
       setDeletingWidgetId(null);
     }
-  }, [supabase, activeWidgetId, testimonials, DEFAULT_SETTINGS, loadWidgetIntoSettings]);
+  }, [supabase, activeWidgetId, testimonials, DEFAULT_SETTINGS, loadWidgetIntoSettings, isDirty]);
 
   // ── Save widget ───────────────────────────────────────────────────────────
   const handleSave = useCallback(async () => {
@@ -1086,6 +1152,9 @@ export default function WidgetsPage() {
         )
       );
       toast.success('Widget saved successfully');
+      const settingsAfterSave = { ...settings, pinnedIds: pinnedIdsToSave };
+      setSettings(settingsAfterSave);
+      setSavedSettingsSnapshot(JSON.stringify(settingsAfterSave));
     } catch (err) {
       toast.error('Failed to save widget');
       console.error(err);
@@ -1115,7 +1184,7 @@ interface Testimonial {
   author_role: string | null;
   author_company: string | null;
   rating: number;
-  content: string;
+  content: string | null;
 }
 
 export function Testimonials() {
@@ -1873,6 +1942,12 @@ export function Testimonials() {
                     <p className="text-xs font-medium text-foreground truncate flex-1 min-w-0">
                       {t.author_name}
                     </p>
+                    {t.video_url && (
+                      <span className="text-[9px] font-semibold text-sky-600 bg-sky-50 border border-sky-200 rounded-full px-1.5 py-0.5 shrink-0 flex items-center gap-0.5">
+                        <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polygon points="5,3 19,12 5,21"/></svg>
+                        Video
+                      </span>
+                    )}
                     {t.featured && (
                       <span className="text-[9px] font-semibold text-amber-600 bg-amber-50 border border-amber-200 rounded-full px-1.5 py-0.5 shrink-0">
                         Featured

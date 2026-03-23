@@ -172,7 +172,7 @@ function DashboardLayoutInner({ children }: { children: React.ReactNode }) {
   async function handleSignOut() {
     setIsSigningOut(true);
     const supabase = createClient();
-    const { error } = await supabase.auth.signOut();
+    const { error } = await supabase.auth.signOut({ scope: 'local' });
 
     if (error) {
       toast.error('Failed to sign out. Please try again.');

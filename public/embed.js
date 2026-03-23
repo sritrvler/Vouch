@@ -223,8 +223,8 @@
       quoteHtml = '<span style="color:' + tc + '">' + esc(content) + '</span>';
     }
 
-    // Skip card if no content at all
-    if (!content) return '';
+    // Skip card if nothing to show (no text AND no video)
+    if (!content && !t.video_url) return '';
 
     // Verification
     var src = t.source_url || '';
@@ -264,8 +264,8 @@
     }
     html += '</div>';
 
-    // Quote (MIDDLE, hidden when show_text is false and testimonial has video)
-    if (t.show_text !== false || !t.video_url) {
+    // Quote (MIDDLE, hidden when no text content or when show_text is false and testimonial has video)
+    if (content && (t.show_text !== false || !t.video_url)) {
       html +=
         '<blockquote style="margin:0;padding:0"><p style="font-size:' + quoteSize +
         'px;line-height:1.65;margin:0;overflow:hidden;display:-webkit-box;-webkit-line-clamp:6;-webkit-box-orient:vertical">' +
@@ -355,7 +355,7 @@
     if (theme.showRating !== false) {
       html += '<div style="display:flex;justify-content:center;margin-bottom:16px">' + stars(t.rating, pc, emptyStarColor) + '</div>';
     }
-    if (t.show_text !== false || !t.video_url) {
+    if (content && (t.show_text !== false || !t.video_url)) {
       html +=
         '<blockquote style="margin:0 0 24px"><p style="font-size:' + sqSize + 'px;line-height:1.7;font-style:italic;margin:0;color:' + tc + '">&ldquo;' +
         quoteHtml + '&rdquo;</p></blockquote>';
@@ -378,7 +378,24 @@
         '<a href="' + esc(src) + '" target="_blank" rel="noopener noreferrer" style="color:#9ca3af;margin-left:8px;text-decoration:none">' +
         (isX ? xIcon : linkedInIcon) + '</a>';
     }
-    html += '</div></article>';
+    html += '</div>';
+
+    // Video (thumbnail-first, same pattern as renderCard)
+    if (t.video_url && t.show_video !== false) {
+      html +=
+        '<div data-vouch-video data-src="' + esc(t.video_url) + '"' +
+        (t.video_thumbnail_url ? ' data-poster="' + esc(t.video_thumbnail_url) + '"' : '') +
+        ' style="position:relative;width:100%;border-radius:8px;margin-top:12px;overflow:hidden;background:#000;cursor:pointer">' +
+        (t.video_thumbnail_url
+          ? '<img src="' + esc(t.video_thumbnail_url) + '" alt="" style="width:100%;display:block;aspect-ratio:16/9;object-fit:cover" />'
+          : '<div style="width:100%;aspect-ratio:16/9"></div>') +
+        '<div style="position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,0.25) 0%,transparent 60%);display:flex;align-items:center;justify-content:center">' +
+        '<div style="padding:14px 18px;border-radius:10px;background:rgba(0,0,0,0.55);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center">' +
+        '<svg width="16" height="16" viewBox="0 0 24 24" fill="white"><polygon points="8,5 20,12 8,19"/></svg>' +
+        '</div></div></div>';
+    }
+
+    html += '</article>';
     return html;
   }
 
@@ -387,7 +404,8 @@
   function renderGrid(testimonials, theme) {
     var html = '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:20px;padding:4px">';
     for (var i = 0; i < testimonials.length; i++) {
-      html += '<div style="display:flex">' + renderCard(testimonials[i], theme, false) + '</div>';
+      var card = renderCard(testimonials[i], theme, false);
+      if (card) html += '<div style="display:flex">' + card + '</div>';
     }
     html += '</div>';
     return html;
@@ -407,7 +425,8 @@
       '</style>' +
       '<div class="vouch-carousel-wrap" style="overflow:hidden;padding:4px 0"><div class="vouch-track" style="display:flex;gap:20px;width:max-content">';
     for (var i = 0; i < doubled.length; i++) {
-      html += '<div style="width:320px;flex-shrink:0">' + renderCard(doubled[i], theme, false) + '</div>';
+      var card = renderCard(doubled[i], theme, false);
+      if (card) html += '<div style="width:320px;flex-shrink:0">' + card + '</div>';
     }
     html += '</div></div>';
     return html;
@@ -416,7 +435,8 @@
   function renderWall(testimonials, theme) {
     var html = '<div style="columns:280px;column-gap:20px;padding:4px">';
     for (var i = 0; i < testimonials.length; i++) {
-      html += '<div style="break-inside:avoid;margin-bottom:20px">' + renderCard(testimonials[i], theme, true) + '</div>';
+      var card = renderCard(testimonials[i], theme, true);
+      if (card) html += '<div style="break-inside:avoid;margin-bottom:20px">' + card + '</div>';
     }
     html += '</div>';
     return html;
@@ -425,7 +445,8 @@
   function renderList(testimonials, theme) {
     var html = '<div style="display:flex;flex-direction:column;gap:16px;padding:4px">';
     for (var i = 0; i < testimonials.length; i++) {
-      html += renderCard(testimonials[i], theme, true);
+      var card = renderCard(testimonials[i], theme, true);
+      if (card) html += card;
     }
     html += '</div>';
     return html;
@@ -515,7 +536,7 @@
 
     return (
       '<div class="mn-item">' +
-        '<blockquote class="mn-quote"><p style="margin:0">' + quoteHtml + '</p></blockquote>' +
+        (content && (t.show_text !== false || !t.video_url) ? '<blockquote class="mn-quote"><p style="margin:0">' + quoteHtml + '</p></blockquote>' : '') +
         '<div class="mn-attr">' +
           '<div>' +
             '<div class="mn-name">' + esc(t.author_name) + '</div>' +
@@ -714,8 +735,8 @@
             logoHtml +
           '</div>' +
           '<div class="ed-content">' +
-            '<span class="ed-qmark" aria-hidden="true">\u201C</span>' +
-            '<blockquote class="ed-quote"><p style="margin:0">' + quoteHtml + '</p></blockquote>' +
+            (content && (t.show_text !== false || !t.video_url) ? '<span class="ed-qmark" aria-hidden="true">\u201C</span>' +
+            '<blockquote class="ed-quote"><p style="margin:0">' + quoteHtml + '</p></blockquote>' : '') +
           '</div>' +
         '</div>' +
         '</div>';
