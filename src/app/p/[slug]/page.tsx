@@ -98,14 +98,30 @@ export default async function PublicTestimonialsPage({ params }: PageProps) {
     );
   }
 
-  // Fetch most recently updated widget for theme/ordering sync
-  const { data: widget } = await supabase
+  // Prefer wall layout widget (slug page renders as masonry wall), fall back to most recent
+  const { data: wallWidget, error: wallError } = await supabase
     .from('widgets')
     .select('theme, pinned_ids, filter_mode, min_rating, max_items')
     .eq('project_id', project.id)
+    .eq('layout', 'wall')
     .order('updated_at', { ascending: false })
     .limit(1)
     .maybeSingle();
+
+  if (wallError) console.error('[slug page] wall widget query failed:', wallError.message);
+
+  let widget = wallWidget;
+  if (!widget) {
+    const { data: fallbackWidget, error: fallbackError } = await supabase
+      .from('widgets')
+      .select('theme, pinned_ids, filter_mode, min_rating, max_items')
+      .eq('project_id', project.id)
+      .order('updated_at', { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    if (fallbackError) console.error('[slug page] fallback widget query failed:', fallbackError.message);
+    widget = fallbackWidget;
+  }
 
   // Fetch active collection form for this project
   const { data: form } = await supabase
