@@ -49,23 +49,7 @@ export async function POST(request: NextRequest) {
     }
     const form = formRes.data;
 
-    const videoBuffer = await video.arrayBuffer();
-
-    // Verify file magic bytes match a real video format (not just client-provided MIME)
-    const header = new Uint8Array(videoBuffer.slice(0, 12));
-    const isMp4 = header[4] === 0x66 && header[5] === 0x74 && header[6] === 0x79 && header[7] === 0x70; // ftyp box
-    const isWebm = header[0] === 0x1A && header[1] === 0x45 && header[2] === 0xDF && header[3] === 0xA3; // EBML header
-    const isOgg = header[0] === 0x4F && header[1] === 0x67 && header[2] === 0x67 && header[3] === 0x53; // OggS header
-    if (!isMp4 && !isWebm && !isOgg) {
-      return NextResponse.json({ error: 'Invalid video file' }, { status: 400 });
-    }
-
-    // Derive extension from actual content (magic bytes), not client MIME which may be octet-stream
-    const ext = isMp4 ? 'mp4' : isWebm ? 'webm' : 'ogg';
-    const contentType = isMp4 ? 'video/mp4' : isWebm ? 'video/webm' : 'video/ogg';
-    const path = `${formId}/${crypto.randomUUID()}.${ext}`;
-
-    // Check subscription + video count in parallel
+    // Check subscription + video count BEFORE reading video buffer into memory
     const [subRes, countRes] = await Promise.all([
       adminClient
         .from('subscriptions')
@@ -87,6 +71,27 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    const videoBuffer = await video.arrayBuffer();
+
+    // Verify file magic bytes match a real video format (not just client-provided MIME)
+    const header = new Uint8Array(videoBuffer.slice(0, 12));
+    const isMp4 = header[4] === 0x66 && header[5] === 0x74 && header[6] === 0x79 && header[7] === 0x70; // ftyp box
+    const isWebm = header[0] === 0x1A && header[1] === 0x45 && header[2] === 0xDF && header[3] === 0xA3; // EBML header
+    const isOgg = header[0] === 0x4F && header[1] === 0x67 && header[2] === 0x67 && header[3] === 0x53; // OggS header
+    if (!isMp4 && !isWebm && !isOgg) {
+      return NextResponse.json({ error: 'Invalid video file' }, { status: 400 });
+    }
+
+    // Derive extension from actual content (magic bytes), not client MIME which may be octet-stream
+    const ext = isMp4 ? 'mp4' : isWebm ? 'webm' : 'ogg';
+    const contentType = isMp4 ? 'video/mp4' : isWebm ? 'video/webm' : 'video/ogg';
+    const path = `${formId}/${crypto.randomUUID()}.${ext}`;
+
+    // Ensure bucket exists (self-healing, same pattern as upload-logo route)
+    await adminClient.storage
+      .createBucket('testimonial-videos', { public: true })
+      .catch(() => adminClient.storage.updateBucket('testimonial-videos', { public: true }));
+
     const { error: uploadError } = await adminClient.storage
       .from('testimonial-videos')
       .upload(path, videoBuffer, {
@@ -103,20 +108,24 @@ export async function POST(request: NextRequest) {
       .from('testimonial-videos')
       .getPublicUrl(path);
 
-    // Upload thumbnail if provided
+    // Upload thumbnail if provided (max 5MB, must be JPEG)
     let thumbnailUrl: string | null = null;
     const thumbnail = formData.get('thumbnail') as File | null;
-    if (thumbnail && thumbnail.type.startsWith('image/')) {
+    if (thumbnail && thumbnail.size <= 5 * 1024 * 1024) {
       const thumbBuffer = await thumbnail.arrayBuffer();
-      const thumbPath = `${formId}/${crypto.randomUUID()}-thumb.jpg`;
-      const { error: thumbError } = await adminClient.storage
-        .from('testimonial-videos')
-        .upload(thumbPath, thumbBuffer, { contentType: 'image/jpeg', upsert: false });
-      if (!thumbError) {
-        const { data: thumbData } = adminClient.storage
+      const thumbHeader = new Uint8Array(thumbBuffer.slice(0, 3));
+      const isJpeg = thumbHeader[0] === 0xFF && thumbHeader[1] === 0xD8 && thumbHeader[2] === 0xFF;
+      if (isJpeg) {
+        const thumbPath = `${formId}/${crypto.randomUUID()}-thumb.jpg`;
+        const { error: thumbError } = await adminClient.storage
           .from('testimonial-videos')
-          .getPublicUrl(thumbPath);
-        thumbnailUrl = thumbData.publicUrl;
+          .upload(thumbPath, thumbBuffer, { contentType: 'image/jpeg', upsert: false });
+        if (!thumbError) {
+          const { data: thumbData } = adminClient.storage
+            .from('testimonial-videos')
+            .getPublicUrl(thumbPath);
+          thumbnailUrl = thumbData.publicUrl;
+        }
       }
     }
 

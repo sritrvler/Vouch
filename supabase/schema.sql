@@ -163,6 +163,12 @@ create table public.widgets (
 -- ALTER TABLE public.collection_forms ADD COLUMN IF NOT EXISTS prompt text NOT NULL DEFAULT 'What did you love? What could be better?';
 
 -- ============================================================
+-- STORAGE BUCKETS (auto-created by upload routes on first use)
+-- bucket: vouch-assets (public: true) - logos, avatars
+-- bucket: testimonial-videos (public: true) - video recordings + thumbnails
+-- ============================================================
+
+-- ============================================================
 -- ANALYTICS — Form views
 -- ============================================================
 create table public.form_views (
