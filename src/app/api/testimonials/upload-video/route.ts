@@ -63,6 +63,11 @@ export async function POST(request: NextRequest) {
         .not('video_url', 'is', null),
     ]);
 
+    if (countRes.error) {
+      console.error('Video count query failed:', countRes.error);
+      return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    }
+
     const isFree = !subRes.data || subRes.data.plan === 'free';
     if (isFree && (countRes.count ?? 0) >= PLANS.free.videoLimit) {
       return NextResponse.json(
@@ -90,7 +95,11 @@ export async function POST(request: NextRequest) {
     // Ensure bucket exists (self-healing, same pattern as upload-logo route)
     await adminClient.storage
       .createBucket('testimonial-videos', { public: true })
-      .catch(() => adminClient.storage.updateBucket('testimonial-videos', { public: true }));
+      .catch(() =>
+        adminClient.storage
+          .updateBucket('testimonial-videos', { public: true })
+          .catch(err => console.error('Bucket setup failed:', err))
+      );
 
     const { error: uploadError } = await adminClient.storage
       .from('testimonial-videos')

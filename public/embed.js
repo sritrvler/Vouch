@@ -956,7 +956,7 @@
             video.controls = true;
             video.autoplay = true;
             video.playsInline = true;
-            video.preload = 'metadata';
+            video.preload = 'auto';
             video.style.cssText = 'width:100%;display:block;border-radius:8px;background:#000';
             wrap.replaceWith(video);
           });

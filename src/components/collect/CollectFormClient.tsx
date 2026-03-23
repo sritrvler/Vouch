@@ -558,7 +558,7 @@ export default function CollectFormClient({
         setIsRecording(false);
         setIsPaused(false);
         extractVideoFrames(objUrl, 4).then((frames) => {
-          setThumbnailFrames(frames);
+          setThumbnailFrames(frames.filter(Boolean));
           setSelectedThumbnailIdx(0);
         });
       };
