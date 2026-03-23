@@ -1975,6 +1975,9 @@ export function Testimonials() {
               <div className="flex items-center gap-1.5">
                 <span className="text-xs text-muted-foreground font-medium">Preview</span>
                 <span className="text-[10px] text-muted-foreground/60">how it looks on your site</span>
+                {(settings.layout === 'grid' || settings.layout === 'wall') && (
+                  <span className="text-[10px] text-muted-foreground/60">· Drag cards to reorder</span>
+                )}
               </div>
               {usingSampleData && (
                 <span className="text-xs bg-amber-50 text-amber-700 border border-amber-200 rounded-full px-2 py-0.5 font-medium">
