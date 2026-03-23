@@ -86,7 +86,7 @@ export async function POST(request: NextRequest) {
     if (!Number.isInteger(rating) || rating < 1 || rating > 5) {
       return NextResponse.json({ error: 'rating must be an integer between 1 and 5' }, { status: 400 });
     }
-    if (typeof content !== 'string' || content.trim().length < 20) {
+    if (!videoUrl && (typeof content !== 'string' || content.trim().length < 20)) {
       return NextResponse.json(
         { error: 'content must be at least 20 characters' },
         { status: 400 }
