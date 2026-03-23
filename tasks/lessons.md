@@ -59,8 +59,8 @@ Do NOT add a third lesson. Fix the enforcement mechanism.
 ### Deployment (3)
 28. Vercel: project-level env vars take precedence over team-level.
 29. Env var changes need full redeployment (new deploy, not "Redeploy" on old).
-30. Lemon Squeezy: test vs live mode have completely separate API keys AND variant IDs.
+30. Supabase Storage buckets must exist before upload. Use self-healing `createBucket().catch(updateBucket())` pattern in upload routes, same as `upload-logo/route.ts`. Enforcement: upload routes themselves.
 
 ## Recently Graduated (last 5)
 
-(None yet. Lessons graduate here when their enforcement mechanism is created.)
+1. Lemon Squeezy: test vs live mode have completely separate API keys AND variant IDs. (Graduated: enforcement is operational knowledge, not code-level.)

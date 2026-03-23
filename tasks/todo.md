@@ -1,7 +1,15 @@
-## Session Handoff (March 20, 2026, session 21)
+## Session Handoff (March 23, 2026, session 22)
 
 **What was done:**
-1. **Fixed Lighthouse desktop regression** from 87 to 99 (mobile to 94). Dynamic-imported `@vercel/analytics/next` via a thin `'use client'` wrapper (`LazyAnalytics.tsx`) to remove ~7 KiB from the initial root layout JS chunk. Added `va.vercel-scripts.com` to CSP `script-src` for dev/preview analytics.
+1. **Re-enabled video testimonials** in collection form. Restored type-choice UI ("Write a testimonial" / "Record a video") that was removed in session March 12.
+2. **Fixed video upload "Storage upload failed"** by adding self-healing bucket creation for `testimonial-videos` (same pattern as `upload-logo` route).
+3. **Hardened upload-video route** (architect + reviewer feedback): moved plan check before buffer read (saves 100MB memory for free users), added thumbnail JPEG magic byte validation + 5MB cap, added countRes.error check, added bucket setup error logging.
+4. **Fixed video-only submit** by skipping 20-char content check in submit route when `videoUrl` is present.
+5. **Added pre-camera format check** in collection form: shows "not supported" message before camera permission if browser can't produce WebM/MP4.
+6. **Improved error messages** in handleVideoNext: distinguishes 400 (format), 429 (rate limit), 403 (plan limit) with specific toasts + console logging.
+7. **Added Ogg format support** to server magic byte check (defense-in-depth for Firefox Android).
+8. **Added test suites**: 33 tests for upload-video route, 15 for video utility functions.
+9. **embed.js video preload** stays `'auto'` (reverted from `'metadata'` per reviewer: post-click playback should buffer aggressively since user expressed intent to watch).
 
 **What's next:** Phase 1 BUILD continues:
 1. **MANUAL: Toggle `vouch-assets` bucket to public in Supabase Dashboard** (Storage > vouch-assets > Settings > Public bucket: ON).
@@ -13,9 +21,10 @@
 
 **What to watch out for:**
 1. See Persistent Watch-Outs section below for all active items.
-2. Widget view counts now undercount ~5x due to 300s CDN cache (documented in code). Acceptable tradeoff.
-3. After deploy, verify in DevTools: embed.js has `s-maxage=86400`, widget API has `s-maxage=300, stale-while-revalidate=60`.
-4. If Lighthouse regresses again, next step is `next/script` with `lazyOnload` (requires custom SPA tracking). See plan mode transcript for details.
+2. `PLANS.free.videoLimit` is 0. Free users see the video option but get a 403 on upload (handled gracefully with toast).
+3. Widget view counts now undercount ~5x due to 300s CDN cache (documented in code). Acceptable tradeoff.
+4. After deploy, verify in DevTools: embed.js has `s-maxage=86400`, widget API has `s-maxage=300, stale-while-revalidate=60`.
+5. If Lighthouse regresses again, next step is `next/script` with `lazyOnload` (requires custom SPA tracking).
 
 ---
 
