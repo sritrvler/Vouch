@@ -304,8 +304,6 @@ function getSupportedMimeType(): string {
     'video/webm',
     'video/mp4;codecs=avc1,mp4a.40.2',
     'video/mp4',
-    'video/ogg;codecs=opus',
-    'video/ogg',
   ];
   for (const type of candidates) {
     if (MediaRecorder.isTypeSupported(type)) return type;
@@ -316,7 +314,6 @@ function getSupportedMimeType(): string {
 function getVideoExtension(mimeType: string): string {
   if (mimeType.includes('mp4') || mimeType.includes('quicktime') || mimeType.includes('avc')) return 'mp4';
   if (mimeType.includes('webm') || mimeType.includes('vp8') || mimeType.includes('vp9')) return 'webm';
-  if (mimeType.includes('ogg')) return 'ogg';
   return 'mp4';
 }
 
@@ -605,6 +602,14 @@ export default function CollectFormClient({
   // Init camera when user chose video on step 2
   useEffect(() => {
     if (step !== 2 || testimonialType !== 'video' || videoBlob || cameraInitRef.current) return;
+
+    // Check format support before requesting camera permission
+    if (typeof MediaRecorder === 'undefined' || !getSupportedMimeType()) {
+      setCameraErrorMessage('Video recording is not supported in this browser. Please try Chrome or Safari for the best experience.');
+      setCameraError(true);
+      return;
+    }
+
     cameraInitRef.current = true;
     setIsCameraInitializing(true);
     setCameraError(false);
@@ -704,15 +709,7 @@ export default function CollectFormClient({
         fd.append('thumbnail', dataURLToBlob(thumbnailFrames[selectedThumbnailIdx]), 'thumbnail.jpg');
       }
       const res = await fetch('/api/testimonials/upload-video', { method: 'POST', body: fd });
-      if (res.status === 403) {
-        const data = (await res.json()) as { limitReached?: boolean };
-        if (data.limitReached) {
-          toast.error('Video testimonials are not available for this form right now.');
-          setIsUploadingVideo(false);
-          goTo(3, 'forward');
-          return;
-        }
-      } else if (res.ok) {
+      if (res.ok) {
         const { url, thumbnailUrl } = (await res.json()) as { url: string; thumbnailUrl: string | null };
         setVideoUrl(url);
         if (thumbnailUrl) setVideoThumbnailUrl(thumbnailUrl);
@@ -720,10 +717,30 @@ export default function CollectFormClient({
         goTo(3, 'forward');
         return;
       }
-      // Non-403, non-ok: upload failed
+      // Handle specific error statuses
+      const errorData = await res.json().catch(() => ({ error: 'Unknown error' })) as { error?: string; limitReached?: boolean };
+      console.error(`Video upload failed: ${res.status}`, errorData);
+      if (res.status === 403 && errorData.limitReached) {
+        toast.error('Video testimonials are not available for this form right now.');
+        setIsUploadingVideo(false);
+        goTo(3, 'forward');
+        return;
+      }
+      if (res.status === 400) {
+        toast.error('This video format is not supported. Please try Chrome or Safari.');
+        setIsUploadingVideo(false);
+        goTo(3, 'forward');
+        return;
+      }
+      if (res.status === 429) {
+        toast.error('Too many uploads. Please wait a few minutes and try again.');
+        setIsUploadingVideo(false);
+        return;
+      }
       setVideoUploadFailed(true);
       setIsUploadingVideo(false);
-    } catch {
+    } catch (err) {
+      console.error('Video upload network error:', err);
       setVideoUploadFailed(true);
       setIsUploadingVideo(false);
     }
