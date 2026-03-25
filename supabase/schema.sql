@@ -53,6 +53,7 @@ create table public.projects (
   report_token text unique,
   report_footer_text text,
   report_message text,
+  public_page_settings jsonb default null,
   created_at timestamptz default now() not null,
   updated_at timestamptz default now() not null
 );
@@ -145,6 +146,9 @@ create table public.widgets (
 );
 -- To add pinned_ids to an existing database run:
 -- ALTER TABLE public.widgets ADD COLUMN IF NOT EXISTS pinned_ids jsonb default '[]';
+
+-- To add public page settings to an existing database run:
+-- ALTER TABLE public.projects ADD COLUMN IF NOT EXISTS public_page_settings jsonb DEFAULT NULL;
 
 -- To add report customization columns to an existing database run:
 -- ALTER TABLE public.projects ADD COLUMN IF NOT EXISTS report_footer_text text;

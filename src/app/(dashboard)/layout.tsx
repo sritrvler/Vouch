@@ -10,6 +10,7 @@ import {
   Inbox,
   FileText,
   Layout,
+  Globe,
   Settings,
   LogOut,
   Sparkles,
@@ -39,6 +40,7 @@ const NAV_ITEMS: NavItem[] = [
   { label: 'Inbox', href: '/dashboard/inbox', icon: Inbox },
   { label: 'Forms', href: '/dashboard/forms', icon: FileText },
   { label: 'Widgets', href: '/dashboard/widgets', icon: Layout },
+  { label: 'Public Page', href: '/dashboard/public-page', icon: Globe },
   { label: 'Settings', href: '/dashboard/settings', icon: Settings },
 ];
 

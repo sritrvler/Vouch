@@ -1,13 +1,26 @@
 import { createServerSupabaseClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import type { Metadata } from 'next';
-import { Star, ExternalLink, Play } from 'lucide-react';
+import { Star, ExternalLink } from 'lucide-react';
 import Link from 'next/link';
 import { resolveFontUrl, sanitizeFontFamily } from '@/lib/fonts';
 
 export const revalidate = 60;
 
 // ─── Helpers ───────────────────────────────────────────────────────────────
+
+function hexAlpha(color: string | null | undefined, alpha: number): string {
+  if (!color) return `rgba(0,0,0,${alpha})`;
+  const c = color.replace(/^(#[0-9a-fA-F]{6})[0-9a-fA-F]{2}$/, '$1')
+                  .replace(/^(#[0-9a-fA-F]{3})[0-9a-fA-F]$/, '$1');
+  const m6 = c.match(/^#([0-9a-fA-F]{2})([0-9a-fA-F]{2})([0-9a-fA-F]{2})$/);
+  if (m6) return `rgba(${parseInt(m6[1], 16)},${parseInt(m6[2], 16)},${parseInt(m6[3], 16)},${alpha})`;
+  const m3 = c.match(/^#([0-9a-fA-F])([0-9a-fA-F])([0-9a-fA-F])$/);
+  if (m3) return `rgba(${parseInt(m3[1] + m3[1], 16)},${parseInt(m3[2] + m3[2], 16)},${parseInt(m3[3] + m3[3], 16)},${alpha})`;
+  return `rgba(0,0,0,${alpha})`;
+}
+
+const BR_MAP: Record<string, string> = { none: '0px', small: '8px', medium: '14px', large: '20px' };
 
 function companyToDomain(company: string): string {
   return (
@@ -53,7 +66,7 @@ export default async function PublicTestimonialsPage({ params }: PageProps) {
   // Fetch project by slug
   const { data: project } = await supabase
     .from('projects')
-    .select('id, name, logo_url, accent_color, form_bg_color, button_color, text_color, font_family, font_url, website, user_id')
+    .select('id, name, logo_url, accent_color, form_bg_color, button_color, text_color, font_family, font_url, website, user_id, public_page_settings')
     .eq('slug', slug)
     .single();
 
@@ -97,29 +110,51 @@ export default async function PublicTestimonialsPage({ params }: PageProps) {
     );
   }
 
-  // Prefer wall layout widget (slug page renders as masonry wall), fall back to most recent
-  const { data: wallWidget, error: wallError } = await supabase
-    .from('widgets')
-    .select('theme, pinned_ids, filter_mode, min_rating, max_items')
-    .eq('project_id', project.id)
-    .eq('layout', 'wall')
-    .order('updated_at', { ascending: false })
-    .limit(1)
-    .maybeSingle();
+  // Resolve display settings: public_page_settings first, then wall-widget fallback
+  const pps = project.public_page_settings as Record<string, any> | null;
+  let resolvedSettings: { theme: Record<string, any> | null; pinned_ids: any; filter_mode: string | null; min_rating: number | null; max_items: number | null } | null = null;
 
-  if (wallError) console.error('[slug page] wall widget query failed:', wallError.message);
-
-  let widget = wallWidget;
-  if (!widget) {
-    const { data: fallbackWidget, error: fallbackError } = await supabase
+  if (pps) {
+    resolvedSettings = {
+      theme: pps.theme ?? null,
+      pinned_ids: pps.pinnedIds ?? [],
+      filter_mode: pps.filterMode ?? 'all',
+      min_rating: pps.minRating ?? null,
+      max_items: pps.maxItems ?? null,
+    };
+  } else {
+    // Fallback: borrow from wall-layout widget (legacy behavior)
+    const { data: wallWidget, error: wallError } = await supabase
       .from('widgets')
       .select('theme, pinned_ids, filter_mode, min_rating, max_items')
       .eq('project_id', project.id)
+      .eq('layout', 'wall')
       .order('updated_at', { ascending: false })
       .limit(1)
       .maybeSingle();
-    if (fallbackError) console.error('[slug page] fallback widget query failed:', fallbackError.message);
-    widget = fallbackWidget;
+    if (wallError) console.error('[slug page] wall widget query failed:', wallError.message);
+
+    let widget = wallWidget;
+    if (!widget) {
+      const { data: fallbackWidget, error: fallbackError } = await supabase
+        .from('widgets')
+        .select('theme, pinned_ids, filter_mode, min_rating, max_items')
+        .eq('project_id', project.id)
+        .order('updated_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      if (fallbackError) console.error('[slug page] fallback widget query failed:', fallbackError.message);
+      widget = fallbackWidget;
+    }
+    if (widget) {
+      resolvedSettings = {
+        theme: widget.theme as Record<string, any> | null,
+        pinned_ids: widget.pinned_ids,
+        filter_mode: widget.filter_mode,
+        min_rating: widget.min_rating,
+        max_items: widget.max_items,
+      };
+    }
   }
 
   // Fetch active collection form for this project
@@ -140,9 +175,9 @@ export default async function PublicTestimonialsPage({ params }: PageProps) {
     .order('created_at', { ascending: false })
     .limit(200);
 
-  // Apply widget pinned_ids ordering
+  // Apply pinned_ids ordering
   let displayTestimonials = testimonials ?? [];
-  const pinnedIds: string[] = Array.isArray(widget?.pinned_ids) ? (widget.pinned_ids as string[]) : [];
+  const pinnedIds: string[] = Array.isArray(resolvedSettings?.pinned_ids) ? (resolvedSettings.pinned_ids as string[]) : [];
   if (pinnedIds.length > 0) {
     const idxMap = new Map(pinnedIds.map((id: string, i: number) => [id, i]));
     displayTestimonials = [...displayTestimonials].sort((a, b) => {
@@ -152,14 +187,14 @@ export default async function PublicTestimonialsPage({ params }: PageProps) {
     });
   }
 
-  // Apply widget filtering
-  if (widget?.filter_mode === 'featured') {
+  // Apply filtering
+  if (resolvedSettings?.filter_mode === 'featured') {
     displayTestimonials = displayTestimonials.filter((t: any) => t.featured);
-  } else if (widget?.filter_mode === 'rating' && widget?.min_rating) {
-    displayTestimonials = displayTestimonials.filter((t: any) => (t.rating ?? 0) >= widget.min_rating);
+  } else if (resolvedSettings?.filter_mode === 'rating' && resolvedSettings?.min_rating) {
+    displayTestimonials = displayTestimonials.filter((t: any) => (t.rating ?? 0) >= resolvedSettings.min_rating!);
   }
-  if (widget?.max_items) {
-    displayTestimonials = displayTestimonials.slice(0, widget.max_items);
+  if (resolvedSettings?.max_items) {
+    displayTestimonials = displayTestimonials.slice(0, resolvedSettings.max_items);
   }
 
   // Skip testimonials with neither content nor video (matches embed.js behavior)
@@ -170,8 +205,8 @@ export default async function PublicTestimonialsPage({ params }: PageProps) {
       ? displayTestimonials.reduce((sum, t) => sum + (t.rating ?? 0), 0) / displayTestimonials.length
       : 0;
 
-  // Derive colors from widget theme, falling back to project colors
-  const theme = widget?.theme as Record<string, any> | null;
+  // Derive colors from resolved settings theme, falling back to project colors
+  const theme = resolvedSettings?.theme ?? null;
   const accentColor = theme?.primaryColor || project.button_color || project.accent_color || '#4f46e5';
   const textColor = theme?.textColor || project.text_color || '#1a1a1a';
   const cardColor = theme?.cardColor || '#ffffff';
@@ -188,6 +223,13 @@ export default async function PublicTestimonialsPage({ params }: PageProps) {
   const showAvatar = theme?.showAvatar !== false;
   const showDate = theme?.showDate !== false;
   const showMetric = theme?.showMetric !== false;
+  const borderRadius = BR_MAP[theme?.borderRadius] || '14px';
+  const emptyStarColor = hexAlpha(textColor, 0.22);
+  const subtitleColor = hexAlpha(textColor, 0.55);
+  const cardPad = ts === 'compact' ? '14px 16px' : '24px';
+  const sectionGap = ts === 'compact' ? '10px' : '16px';
+  const cardBorder = cardStyle === 'border' ? `1px solid ${hexAlpha(textColor, 0.15)}` : 'none';
+  const cardShadow = cardStyle === 'shadow' ? '0 1px 3px rgba(0,0,0,0.08),0 1px 2px rgba(0,0,0,0.04)' : 'none';
 
   const jsonLd = {
     '@context': 'https://schema.org',
@@ -356,17 +398,19 @@ export default async function PublicTestimonialsPage({ params }: PageProps) {
                   data-card-author={t.author_name}
                   data-card-role={[t.author_role, t.author_company].filter(Boolean).join(', ')}
                   data-card-rating={String(t.rating ?? '')}
-                  className={`rounded-2xl flex flex-col overflow-hidden${
-                    cardStyle === 'border' ? ' border border-gray-200' :
-                    cardStyle === 'flat' ? '' :
-                    ' border border-gray-100 shadow-sm'
-                  }`}
                   style={{
-                    backgroundColor: cardColor,
+                    background: cardColor,
+                    border: cardBorder,
+                    boxShadow: cardShadow,
+                    borderRadius,
+                    padding: cardPad,
+                    display: 'flex',
+                    flexDirection: 'column' as const,
+                    gap: sectionGap,
+                    width: '100%',
                     ...(t.featured ? { borderLeft: `3px solid ${accentColor}` } : {}),
                   }}
                 >
-                  <div className="p-5 flex flex-col gap-3">
                     {/* Zone C: Stars + metric (TOP) */}
                     <div className="flex items-center gap-2 flex-wrap">
                       {showRating && t.rating != null && (
@@ -376,7 +420,7 @@ export default async function PublicTestimonialsPage({ params }: PageProps) {
                               key={star}
                               className="w-3.5 h-3.5"
                               fill={star <= t.rating! ? accentColor : 'none'}
-                              stroke={star <= t.rating! ? accentColor : '#d1d5db'}
+                              stroke={star <= t.rating! ? accentColor : emptyStarColor}
                             />
                           ))}
                         </div>
@@ -397,8 +441,8 @@ export default async function PublicTestimonialsPage({ params }: PageProps) {
 
                     {/* Zone B: Quote (MIDDLE, hidden for video-only or show_text=false) */}
                     {content && (showText !== false || !videoUrl) && (
-                      <blockquote>
-                        <p data-vouch-quote="" className="leading-relaxed line-clamp-6" style={{ fontSize: quoteSize }}>
+                      <blockquote style={{ margin: 0, padding: 0 }}>
+                        <p data-vouch-quote="" className="line-clamp-6" style={{ fontSize: quoteSize, lineHeight: 1.65, margin: 0 }}>
                           &ldquo;
                           {hasGolden ? (
                             <>
@@ -422,9 +466,9 @@ export default async function PublicTestimonialsPage({ params }: PageProps) {
                       </blockquote>
                     )}
 
-                    {/* Zone A: Identity (BOTTOM) */}
-                    <div className="flex items-center justify-between gap-2">
-                      <div className="flex items-center gap-2.5 min-w-0 flex-1">
+                    {/* Zone A: Identity (BOTTOM, pushed to card bottom) */}
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px', marginTop: 'auto' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '10px', minWidth: 0, flex: 1 }}>
                         {/* Avatar / favicon / initials */}
                         {showAvatar && (t.author_avatar_url ? (
                           // eslint-disable-next-line @next/next/no-img-element
@@ -448,12 +492,12 @@ export default async function PublicTestimonialsPage({ params }: PageProps) {
                             {initials}
                           </div>
                         ))}
-                        <div className="min-w-0">
-                          <p className="font-bold truncate" style={{ fontSize: nameSize, color: textColor }}>{t.author_name}</p>
+                        <div style={{ minWidth: 0 }}>
+                          <div style={{ fontWeight: 700, fontSize: nameSize, color: textColor, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{t.author_name}</div>
                           {(t.author_role || t.author_company) && (
-                            <p className="leading-snug" style={{ fontSize: roleSize, color: `${textColor}99` }}>
+                            <div style={{ fontSize: roleSize, color: subtitleColor, lineHeight: 1.4 }}>
                               {[t.author_role, t.author_company].filter(Boolean).join(', ')}
-                            </p>
+                            </div>
                           )}
                           {emailDomain && (
                             <span className="inline-flex items-center gap-0.5 text-[10px] font-medium text-emerald-600 mt-0.5">
@@ -502,38 +546,29 @@ export default async function PublicTestimonialsPage({ params }: PageProps) {
                       ) : null}
                     </div>
 
-                    {/* Video thumbnail with play overlay */}
+                    {/* Video thumbnail with play overlay (matches embed.js) */}
                     {videoUrl && showVideo !== false && (
-                      <div className="pt-2 border-t border-gray-100">
-                        <div
-                          data-vouch-play=""
-                          data-video-url={videoUrl}
-                          data-video-poster={videoThumbnailUrl || ''}
-                          className="relative rounded-xl overflow-hidden cursor-pointer group"
-                          role="button"
-                          aria-label="Play video testimonial"
-                        >
-                          {/* eslint-disable-next-line jsx-a11y/media-has-caption */}
-                          <video
-                            src={videoUrl}
-                            poster={videoThumbnailUrl || undefined}
-                            preload="metadata"
-                            muted
-                            className="w-full block"
-                            style={{ maxHeight: '160px', objectFit: 'cover', pointerEvents: 'none' }}
-                          />
-                          <div className="absolute inset-0 bg-black/30 group-hover:bg-black/40 transition-colors flex items-center justify-center">
-                            <div
-                              className="w-11 h-11 rounded-full flex items-center justify-center shadow-xl group-hover:scale-110 transition-transform duration-200"
-                              style={{ backgroundColor: 'rgba(255,255,255,0.92)' }}
-                            >
-                              <Play className="w-4 h-4 ml-0.5" style={{ fill: accentColor, color: accentColor }} />
-                            </div>
+                      <div
+                        data-vouch-play=""
+                        data-video-url={videoUrl}
+                        data-video-poster={videoThumbnailUrl || ''}
+                        style={{ position: 'relative', width: '100%', borderRadius: '8px', marginTop: '8px', overflow: 'hidden', background: '#000', cursor: 'pointer' }}
+                        role="button"
+                        aria-label="Play video testimonial"
+                      >
+                        {videoThumbnailUrl ? (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img src={videoThumbnailUrl} alt="" style={{ width: '100%', display: 'block', aspectRatio: '16/9', objectFit: 'cover' }} />
+                        ) : (
+                          <div style={{ width: '100%', aspectRatio: '16/9' }} />
+                        )}
+                        <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(0,0,0,0.25) 0%, transparent 60%)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                          <div style={{ padding: '14px 18px', borderRadius: '10px', background: 'rgba(0,0,0,0.55)', backdropFilter: 'blur(4px)', WebkitBackdropFilter: 'blur(4px)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="white"><polygon points="8,5 20,12 8,19"/></svg>
                           </div>
                         </div>
                       </div>
                     )}
-                  </div>
                 </article>
                 </div>
               );
