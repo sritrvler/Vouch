@@ -6,6 +6,7 @@ import { Menu, X, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { createClient } from "@/lib/supabase/client";
+import { capture } from "@/lib/analytics";
 
 function VouchLogo() {
   return (
@@ -99,6 +100,7 @@ export default function NavHeader() {
             <div className="hidden md:flex items-center gap-3">
               <Link
                 href="/pricing"
+                onClick={() => capture("marketing_nav_clicked", { destination: "/pricing" })}
                 className="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors px-3 py-1.5"
               >
                 Pricing
@@ -115,6 +117,7 @@ export default function NavHeader() {
                 <>
                   <Link
                     href="/login"
+                    onClick={() => capture("marketing_nav_clicked", { destination: "/login" })}
                     className="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors px-3 py-1.5"
                   >
                     Log in
@@ -124,7 +127,12 @@ export default function NavHeader() {
                     size="sm"
                     className="bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg px-4 shadow-sm"
                   >
-                    <Link href="/signup">Start free</Link>
+                    <Link
+                      href="/signup"
+                      onClick={() => capture("marketing_cta_clicked", { cta: "start_free", location: "nav" })}
+                    >
+                      Start free
+                    </Link>
                   </Button>
                 </>
               )}
@@ -158,9 +166,10 @@ export default function NavHeader() {
         inert={!mobileOpen}
       >
         <div className="max-w-7xl mx-auto px-4 py-4 flex flex-col gap-1">
-          <Link
-            href="/pricing"
-            onClick={() => setMobileOpen(false)}
+              <Link
+                href="/pricing"
+                onClick={() => setMobileOpen(false)}
+                onClickCapture={() => capture("marketing_nav_clicked", { destination: "/pricing" })}
             className="px-4 py-3 text-sm font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50 rounded-md transition-colors"
           >
             Pricing
@@ -179,6 +188,7 @@ export default function NavHeader() {
               <Link
                 href="/login"
                 onClick={() => setMobileOpen(false)}
+                onClickCapture={() => capture("marketing_nav_clicked", { destination: "/login" })}
                 className="px-4 py-3 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-md transition-colors"
               >
                 Log in
@@ -187,7 +197,13 @@ export default function NavHeader() {
                 asChild
                 className="mt-1 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg"
               >
-                <Link href="/signup" onClick={() => setMobileOpen(false)}>
+                <Link
+                  href="/signup"
+                  onClick={() => {
+                    setMobileOpen(false);
+                    capture("marketing_cta_clicked", { cta: "start_free", location: "mobile_nav" });
+                  }}
+                >
                   Start for free
                 </Link>
               </Button>

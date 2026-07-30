@@ -16,6 +16,17 @@ bun dev
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
+## PostHog analytics
+
+The app includes PostHog Web Analytics and Session Replay. Add these variables in Vercel Project Settings → Environment Variables (and in `.env.local` for local development):
+
+```bash
+NEXT_PUBLIC_POSTHOG_KEY=your_project_api_key
+NEXT_PUBLIC_POSTHOG_HOST=https://us.i.posthog.com
+```
+
+The integration records pageviews, sessions, page-leave events, referrers/UTMs, and privacy-masked session replays. It also captures named events for marketing CTAs, signup/login, plan selection, checkout starts, and testimonial collection steps/submissions. If `NEXT_PUBLIC_POSTHOG_KEY` is missing, the app continues to run without PostHog.
+
 You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.

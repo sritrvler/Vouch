@@ -12,6 +12,7 @@ import { createClient } from '@/lib/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { capture } from '@/lib/analytics';
 
 const loginSchema = z.object({
   email: z.string().min(1, 'Email is required').email('Enter a valid email address'),
@@ -43,6 +44,7 @@ export default function LoginPage() {
 
   async function onSubmit(values: LoginFormValues) {
     setIsLoading(true);
+    capture('login_started', { method: 'email' });
     const supabase = createClient();
 
     const { error } = await supabase.auth.signInWithPassword({
@@ -57,12 +59,14 @@ export default function LoginPage() {
     }
 
     toast.success('Welcome back!');
+    capture('login_completed', { method: 'email' });
     router.push('/dashboard');
     router.refresh();
   }
 
   async function handleGoogleSignIn() {
     setIsGoogleLoading(true);
+    capture('login_started', { method: 'google' });
     const supabase = createClient();
     const origin = window.location.origin;
 

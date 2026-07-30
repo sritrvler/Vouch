@@ -6,6 +6,7 @@ import { Check, Minus } from "lucide-react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { capture } from "@/lib/analytics";
 import { PRO_FEATURES as PRO_FEATURES_SOURCE, STUDIO_FEATURES as STUDIO_FEATURES_SOURCE, PRICING } from "@/lib/lemonsqueezy";
 
 export type FeatureItem = { text: string; limitation?: true };
@@ -36,7 +37,10 @@ export function PricingCards() {
           <button
             role="radio"
             aria-checked={billing === 'monthly'}
-            onClick={() => setBilling('monthly')}
+            onClick={() => {
+              setBilling('monthly');
+              capture('billing_frequency_selected', { billing: 'monthly', location: 'pricing_cards' });
+            }}
             className={cn(
               'relative z-10 px-5 py-1.5 rounded-full text-sm font-medium transition-colors',
               billing === 'monthly'
@@ -56,7 +60,10 @@ export function PricingCards() {
           <button
             role="radio"
             aria-checked={billing === 'yearly'}
-            onClick={() => setBilling('yearly')}
+            onClick={() => {
+              setBilling('yearly');
+              capture('billing_frequency_selected', { billing: 'yearly', location: 'pricing_cards' });
+            }}
             className={cn(
               'relative z-10 px-5 py-1.5 rounded-full text-sm font-medium transition-colors flex items-center gap-2',
               billing === 'yearly'
@@ -115,7 +122,12 @@ export function PricingCards() {
             variant="outline"
             className="w-full rounded-xl border-gray-200 text-gray-700 hover:border-gray-300"
           >
-            <Link href="/signup">Start for free</Link>
+            <Link
+              href="/signup"
+              onClick={() => capture("plan_selected", { plan: "free", billing, location: "pricing_cards" })}
+            >
+              Start for free
+            </Link>
           </Button>
         </div>
       </div>
@@ -157,7 +169,10 @@ export function PricingCards() {
             asChild
             className="w-full rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white shadow-md shadow-indigo-100"
           >
-            <Link href={`/signup?plan=pro${billing === 'yearly' ? '&billing=yearly' : ''}`}>
+            <Link
+              href={`/signup?plan=pro${billing === 'yearly' ? '&billing=yearly' : ''}`}
+              onClick={() => capture("plan_selected", { plan: "pro", billing, location: "pricing_cards" })}
+            >
               Get started with Pro
             </Link>
           </Button>
@@ -199,7 +214,10 @@ export function PricingCards() {
             asChild
             className="w-full rounded-xl bg-slate-800 hover:bg-slate-700 text-white border border-slate-700"
           >
-            <Link href={`/signup?plan=studio${billing === 'yearly' ? '&billing=yearly' : ''}`}>
+            <Link
+              href={`/signup?plan=studio${billing === 'yearly' ? '&billing=yearly' : ''}`}
+              onClick={() => capture("plan_selected", { plan: "studio", billing, location: "pricing_cards" })}
+            >
               Get started with Studio
             </Link>
           </Button>

@@ -7,6 +7,7 @@ import { Check, X, Zap, ArrowRight, Lock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { PricingCards } from "../_components/PricingCards";
 import VouchWidget from "../_components/VouchWidget";
+import { capture } from "@/lib/analytics";
 
 /* ─────────────────────────────────────────────────
    Feature comparison table data
@@ -278,7 +279,10 @@ export default function PricingPage() {
               size="lg"
               className="bg-white text-indigo-600 hover:bg-indigo-50 rounded-xl px-7 font-semibold"
             >
-              <Link href="/signup">
+              <Link
+                href="/signup"
+                onClick={() => capture("marketing_cta_clicked", { cta: "start_free", location: "pricing_bottom_cta" })}
+              >
                 Start for free <ArrowRight className="ml-1 w-4 h-4" />
               </Link>
             </Button>
@@ -288,7 +292,12 @@ export default function PricingPage() {
               size="lg"
               className="text-white border border-indigo-400 hover:bg-indigo-700 rounded-xl px-7"
             >
-              <Link href="/signup?plan=pro">Upgrade to Pro</Link>
+              <Link
+                href="/signup?plan=pro"
+                onClick={() => capture("marketing_cta_clicked", { cta: "upgrade_to_pro", location: "pricing_bottom_cta" })}
+              >
+                Upgrade to Pro
+              </Link>
             </Button>
           </div>
           <div className="flex flex-col items-center gap-2 mt-5">
