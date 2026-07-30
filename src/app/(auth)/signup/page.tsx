@@ -13,6 +13,7 @@ import { isDisposableEmail } from '@/lib/disposable-emails';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { capture } from '@/lib/analytics';
 
 const signupSchema = z.object({
   fullName: z
@@ -61,6 +62,7 @@ function SignupForm() {
     }
 
     setIsLoading(true);
+    capture('signup_started', { method: 'email', plan: isPro ? 'pro' : 'free', billing });
     const supabase = createClient();
     const origin = window.location.origin;
 
@@ -81,6 +83,7 @@ function SignupForm() {
 
     // If user is immediately confirmed (e.g. email confirmations disabled in Supabase)
     if (data.session) {
+      capture('signup_completed', { method: 'email', plan: isPro ? 'pro' : 'free', billing });
       if (isPro) {
         toast.success('Account created! Taking you to checkout...');
         const res = await fetch('/api/stripe/checkout', {
@@ -90,7 +93,7 @@ function SignupForm() {
         });
         if (res.ok) {
           const { url } = await res.json();
-          if (url) { window.location.href = url; return; }
+          if (url) { window.location.assign(url); return; }
         }
       }
       toast.success('Account created! Welcome to Vouch.');
@@ -106,6 +109,7 @@ function SignupForm() {
 
   async function handleGoogleSignIn() {
     setIsGoogleLoading(true);
+    capture('signup_started', { method: 'google', plan: isPro ? 'pro' : 'free', billing });
     const supabase = createClient();
     const origin = window.location.origin;
 
