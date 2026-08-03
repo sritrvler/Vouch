@@ -26,6 +26,9 @@ export const metadata: Metadata = {
   title: { default: 'Vouch: Turn happy customers into your best salespeople', template: '%s | Vouch' },
   description: 'Collect testimonials, boost Google reviews, and embed beautiful social proof on your website. Set up in minutes.',
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'),
+  verification: {
+    google: 'NEWvBs3zQTZ_gpP1887ERMaTQVNVA1acPWqmk5Yw5oo',
+  },
   openGraph: {
     type: 'website',
     siteName: 'Vouch',
