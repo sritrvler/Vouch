@@ -1,7 +1,7 @@
 import dynamic from 'next/dynamic';
-import Link from 'next/link';
-import { Star, ArrowRight, Check, Zap, MessageSquare, Code2 } from 'lucide-react';
+import { Star, ArrowRight, Check, MessageSquare, Code2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import TrackedLink from '@/components/TrackedLink';
 // Dynamic imports for client components with Framer Motion (code-split for smaller main bundle)
 const HeroVisual = dynamic(() => import('./_components/HeroVisual'));
 const CollectVisual = dynamic(() => import('./_components/CollectVisual'));
@@ -141,9 +141,13 @@ function HeroSection() {
                   size="lg"
                   className="bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl px-7 py-6 text-base font-semibold shadow-lg shadow-indigo-200 hover:shadow-indigo-300 transition-all"
                 >
-                  <Link href="/signup">
+                  <TrackedLink
+                    href="/signup"
+                    event="marketing_cta_clicked"
+                    properties={{ cta: 'collect_first_testimonial', location: 'hero' }}
+                  >
                     Collect my first testimonial <ArrowRight className="ml-1.5 w-4 h-4" />
-                  </Link>
+                  </TrackedLink>
                 </Button>
               </MotionCTA>
               <MotionCTA>
@@ -525,9 +529,13 @@ function BottomCTA() {
                   size="lg"
                   className="bg-white text-indigo-600 hover:bg-indigo-50 rounded-xl px-8 py-6 text-base font-semibold shadow-lg"
                 >
-                  <Link href="/signup">
+                  <TrackedLink
+                    href="/signup"
+                    event="marketing_cta_clicked"
+                    properties={{ cta: 'collect_first_testimonial', location: 'bottom_cta' }}
+                  >
                     Collect my first testimonial <ArrowRight className="ml-1.5 w-4 h-4" />
-                  </Link>
+                  </TrackedLink>
                 </Button>
               </MotionCTA>
               <MotionCTA>
@@ -537,7 +545,13 @@ function BottomCTA() {
                   size="lg"
                   className="text-white border border-white/25 hover:bg-white/10 rounded-xl px-8 py-6 text-base"
                 >
-                  <Link href="/pricing">See pricing</Link>
+                  <TrackedLink
+                    href="/pricing"
+                    event="marketing_cta_clicked"
+                    properties={{ cta: 'see_pricing', location: 'bottom_cta' }}
+                  >
+                    See pricing
+                  </TrackedLink>
                 </Button>
               </MotionCTA>
             </div>

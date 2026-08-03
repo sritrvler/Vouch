@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { capture } from '@/lib/analytics';
 
 // ─── Types ─────────────────────────────────────────────────────────────────
 
@@ -467,6 +468,10 @@ export default function CollectFormClient({
   const cameraInitRef = useRef(false);
   const currentStreamRef = useRef<MediaStream | null>(null);
 
+  useEffect(() => {
+    capture('testimonial_form_viewed', { form_id: form.id, project_id: project.id });
+  }, [form.id, project.id]);
+
   const contentLength = content.trim().length;
   const contentValid = contentLength >= 20;
   const nameValid = authorName.trim().length > 0;
@@ -474,15 +479,23 @@ export default function CollectFormClient({
   const canSubmit = nameValid && agreed && (contentValid || videoUrl !== null);
 
   function goTo(nextStep: 1 | 2 | 3 | 4, dir: 'forward' | 'back') {
+    capture('testimonial_form_step_changed', {
+      form_id: form.id,
+      from_step: step,
+      to_step: nextStep,
+      direction: dir,
+    });
     setDirection(dir);
     setStep(nextStep);
   }
 
   function handleRatingClick(value: number) {
+    capture('testimonial_rating_selected', { form_id: form.id, rating: value });
     setRating(value);
   }
 
   function handleTypeChoice(type: 'text' | 'video') {
+    capture('testimonial_type_selected', { form_id: form.id, testimonial_type: type });
     setTestimonialType(type);
     goTo(2, 'forward');
   }
@@ -564,6 +577,7 @@ export default function CollectFormClient({
       };
       mediaRecorderRef.current = mr;
       mr.start();
+      capture('testimonial_recording_started', { form_id: form.id });
       setIsRecording(true);
       setIsPaused(false);
       setRecordingTime(0);
@@ -574,6 +588,7 @@ export default function CollectFormClient({
   }
 
   function stopRecording() {
+    capture('testimonial_recording_stopped', { form_id: form.id, duration_seconds: recordingTime });
     mediaRecorderRef.current?.stop();
   }
 
@@ -714,6 +729,7 @@ export default function CollectFormClient({
         setVideoUrl(url);
         if (thumbnailUrl) setVideoThumbnailUrl(thumbnailUrl);
         setIsUploadingVideo(false);
+        capture('testimonial_video_uploaded', { form_id: form.id, duration_seconds: recordingTime });
         goTo(3, 'forward');
         return;
       }
@@ -750,6 +766,12 @@ export default function CollectFormClient({
     if (!canSubmit) return;
 
     setIsSubmitting(true);
+    capture('testimonial_submit_started', {
+      form_id: form.id,
+      rating,
+      testimonial_type: videoUrl ? 'video' : 'text',
+      content_length: content.trim().length,
+    });
 
     try {
       let avatarUrl: string | null = null;
@@ -799,6 +821,11 @@ export default function CollectFormClient({
         return;
       }
 
+      capture('testimonial_submitted', {
+        form_id: form.id,
+        rating,
+        testimonial_type: videoUrl ? 'video' : 'text',
+      });
       goTo(4, 'forward');
     } catch {
       toast.error('Network error. Your response is still here. Please check your connection and try again.', { duration: 8000 });

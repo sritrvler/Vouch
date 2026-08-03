@@ -7,6 +7,7 @@ import { Check, Zap, Loader2, Crown } from 'lucide-react';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import { STUDIO_FEATURES, PRICING } from '@/lib/lemonsqueezy';
+import { capture } from '@/lib/analytics';
 
 // Shorter list for the modal. Full list lives on the pricing page.
 const MODAL_PRO_HIGHLIGHTS = [
@@ -35,6 +36,7 @@ export function UpgradeModal({ open, onOpenChange }: UpgradeModalProps) {
 
   async function handleUpgrade(plan: 'pro' | 'studio') {
     setLoadingPlan(plan);
+    capture('checkout_started', { plan, billing, provider: 'stripe' });
     try {
       const res = await fetch('/api/stripe/checkout', {
         method: 'POST',
